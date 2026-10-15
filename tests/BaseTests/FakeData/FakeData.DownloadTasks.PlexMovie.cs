@@ -2,9 +2,8 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static Faker<DownloadTaskMovie> CreateDownloadTaskMovieFaker()
-    {
-        return new Faker<DownloadTaskMovie>()
+    private static readonly Faker<DownloadTaskMovie> _downloadTaskMovieFaker =
+        new Faker<DownloadTaskMovie>()
             .ApplyDownloadTaskParentBase(DownloadTaskType.Movie)
             .Ignore(x => x.Children)
             .FinishWith(
@@ -19,13 +18,12 @@ public static partial class FakeData
                     }
                 }
             );
-    }
 
     public static Faker<DownloadTaskMovie> GetMovieDownloadTask(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return CreateDownloadTaskMovieFaker()
+        return _downloadTaskMovieFaker
             .UseSeed(seed.Next())
             .RuleFor(
                 x => x.DataTotal,
@@ -40,14 +38,12 @@ public static partial class FakeData
             );
     }
 
-    private static Faker<DownloadTaskMovieFile> CreateDownloadTaskMovieFileFaker()
-    {
-        return new Faker<DownloadTaskMovieFile>()
+    private static readonly Faker<DownloadTaskMovieFile> _downloadTaskMovieFileFaker =
+        new Faker<DownloadTaskMovieFile>()
             .ApplyDownloadTaskFileBase(DownloadTaskType.MovieData)
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
             .Ignore(x => x.Logs);
-    }
 
     public static Faker<DownloadTaskMovieFile> GetDownloadTaskMovieFile(
         Seed seed,
@@ -56,7 +52,7 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return CreateDownloadTaskMovieFileFaker()
+        return _downloadTaskMovieFileFaker
             .RuleFor(
                 x => x.DataTotal,
                 f =>

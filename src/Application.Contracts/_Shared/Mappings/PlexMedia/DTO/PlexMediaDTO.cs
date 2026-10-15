@@ -16,6 +16,12 @@ public record PlexMediaDTO : PlexMediaSlimDTO
 
     public required DateTime? OriginallyAvailableAt { get; set; }
 
+    public required string? RecordLabel { get; init; }
+
+    public required DateTime? ReleaseDate { get; init; }
+
+    public required List<PlexGenreDTO> Genres { get; init; } = [];
+
     public required int? DiscNumber { get; set; }
 
     public required int? TrackNumber { get; set; }

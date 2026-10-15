@@ -123,14 +123,12 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			}
 
 			const existing = state.serverDownloads[i]!;
-			const merged: DownloadProgressDTO[] = values(merge(keyBy(existing.downloads ?? [], 'id'), keyBy(serverDownloadProgress.downloads ?? [], 'id')));
-
-			state.serverDownloads.splice(i, 1, {
-				...existing,
-				id: existing.id,
-				downloadableTasksCount: existing.downloadableTasksCount,
-				downloads: merged,
-			});
+			const downloads = existing.downloads ?? [];
+			const existingById = keyBy(downloads, 'id');
+			merge(existingById, keyBy(serverDownloadProgress.downloads ?? [], 'id'));
+			downloads.splice(0, downloads.length, ...values(existingById));
+			existing.downloads = downloads;
+			downloadNodeIndexCache.delete(downloads);
 		},
 		updateDownloadPatch(patch: DownloadPatchMessagePackDTO): void {
 			if (!patch) return;
@@ -147,12 +145,28 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			}
 
 			const serverDownload = state.serverDownloads[serverIndex]!;
-			let downloads = cloneDeep(serverDownload.downloads ?? []);
+			const downloads = serverDownload.downloads ?? [];
+			if (patch.upserts.length === 0) {
+				if (patch.deletedIds.length > 0) removeDeletedInPlace(downloads, new Set(patch.deletedIds));
+				downloadNodeIndexCache.delete(downloads);
+				return;
+			}
 
-			if (patch.deletedIds.length > 0) downloads = removeDeleted(downloads, patch.deletedIds);
+			const nodeIndex = getDownloadNodeIndex(downloads);
+			const deletedNodeIds = getDeletedNodeIds(nodeIndex, patch.deletedIds);
+
+			if (patch.upserts.some((upsert) => !nodeIndex.has(upsert.id) || deletedNodeIds.has(upsert.id))) {
+				actions.fetchDownloadList().subscribe();
+				return;
+			}
+
+			if (deletedNodeIds.size > 0) {
+				removeDeletedInPlace(downloads, deletedNodeIds);
+				for (const id of deletedNodeIds) nodeIndex.delete(id);
+			}
 
 			for (const upsert of patch.upserts) {
-				const existingNode = findNodeById(downloads, upsert.id);
+				const existingNode = nodeIndex.get(upsert.id);
 				if (!existingNode) {
 					actions.fetchDownloadList().subscribe();
 					return;
@@ -165,10 +179,6 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				existingNode.downloadSpeed = upsert.downloadSpeed;
 				existingNode.timeRemaining = upsert.timeRemaining;
 			}
-
-			state.serverDownloads.splice(serverIndex, 1, {
-				...serverDownload, downloads,
-			});
 		},
 		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewContainerDTO | null> {
 			return downloadApi.getDownloadPreviewEndpoint(downloadMediaCommand).pipe(map((response) => {
@@ -253,6 +263,8 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 		},
 	};
 
+	const downloadNodeIndexCache = new WeakMap<DownloadProgressDTO[], Map<string, DownloadProgressDTO>>();
+
 	function findNodeById(nodes: DownloadProgressDTO[], id: string): DownloadProgressDTO | null {
 		for (const node of nodes) {
 			if (node.id === id) return node;
@@ -264,37 +276,52 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 		return null;
 	}
 
-	function removeDeleted(nodes: DownloadProgressDTO[], deletedIds: string[]): DownloadProgressDTO[] {
-		if (deletedIds.length === 0) return nodes;
+	function getDownloadNodeIndex(nodes: DownloadProgressDTO[]): Map<string, DownloadProgressDTO> {
+		const cached = downloadNodeIndexCache.get(nodes);
+		if (cached) return cached;
 
-		const deletedSet = new Set(deletedIds);
-
-		const collectChildrenIds = (node: DownloadProgressDTO) => {
-			for (const child of node.children ?? []) {
-				deletedSet.add(child.id);
-				collectChildrenIds(child);
-			}
-		};
-
-		const scanDeletedRoots = (items: DownloadProgressDTO[]) => {
+		const nodeIndex = new Map<string, DownloadProgressDTO>();
+		function visit(items: DownloadProgressDTO[]): void {
 			for (const item of items) {
-				if (deletedSet.has(item.id)) collectChildrenIds(item);
-
-				scanDeletedRoots(item.children ?? []);
+				nodeIndex.set(item.id, item);
+				visit(item.children ?? []);
 			}
-		};
+		}
 
-		scanDeletedRoots(nodes);
+		visit(nodes);
+		downloadNodeIndexCache.set(nodes, nodeIndex);
+		return nodeIndex;
+	}
 
-		const removeRecursive = (items: DownloadProgressDTO[]): DownloadProgressDTO[] => {
-			return items
-				.filter((item) => !deletedSet.has(item.id))
-				.map((item) => ({
-					...item, children: removeRecursive(item.children ?? []),
-				}));
-		};
+	function getDeletedNodeIds(nodeIndex: Map<string, DownloadProgressDTO>, deletedIds: string[]): Set<string> {
+		const deletedNodeIds = new Set(deletedIds);
 
-		return removeRecursive(nodes);
+		function collectDescendantIds(node: DownloadProgressDTO): void {
+			for (const child of node.children ?? []) {
+				if (deletedNodeIds.has(child.id)) continue;
+				deletedNodeIds.add(child.id);
+				collectDescendantIds(child);
+			}
+		}
+
+		for (const deletedId of deletedIds) {
+			const node = nodeIndex.get(deletedId);
+			if (node) collectDescendantIds(node);
+		}
+
+		return deletedNodeIds;
+	}
+
+	function removeDeletedInPlace(nodes: DownloadProgressDTO[], deletedNodeIds: ReadonlySet<string>): void {
+		for (let index = nodes.length - 1; index >= 0; index--) {
+			const node = nodes[index]!;
+			if (deletedNodeIds.has(node.id)) {
+				nodes.splice(index, 1);
+				continue;
+			}
+
+			removeDeletedInPlace(node.children ?? [], deletedNodeIds);
+		}
 	}
 
 	// Getters

@@ -292,10 +292,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
             .Distinct()
             .ToArray();
         var years = remoteShows.Select(x => x.Year).Distinct().ToArray();
-        var searchTitles = remoteShows
-            .Select(x => x.SearchTitle)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
+        var searchTitles = remoteShows.Select(x => x.SearchTitle).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
 
         return await context
             .PlexTvShows.Where(x =>
@@ -317,7 +314,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                 SearchTitle = x.SearchTitle,
                 Year = x.Year,
                 Duration = x.Duration,
-                Quality = x.Quality,
+                VideoQuality = x.VideoQuality,
                 Guid_IMDB = x.Guid_IMDB,
                 Guid_TMDB = x.Guid_TMDB,
                 Guid_TVDB = x.Guid_TVDB,
@@ -342,7 +339,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                 SearchTitle = x.SearchTitle,
                 Year = x.Year,
                 Duration = x.Duration,
-                Quality = x.Quality,
+                VideoQuality = x.VideoQuality,
                 Guid_IMDB = x.Guid_IMDB,
                 Guid_TMDB = x.Guid_TMDB,
                 Guid_TVDB = x.Guid_TVDB,
@@ -365,7 +362,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                 Id = x.Id,
                 TvShowId = x.TvShowId,
                 SeasonNumber = x.SeasonNumber,
-                Quality = x.Quality,
+                VideoQuality = x.VideoQuality,
             })
             .ToListAsync(cancellationToken);
     }
@@ -386,7 +383,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                 Id = x.Id,
                 TvShowSeasonId = x.TvShowSeasonId,
                 EpisodeNumber = x.EpisodeNumber,
-                Quality = x.Quality,
+                VideoQuality = x.VideoQuality,
             })
             .ToListAsync(cancellationToken);
     }
@@ -419,11 +416,11 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                     OwnedPlexLibraryId = ownedLibraryId,
                     RemotePlexMediaId = remoteShow.Id,
                     OwnedPlexMediaId = ownedShow.Id,
-                    HitState = IsHigherQuality(remoteShow.Quality, ownedShow.Quality)
+                    HitState = IsHigherQuality(remoteShow.VideoQuality, ownedShow.VideoQuality)
                         ? PlexMediaComparisonHitState.HigherQuality
                         : PlexMediaComparisonHitState.Matched,
-                    RemoteQuality = remoteShow.Quality,
-                    OwnedQuality = ownedShow.Quality,
+                    RemoteQuality = remoteShow.VideoQuality,
+                    OwnedQuality = ownedShow.VideoQuality,
                     MatchType = showMatchType,
                     ComparedAt = comparedAt,
                 }
@@ -486,11 +483,11 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                             OwnedPlexLibraryId = ownedLibraryId,
                             RemotePlexMediaId = remoteSeason.Id,
                             OwnedPlexMediaId = ownedSeason.Id,
-                            HitState = IsHigherQuality(remoteSeason.Quality, ownedSeason.Quality)
+                            HitState = IsHigherQuality(remoteSeason.VideoQuality, ownedSeason.VideoQuality)
                                 ? PlexMediaComparisonHitState.HigherQuality
                                 : PlexMediaComparisonHitState.Matched,
-                            RemoteQuality = remoteSeason.Quality,
-                            OwnedQuality = ownedSeason.Quality,
+                            RemoteQuality = remoteSeason.VideoQuality,
+                            OwnedQuality = ownedSeason.VideoQuality,
                             MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
                             ComparedAt = comparedAt,
                         }
@@ -517,11 +514,11 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                                 OwnedPlexLibraryId = ownedLibraryId,
                                 RemotePlexMediaId = remoteEpisode.Id,
                                 OwnedPlexMediaId = ownedEpisode.Id,
-                                HitState = IsHigherQuality(remoteEpisode.Quality, ownedEpisode.Quality)
+                                HitState = IsHigherQuality(remoteEpisode.VideoQuality, ownedEpisode.VideoQuality)
                                     ? PlexMediaComparisonHitState.HigherQuality
                                     : PlexMediaComparisonHitState.Matched,
-                                RemoteQuality = remoteEpisode.Quality,
-                                OwnedQuality = ownedEpisode.Quality,
+                                RemoteQuality = remoteEpisode.VideoQuality,
+                                OwnedQuality = ownedEpisode.VideoQuality,
                                 MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
                                 ComparedAt = comparedAt,
                             })
@@ -608,7 +605,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
 
         public required int Duration { get; init; }
 
-        public required VideoQuality Quality { get; init; }
+        public required VideoQuality VideoQuality { get; init; }
 
         // ReSharper disable once InconsistentNaming
         public required string? Guid_IMDB { get; init; }
@@ -625,7 +622,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
         public required int Id { get; init; }
         public required int TvShowId { get; init; }
         public required int SeasonNumber { get; init; }
-        public required VideoQuality Quality { get; init; }
+        public required VideoQuality VideoQuality { get; init; }
     }
 
     private sealed record EpisodeProjection
@@ -633,6 +630,6 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
         public required int Id { get; init; }
         public required int TvShowSeasonId { get; init; }
         public required int EpisodeNumber { get; init; }
-        public required VideoQuality Quality { get; init; }
+        public required VideoQuality VideoQuality { get; init; }
     }
 }

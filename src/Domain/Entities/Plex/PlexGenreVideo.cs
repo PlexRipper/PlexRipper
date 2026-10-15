@@ -1,6 +1,6 @@
 namespace Reaparr.Domain;
 
-public class PlexGenre : BaseEntity
+public class PlexGenreVideo : BaseEntity
 {
     public required string Name { get; init; }
 
@@ -14,8 +14,6 @@ public class PlexGenre : BaseEntity
     public ICollection<PlexMovie> PlexMovieGenres { get; set; } = [];
 
     public ICollection<PlexTvShow> PlexTvShowGenres { get; set; } = [];
-
-    public ICollection<PlexMusicArtist> PlexMusicArtistGenres { get; set; } = [];
 
     public ICollection<PlexOtherVideo> PlexOtherVideoGenres { get; set; } = [];
 

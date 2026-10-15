@@ -16,18 +16,21 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
     private readonly IReaparrDbContext _dbContext;
     private readonly IScheduler _scheduler;
     private readonly INotificationHubService _notificationHubService;
+    private readonly ICommandExecutor _commandExecutor;
 
     public CancelLibrarySyncJobCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         IScheduler scheduler,
-        INotificationHubService notificationHubService
+        INotificationHubService notificationHubService,
+        ICommandExecutor commandExecutor
     )
     {
         _log = log.ForContext<CancelLibrarySyncJobCommandHandler>();
         _dbContext = dbContext;
         _scheduler = scheduler;
         _notificationHubService = notificationHubService;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result> ExecuteAsync(CancelLibrarySyncJobCommand command, CancellationToken cancellationToken)
@@ -78,17 +81,20 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                 );
 
             var completionResult = await _scheduler.AwaitJobCompletion(jobKey, cancellationToken);
-            if (completionResult.IsFailed)
-                return completionResult;
+            if (completionResult.IsCancelled || completionResult.IsFailed)
+                return completionResult.LogIfFailed();
         }
         else
         {
-            // Job is queued but not yet executing — mark it as cancelled directly.
-            if (
-                !await _scheduler.DeleteJob(jobKey, cancellationToken)
-                && await _scheduler.Interrupt(jobKey, cancellationToken)
-            )
-                return await _scheduler.AwaitJobCompletion(jobKey, cancellationToken);
+            // Deleting a scheduled job does not interrupt an execution that started in the meantime.
+            await _scheduler.DeleteJob(jobKey, cancellationToken);
+            var interruptedAfterDelete = await _scheduler.Interrupt(jobKey, cancellationToken);
+            var completionResult = await _scheduler.AwaitJobCompletion(jobKey, cancellationToken);
+            if (completionResult.IsCancelledOrFailed)
+                return completionResult.LogIfFailed();
+
+            if (interruptedAfterDelete)
+                return Result.Ok();
 
             var cancelled = await _dbContext
                 .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == plexLibraryId)
@@ -102,10 +108,31 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                     cancellationToken: cancellationToken
                 );
             if (cancelled != 1)
-                return Result.Fail(
-                    "Library sync job for library {PlexLibraryId} changed state while cancelling",
-                    plexLibraryId
-                );
+            {
+                var currentStatus = await _dbContext
+                    .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == plexLibraryId)
+                    .Select(x => x.Status)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (
+                    currentStatus
+                    is LibrarySyncJobStatus.Completed
+                        or LibrarySyncJobStatus.Cancelled
+                        or LibrarySyncJobStatus.Failed
+                )
+                {
+                    _log.Here()
+                        .Information(
+                            "Library sync job for library {PlexLibraryId} changed to terminal status {Status} while cancelling",
+                            plexLibraryId,
+                            currentStatus
+                        );
+                    return Result.Ok();
+                }
+
+                return Result
+                    .Fail("Library sync job for library {PlexLibraryId} changed state while cancelling", plexLibraryId)
+                    .LogError();
+            }
 
             _log.Here()
                 .Information(
@@ -114,7 +141,20 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                     plexLibraryId
                 );
 
-            await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
+            var notificationResult = await Result.Try(async Task () =>
+                await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus])
+            );
+            notificationResult.LogIfFailed();
+
+            var dispatchResult = await Result.Try(async Task () =>
+            {
+                var checkQueuedResult = await _commandExecutor.Send(
+                    new CheckQueuedPlexLibraryToSyncCommand(),
+                    cancellationToken
+                );
+                checkQueuedResult.LogIfFailed();
+            });
+            dispatchResult.LogIfFailed();
         }
 
         return Result.Ok();

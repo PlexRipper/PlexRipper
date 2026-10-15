@@ -94,6 +94,7 @@ export function generatePlexMedia({
 		...generatePlexMediaSlim({ config, partialData }),
 		hasArt: false,
 		hasTheme: false,
+		genres: [],
 		rating: randNumber({ min: 1, max: 10 }),
 		studio: randCompanyName(),
 		summary: randSentence(),

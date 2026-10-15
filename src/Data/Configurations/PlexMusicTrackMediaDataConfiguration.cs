@@ -4,6 +4,9 @@ public class PlexMusicTrackMediaDataConfiguration : IEntityTypeConfiguration<Ple
 {
     public void Configure(EntityTypeBuilder<PlexMusicTrackMediaData> builder)
     {
+        builder.Ignore(x => x.VideoQuality);
+        builder.Ignore(x => x.VideoResolution);
+        builder.Ignore(x => x.VideoCodec);
         builder.HasIndex(x => new { x.PlexLibraryId, x.PlexApiPartId }).IsUnique();
         builder
             .HasIndex(x => new

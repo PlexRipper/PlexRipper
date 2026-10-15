@@ -25,7 +25,7 @@ public static partial class FakeData
                 video.FullTitle = video.Title;
                 video.Duration = original.Duration / 1000;
                 video.MediaSize = original.Size;
-                video.Quality = original.Quality;
+                video.VideoQuality = original.VideoQuality;
             }
         );
 
@@ -33,7 +33,7 @@ public static partial class FakeData
     {
         var mediaDataFaker = GetPlexOtherVideoMediaData(seed, options);
         return _plexOtherVideo
-            .Clone()
+            .Clone() // Clone to isolate per-call media-data rules and seed state.
             .RuleFor(x => x.MediaDataList, _ => mediaDataFaker.Generate(1))
             .UseSeed(seed.Next());
     }
@@ -51,7 +51,7 @@ public static partial class FakeData
             .RuleFor(x => x.VideoProfile, _ => "high")
             .RuleFor(x => x.VideoFrameRate, _ => 24m)
             .RuleFor(x => x.VideoResolution, _ => VideoQuality.FullHD)
-            .RuleFor(x => x.Quality, (_, x) => x.VideoResolution)
+            .RuleFor(x => x.VideoQuality, (_, x) => x.VideoResolution)
             .RuleFor(x => x.Container, _ => "mp4")
             .RuleFor(x => x.Source, _ => ReleaseSource.None)
             .RuleFor(x => x.OriginalFilename, (_, x) => $"video-{x.PlexApiPartId}.mp4")
@@ -66,9 +66,15 @@ public static partial class FakeData
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        var faker = _plexOtherVideoMediaData.Clone();
-        if (config.DownloadFileSizeInMb > 0)
-            faker.RuleFor(x => x.Size, (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes);
-        return faker.UseSeed(seed.Next());
+        return _plexOtherVideoMediaData
+            .Clone() // Clone to isolate per-call size rules and caller overrides.
+            .RuleFor(
+                x => x.Size,
+                _ =>
+                    config.DownloadFileSizeInMb > 0
+                        ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                        : (long)ByteSize.FromMebiBytes(10).Bytes
+            )
+            .UseSeed(seed.Next());
     }
 }

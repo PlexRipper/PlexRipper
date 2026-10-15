@@ -1,71 +1,77 @@
 <template>
 	<QPage>
 		<template v-if="!loading && mediaItemDetail">
-			<MediaOverviewBar
-				:media-type="mediaItemDetail.type"
+			<MediaDetailsLayout
 				:library-id="libraryId"
-				:media-detail-item="mediaItemDetail"
-				detail-mode
-				@action="onAction" />
-			<QScroll class="page-content-minus-media-overview-bar">
-				<QRow class="music-detail-header">
-					<QCol cols="auto">
-						<MediaPosterImage
-							class="q-ma-md"
-							:thumb-width="200"
-							:thumb-height="300"
-							:actions="false"
-							:media-item="mediaItemDetail" />
-					</QCol>
-					<QCol>
-						<q-card class="music-detail-info">
-							<q-card-section>
-								<h1 class="text-h4 text-weight-bold q-mt-none q-mb-md">
-									{{ mediaItemDetail.title }}
-								</h1>
-								<dl class="music-detail-metadata">
-									<div>
-										<dt>{{ t('components.music-details.album-count') }}</dt>
-										<dd>{{ albumCount }}</dd>
+				:media-item="mediaItemDetail"
+				:summary-label="t('components.details-overview.summary')"
+				@action="onAction">
+				<template #details>
+					<tr>
+						<td
+							colspan="2"
+							class="media-info-column">
+							<div class="media-info-detail-grid">
+								<div class="media-info-detail-column">
+									<div class="media-info-detail-field">
+										<div class="media-info-detail-label">
+											{{ t('components.music-details.duration') }}
+										</div>
+										<div class="media-info-detail-value">
+											<QDuration :value="mediaItemDetail.duration" />
+										</div>
 									</div>
-									<div>
-										<dt>{{ t('components.music-details.track-count') }}</dt>
-										<dd>{{ trackCount }}</dd>
-									</div>
-									<div>
-										<dt>{{ t('components.music-details.duration') }}</dt>
-										<dd><QDuration :value="mediaItemDetail.duration" /></dd>
-									</div>
-									<div>
-										<dt>{{ t('components.music-details.size') }}</dt>
-										<dd><QFileSize :size="mediaItemDetail.mediaSize" /></dd>
-									</div>
-									<div v-if="mediaItemDetail.year > 0">
-										<dt>{{ t('components.music-details.year') }}</dt>
-										<dd>{{ mediaItemDetail.year }}</dd>
+									<div class="media-info-detail-field">
+										<div class="media-info-detail-label">
+											{{ t('components.music-details.size') }}
+										</div>
+										<div class="media-info-detail-value">
+											<QFileSize :size="mediaItemDetail.mediaSize" />
+										</div>
 									</div>
 									<div
+										v-if="mediaItemDetail.year > 0"
+										class="media-info-detail-field">
+										<div class="media-info-detail-label">
+											{{ t('components.music-details.year') }}
+										</div>
+										<div class="media-info-detail-value">
+											{{ mediaItemDetail.year }}
+										</div>
+									</div>
+									<div
+										v-if="mediaItemDetail.genres?.length"
+										class="media-info-detail-field"
+										data-cy="music-detail-genres">
+										<div class="media-info-detail-label">
+											{{ t('components.music-details.genres') }}
+										</div>
+										<div class="media-info-detail-value">
+											{{ mediaItemDetail.genres?.map((genre) => genre.name).join(', ') }}
+										</div>
+									</div>
+								</div>
+								<div class="media-info-detail-column">
+									<div
 										v-for="date in dates"
-										:key="date.key">
-										<dt>{{ date.label }}</dt>
-										<dd>
+										:key="date.key"
+										class="media-info-detail-field">
+										<div class="media-info-detail-label">
+											{{ date.label }}
+										</div>
+										<div class="media-info-detail-value">
 											<QDateTime
 												:text="date.value"
 												long-date />
-										</dd>
+										</div>
 									</div>
-								</dl>
-								<p
-									v-if="mediaItemDetail.summary"
-									class="q-mt-md music-detail-summary">
-									{{ mediaItemDetail.summary }}
-								</p>
-							</q-card-section>
-						</q-card>
-					</QCol>
-				</QRow>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</template>
 				<MusicMediaList :media-item="mediaItemDetail" />
-			</QScroll>
+			</MediaDetailsLayout>
 		</template>
 
 		<div
@@ -118,8 +124,6 @@ const requests = new Subject<void>();
 const libraryId = computed(() => +(route.params.id as string));
 const artistId = computed(() => +(route.params.artistId as string));
 const validRoute = computed(() => [get(libraryId), get(artistId)].every((id) => Number.isSafeInteger(id) && id > 0));
-const albumCount = computed(() => get(mediaItemDetail)?.children.length ?? 0);
-const trackCount = computed(() => get(mediaItemDetail)?.children.reduce((count, album) => count + album.children.length, 0) ?? 0);
 const dates = computed(() => [
 	{ key: 'originallyAvailableAt', label: t('components.music-details.originally-available'), value: get(mediaItemDetail)?.originallyAvailableAt },
 	{ key: 'addedAt', label: t('components.music-details.added-at'), value: get(mediaItemDetail)?.addedAt },
@@ -193,46 +197,3 @@ onBeforeUnmount(() => {
 
 definePageMeta({ scrollToTop: false });
 </script>
-
-<style lang="scss">
-@use '@/assets/scss/_mixins.scss';
-
-.music-detail-info {
-	@extend .background-sm;
-	min-height: 300px;
-	margin: 1rem 1rem 1rem 0;
-}
-
-.music-detail-metadata {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.75rem 1.5rem;
-	margin: 0;
-
-	div { display: grid; grid-template-columns: minmax(8rem, auto) 1fr; gap: 1rem; }
-	dt { font-weight: 600; }
-	dd { margin: 0; }
-}
-
-.music-detail-summary { white-space: pre-wrap; }
-
-@media (max-width: $breakpoint-xs-max) {
-	.music-detail-header {
-		flex-direction: column;
-		align-items: center;
-		> .col, > .col-auto { flex: 0 0 100%; width: 100%; max-width: 100%; }
-		> .col-auto { display: flex; justify-content: center; }
-	}
-	.music-detail-info { margin: 0 0.5rem 1rem; }
-	.music-detail-metadata {
-		grid-template-columns: 1fr;
-		div { grid-template-columns: minmax(7rem, auto) 1fr; }
-	}
-	.page-content-minus-media-overview-bar,
-	.page-content-minus-media-overview-bar .q-scrollarea__content {
-		width: 100% !important;
-		min-width: 0 !important;
-		max-width: 100% !important;
-	}
-}
-</style>

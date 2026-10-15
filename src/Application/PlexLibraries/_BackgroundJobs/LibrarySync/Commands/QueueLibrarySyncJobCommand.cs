@@ -23,12 +23,19 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly INotificationHubService _notificationHubService;
 
-    public QueueLibrarySyncJobCommandHandler(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public QueueLibrarySyncJobCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor,
+        INotificationHubService notificationHubService
+    )
     {
         _log = log.ForContext<QueueLibrarySyncJobCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _notificationHubService = notificationHubService;
     }
 
     public async Task<Result> ExecuteAsync(QueueLibrarySyncJobCommand command, CancellationToken cancellationToken)
@@ -146,14 +153,31 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
                 );
         }
 
-        if (itemsToAdd.Any() || itemsToReset.Any() || queuedOrProcessingIds.Any())
+        var hasAdmission = itemsToAdd.Any() || itemsToReset.Any();
+        if (hasAdmission)
         {
-            var checkQueuedResult = await _commandExecutor.Send(
-                new CheckQueuedPlexLibraryToSyncCommand(),
-                cancellationToken
+            var notificationResult = await Result.Try(
+                async Task () =>
+                    await _notificationHubService.SendRefreshNotificationAsync([
+                        RefreshDataType.PlexLibrarySyncStatus,
+                    ])
             );
+            notificationResult.LogIfFailed();
+        }
 
-            return checkQueuedResult.LogIfFailed();
+        if (hasAdmission || queuedOrProcessingIds.Any())
+        {
+            var dispatchResult = await Result.Try(
+                async Task () =>
+                {
+                    var checkQueuedResult = await _commandExecutor.Send(
+                        new CheckQueuedPlexLibraryToSyncCommand(),
+                        cancellationToken
+                    );
+                    checkQueuedResult.LogIfFailed();
+                }
+            );
+            dispatchResult.LogIfFailed();
         }
 
         return Result.Ok();

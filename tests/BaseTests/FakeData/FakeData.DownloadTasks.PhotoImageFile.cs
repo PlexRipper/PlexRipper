@@ -2,7 +2,7 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    // TODO Do an audit of ensureing as much faker generation methods are readonly fields
+
     public static Faker<DownloadTaskPhotoImageFile> GetDownloadTaskPhotoImageFile(
         Seed seed,
         Action<FakeDataConfig>? options = null
@@ -15,7 +15,7 @@ public static partial class FakeData
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
             .Ignore(x => x.Logs)
-            .RuleFor(x => x.Quality, _ => VideoQuality.None)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.None)
             .RuleFor(x => x.FileName, (_, x) => $"photo-{x.PlexApiPartId}.jpg")
             .RuleFor(
                 x => x.DataTotal,

@@ -39,6 +39,10 @@ export function baseBtnPropsDefault() {
 			type: String,
 			default: '',
 		},
+		ariaLabel: {
+			type: String,
+			default: undefined,
+		},
 		icon: {
 			type: String,
 			default: undefined,

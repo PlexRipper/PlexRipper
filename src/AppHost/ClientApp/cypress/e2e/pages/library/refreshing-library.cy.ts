@@ -42,14 +42,20 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie)!;
 			const server = data.plexServers.find((x) => x.id === movieLibrary.plexServerId)!;
 
-			cy.intercept('GET', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), {
+			cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), {
 				statusCode: 200,
-				body: generateResultDTO(movieLibrary),
-			});
+				body: generateResultDTO(generateLibrarySyncJobQueue({
+					plexLibraryId: movieLibrary.id,
+					plexServerId: server.id,
+					status: LibrarySyncJobStatus.Queued,
+				})),
+			}).as('refreshMovies');
 
 			// Verify the refresh button is visible before clicking
 			cy.getCy('media-overview-refresh-library-btn').should('be.visible');
 			cy.getCy('media-overview-refresh-library-btn').click();
+			cy.getCy('refresh-mode-incremental-button').click();
+			cy.wait('@refreshMovies');
 
 			// Verify the refresh container is NOT yet visible before the job starts
 			cy.getCy('refresh-library-container').should('not.exist');
@@ -150,14 +156,20 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			const tvShowLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.TvShow)!;
 			const server = data.plexServers.find((x) => x.id === tvShowLibrary.plexServerId)!;
 
-			cy.intercept('GET', PlexLibraryPaths.refreshLibraryMediaEndpoint(tvShowLibrary.id), {
+			cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(tvShowLibrary.id), {
 				statusCode: 200,
-				body: generateResultDTO(tvShowLibrary),
-			});
+				body: generateResultDTO(generateLibrarySyncJobQueue({
+					plexLibraryId: tvShowLibrary.id,
+					plexServerId: server.id,
+					status: LibrarySyncJobStatus.Queued,
+				})),
+			}).as('refreshTvShows');
 
 			// Verify the refresh button is visible before clicking
 			cy.getCy('media-overview-refresh-library-btn').should('be.visible');
 			cy.getCy('media-overview-refresh-library-btn').click();
+			cy.getCy('refresh-mode-incremental-button').click();
+			cy.wait('@refreshTvShows');
 
 			// Verify the refresh container is NOT yet visible before the job starts
 			cy.getCy('refresh-library-container').should('not.exist');
@@ -183,9 +195,9 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			const tvShowCount = tvShowLibrary.count;
 			const seasonCount = tvShowLibrary.seasonCount;
 			const episodeCount = tvShowLibrary.episodeCount;
-			const totalCount = episodeCount;
+			const totalCount = tvShowCount + seasonCount + episodeCount;
 
-			// Stage 1: TvShows progress from 0% to 100%, Seasons and Episodes not yet started
+			// Stage 1: TvShows progress from 0% to 100%, Seasons and Episodes remain queued
 			for (let i = 1; i <= steps; i++) {
 				const tvShowReceived = Math.round(i * (tvShowCount / steps));
 
@@ -213,7 +225,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 					generateLibrarySyncProgress({
 						type: PlexMediaType.TvShow,
 						libraryId: tvShowLibrary.id,
-						received: tvShowReceived,
+						received: items.reduce((sum, item) => sum + item.received, 0),
 						total: totalCount,
 						items,
 					}),
@@ -221,18 +233,18 @@ describe('Test the refreshing of a PlexLibrary', () => {
 
 				cy.getCy('refresh-library-container').should('be.visible');
 
-				// TvShow row counter updates; Season and Episode rows not yet visible (received === 0)
+				// Every row remains visible once its preflight total is known
 				cy.getCy(`library-media-sync-progress-row-${PlexMediaType.TvShow}-count`)
 					.should('contain.text', `${tvShowReceived}/${tvShowCount}`);
 
 				cy.getCy(`library-media-sync-progress-row-${PlexMediaType.Season}-count`)
-					.should('not.exist');
+					.should('contain.text', `0/${seasonCount}`);
 
 				cy.getCy(`library-media-sync-progress-row-${PlexMediaType.Episode}-count`)
-					.should('not.exist');
+					.should('contain.text', `0/${episodeCount}`);
+				cy.contains('Updating database with all new data, please wait').should('not.exist');
 			}
-
-			// Stage 2: TvShows complete, Seasons progress from 0% to 100%, Episodes not yet started
+			// Stage 2: TvShows complete, Seasons progress from 0% to 100%, Episodes remain queued
 			for (let i = 1; i <= steps; i++) {
 				const seasonReceived = Math.round(i * (seasonCount / steps));
 
@@ -268,7 +280,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 
 				cy.getCy('refresh-library-container').should('be.visible');
 
-				// TvShow row complete; Season row counter updates; Episode row not yet visible (received === 0)
+				// TvShow row complete; Season row counter updates; Episode row remains visible at zero
 				cy.getCy(`library-media-sync-progress-row-${PlexMediaType.TvShow}-count`)
 					.should('contain.text', `${tvShowCount}/${tvShowCount}`);
 
@@ -276,7 +288,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 					.should('contain.text', `${seasonReceived}/${seasonCount}`);
 
 				cy.getCy(`library-media-sync-progress-row-${PlexMediaType.Episode}-count`)
-					.should('not.exist');
+					.should('contain.text', `0/${episodeCount}`);
 			}
 
 			// Stage 3: TvShows and Seasons complete, Episodes progress from 0% to 100%

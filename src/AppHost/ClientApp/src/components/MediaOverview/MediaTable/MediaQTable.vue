@@ -33,7 +33,7 @@
 					</div>
 					<div class="media-q-table-card__metadata">
 						<MediaQuality
-							v-if="supportsVideoQuality(row.type)"
+							v-if="supportsFileQuality(row.type)"
 							:qualities="row.qualities" />
 						<MediaComparisonStateButton
 							v-if="supportsComparison(row.type)"
@@ -63,7 +63,7 @@
 			<template #body-cell-quality="{ row }: { row: PlexMediaSlimDTO }">
 				<q-td class="text-eclipse">
 					<MediaQuality
-						v-if="supportsVideoQuality(row.type)"
+						v-if="supportsFileQuality(row.type)"
 						:qualities="row.qualities" />
 				</q-td>
 			</template>
@@ -181,7 +181,7 @@ const qTableProps = computed((): QTableProps => {
 		rows: [],
 		columns: mediaTableColumns.filter((column) => {
 			if (column.field === 'quality')
-				return props.rows.some((row) => supportsVideoQuality(row.type));
+				return props.rows.some((row) => supportsFileQuality(row.type));
 			if (column.field === 'comparisonState')
 				return props.rows.some((row) => supportsComparison(row.type));
 			return true;
@@ -198,12 +198,12 @@ const qTableProps = computed((): QTableProps => {
 	};
 });
 
-function supportsVideoQuality(type: PlexMediaType): boolean {
-	return [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.Season, PlexMediaType.Episode, PlexMediaType.OtherVideos].includes(type);
+function supportsFileQuality(type: PlexMediaType): boolean {
+	return [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.Season, PlexMediaType.Episode, PlexMediaType.OtherVideos, PlexMediaType.MusicArtist, PlexMediaType.MusicAlbum, PlexMediaType.MusicTrack].includes(type);
 }
 
 function supportsComparison(type: PlexMediaType): boolean {
-	return [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.Season, PlexMediaType.Episode, PlexMediaType.MusicArtist].includes(type);
+	return [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.Season, PlexMediaType.Episode, PlexMediaType.MusicArtist, PlexMediaType.MusicTrack].includes(type);
 }
 
 function isRowSelected(rowId: number): boolean {

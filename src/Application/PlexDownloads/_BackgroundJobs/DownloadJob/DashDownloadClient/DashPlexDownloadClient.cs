@@ -188,7 +188,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         switch (downloadTask.DownloadTaskType)
         {
             case DownloadTaskType.MovieData:
-            case DownloadTaskType.MoviePart:
                 await _dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
                     .ExecuteUpdateAsync(
@@ -200,7 +199,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                     );
                 break;
             case DownloadTaskType.EpisodeData:
-            case DownloadTaskType.EpisodePart:
                 await _dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTask.Id)
                     .ExecuteUpdateAsync(

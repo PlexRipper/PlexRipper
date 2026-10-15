@@ -45,12 +45,6 @@ public class RefreshPlexMusicLibraryCommandHandler
         var plexLibrary = command.LibraryMetadata.PlexLibrary;
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
 
-        var comparisonResult = await Result.Try(() =>
-            _commandExecutor.Send(new InvalidateLibraryComparisonJobsCommand([plexLibraryId]), cancellationToken)
-        );
-        if (comparisonResult.IsFailed)
-            return comparisonResult.LogIfFailed();
-
         var albumsResult = await Result.Try(() =>
             _commandExecutor.Send(
                 new GetLibraryMediaFromPlexApiCommand(plexLibrary, PlexMediaType.MusicAlbum),
@@ -66,6 +60,27 @@ public class RefreshPlexMusicLibraryCommandHandler
             await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, albumsResult.ToResult(), cancellationToken);
             return albumsResult.ToResult().LogError();
         }
+
+        var albumMetadataResult = await Result.Try(() =>
+            _commandExecutor.Send(
+                new InsertMediaMetaDataCommand(
+                    new LibraryMetadata(plexLibrary) { Countries = albumsResult.Value.Countries }
+                ),
+                cancellationToken
+            )
+        );
+
+        if (albumMetadataResult.IsCancelled)
+            return albumMetadataResult.ToResult().LogWarning();
+
+        if (albumMetadataResult.IsFailed)
+        {
+            await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, albumMetadataResult.ToResult(), cancellationToken);
+            return albumMetadataResult.ToResult().LogError();
+        }
+
+        foreach (var (key, country) in albumMetadataResult.Value.PlexCountries)
+            command.LibraryMetadata.PlexCountries[key] = country;
 
         var tracksResult = await Result.Try(() =>
             _commandExecutor.Send(
@@ -106,6 +121,30 @@ public class RefreshPlexMusicLibraryCommandHandler
         {
             await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, syncResult.ToResult(), cancellationToken);
             return syncResult.ToResult().LogError();
+        }
+        var comparisonResult = await Result.Try(() =>
+            _commandExecutor.Send(new InvalidateLibraryComparisonJobsCommand([plexLibraryId]), cancellationToken)
+        );
+        if (comparisonResult.IsCancelled || comparisonResult.IsFailed)
+        {
+            using var finalizationCancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var finalizationToken = finalizationCancellation.Token;
+            var optimizationAfterFailure = await Result.Try(() =>
+                _commandExecutor.Send(
+                    new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },
+                    finalizationToken
+                )
+            );
+            optimizationAfterFailure.LogIfFailed();
+            var rebuildAfterFailure = await Result.Try(() =>
+                _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), finalizationToken)
+            );
+            rebuildAfterFailure.LogIfFailed();
+            var progressAfterFailure = await Result.Try(async Task () =>
+                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, comparisonResult, finalizationToken)
+            );
+            progressAfterFailure.LogIfFailed();
+            return comparisonResult.LogIfFailed();
         }
         var optimizationResult = await _commandExecutor.Send(
             new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },

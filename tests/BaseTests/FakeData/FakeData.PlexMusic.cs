@@ -5,12 +5,14 @@ public static partial class FakeData
     private static readonly Faker<PlexMusicArtist> _plexMusicArtist = new Faker<PlexMusicArtist>()
         .ApplyBasePlexMedia()
         .RuleFor(x => x.Title, f => f.Name.FullName())
-        .RuleFor(x => x.Guid, f => $"plex://artist/{f.Random.Guid():N}")
-        .RuleFor(x => x.MusicBrainzArtistId, f => f.Random.Guid().ToString())
+        .RuleFor(x => x.Guid, _ => string.Empty)
+        .RuleFor(x => x.PlexApiIdentityId, f => f.Random.Guid().ToString("N"))
+        .RuleFor(x => x.MusicBrainzArtistId, f => f.Random.Guid().ToString("D"))
         .RuleFor(x => x.Guid_IMDB, _ => null)
         .RuleFor(x => x.Guid_TMDB, _ => null)
         .RuleFor(x => x.Guid_TVDB, _ => null)
         .Ignore(x => x.Albums)
+        .Ignore(x => x.Qualities)
         .Ignore(x => x.Actors)
         .Ignore(x => x.Genres)
         .Ignore(x => x.Countries)
@@ -31,7 +33,7 @@ public static partial class FakeData
                 artist.ChildCount = artist.Albums.Count;
                 artist.Duration = artist.Albums.Sum(x => x.Duration);
                 artist.MediaSize = artist.Albums.Sum(x => x.MediaSize);
-                artist.Quality = VideoQuality.Unknown;
+                artist.VideoQuality = VideoQuality.None;
                 artist.FullTitle = artist.Title;
             }
         );
@@ -42,7 +44,7 @@ public static partial class FakeData
         var albumFaker = GetPlexMusicAlbums(seed, options);
 
         return _plexMusicArtist
-            .Clone()
+            .Clone() // Clone to isolate per-call child rules and seed state.
             .RuleFor(x => x.Albums, _ => albumFaker.Generate(config.MusicAlbumCount))
             .UseSeed(seed.Next());
     }
@@ -53,18 +55,19 @@ public static partial class FakeData
         .Ignore(x => x.PlexArtist)
         .Ignore(x => x.ParentKey)
         .RuleFor(x => x.Title, f => f.Commerce.ProductName())
-        .RuleFor(x => x.Guid, f => $"plex://album/{f.Random.Guid():N}")
-        .RuleFor(x => x.MusicBrainzReleaseId, f => f.Random.Guid().ToString())
-        .RuleFor(x => x.MusicBrainzReleaseGroupId, f => f.Random.Guid().ToString())
+        .RuleFor(x => x.Guid, _ => string.Empty)
+        .RuleFor(x => x.PlexApiIdentityId, f => f.Random.Guid().ToString("N"))
+        .RuleFor(x => x.MusicBrainzReleaseId, f => f.Random.Guid().ToString("D"))
         .RuleFor(x => x.Guid_IMDB, _ => null)
         .RuleFor(x => x.Guid_TMDB, _ => null)
         .RuleFor(x => x.Guid_TVDB, _ => null)
         .RuleFor(x => x.ReleaseDate, f => f.Date.Past(40))
         .RuleFor(x => x.RecordLabel, f => f.Company.CompanyName())
-        .RuleFor(x => x.Country, f => f.Address.CountryCode())
+        .Ignore(x => x.Countries)
         .Ignore(x => x.DiscCount)
         .Ignore(x => x.TrackCount)
         .Ignore(x => x.Tracks)
+        .Ignore(x => x.Qualities)
         .FinishWith(
             (_, album) =>
             {
@@ -82,7 +85,7 @@ public static partial class FakeData
                 album.DiscCount = album.Tracks.Count == 0 ? 0 : 1;
                 album.Duration = album.Tracks.Sum(x => x.Duration);
                 album.MediaSize = album.Tracks.Sum(x => x.MediaSize);
-                album.Quality = VideoQuality.Unknown;
+                album.VideoQuality = VideoQuality.None;
                 album.FullTitle = album.Title;
             }
         );
@@ -93,7 +96,7 @@ public static partial class FakeData
         var trackFaker = GetPlexMusicTracks(seed, options);
 
         return _plexMusicAlbum
-            .Clone()
+            .Clone() // Clone to isolate per-call child rules and seed state.
             .RuleFor(x => x.Tracks, _ => trackFaker.Generate(config.MusicTrackCount))
             .UseSeed(seed.Next());
     }
@@ -104,9 +107,9 @@ public static partial class FakeData
         .Ignore(x => x.PlexAlbum)
         .Ignore(x => x.ParentKey)
         .RuleFor(x => x.Title, f => string.Join(" ", f.Lorem.Words(f.Random.Int(1, 4))))
-        .RuleFor(x => x.Guid, f => $"plex://track/{f.Random.Guid():N}")
-        .RuleFor(x => x.MusicBrainzRecordingId, f => f.Random.Guid().ToString())
-        .RuleFor(x => x.MusicBrainzReleaseTrackId, f => f.Random.Guid().ToString())
+        .RuleFor(x => x.Guid, _ => string.Empty)
+        .RuleFor(x => x.PlexApiIdentityId, f => f.Random.Guid().ToString("N"))
+        .RuleFor(x => x.MusicBrainzReleaseTrackId, f => f.Random.Guid().ToString("D"))
         .RuleFor(x => x.Guid_IMDB, _ => null)
         .RuleFor(x => x.Guid_TMDB, _ => null)
         .RuleFor(x => x.Guid_TVDB, _ => null)
@@ -124,7 +127,7 @@ public static partial class FakeData
                 track.ChildCount = 0;
                 track.Duration = original.Duration / 1000;
                 track.MediaSize = original.Size;
-                track.Quality = VideoQuality.Unknown;
+                track.VideoQuality = VideoQuality.None;
                 track.FullTitle = track.Title;
             }
         );
@@ -134,7 +137,7 @@ public static partial class FakeData
         var mediaDataFaker = GetPlexMusicTrackMediaData(seed, options);
 
         return _plexMusicTrack
-            .Clone()
+            .Clone() // Clone to isolate per-call media-data rules and seed state.
             .RuleFor(x => x.MediaDataList, _ => mediaDataFaker.Generate(1))
             .UseSeed(seed.Next());
     }
@@ -147,8 +150,15 @@ public static partial class FakeData
             .RuleFor(x => x.PartIndex, _ => 0)
             .RuleFor(x => x.VideoCodec, _ => string.Empty)
             .RuleFor(x => x.AudioCodec, _ => "flac")
-            .RuleFor(x => x.VideoResolution, _ => VideoQuality.Unknown)
-            .RuleFor(x => x.Quality, _ => VideoQuality.Unknown)
+            .RuleFor(x => x.AudioBitrateKbps, _ => 737)
+            .RuleFor(x => x.AudioBitDepth, _ => 16)
+            .RuleFor(x => x.AudioSampleRateHz, _ => 44_100)
+            .RuleFor(x => x.AudioChannels, _ => 2)
+            .RuleFor(x => x.AudioChannelLayout, _ => "stereo")
+            .RuleFor(x => x.AudioProfile, _ => null)
+            .RuleFor(x => x.AudioQuality, _ => AudioQuality.FLAC_16Bit_44_1kHz)
+            .RuleFor(x => x.VideoResolution, _ => VideoQuality.None)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.None)
             .RuleFor(x => x.Duration, f => f.Random.Int(90_000, 600_000))
             .RuleFor(x => x.Container, _ => "flac")
             .RuleFor(x => x.Source, _ => ReleaseSource.None)
@@ -156,10 +166,6 @@ public static partial class FakeData
             .RuleFor(x => x.Key, (_, x) => $"/library/parts/{x.PlexApiPartId}/file.flac")
             .RuleFor(x => x.OriginalFilePath, (_, x) => $"/music/{x.OriginalFilename}")
             .RuleFor(x => x.SourceRelativePath, (_, x) => x.OriginalFilename)
-            .RuleFor(x => x.Width, _ => null)
-            .RuleFor(x => x.Height, _ => null)
-            .RuleFor(x => x.VideoProfile, _ => null)
-            .RuleFor(x => x.VideoFrameRate, _ => null)
             .RuleFor(x => x.GeneratedNameSyncedAt, _ => null);
 
     public static Faker<PlexMusicTrackMediaData> GetPlexMusicTrackMediaData(
@@ -168,9 +174,15 @@ public static partial class FakeData
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        var faker = _plexMusicTrackMediaData.Clone();
-        if (config.DownloadFileSizeInMb > 0)
-            faker.RuleFor(x => x.Size, (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes);
-        return faker.UseSeed(seed.Next());
+        return _plexMusicTrackMediaData
+            .Clone() // Clone to isolate per-call size rules and caller overrides.
+            .RuleFor(
+                x => x.Size,
+                _ =>
+                    config.DownloadFileSizeInMb > 0
+                        ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                        : (long)ByteSize.FromMebiBytes(10).Bytes
+            )
+            .UseSeed(seed.Next());
     }
 }

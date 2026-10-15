@@ -53,15 +53,11 @@ public static partial class DbContextExtensions
     }
 
     /// <summary>
-    /// Uses a single SQL statement to insert or ignore multiple <see cref="PlexGenre"/> entities into the database, and returns a dictionary mapping each genre's key to its corresponding ID in the database.
+    /// Inserts video genres that are not already present and returns their database IDs keyed by Plex key.
     /// </summary>
-    /// <param name="dbContext">The database context to use for the operation.</param>
-    /// <param name="entities">A read-only collection of <see cref="PlexGenre"/> entities to insert or ignore.</param>
-    /// <param name="ct">A cancellation token to observe while performing the operation.</param>
-    /// <returns>A dictionary mapping each genre's key to its corresponding ID in the database.</returns>
-    public static async Task<Dictionary<string, int>> InsertOrIgnorePlexGenresAsync(
+    public static async Task<Dictionary<string, int>> InsertOrIgnorePlexGenresVideoAsync(
         this IReaparrDbContext dbContext,
-        IReadOnlyCollection<PlexGenre> entities,
+        IReadOnlyCollection<PlexGenreVideo> entities,
         CancellationToken ct
     )
     {
@@ -80,18 +76,58 @@ public static partial class DbContextExtensions
             }
 
             var sql = FormattableStringFactory.Create(
-                $"INSERT OR IGNORE INTO PlexGenres (Name, Key, Type) VALUES {string.Join(", ", values)}",
+                $"INSERT OR IGNORE INTO {nameof(IReaparrDbContext.PlexGenresVideo)} (Name, Key, Type) VALUES {string.Join(", ", values)}",
                 arguments.ToArray()
             );
             await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
 
             var keys = chunk.Select(g => g.Key).ToList();
             var found = await dbContext
-                .PlexGenres.Where(g => keys.Contains(g.Key))
+                .PlexGenresVideo.Where(g => keys.Contains(g.Key))
                 .Select(g => new { g.Key, g.Id })
                 .ToListAsync(ct);
-            foreach (var g in found)
-                result[g.Key] = g.Id;
+            foreach (var genre in found)
+                result[genre.Key] = genre.Id;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Inserts audio genres that are not already present and returns their database IDs keyed by Plex key.
+    /// </summary>
+    public static async Task<Dictionary<string, int>> InsertOrIgnorePlexGenresAudioAsync(
+        this IReaparrDbContext dbContext,
+        IReadOnlyCollection<PlexGenreAudio> entities,
+        CancellationToken ct
+    )
+    {
+        var result = new Dictionary<string, int>(entities.Count);
+
+        foreach (var chunk in entities.Chunk(CHUNK_SIZE))
+        {
+            var arguments = new List<object>(chunk.Length * 2);
+            var values = new List<string>(chunk.Length);
+            foreach (var genre in chunk)
+            {
+                values.Add($"({{{arguments.Count}}}, {{{arguments.Count + 1}}})");
+                arguments.Add(genre.Name);
+                arguments.Add(genre.Key);
+            }
+
+            var sql = FormattableStringFactory.Create(
+                $"INSERT OR IGNORE INTO {nameof(IReaparrDbContext.PlexGenresAudio)} (Name, Key) VALUES {string.Join(", ", values)}",
+                arguments.ToArray()
+            );
+            await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
+
+            var keys = chunk.Select(g => g.Key).ToList();
+            var found = await dbContext
+                .PlexGenresAudio.Where(g => keys.Contains(g.Key))
+                .Select(g => new { g.Key, g.Id })
+                .ToListAsync(ct);
+            foreach (var genre in found)
+                result[genre.Key] = genre.Id;
         }
 
         return result;

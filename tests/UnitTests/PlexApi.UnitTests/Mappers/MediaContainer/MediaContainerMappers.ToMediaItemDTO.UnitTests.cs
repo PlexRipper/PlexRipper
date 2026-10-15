@@ -368,5 +368,79 @@ namespace Reaparr.PlexApi.UnitTests
             // Assert
             result.Media.Single().VideoResolution.ShouldBe(VideoQuality.Unknown);
         }
+        [Test]
+        public void ShouldPreserveEnrichedAudioAndLyricsStreams_WhenTrackResponseContainsOptionalStreams()
+        {
+            // Arrange
+            var source = new Metadata
+            {
+                RatingKey = "78658",
+                Key = "/library/metadata/78658",
+                Type = "track",
+                Title = "Strangers By Nature",
+                Media =
+                [
+                    new Media
+                    {
+                        Id = 9001,
+                        AudioCodec = "flac",
+                        Bitrate = 737,
+                        AudioChannels = 2,
+                        Part =
+                        [
+                            new Part
+                            {
+                                Id = 9101,
+                                Key = "/library/parts/9101/file.flac",
+                                File = "/music/30/01.flac",
+                                Container = "flac",
+                                Stream =
+                                [
+                                    new Stream
+                                    {
+                                        Id = 1,
+                                        StreamType = LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Audio,
+                                        Selected = true,
+                                        Default = true,
+                                        Codec = "flac",
+                                        Bitrate = 737,
+                                        BitDepth = 16,
+                                        SamplingRate = 44100,
+                                        Channels = 2,
+                                        AudioChannelLayout = "stereo",
+                                    },
+                                    new Stream
+                                    {
+                                        Id = 2,
+                                        StreamType = LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Subtitle,
+                                        Codec = "lrc",
+                                        Title = "Lyrics",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            };
+
+            // Act
+            var result = source.ToMediaItemDTO();
+
+            // Assert
+            var streams = result.Media.ShouldHaveSingleItem().Parts.ShouldHaveSingleItem().Stream;
+            streams.Select(x => x.StreamType).ShouldBe([Domain.StreamType.Audio, Domain.StreamType.Subtitle]);
+            var audio = streams[0];
+            (
+                audio.Codec,
+                audio.Bitrate,
+                audio.BitDepth,
+                audio.SamplingRate,
+                audio.Channels,
+                audio.AudioChannelLayout,
+                audio.Selected,
+                audio.Default
+            ).ShouldBe(("flac", 737, 16, 44100, 2, "stereo", true, true));
+        }
+
     }
 }

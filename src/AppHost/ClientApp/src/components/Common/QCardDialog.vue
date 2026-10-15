@@ -28,6 +28,7 @@
 						class="dialog-close-button">
 						<CloseIconButton
 							cy="dialog-close-button"
+							:aria-label="$t('general.commands.close')"
 							@click="closeDialog" />
 					</div>
 				</QCardTitle>

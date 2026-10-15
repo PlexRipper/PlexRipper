@@ -2,7 +2,13 @@
 	<!--	Refresh Library Screen	-->
 	<MediaOverviewRefresh
 		v-if="libraryStore.getIsLibrarySyncing(libraryId)"
-		:library-id="libraryId" />
+		:library-id="libraryId"
+		mode="processing" />
+	<MediaOverviewRefresh
+		v-else-if="showQueuedPanel"
+		:library-id="libraryId"
+		mode="queued"
+		variant="panel" />
 	<div
 		v-else
 		class="media-overview-layout">
@@ -11,6 +17,7 @@
 			<MediaOverviewBar
 				:detail-mode="false"
 				:library-id="libraryId"
+				:refresh-disabled="isRefreshDisabled"
 				@action="onAction" />
 			<!-- Library Inaccessible Alert -->
 			<q-banner
@@ -29,6 +36,25 @@
 				{{ $t('components.media-overview.library-inaccessible') }}
 			</q-banner>
 		</div>
+		<QBanner
+			v-if="refreshSubmitting && !isQueued"
+			class="media-overview-refresh-requesting"
+			dense
+			role="status"
+			aria-live="polite"
+			data-cy="media-overview-refresh-requesting">
+			<template #avatar>
+				<q-icon
+					name="mdi-refresh"
+					aria-hidden="true" />
+			</template>
+			{{ t('components.media-overview.requesting-refresh') }}
+		</QBanner>
+		<MediaOverviewRefresh
+			v-if="isQueued"
+			:library-id="libraryId"
+			mode="queued"
+			variant="banner" />
 		<div class="media-overview-content">
 			<template v-if="!mediaOverviewStore.loading">
 				<QRow
@@ -148,8 +174,10 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { type DownloadMediaDTO, PlexMediaType, ViewMode } from '@dto';
+import { get, set } from '@vueuse/core';
+import { finalize, switchMap } from 'rxjs';
 import { DialogType } from '@enums';
+import { LibrarySyncJobStatus, type DownloadMediaDTO, PlexMediaType, ViewMode } from '@dto';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import {
 	listenMediaOverviewDownloadCommand,
@@ -187,6 +215,27 @@ const isLibraryInaccessible = computed(() => {
 		|| !accountStore.getHasAccountServerAccess(library.plexServerId)
 		|| !accountStore.getHasAccountLibraryAccess(library.id);
 });
+const refreshSubmitting = ref(false);
+const refreshAttemptActive = ref(false);
+const syncQueue = computed(() => libraryStore.getLibrarySyncQueue(props.libraryId));
+const syncQueueKey = computed(() => {
+	const queue = libraryStore.getLibrarySyncQueue(props.libraryId);
+	return queue ? `${queue.status}|${queue.createdAt}|${queue.completedAt ?? ''}` : '';
+});
+const isQueued = computed(() => get(syncQueue)?.status === LibrarySyncJobStatus.Queued);
+const isRefreshDisabled = computed(() => {
+	const status = get(syncQueue)?.status;
+	return get(refreshSubmitting)
+		|| status === LibrarySyncJobStatus.Queued
+		|| status === LibrarySyncJobStatus.Processing;
+});
+const showQueuedPanel = computed(() => {
+	const currentLibrary = get(library);
+	return get(isQueued)
+		&& currentLibrary?.isEnabled === true
+		&& currentLibrary.syncedAt === null
+		&& !get(isLibraryInaccessible);
+});
 
 function resetProgress() {
 	libraryStore.updateLibraryProgress({
@@ -203,10 +252,28 @@ function resetProgress() {
 }
 
 function refreshLibrary(forceMediaRefresh: boolean): void {
+	if (get(isRefreshDisabled)) {
+		return;
+	}
+
+	set(refreshSubmitting, true);
+	set(refreshAttemptActive, true);
 	resetProgress();
-	mediaOverviewStore.loading = true;
 	useSubscription(
-		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId, forceMediaRefresh).subscribe(),
+		libraryStore.reSyncLibrary(props.libraryId, forceMediaRefresh).pipe(
+			finalize(() => {
+				set(refreshSubmitting, false);
+			}),
+		).subscribe({
+			next: (queue) => {
+				if (!queue) {
+					set(refreshAttemptActive, false);
+				}
+			},
+			error: () => {
+				set(refreshAttemptActive, false);
+			},
+		}),
 	);
 }
 
@@ -258,6 +325,9 @@ function onAction(event: IMediaOverviewBarActions) {
 
 			break;
 		case 'refresh-library':
+			if (get(isRefreshDisabled)) {
+				break;
+			}
 			dialogStore.openDialog(DialogType.RefreshMediaDialog);
 			break;
 		case 'media-options-dialog':
@@ -279,14 +349,43 @@ function onOptionsClosed(hasChanged: boolean) {
 	}
 }
 
-// Refresh media data when a library sync completes.
+function refreshCompletedLibrary(): void {
+	useSubscription(
+		libraryStore.refreshLibrary(props.libraryId).pipe(
+			switchMap(() => mediaOverviewStore.refreshMediaData()),
+		).subscribe(),
+	);
+}
+
+// Refresh library metadata and media only when the current queue row reports completion.
 watch(
-	() => libraryStore.getIsLibrarySyncing(props.libraryId),
-	(isSyncing, wasSyncing) => {
-		if (wasSyncing && !isSyncing) {
-			useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
+	syncQueueKey,
+	(currentKey, previousKey) => {
+		const currentQueue = get(syncQueue);
+		if (!currentQueue) {
+			set(refreshAttemptActive, false);
+			return;
 		}
+
+		if (currentQueue.status === LibrarySyncJobStatus.Queued
+			|| currentQueue.status === LibrarySyncJobStatus.Processing) {
+			set(refreshAttemptActive, true);
+			return;
+		}
+
+		if (currentQueue.status === LibrarySyncJobStatus.Completed) {
+			const isCompletedReplacement = previousKey?.startsWith(`${LibrarySyncJobStatus.Completed}|`)
+				&& currentKey !== previousKey;
+			if (get(refreshAttemptActive) || isCompletedReplacement) {
+				set(refreshAttemptActive, false);
+				refreshCompletedLibrary();
+			}
+			return;
+		}
+
+		set(refreshAttemptActive, false);
 	},
+	{ immediate: true },
 );
 
 onMounted(() => {

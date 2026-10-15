@@ -102,7 +102,7 @@ public sealed class GetMediaOverviewMusicCommandHandler
         LogPhase(filter, "SnapshotExists", stopwatch.Elapsed, 1);
         stopwatch.Restart();
 
-        var candidates = context.PlexArtists.ApplyFilter(options);
+        var candidates = context.PlexMusicArtists.ApplyFilter(options);
         var snapshots = context.MediaOverviewMusicArtistSnapshots.Where(snapshot =>
             allowedLibraryIds.Contains(snapshot.PlexLibraryId)
             && candidates.Any(artist => artist.Id == snapshot.PlexArtistId)
@@ -117,7 +117,7 @@ public sealed class GetMediaOverviewMusicCommandHandler
         stopwatch.Restart();
         var aggregate = await snapshots
             .Join(
-                context.PlexArtists,
+                context.PlexMusicArtists,
                 snapshot => snapshot.PlexArtistId,
                 artist => artist.Id,
                 (_, artist) => artist.MediaSize
@@ -130,7 +130,7 @@ public sealed class GetMediaOverviewMusicCommandHandler
         LogPhase(filter, "Aggregate", stopwatch.Elapsed, totalCount);
         stopwatch.Restart();
         var items = await context
-            .PlexArtists.Where(x => ids.Contains(x.Id))
+            .PlexMusicArtists.Where(x => ids.Contains(x.Id))
             .Select(x => new PlexMediaSlimDTO
             {
                 Id = x.Id,
@@ -150,7 +150,17 @@ public sealed class GetMediaOverviewMusicCommandHandler
                 HasThumb = x.HasThumb,
                 PlexApiRatingKey = x.PlexApiRatingKey,
                 PlexApiMetaDataKey = x.PlexApiMetaDataKey,
-                Qualities = new List<PlexMediaQualityDTO>(),
+                Qualities = x
+                    .Qualities.OrderBy(quality => quality.Id)
+                    .Select(quality => new PlexMediaQualityDTO
+                    {
+                        VideoQuality = VideoQuality.None,
+                        AudioQuality = quality.AudioQuality,
+                        MediaId = quality.PlexMusicArtistId,
+                        DataId = -1,
+                        MediaDataType = PlexMediaType.MusicArtist,
+                    })
+                    .ToList(),
             })
             .ToListAsync(cancellationToken);
         items = items.RestorePageOrder(ids);
@@ -179,7 +189,7 @@ public sealed class GetMediaOverviewMusicCommandHandler
         );
         var navigationRows = await orderedSnapshots
             .Join(
-                context.PlexArtists,
+                context.PlexMusicArtists,
                 snapshot => snapshot.PlexArtistId,
                 artist => artist.Id,
                 (_, artist) =>
@@ -219,12 +229,7 @@ public sealed class GetMediaOverviewMusicCommandHandler
             .OrderBy(x => x)
             .ToListAsync(cancellationToken);
         LogPhase(filter, "Metadata", stopwatch.Elapsed, items.Count);
-        result.Qualities = items
-            .SelectMany(x => x.Qualities)
-            .Select(x => x.Quality.ToId())
-            .Distinct()
-            .OrderBy(x => x)
-            .ToList();
+        result.Qualities = [];
         return Result.Ok(result);
     }
 

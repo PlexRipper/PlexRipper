@@ -59,12 +59,17 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var testResult = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest() { PlexLibraryId = plexLibrary.Id });
 
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldNotBeNull();
+        result.Value.PlexLibraryId.ShouldBe(plexLibrary.Id);
+        result.Value.PlexServerId.ShouldBe(plexLibrary.PlexServerId);
+        new[] { LibrarySyncJobStatus.Queued, LibrarySyncJobStatus.Processing }.ShouldContain(result.Value.Status);
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Wait for the scheduler to finish the library sync job
@@ -163,12 +168,17 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var testResult = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = plexLibrary.Id });
 
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldNotBeNull();
+        result.Value.PlexLibraryId.ShouldBe(plexLibrary.Id);
+        result.Value.PlexServerId.ShouldBe(plexLibrary.PlexServerId);
+        new[] { LibrarySyncJobStatus.Queued, LibrarySyncJobStatus.Processing }.ShouldContain(result.Value.Status);
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Wait for the scheduler to finish the library sync job

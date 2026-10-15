@@ -15,7 +15,11 @@ internal static class PlexMediaComparisonDetailsMapper
         string remoteLocation,
         string ownedLocation,
         int remotePlexLibraryId,
-        int remotePlexServerId
+        int remotePlexServerId,
+        AudioQuality remoteAudioQuality = AudioQuality.None,
+        AudioQuality ownedAudioQuality = AudioQuality.None,
+        int? remotePlexMediaDataId = null,
+        int? ownedPlexMediaDataId = null
     ) =>
         new()
         {
@@ -29,6 +33,10 @@ internal static class PlexMediaComparisonDetailsMapper
             IsActionable = true,
             RemoteQuality = remoteQuality,
             OwnedQuality = ownedQuality,
+            RemoteAudioQuality = remoteAudioQuality,
+            OwnedAudioQuality = ownedAudioQuality,
+            RemotePlexMediaDataId = remotePlexMediaDataId,
+            OwnedPlexMediaDataId = ownedPlexMediaDataId,
             RemoteLocation = remoteLocation,
             OwnedLocation = ownedLocation,
             RemotePlexLibraryId = remotePlexLibraryId,
@@ -77,6 +85,10 @@ internal static class PlexMediaComparisonDetailsMapper
                 State = row.ComparisonId.ToComparisonState(),
                 RemoteQuality = row.RemoteQuality,
                 OwnedQuality = row.OwnedQuality,
+                RemoteAudioQuality = row.RemoteAudioQuality,
+                OwnedAudioQuality = row.OwnedAudioQuality,
+                RemotePlexMediaDataId = row.RemotePlexMediaDataId,
+                OwnedPlexMediaDataId = row.OwnedPlexMediaDataId,
                 PlexLibraryId = row.RemotePlexLibraryId,
                 PlexServerId = row.RemotePlexServerId,
                 Children = ToDtoRows(row.RowId, rowsByParentRowId),

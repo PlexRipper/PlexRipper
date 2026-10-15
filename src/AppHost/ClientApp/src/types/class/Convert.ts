@@ -106,10 +106,13 @@ export const Convert = {
 			case PlexMediaType.Movie:
 				return 'mdi-filmstrip';
 			case PlexMediaType.MusicArtist:
-			case PlexMediaType.MusicAlbum:
-			case PlexMediaType.MusicTrack:
 				return 'mdi-music';
+			case PlexMediaType.MusicAlbum:
+				return 'mdi-album';
+			case PlexMediaType.MusicTrack:
+				return 'mdi-music-note';
 			case PlexMediaType.PhotoAlbum:
+				return 'mdi-image-multiple';
 			case PlexMediaType.PhotoImage:
 				return 'mdi-image';
 			case PlexMediaType.OtherVideos:
@@ -160,17 +163,14 @@ export const Convert = {
 				return PlexMediaType.MusicAlbum;
 			case DownloadTaskType.MusicTrack:
 			case DownloadTaskType.MusicTrackData:
-			case DownloadTaskType.MusicTrackPart:
 				return PlexMediaType.MusicTrack;
 			case DownloadTaskType.PhotoAlbum:
 				return PlexMediaType.PhotoAlbum;
 			case DownloadTaskType.PhotoImage:
 			case DownloadTaskType.PhotoData:
-			case DownloadTaskType.PhotoPart:
 				return PlexMediaType.PhotoImage;
 			case DownloadTaskType.OtherVideo:
 			case DownloadTaskType.OtherVideoData:
-			case DownloadTaskType.OtherVideoPart:
 				return PlexMediaType.OtherVideos;
 			default:
 				return PlexMediaType.Unknown;

@@ -81,11 +81,16 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
         result.Value.Page.ShouldBe(2);
         result.Value.PageSize.ShouldBe(1);
         result.Value.Items[0].Type.ShouldBe(PlexMediaType.Movie);
-        result.Value.Items[0].Year.ShouldBe(
-            await IDbContext.PlexMovies.Where(x => x.Id == movieIds[1]).Select(x => x.Year).SingleAsync(CancellationToken)
-        );
+        result
+            .Value.Items[0]
+            .Year.ShouldBe(
+                await IDbContext
+                    .PlexMovies.Where(x => x.Id == movieIds[1])
+                    .Select(x => x.Year)
+                    .SingleAsync(CancellationToken)
+            );
         result.Value.Items[0].GrandChildCount.ShouldBe(0);
-        result.Value.Items[0].Qualities.Select(x => x.Quality).ShouldBeInOrder();
+        result.Value.Items[0].Qualities.Select(x => x.VideoQuality).ShouldBeInOrder();
     }
 
     [Test]
@@ -127,7 +132,12 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
             PlexLibraryId = libraryId,
             FilterOfflineMedia = false,
             FilterOwnedMedia = false,
-            Parameters = new FlexQueryParameters { Page = 1, PageSize = 1, Sort = "sortIndex:asc" },
+            Parameters = new FlexQueryParameters
+            {
+                Page = 1,
+                PageSize = 1,
+                Sort = "sortIndex:asc",
+            },
         };
 
         // Act
@@ -170,7 +180,12 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
             PlexLibraryId = libraryId,
             FilterOfflineMedia = false,
             FilterOwnedMedia = false,
-            Parameters = new FlexQueryParameters { Page = 2, PageSize = 1, Sort = "sortIndex:asc" },
+            Parameters = new FlexQueryParameters
+            {
+                Page = 2,
+                PageSize = 1,
+                Sort = "sortIndex:asc",
+            },
         };
 
         // Act
@@ -225,7 +240,12 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
             PlexLibraryId = libraryId,
             FilterOfflineMedia = false,
             FilterOwnedMedia = false,
-            Parameters = new FlexQueryParameters { Page = 1, PageSize = 1, Sort = sort },
+            Parameters = new FlexQueryParameters
+            {
+                Page = 1,
+                PageSize = 1,
+                Sort = sort,
+            },
         };
         Mock.SetupCommand<Result>(command => command is ApplyComparisonStateCommand)
             .ReturnsAsync(Result.Ok())
@@ -262,13 +282,13 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
             CancellationToken
         );
         await setupContext.SaveChangesAsync(CancellationToken);
-        var genre = new PlexGenre
+        var genre = new PlexGenreVideo
         {
             Name = "Drama",
             Key = "drama",
             Type = PlexGenreType.Drama,
         };
-        await setupContext.PlexGenres.AddAsync(genre, CancellationToken);
+        await setupContext.PlexGenresVideo.AddAsync(genre, CancellationToken);
         await setupContext.SaveChangesAsync(CancellationToken);
         await setupContext.PlexMovieGenres.AddAsync(
             new PlexMovieGenres(genre.Id, libraryId, movies[0].Id),

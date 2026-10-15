@@ -67,10 +67,18 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             );
 
         builder
-            .HasMany(x => x.Genres)
+            .HasMany(x => x.GenresVideo)
             .WithMany(x => x.PlexLibraries)
-            .UsingEntity<PlexLibraryGenres>(
-                l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.PlexGenreId),
+            .UsingEntity<PlexLibraryGenresVideo>(
+                l => l.HasOne<PlexGenreVideo>().WithMany().HasForeignKey(e => e.PlexGenreId),
+                r => r.HasOne<PlexLibrary>().WithMany().HasForeignKey(e => e.PlexLibraryId)
+            );
+
+        builder
+            .HasMany(x => x.GenresAudio)
+            .WithMany(x => x.PlexLibraries)
+            .UsingEntity<PlexLibraryGenresAudio>(
+                l => l.HasOne<PlexGenreAudio>().WithMany().HasForeignKey(e => e.PlexGenreId),
                 r => r.HasOne<PlexLibrary>().WithMany().HasForeignKey(e => e.PlexLibraryId)
             );
 

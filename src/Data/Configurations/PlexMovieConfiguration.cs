@@ -5,9 +5,9 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
     public void Configure(EntityTypeBuilder<PlexMovie> builder)
     {
         builder.HasIndex(x => x.SortIndex);
-        builder.HasIndex(x => x.Quality);
+        builder.HasIndex(x => x.VideoQuality);
         builder.HasIndex(x => new { x.PlexLibraryId, x.SortIndex });
-        builder.HasIndex(x => new { x.PlexLibraryId, x.Quality });
+        builder.HasIndex(x => new { x.PlexLibraryId, Quality = x.VideoQuality });
         // SearchMovieCommandHandler and SearchGenericCommandHandler use LIKE '<normalized-title>%';
         // NOCASE lets SQLite turn that case-insensitive prefix predicate into an index range.
         builder.Property(x => x.SearchTitle).UseCollation("NOCASE");
@@ -55,7 +55,7 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
             .HasMany(x => x.Genres)
             .WithMany(x => x.PlexMovieGenres)
             .UsingEntity<PlexMovieGenres>(
-                l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.GenresId),
+                l => l.HasOne<PlexGenreVideo>().WithMany().HasForeignKey(e => e.GenresId),
                 r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
             );
 

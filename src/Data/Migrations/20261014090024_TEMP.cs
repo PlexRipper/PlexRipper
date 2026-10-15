@@ -11,6 +11,20 @@ namespace Reaparr.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_PlexMovieGenres_PlexGenres_GenresId",
+                table: "PlexMovieGenres");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_PlexTvShowGenres_PlexGenres_GenresId",
+                table: "PlexTvShowGenres");
+
+            migrationBuilder.DropTable(
+                name: "PlexLibraryGenres");
+
+            migrationBuilder.DropTable(
+                name: "PlexGenres");
+
             migrationBuilder.AddColumn<int>(
                 name: "MusicAlbumCount",
                 table: "PlexLibraries",
@@ -206,7 +220,36 @@ namespace Reaparr.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlexArtists",
+                name: "PlexGenresAudio",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexGenresAudio", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlexGenresVideo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false, defaultValue: "\"Unknown\"")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexGenresVideo", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlexMusicArtists",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -219,7 +262,6 @@ namespace Reaparr.Data.Migrations
                     Duration = table.Column<int>(type: "INTEGER", nullable: false),
                     MediaSize = table.Column<long>(type: "INTEGER", nullable: false),
                     PlexApiMetaDataKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Studio = table.Column<string>(type: "TEXT", nullable: false),
                     Summary = table.Column<string>(type: "TEXT", nullable: false),
                     ContentRating = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<double>(type: "REAL", nullable: false),
@@ -227,30 +269,26 @@ namespace Reaparr.Data.Migrations
                     AddedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     OriginallyAvailableAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Quality = table.Column<int>(type: "INTEGER", nullable: false),
                     HasThumb = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasArt = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasTheme = table.Column<bool>(type: "INTEGER", nullable: false),
                     FullTitle = table.Column<string>(type: "TEXT", nullable: false),
-                    Guid = table.Column<string>(type: "TEXT", nullable: false),
-                    Guid_IMDB = table.Column<string>(type: "TEXT", nullable: true),
-                    Guid_TMDB = table.Column<int>(type: "INTEGER", nullable: true),
-                    Guid_TVDB = table.Column<int>(type: "INTEGER", nullable: true),
-                    MusicBrainzArtistId = table.Column<string>(type: "TEXT", nullable: true, collation: "NOCASE"),
+                    PlexApiIdentityId = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    MusicBrainzArtistId = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlexArtists", x => x.Id);
+                    table.PrimaryKey("PK_PlexMusicArtists", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlexArtists_PlexLibraries_PlexLibraryId",
+                        name: "FK_PlexMusicArtists_PlexLibraries_PlexLibraryId",
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexArtists_PlexServers_PlexServerId",
+                        name: "FK_PlexMusicArtists_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
@@ -539,6 +577,54 @@ namespace Reaparr.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PlexLibraryGenresAudio",
+                columns: table => new
+                {
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexGenreId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexLibraryGenresAudio", x => new { x.PlexGenreId, x.PlexLibraryId });
+                    table.ForeignKey(
+                        name: "FK_PlexLibraryGenresAudio_PlexGenresAudio_PlexGenreId",
+                        column: x => x.PlexGenreId,
+                        principalTable: "PlexGenresAudio",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexLibraryGenresAudio_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlexLibraryGenresVideo",
+                columns: table => new
+                {
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexGenreId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexLibraryGenresVideo", x => new { x.PlexGenreId, x.PlexLibraryId });
+                    table.ForeignKey(
+                        name: "FK_PlexLibraryGenresVideo_PlexGenresVideo_PlexGenreId",
+                        column: x => x.PlexGenreId,
+                        principalTable: "PlexGenresVideo",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexLibraryGenresVideo_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MediaOverviewMusicArtistSnapshots",
                 columns: table => new
                 {
@@ -557,21 +643,21 @@ namespace Reaparr.Data.Migrations
                 {
                     table.PrimaryKey("PK_MediaOverviewMusicArtistSnapshots", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MediaOverviewMusicArtistSnapshots_PlexArtists_PlexArtistId",
-                        column: x => x.PlexArtistId,
-                        principalTable: "PlexArtists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_MediaOverviewMusicArtistSnapshots_PlexLibraries_PlexLibraryId",
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MediaOverviewMusicArtistSnapshots_PlexMusicArtists_PlexArtistId",
+                        column: x => x.PlexArtistId,
+                        principalTable: "PlexMusicArtists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlexAlbums",
+                name: "PlexMusicAlbums",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -584,7 +670,6 @@ namespace Reaparr.Data.Migrations
                     Duration = table.Column<int>(type: "INTEGER", nullable: false),
                     MediaSize = table.Column<long>(type: "INTEGER", nullable: false),
                     PlexApiMetaDataKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Studio = table.Column<string>(type: "TEXT", nullable: false),
                     Summary = table.Column<string>(type: "TEXT", nullable: false),
                     ContentRating = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<double>(type: "REAL", nullable: false),
@@ -592,22 +677,16 @@ namespace Reaparr.Data.Migrations
                     AddedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     OriginallyAvailableAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Quality = table.Column<int>(type: "INTEGER", nullable: false),
                     HasThumb = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasArt = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasTheme = table.Column<bool>(type: "INTEGER", nullable: false),
                     FullTitle = table.Column<string>(type: "TEXT", nullable: false),
-                    Guid = table.Column<string>(type: "TEXT", nullable: false),
-                    Guid_IMDB = table.Column<string>(type: "TEXT", nullable: true),
-                    Guid_TMDB = table.Column<int>(type: "INTEGER", nullable: true),
-                    Guid_TVDB = table.Column<int>(type: "INTEGER", nullable: true),
                     ParentKey = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexArtistId = table.Column<int>(type: "INTEGER", nullable: false),
-                    MusicBrainzReleaseId = table.Column<string>(type: "TEXT", nullable: true),
-                    MusicBrainzReleaseGroupId = table.Column<string>(type: "TEXT", nullable: true),
+                    PlexApiIdentityId = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    MusicBrainzReleaseId = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
                     ReleaseDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     RecordLabel = table.Column<string>(type: "TEXT", nullable: true),
-                    Country = table.Column<string>(type: "TEXT", nullable: true),
                     DiscCount = table.Column<int>(type: "INTEGER", nullable: true),
                     TrackCount = table.Column<int>(type: "INTEGER", nullable: true),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -615,21 +694,21 @@ namespace Reaparr.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlexAlbums", x => x.Id);
+                    table.PrimaryKey("PK_PlexMusicAlbums", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlexAlbums_PlexArtists_PlexArtistId",
-                        column: x => x.PlexArtistId,
-                        principalTable: "PlexArtists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlexAlbums_PlexLibraries_PlexLibraryId",
+                        name: "FK_PlexMusicAlbums_PlexLibraries_PlexLibraryId",
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexAlbums_PlexServers_PlexServerId",
+                        name: "FK_PlexMusicAlbums_PlexMusicArtists_PlexArtistId",
+                        column: x => x.PlexArtistId,
+                        principalTable: "PlexMusicArtists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicAlbums_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
@@ -654,9 +733,9 @@ namespace Reaparr.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexMusicArtistActors_PlexArtists_PlexMusicArtistId",
+                        name: "FK_PlexMusicArtistActors_PlexMusicArtists_PlexMusicArtistId",
                         column: x => x.PlexMusicArtistId,
-                        principalTable: "PlexArtists",
+                        principalTable: "PlexMusicArtists",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -678,18 +757,6 @@ namespace Reaparr.Data.Migrations
                 {
                     table.PrimaryKey("PK_PlexMusicArtistComparisons", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlexMusicArtistComparisons_PlexArtists_OwnedPlexMediaId",
-                        column: x => x.OwnedPlexMediaId,
-                        principalTable: "PlexArtists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlexMusicArtistComparisons_PlexArtists_RemotePlexMediaId",
-                        column: x => x.RemotePlexMediaId,
-                        principalTable: "PlexArtists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_PlexMusicArtistComparisons_PlexLibraries_OwnedPlexLibraryId",
                         column: x => x.OwnedPlexLibraryId,
                         principalTable: "PlexLibraries",
@@ -699,6 +766,18 @@ namespace Reaparr.Data.Migrations
                         name: "FK_PlexMusicArtistComparisons_PlexLibraries_RemotePlexLibraryId",
                         column: x => x.RemotePlexLibraryId,
                         principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicArtistComparisons_PlexMusicArtists_OwnedPlexMediaId",
+                        column: x => x.OwnedPlexMediaId,
+                        principalTable: "PlexMusicArtists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicArtistComparisons_PlexMusicArtists_RemotePlexMediaId",
+                        column: x => x.RemotePlexMediaId,
+                        principalTable: "PlexMusicArtists",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -715,15 +794,15 @@ namespace Reaparr.Data.Migrations
                 {
                     table.PrimaryKey("PK_PlexMusicArtistCountries", x => new { x.CountryId, x.PlexMusicArtistId });
                     table.ForeignKey(
-                        name: "FK_PlexMusicArtistCountries_PlexArtists_PlexMusicArtistId",
-                        column: x => x.PlexMusicArtistId,
-                        principalTable: "PlexArtists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_PlexMusicArtistCountries_PlexCountries_CountryId",
                         column: x => x.CountryId,
                         principalTable: "PlexCountries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicArtistCountries_PlexMusicArtists_PlexMusicArtistId",
+                        column: x => x.PlexMusicArtistId,
+                        principalTable: "PlexMusicArtists",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -740,15 +819,42 @@ namespace Reaparr.Data.Migrations
                 {
                     table.PrimaryKey("PK_PlexMusicArtistGenres", x => new { x.GenresId, x.PlexMusicArtistId });
                     table.ForeignKey(
-                        name: "FK_PlexMusicArtistGenres_PlexArtists_PlexMusicArtistId",
-                        column: x => x.PlexMusicArtistId,
-                        principalTable: "PlexArtists",
+                        name: "FK_PlexMusicArtistGenres_PlexGenresAudio_GenresId",
+                        column: x => x.GenresId,
+                        principalTable: "PlexGenresAudio",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexMusicArtistGenres_PlexGenres_GenresId",
-                        column: x => x.GenresId,
-                        principalTable: "PlexGenres",
+                        name: "FK_PlexMusicArtistGenres_PlexMusicArtists_PlexMusicArtistId",
+                        column: x => x.PlexMusicArtistId,
+                        principalTable: "PlexMusicArtists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlexMusicArtistMediaQualities",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexMusicArtistId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Quality = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexMusicArtistMediaQualities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicArtistMediaQualities_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicArtistMediaQualities_PlexMusicArtists_PlexMusicArtistId",
+                        column: x => x.PlexMusicArtistId,
+                        principalTable: "PlexMusicArtists",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -904,9 +1010,9 @@ namespace Reaparr.Data.Migrations
                 {
                     table.PrimaryKey("PK_PlexOtherVideoGenres", x => new { x.GenresId, x.PlexOtherVideoId });
                     table.ForeignKey(
-                        name: "FK_PlexOtherVideoGenres_PlexGenres_GenresId",
+                        name: "FK_PlexOtherVideoGenres_PlexGenresVideo_GenresId",
                         column: x => x.GenresId,
-                        principalTable: "PlexGenres",
+                        principalTable: "PlexGenresVideo",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -1174,18 +1280,6 @@ namespace Reaparr.Data.Migrations
                 {
                     table.PrimaryKey("PK_PlexMusicAlbumComparisons", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlexMusicAlbumComparisons_PlexAlbums_OwnedPlexMediaId",
-                        column: x => x.OwnedPlexMediaId,
-                        principalTable: "PlexAlbums",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlexMusicAlbumComparisons_PlexAlbums_RemotePlexMediaId",
-                        column: x => x.RemotePlexMediaId,
-                        principalTable: "PlexAlbums",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_PlexMusicAlbumComparisons_PlexLibraries_OwnedPlexLibraryId",
                         column: x => x.OwnedPlexLibraryId,
                         principalTable: "PlexLibraries",
@@ -1197,10 +1291,74 @@ namespace Reaparr.Data.Migrations
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicAlbumComparisons_PlexMusicAlbums_OwnedPlexMediaId",
+                        column: x => x.OwnedPlexMediaId,
+                        principalTable: "PlexMusicAlbums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicAlbumComparisons_PlexMusicAlbums_RemotePlexMediaId",
+                        column: x => x.RemotePlexMediaId,
+                        principalTable: "PlexMusicAlbums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlexTracks",
+                name: "PlexMusicAlbumCountries",
+                columns: table => new
+                {
+                    CountryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexMusicAlbumId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexMusicAlbumCountries", x => new { x.CountryId, x.PlexMusicAlbumId });
+                    table.ForeignKey(
+                        name: "FK_PlexMusicAlbumCountries_PlexCountries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "PlexCountries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicAlbumCountries_PlexMusicAlbums_PlexMusicAlbumId",
+                        column: x => x.PlexMusicAlbumId,
+                        principalTable: "PlexMusicAlbums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlexMusicAlbumMediaQualities",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexMusicAlbumId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Quality = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexMusicAlbumMediaQualities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicAlbumMediaQualities_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicAlbumMediaQualities_PlexMusicAlbums_PlexMusicAlbumId",
+                        column: x => x.PlexMusicAlbumId,
+                        principalTable: "PlexMusicAlbums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlexMusicTracks",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -1213,7 +1371,6 @@ namespace Reaparr.Data.Migrations
                     Duration = table.Column<int>(type: "INTEGER", nullable: false),
                     MediaSize = table.Column<long>(type: "INTEGER", nullable: false),
                     PlexApiMetaDataKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Studio = table.Column<string>(type: "TEXT", nullable: false),
                     Summary = table.Column<string>(type: "TEXT", nullable: false),
                     ContentRating = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<double>(type: "REAL", nullable: false),
@@ -1221,19 +1378,14 @@ namespace Reaparr.Data.Migrations
                     AddedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     OriginallyAvailableAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Quality = table.Column<int>(type: "INTEGER", nullable: false),
                     HasThumb = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasArt = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasTheme = table.Column<bool>(type: "INTEGER", nullable: false),
                     FullTitle = table.Column<string>(type: "TEXT", nullable: false),
-                    Guid = table.Column<string>(type: "TEXT", nullable: false),
-                    Guid_IMDB = table.Column<string>(type: "TEXT", nullable: true),
-                    Guid_TMDB = table.Column<int>(type: "INTEGER", nullable: true),
-                    Guid_TVDB = table.Column<int>(type: "INTEGER", nullable: true),
                     ParentKey = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexAlbumId = table.Column<int>(type: "INTEGER", nullable: false),
-                    MusicBrainzRecordingId = table.Column<string>(type: "TEXT", nullable: true),
-                    MusicBrainzReleaseTrackId = table.Column<string>(type: "TEXT", nullable: true),
+                    PlexApiIdentityId = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    MusicBrainzReleaseTrackId = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
                     DiscNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     TrackNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -1241,21 +1393,21 @@ namespace Reaparr.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlexTracks", x => x.Id);
+                    table.PrimaryKey("PK_PlexMusicTracks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlexTracks_PlexAlbums_PlexAlbumId",
-                        column: x => x.PlexAlbumId,
-                        principalTable: "PlexAlbums",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlexTracks_PlexLibraries_PlexLibraryId",
+                        name: "FK_PlexMusicTracks_PlexLibraries_PlexLibraryId",
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexTracks_PlexServers_PlexServerId",
+                        name: "FK_PlexMusicTracks_PlexMusicAlbums_PlexAlbumId",
+                        column: x => x.PlexAlbumId,
+                        principalTable: "PlexMusicAlbums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexMusicTracks_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
@@ -1345,7 +1497,8 @@ namespace Reaparr.Data.Migrations
                     Percentage = table.Column<decimal>(type: "TEXT", nullable: false),
                     TimeRemaining = table.Column<int>(type: "INTEGER", nullable: false),
                     DestinationFolderPathId = table.Column<int>(type: "INTEGER", nullable: true),
-                    ParentId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    ParentId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    AudioQuality = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1426,6 +1579,11 @@ namespace Reaparr.Data.Migrations
                     OwnedPlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     RemotePlexMediaId = table.Column<int>(type: "INTEGER", nullable: false),
                     OwnedPlexMediaId = table.Column<int>(type: "INTEGER", nullable: false),
+                    HitState = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    RemoteAudioQuality = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    OwnedAudioQuality = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    RemotePlexMediaDataId = table.Column<int>(type: "INTEGER", nullable: true),
+                    OwnedPlexMediaDataId = table.Column<int>(type: "INTEGER", nullable: true),
                     MatchType = table.Column<int>(type: "INTEGER", nullable: false),
                     ComparedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
@@ -1445,21 +1603,21 @@ namespace Reaparr.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexMusicTrackComparisons_PlexTracks_OwnedPlexMediaId",
+                        name: "FK_PlexMusicTrackComparisons_PlexMusicTracks_OwnedPlexMediaId",
                         column: x => x.OwnedPlexMediaId,
-                        principalTable: "PlexTracks",
+                        principalTable: "PlexMusicTracks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexMusicTrackComparisons_PlexTracks_RemotePlexMediaId",
+                        name: "FK_PlexMusicTrackComparisons_PlexMusicTracks_RemotePlexMediaId",
                         column: x => x.RemotePlexMediaId,
-                        principalTable: "PlexTracks",
+                        principalTable: "PlexMusicTracks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlexTrackData",
+                name: "PlexMusicTrackData",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -1467,7 +1625,6 @@ namespace Reaparr.Data.Migrations
                     PlexApiRatingKey = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexApiMediaId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexApiPartId = table.Column<int>(type: "INTEGER", nullable: false),
-                    VideoResolution = table.Column<int>(type: "INTEGER", nullable: false),
                     OriginalFilename = table.Column<string>(type: "TEXT", nullable: false),
                     GeneratedFilename = table.Column<string>(type: "TEXT", nullable: true),
                     Container = table.Column<string>(type: "TEXT", nullable: false),
@@ -1475,7 +1632,6 @@ namespace Reaparr.Data.Migrations
                     Size = table.Column<long>(type: "INTEGER", nullable: false),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
                     Source = table.Column<int>(type: "INTEGER", nullable: false),
-                    VideoCodec = table.Column<string>(type: "TEXT", nullable: false),
                     AudioCodec = table.Column<string>(type: "TEXT", nullable: false),
                     NeedsGeneratedName = table.Column<bool>(type: "INTEGER", nullable: false),
                     GeneratedNameSyncedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
@@ -1483,33 +1639,35 @@ namespace Reaparr.Data.Migrations
                     PartIndex = table.Column<int>(type: "INTEGER", nullable: false),
                     OriginalFilePath = table.Column<string>(type: "TEXT", nullable: true),
                     SourceRelativePath = table.Column<string>(type: "TEXT", nullable: true),
-                    Width = table.Column<int>(type: "INTEGER", nullable: true),
-                    Height = table.Column<int>(type: "INTEGER", nullable: true),
-                    VideoProfile = table.Column<string>(type: "TEXT", nullable: true),
-                    VideoFrameRate = table.Column<decimal>(type: "TEXT", nullable: true),
-                    Quality = table.Column<int>(type: "INTEGER", nullable: false),
+                    AudioBitrateKbps = table.Column<int>(type: "INTEGER", nullable: true),
+                    AudioBitDepth = table.Column<int>(type: "INTEGER", nullable: true),
+                    AudioSampleRateHz = table.Column<int>(type: "INTEGER", nullable: true),
+                    AudioChannels = table.Column<int>(type: "INTEGER", nullable: true),
+                    AudioChannelLayout = table.Column<string>(type: "TEXT", nullable: true),
+                    AudioProfile = table.Column<string>(type: "TEXT", nullable: true),
+                    AudioQuality = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlexTrackData", x => x.Id);
+                    table.PrimaryKey("PK_PlexMusicTrackData", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlexTrackData_PlexLibraries_PlexLibraryId",
+                        name: "FK_PlexMusicTrackData_PlexLibraries_PlexLibraryId",
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexTrackData_PlexServers_PlexServerId",
-                        column: x => x.PlexServerId,
-                        principalTable: "PlexServers",
+                        name: "FK_PlexMusicTrackData_PlexMusicTracks_PlexTrackId",
+                        column: x => x.PlexTrackId,
+                        principalTable: "PlexMusicTracks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlexTrackData_PlexTracks_PlexTrackId",
-                        column: x => x.PlexTrackId,
-                        principalTable: "PlexTracks",
+                        name: "FK_PlexMusicTrackData_PlexServers_PlexServerId",
+                        column: x => x.PlexServerId,
+                        principalTable: "PlexServers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1956,6 +2114,11 @@ namespace Reaparr.Data.Migrations
                 columns: new[] { "PlexLibraryId", "MediaSizeRank" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_MediaOverviewOtherVideoSnapshots_PlexLibraryId_QualityRank",
+                table: "MediaOverviewOtherVideoSnapshots",
+                columns: new[] { "PlexLibraryId", "QualityRank" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MediaOverviewOtherVideoSnapshots_PlexLibraryId_TitleRank",
                 table: "MediaOverviewOtherVideoSnapshots",
                 columns: new[] { "PlexLibraryId", "TitleRank" });
@@ -2013,56 +2176,26 @@ namespace Reaparr.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexAlbums_PlexArtistId",
-                table: "PlexAlbums",
-                column: "PlexArtistId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexAlbums_PlexLibraryId_PlexApiRatingKey",
-                table: "PlexAlbums",
-                columns: new[] { "PlexLibraryId", "PlexApiRatingKey" },
+                name: "IX_PlexGenresAudio_Key",
+                table: "PlexGenresAudio",
+                column: "Key",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexAlbums_PlexLibraryId_SearchTitle",
-                table: "PlexAlbums",
-                columns: new[] { "PlexLibraryId", "SearchTitle" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexAlbums_PlexLibraryId_SortIndex",
-                table: "PlexAlbums",
-                columns: new[] { "PlexLibraryId", "SortIndex" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexAlbums_PlexServerId",
-                table: "PlexAlbums",
-                column: "PlexServerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexArtists_PlexLibraryId_MusicBrainzArtistId",
-                table: "PlexArtists",
-                columns: new[] { "PlexLibraryId", "MusicBrainzArtistId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexArtists_PlexLibraryId_PlexApiRatingKey",
-                table: "PlexArtists",
-                columns: new[] { "PlexLibraryId", "PlexApiRatingKey" },
+                name: "IX_PlexGenresVideo_Key",
+                table: "PlexGenresVideo",
+                column: "Key",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexArtists_PlexLibraryId_SearchTitle",
-                table: "PlexArtists",
-                columns: new[] { "PlexLibraryId", "SearchTitle" });
+                name: "IX_PlexLibraryGenresAudio_PlexLibraryId",
+                table: "PlexLibraryGenresAudio",
+                column: "PlexLibraryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexArtists_PlexLibraryId_SortIndex",
-                table: "PlexArtists",
-                columns: new[] { "PlexLibraryId", "SortIndex" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexArtists_PlexServerId",
-                table: "PlexArtists",
-                column: "PlexServerId");
+                name: "IX_PlexLibraryGenresVideo_PlexLibraryId",
+                table: "PlexLibraryGenresVideo",
+                column: "PlexLibraryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMusicAlbumComparisons_OwnedPlexLibraryId_OwnedPlexMediaId",
@@ -2089,6 +2222,53 @@ namespace Reaparr.Data.Migrations
                 name: "IX_PlexMusicAlbumComparisons_RemotePlexMediaId",
                 table: "PlexMusicAlbumComparisons",
                 column: "RemotePlexMediaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbumCountries_PlexMusicAlbumId",
+                table: "PlexMusicAlbumCountries",
+                column: "PlexMusicAlbumId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbumMediaQualities_PlexLibraryId_PlexMusicAlbumId_Quality",
+                table: "PlexMusicAlbumMediaQualities",
+                columns: new[] { "PlexLibraryId", "PlexMusicAlbumId", "Quality" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbumMediaQualities_PlexMusicAlbumId",
+                table: "PlexMusicAlbumMediaQualities",
+                column: "PlexMusicAlbumId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbums_PlexArtistId",
+                table: "PlexMusicAlbums",
+                column: "PlexArtistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbums_PlexLibraryId_PlexApiIdentityId",
+                table: "PlexMusicAlbums",
+                columns: new[] { "PlexLibraryId", "PlexApiIdentityId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbums_PlexLibraryId_PlexApiRatingKey",
+                table: "PlexMusicAlbums",
+                columns: new[] { "PlexLibraryId", "PlexApiRatingKey" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbums_PlexLibraryId_SearchTitle",
+                table: "PlexMusicAlbums",
+                columns: new[] { "PlexLibraryId", "SearchTitle" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbums_PlexLibraryId_SortIndex",
+                table: "PlexMusicAlbums",
+                columns: new[] { "PlexLibraryId", "SortIndex" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicAlbums_PlexServerId",
+                table: "PlexMusicAlbums",
+                column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMusicArtistActors_PlexMusicArtistId",
@@ -2132,6 +2312,48 @@ namespace Reaparr.Data.Migrations
                 column: "PlexMusicArtistId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicArtistMediaQualities_PlexLibraryId_PlexMusicArtistId_Quality",
+                table: "PlexMusicArtistMediaQualities",
+                columns: new[] { "PlexLibraryId", "PlexMusicArtistId", "Quality" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicArtistMediaQualities_PlexMusicArtistId",
+                table: "PlexMusicArtistMediaQualities",
+                column: "PlexMusicArtistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicArtists_PlexLibraryId_MusicBrainzArtistId",
+                table: "PlexMusicArtists",
+                columns: new[] { "PlexLibraryId", "MusicBrainzArtistId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicArtists_PlexLibraryId_PlexApiIdentityId",
+                table: "PlexMusicArtists",
+                columns: new[] { "PlexLibraryId", "PlexApiIdentityId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicArtists_PlexLibraryId_PlexApiRatingKey",
+                table: "PlexMusicArtists",
+                columns: new[] { "PlexLibraryId", "PlexApiRatingKey" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicArtists_PlexLibraryId_SearchTitle",
+                table: "PlexMusicArtists",
+                columns: new[] { "PlexLibraryId", "SearchTitle" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicArtists_PlexLibraryId_SortIndex",
+                table: "PlexMusicArtists",
+                columns: new[] { "PlexLibraryId", "SortIndex" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicArtists_PlexServerId",
+                table: "PlexMusicArtists",
+                column: "PlexServerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlexMusicTrackComparisons_OwnedPlexLibraryId_OwnedPlexMediaId",
                 table: "PlexMusicTrackComparisons",
                 columns: new[] { "OwnedPlexLibraryId", "OwnedPlexMediaId" });
@@ -2156,6 +2378,59 @@ namespace Reaparr.Data.Migrations
                 name: "IX_PlexMusicTrackComparisons_RemotePlexMediaId",
                 table: "PlexMusicTrackComparisons",
                 column: "RemotePlexMediaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTrackData_PlexApiRatingKey",
+                table: "PlexMusicTrackData",
+                column: "PlexApiRatingKey");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTrackData_PlexLibraryId_PlexApiPartId",
+                table: "PlexMusicTrackData",
+                columns: new[] { "PlexLibraryId", "PlexApiPartId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTrackData_PlexServerId",
+                table: "PlexMusicTrackData",
+                column: "PlexServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTrackData_PlexTrackId_PlexApiMediaId_PartIndex",
+                table: "PlexMusicTrackData",
+                columns: new[] { "PlexTrackId", "PlexApiMediaId", "PartIndex" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTracks_PlexAlbumId",
+                table: "PlexMusicTracks",
+                column: "PlexAlbumId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTracks_PlexLibraryId_PlexApiIdentityId",
+                table: "PlexMusicTracks",
+                columns: new[] { "PlexLibraryId", "PlexApiIdentityId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTracks_PlexLibraryId_PlexApiRatingKey",
+                table: "PlexMusicTracks",
+                columns: new[] { "PlexLibraryId", "PlexApiRatingKey" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTracks_PlexLibraryId_SearchTitle",
+                table: "PlexMusicTracks",
+                columns: new[] { "PlexLibraryId", "SearchTitle" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTracks_PlexLibraryId_SortIndex",
+                table: "PlexMusicTracks",
+                columns: new[] { "PlexLibraryId", "SortIndex" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMusicTracks_PlexServerId",
+                table: "PlexMusicTracks",
+                column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexOtherVideoActors_PlexOtherVideoId",
@@ -2273,58 +2548,34 @@ namespace Reaparr.Data.Migrations
                 table: "PlexPhotoImages",
                 column: "PlexServerId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTrackData_PlexApiRatingKey",
-                table: "PlexTrackData",
-                column: "PlexApiRatingKey");
+            migrationBuilder.AddForeignKey(
+                name: "FK_PlexMovieGenres_PlexGenresVideo_GenresId",
+                table: "PlexMovieGenres",
+                column: "GenresId",
+                principalTable: "PlexGenresVideo",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTrackData_PlexLibraryId_PlexApiPartId",
-                table: "PlexTrackData",
-                columns: new[] { "PlexLibraryId", "PlexApiPartId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTrackData_PlexServerId",
-                table: "PlexTrackData",
-                column: "PlexServerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTrackData_PlexTrackId_PlexApiMediaId_PartIndex",
-                table: "PlexTrackData",
-                columns: new[] { "PlexTrackId", "PlexApiMediaId", "PartIndex" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTracks_PlexAlbumId",
-                table: "PlexTracks",
-                column: "PlexAlbumId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTracks_PlexLibraryId_PlexApiRatingKey",
-                table: "PlexTracks",
-                columns: new[] { "PlexLibraryId", "PlexApiRatingKey" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTracks_PlexLibraryId_SearchTitle",
-                table: "PlexTracks",
-                columns: new[] { "PlexLibraryId", "SearchTitle" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTracks_PlexLibraryId_SortIndex",
-                table: "PlexTracks",
-                columns: new[] { "PlexLibraryId", "SortIndex" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTracks_PlexServerId",
-                table: "PlexTracks",
-                column: "PlexServerId");
+            migrationBuilder.AddForeignKey(
+                name: "FK_PlexTvShowGenres_PlexGenresVideo_GenresId",
+                table: "PlexTvShowGenres",
+                column: "GenresId",
+                principalTable: "PlexGenresVideo",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_PlexMovieGenres_PlexGenresVideo_GenresId",
+                table: "PlexMovieGenres");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_PlexTvShowGenres_PlexGenresVideo_GenresId",
+                table: "PlexTvShowGenres");
+
             migrationBuilder.DropTable(
                 name: "DownloadTaskOtherVideoFileLogs");
 
@@ -2344,7 +2595,19 @@ namespace Reaparr.Data.Migrations
                 name: "MediaOverviewPhotoAlbumSnapshots");
 
             migrationBuilder.DropTable(
+                name: "PlexLibraryGenresAudio");
+
+            migrationBuilder.DropTable(
+                name: "PlexLibraryGenresVideo");
+
+            migrationBuilder.DropTable(
                 name: "PlexMusicAlbumComparisons");
+
+            migrationBuilder.DropTable(
+                name: "PlexMusicAlbumCountries");
+
+            migrationBuilder.DropTable(
+                name: "PlexMusicAlbumMediaQualities");
 
             migrationBuilder.DropTable(
                 name: "PlexMusicArtistActors");
@@ -2359,7 +2622,13 @@ namespace Reaparr.Data.Migrations
                 name: "PlexMusicArtistGenres");
 
             migrationBuilder.DropTable(
+                name: "PlexMusicArtistMediaQualities");
+
+            migrationBuilder.DropTable(
                 name: "PlexMusicTrackComparisons");
+
+            migrationBuilder.DropTable(
+                name: "PlexMusicTrackData");
 
             migrationBuilder.DropTable(
                 name: "PlexOtherVideoActors");
@@ -2377,9 +2646,6 @@ namespace Reaparr.Data.Migrations
                 name: "PlexPhotoData");
 
             migrationBuilder.DropTable(
-                name: "PlexTrackData");
-
-            migrationBuilder.DropTable(
                 name: "DownloadTaskOtherVideoFiles");
 
             migrationBuilder.DropTable(
@@ -2389,13 +2655,19 @@ namespace Reaparr.Data.Migrations
                 name: "DownloadTaskMusicTrackFiles");
 
             migrationBuilder.DropTable(
+                name: "PlexGenresAudio");
+
+            migrationBuilder.DropTable(
+                name: "PlexMusicTracks");
+
+            migrationBuilder.DropTable(
+                name: "PlexGenresVideo");
+
+            migrationBuilder.DropTable(
                 name: "PlexOtherVideos");
 
             migrationBuilder.DropTable(
                 name: "PlexPhotoImages");
-
-            migrationBuilder.DropTable(
-                name: "PlexTracks");
 
             migrationBuilder.DropTable(
                 name: "DownloadTaskOtherVideos");
@@ -2407,10 +2679,10 @@ namespace Reaparr.Data.Migrations
                 name: "DownloadTaskMusicTracks");
 
             migrationBuilder.DropTable(
-                name: "PlexPhotoAlbums");
+                name: "PlexMusicAlbums");
 
             migrationBuilder.DropTable(
-                name: "PlexAlbums");
+                name: "PlexPhotoAlbums");
 
             migrationBuilder.DropTable(
                 name: "DownloadTaskPhotoAlbums");
@@ -2419,7 +2691,7 @@ namespace Reaparr.Data.Migrations
                 name: "DownloadTaskMusicAlbums");
 
             migrationBuilder.DropTable(
-                name: "PlexArtists");
+                name: "PlexMusicArtists");
 
             migrationBuilder.DropTable(
                 name: "DownloadTaskMusicArtists");
@@ -2461,6 +2733,72 @@ namespace Reaparr.Data.Migrations
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
                 oldComputedColumnSql: "CASE WHEN Type = 'Movie' THEN MovieCount WHEN Type = 'TvShow' THEN TvShowCount WHEN Type = 'MusicArtist' THEN MusicArtistCount WHEN Type = 'PhotoAlbum' THEN PhotoAlbumCount WHEN Type = 'OtherVideos' THEN OtherVideoCount ELSE -1 END");
+
+            migrationBuilder.CreateTable(
+                name: "PlexGenres",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false, defaultValue: "\"Unknown\"")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexGenres", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlexLibraryGenres",
+                columns: table => new
+                {
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexGenreId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlexLibraryGenres", x => new { x.PlexGenreId, x.PlexLibraryId });
+                    table.ForeignKey(
+                        name: "FK_PlexLibraryGenres_PlexGenres_PlexGenreId",
+                        column: x => x.PlexGenreId,
+                        principalTable: "PlexGenres",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlexLibraryGenres_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexGenres_Key",
+                table: "PlexGenres",
+                column: "Key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexLibraryGenres_PlexLibraryId",
+                table: "PlexLibraryGenres",
+                column: "PlexLibraryId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PlexMovieGenres_PlexGenres_GenresId",
+                table: "PlexMovieGenres",
+                column: "GenresId",
+                principalTable: "PlexGenres",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PlexTvShowGenres_PlexGenres_GenresId",
+                table: "PlexTvShowGenres",
+                column: "GenresId",
+                principalTable: "PlexGenres",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }

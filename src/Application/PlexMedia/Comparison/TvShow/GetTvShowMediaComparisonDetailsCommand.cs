@@ -168,8 +168,8 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                         type: PlexMediaType.Episode,
                         title: episode.Title,
                         state: PlexMediaComparisonState.Missing,
-                        remoteQuality: episode.Quality != VideoQuality.Unknown
-                            ? episode.Quality
+                        remoteQuality: episode.VideoQuality != VideoQuality.Unknown
+                            ? episode.VideoQuality
                             : episode
                                 .MediaDataList.Select(x => x.VideoResolution)
                                 .OrderByDescending(x => x.ToId())

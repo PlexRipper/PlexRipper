@@ -52,17 +52,21 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { JobStatus, JobTypes } from '@dto';
+import { JobStatus, JobTypes, LibrarySyncJobStatus } from '@dto';
 import { useSubscription } from '@vueuse/rxjs';
-import { useBackgroundJobsStore, useDialogStore, useI18n } from '#imports';
+import { useBackgroundJobsStore, useDialogStore, useLibraryStore } from '@store';
+import { useI18n } from '#imports';
 
 const size = 32;
 
 const { t } = useI18n();
 const backgroundJobStore = useBackgroundJobsStore();
 const dialogStore = useDialogStore();
+const libraryStore = useLibraryStore();
 const checkPlexServerConnections = ref<Record<string, number[]>>({});
-const syncPlexServerMedia = ref<number[]>([]);
+
+const hasActiveLibrarySync = computed(() => libraryStore.syncQueues.some((queue) =>
+	queue.status === LibrarySyncJobStatus.Queued || queue.status === LibrarySyncJobStatus.Processing));
 
 const loading = computed(() => get(activeCount) > 0);
 
@@ -72,7 +76,7 @@ const activeCount = computed(() => {
 		count++;
 	}
 
-	if (get(syncPlexServerMedia).length > 0) {
+	if (get(hasActiveLibrarySync)) {
 		count++;
 	}
 
@@ -96,7 +100,7 @@ const menuItems = computed(() => {
 		});
 	}
 
-	if (get(syncPlexServerMedia) && get(syncPlexServerMedia).length > 0) {
+	if (get(hasActiveLibrarySync)) {
 		items.push({
 			label: t('components.background-activity-toggle-button.syncing-media'),
 			icon: 'mdi-server-network',
@@ -125,24 +129,10 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		backgroundJobStore.getLibrarySyncJobUpdate(JobStatus.Started)
-			.subscribe(({ data }) => {
-				get(syncPlexServerMedia).push(data.plexServerId);
-			}),
-	);
-
-	useSubscription(
 		backgroundJobStore.getCheckPlexServerConnectionsJobUpdate(JobStatus.Completed)
 			.subscribe(() => {
 				// Clear
 				set(checkPlexServerConnections, {});
-			}),
-	);
-
-	useSubscription(
-		backgroundJobStore.getLibrarySyncJobUpdate(JobStatus.Completed)
-			.subscribe(({ data }) => {
-				set(syncPlexServerMedia, get(syncPlexServerMedia).filter((x) => x !== data.plexServerId));
 			}),
 	);
 });

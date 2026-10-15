@@ -4,7 +4,7 @@ import { generateDownloadTask, generatePlexMedia, generateResultDTO, type MockCo
 import { PlexLibraryPaths, PlexMediaPaths, SettingsPaths } from '@api/api-paths';
 import { MediaMetaDataTypes } from '@enums';
 import {
-	DownloadStatus, DownloadTaskType, FileSystemEntityType, FolderType, MessageTypes, PlexMediaType, VideoQuality,
+	DownloadStatus, DownloadTaskType, FileSystemEntityType, FolderType, MessageTypes, PlexMediaType, VideoQuality, AudioQuality,
 	type DownloadMediaDTO, type DownloadPreviewContainerDTO, type DownloadPreviewDTO, type DownloadProgressDTO,
 	type DownloadTaskCreationReportDTO, type FolderPathDTO, type PlexMediaDTO, type PlexMediaStatisticsDTO,
 	type ServerDownloadProgressDTO,
@@ -49,7 +49,7 @@ function createRoot(family: Family, config: MockConfig, libraryId: number, serve
 	const file = (id: number, version: number, name: string, clip = false) => ({
 		id, plexApiMediaId: version, plexApiPartId: id + 50000, fileName: name,
 		audioCodec: clip ? 'aac' : '', videoCodec: clip ? 'h264' : '',
-		videoResolution: clip ? VideoQuality.FullHD : VideoQuality.Unknown, duration: clip ? 6000 : 0, size: 1024,
+		audioQuality: AudioQuality.None, videoResolution: clip ? VideoQuality.FullHD : VideoQuality.Unknown, duration: clip ? 6000 : 0, size: 1024,
 	});
 	const root = media(100, families[family].type, family === 'photos' ? 'Holiday album' : family === 'music' ? 'Synth artist' : 'Owned recording');
 	if (family === 'photos') {
@@ -71,9 +71,9 @@ function createRoot(family: Family, config: MockConfig, libraryId: number, serve
 				track.discNumber = trackIndex;
 				track.trackNumber = 1;
 				track.mediaData = [
-					{ ...file(track.id * 100, track.id * 10, `track-${track.id}-part-1.flac`), audioCodec: 'flac', duration: 6000 },
-					{ ...file(track.id * 100 + 1, track.id * 10, `track-${track.id}-part-2.flac`), audioCodec: 'flac', duration: 6000 },
-					{ ...file(track.id * 100 + 2, track.id * 10 + 1, `track-${track.id}-alternative.mp3`), audioCodec: 'mp3', duration: 6000 },
+					{ ...file(track.id * 100, track.id * 10, `track-${track.id}-part-1.flac`), audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
+					{ ...file(track.id * 100 + 1, track.id * 10, `track-${track.id}-part-2.flac`), audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
+					{ ...file(track.id * 100 + 2, track.id * 10 + 1, `track-${track.id}-alternative.mp3`), audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
 				];
 				return track;
 			});
@@ -84,7 +84,7 @@ function createRoot(family: Family, config: MockConfig, libraryId: number, serve
 	} else {
 		root.mediaData = [file(10001, 7001, 'recording-part-1.mp4', true), file(10002, 7001, 'recording-part-2.mp4', true), file(10003, 7002, 'recording-alternative.mkv', true)];
 		// Both originals have the same resolution: the selector must identify the version, not rank quality.
-		root.qualities = root.mediaData.map((part) => ({ mediaId: root.id, dataId: part.id, mediaDataType: root.type, quality: part.videoResolution }));
+		root.qualities = root.mediaData.map((part) => ({ mediaId: root.id, dataId: part.id, mediaDataType: root.type, audioQuality: AudioQuality.None, videoQuality: part.videoResolution }));
 	}
 	root.childCount = root.children.length;
 	root.mediaSize = root.children.length ? root.children.reduce((size, child) => size + child.mediaSize, 0) : 3072;
@@ -198,7 +198,7 @@ function setupFamily(family: Family) {
 function visitDetail(family: Family, state: WorkflowState) {
 	cy.visit(route(`/${family}/${state.libraryId}/details/${state.root.id}`));
 	cy.getPageData();
-	cy.get('h1').should('be.visible').and('have.text', state.root.title);
+	cy.get('.media-title').should('be.visible').and('have.text', state.root.title);
 }
 
 function openConfirmation(phone = false, waitForVisible = true) {
@@ -215,8 +215,17 @@ function assertCommand(state: WorkflowState, type: PlexMediaType, id: number, qu
 	return { mediaIds: [id], type, plexLibraryId: state.libraryId, plexServerId: state.serverId, qualities, keepCompletedInDownloadFolder: false };
 }
 
-function assertPreview(command: DownloadMediaDTO, media: PlexMediaDTO, noQuality = true) {
-	cy.wait('@preview').its('request.body').should('deep.equal', [command]);
+function selectMediaTableRow(containerCy: string, title: string) {
+	cy.getCy(containerCy).then(($container) => {
+		const rows = $container.find('[data-cy="media-q-table-mobile-card"], tbody tr');
+		const matches = rows.filter((_, row) => row.textContent?.includes(title) ?? false);
+		expect(matches, `media table row ${title}`).to.have.length(1);
+		cy.wrap(matches).find('[role="checkbox"]').click();
+	});
+}
+
+function assertPreview(command: DownloadMediaDTO | DownloadMediaDTO[], media: PlexMediaDTO, noQuality = true) {
+	cy.wait('@preview').its('request.body').should('deep.equal', Array.isArray(command) ? command : [command]);
 	cy.getCy('download-confirmation-dialog').within(() => {
 		cy.getCy(`column-title-preview-${media.id}`).should('be.visible').and('have.text', media.title);
 		cy.getCy(`column-dataTotal-preview-${media.id}`).should('be.visible').and('have.text', prettyBytes(media.mediaSize, { locale: 'en-US' }));
@@ -242,9 +251,9 @@ function chooseDestination(state: WorkflowState) {
 	cy.getCy('download-confirmation-dialog').should('contain.text', state.overrideFolder.directory).and('not.contain.text', '/wrong/movie/default');
 }
 
-function createAndOpenQueue(state: WorkflowState, command: DownloadMediaDTO, media: PlexMediaDTO, destinationId = state.defaultFolder.id, customPath = '') {
+function createAndOpenQueue(state: WorkflowState, command: DownloadMediaDTO | DownloadMediaDTO[], media: PlexMediaDTO, destinationId = state.defaultFolder.id, customPath = '') {
 	submit().should('not.be.disabled').click();
-	cy.wait('@create').its('request.body').should('deep.equal', { downloadMedias: [command], destinationFolderPathId: destinationId, customDestinationFolderPath: customPath });
+	cy.wait('@create').its('request.body').should('deep.equal', { downloadMedias: Array.isArray(command) ? command : [command], destinationFolderPathId: destinationId, customDestinationFolderPath: customPath });
 	cy.getCy('download-confirmation-dialog').should('not.exist');
 	cy.wait('@queue');
 	cy.visit(route('/downloads'));
@@ -384,7 +393,7 @@ describe('Photos download and lifecycle parity', () => {
 			cy.getCy(`photo-asset-${clip.id}`).should('contain.text', 'holiday-clip-part-1.mp4').and('contain.text', 'holiday-clip-part-2.mp4');
 			cy.getCy(`photo-asset-checkbox-${clip.id}`).click();
 			openConfirmation(true);
-			const clipCommand = assertCommand(state, PlexMediaType.PhotoImage, clip.id, [{ mediaId: clip.id, dataId: 11901, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.FullHD }]);
+			const clipCommand = assertCommand(state, PlexMediaType.PhotoImage, clip.id, [{ mediaId: clip.id, dataId: 11901, mediaDataType: PlexMediaType.PhotoImage, audioQuality: AudioQuality.None, videoQuality: VideoQuality.FullHD }]);
 			assertPreview(clipCommand, clip);
 			createAndOpenQueue(state, clipCommand, clip);
 			visitDetail('photos', state);
@@ -395,7 +404,7 @@ describe('Photos download and lifecycle parity', () => {
 			cy.getCy('photo-album-checkbox').scrollIntoView().click();
 			cy.getCy('photo-album-checkbox').should('have.attr', 'aria-checked', 'true');
 			openConfirmation(true);
-			const command = assertCommand(state, PlexMediaType.PhotoAlbum, state.root.id, [{ mediaId: clip.id, dataId: 11901, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.FullHD }]);
+			const command = assertCommand(state, PlexMediaType.PhotoAlbum, state.root.id, [{ mediaId: clip.id, dataId: 11901, mediaDataType: PlexMediaType.PhotoImage, audioQuality: AudioQuality.None, videoQuality: VideoQuality.FullHD }]);
 			assertPreview(command, state.root);
 			cy.getCy(`column-title-preview-${clip.id}`).scrollIntoView().should('have.text', clip.title);
 			createAndOpenQueue(state, command, state.root);
@@ -512,7 +521,7 @@ describe('Photos download and lifecycle parity', () => {
 });
 
 for (const scope of ['artist', 'album', 'track'] as const) {
-	it(`Music ${scope} retains leaf original selectors and ancestor precedence with the matching family destination`, () => {
+	it(`Music ${scope} uses current table rows and ancestor precedence with the matching family destination`, () => {
 		cy.viewport(scope === 'track' ? 320 : 1280, scope === 'track' ? 568 : 800);
 		setupFamily('music').then((state) => {
 			const album = state.root.children[0]!;
@@ -521,19 +530,17 @@ for (const scope of ['artist', 'album', 'track'] as const) {
 			selectPreview(state, target);
 			visitDetail('music', state);
 			cy.getCy(`music-album-${album.id}`).find('.q-expansion-item__container > .q-item').first().click();
-			for (const number of [1, 2]) {
-				cy.getCy(`music-disc-${album.id}-${number}`).find('.q-expansion-item__container > .q-item').first().should('contain.text', `Disc ${number}`).click().should('be.visible').click();
-			}
-			for (const leaf of album.children) cy.getCy(`music-track-number-${album.id}-${leaf.id}`).should('have.text', '1');
-			cy.getCy(`music-track-original-${album.id}-${track.id}-${track.id * 10}`).click();
-			if (scope === 'track') assertPhoneOriginal(`music-track-original-${album.id}-${track.id}-${track.id * 10}`);
-			cy.getCy(`music-track-${album.id}-${track.id}`).find('[role="radio"]').should('have.length', 3);
-			cy.getCy(`music-track-${album.id}-${track.id}`).should('contain.text', `track-${track.id}-part-1.flac`).and('contain.text', `track-${track.id}-part-2.flac`);
-			cy.getCy(`music-track-checkbox-${album.id}-${track.id}`).click();
+			for (const leaf of album.children)
+				cy.getCy(`music-album-${album.id}`).should('contain.text', leaf.title);
+			selectMediaTableRow(`music-album-${album.id}`, track.title);
 			if (scope !== 'track') cy.getCy(`music-album-checkbox-${album.id}`).click();
 			if (scope === 'artist') cy.getCy('music-artist-checkbox').click();
+			cy.getCy(`music-album-${album.id}`).find('.q-expansion-item__container > .q-item').first().click();
+			cy.getCy(`music-album-${album.id}`).find('[data-cy="media-q-table-mobile-card"], tbody tr').filter(`:contains("${track.title}")`).should('not.be.visible');
+			cy.getCy(`music-album-${album.id}`).find('.q-expansion-item__container > .q-item').first().click();
+			cy.getCy(`music-album-${album.id}`).find('[data-cy="media-q-table-mobile-card"], tbody tr').filter(`:contains("${track.title}")`).find('[role="checkbox"]').should('have.attr', 'aria-checked', 'true');
 			openConfirmation(scope === 'track');
-			const command = assertCommand(state, target.type, target.id, [{ mediaId: track.id, dataId: track.id * 100, mediaDataType: PlexMediaType.MusicTrack, quality: VideoQuality.Unknown }]);
+			const command = assertCommand(state, target.type, target.id);
 			assertPreview(command, target);
 			cy.getCy('download-confirmation-dialog').should('contain.text', state.defaultFolder.directory);
 			if (scope === 'album') chooseDestination(state);
@@ -554,17 +561,29 @@ for (const scope of ['artist', 'album', 'track'] as const) {
 }
 
 for (const destination of ['default', 'override', 'custom'] as const) {
-	it(`Other Videos downloads a whole original version using the ${destination} family destination and retains its queue lifecycle`, () => {
+	it(`Other Videos downloads selected original parts using the ${destination} family destination and retains its queue lifecycle`, () => {
 		cy.viewport(destination === 'custom' ? 320 : 1280, destination === 'custom' ? 568 : 800);
 		setupFamily('other-videos').then((state) => {
 			visitDetail('other-videos', state);
-			cy.getCy('other-video-root-checkbox').click();
-			cy.getCy('other-video-media-list').find('[role="radio"]').should('have.length', 3);
-			if (destination !== 'default') cy.getCy(`other-video-original-${destination === 'custom' ? 10003 : 10001}`).scrollIntoView().click();
-			if (destination === 'custom') assertPhoneOriginal('other-video-original-10003');
+			const selectedParts = destination === 'default'
+				? state.root.mediaData
+				: [state.root.mediaData.find((part) => part.id === (destination === 'custom' ? 10003 : 10001))!];
+			if (destination === 'default')
+				cy.getCy('other-video-root-checkbox').click();
+			else
+				selectMediaTableRow('other-video-media-list', selectedParts[0]!.fileName);
+			if (destination === 'custom') {
+				cy.getCy('other-video-media-list').find(`[aria-label="Selection ${selectedParts[0]!.fileName}"]`).should('be.visible').and(($control) => {
+					const rect = $control[0]!.getBoundingClientRect();
+					expect(rect.width, 'Original touch target width').to.be.at.least(44);
+					expect(rect.height, 'Original touch target height').to.be.at.least(44);
+				});
+			}
+			const commands = selectedParts.map((part) => assertCommand(state, PlexMediaType.OtherVideos, state.root.id, [{
+				mediaId: state.root.id, dataId: part.id, mediaDataType: PlexMediaType.OtherVideos, audioQuality: AudioQuality.None, videoQuality: part.videoResolution,
+			}]));
 			openConfirmation(destination === 'custom');
-			const command = assertCommand(state, PlexMediaType.OtherVideos, state.root.id, destination === 'default' ? [] : [{ mediaId: state.root.id, dataId: destination === 'custom' ? 10003 : 10001, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.FullHD }]);
-			assertPreview(command, state.root, false);
+			assertPreview(commands, state.root, false);
 			cy.getCy('download-confirmation-dialog').should('contain.text', state.defaultFolder.directory);
 			if (destination === 'override') chooseDestination(state);
 			if (destination === 'custom') {
@@ -581,7 +600,7 @@ for (const destination of ['default', 'override', 'custom'] as const) {
 				cy.getCy('directory-browser-confirm-button').should('not.be.disabled').click();
 				cy.getCy('download-confirmation-dialog').should('contain.text', folder.path);
 			}
-			createAndOpenQueue(state, command, state.root, destination === 'override' ? state.overrideFolder.id : destination === 'custom' ? 0 : state.defaultFolder.id, destination === 'custom' ? '/custom/originals' : '');
+			createAndOpenQueue(state, commands, state.root, destination === 'override' ? state.overrideFolder.id : destination === 'custom' ? 0 : state.defaultFolder.id, destination === 'custom' ? '/custom/originals' : '');
 			cy.get('@pageData').then((data) => {
 				const { config } = data as unknown as { config: MockConfig };
 				const item = state.queue.downloads[0]!;
@@ -623,9 +642,15 @@ for (const scenario of [
 			cy.getPageData();
 			cy.getCy(`ask-download-${scenario.control}-confirmation`).should('have.attr', 'aria-checked', 'false');
 			visitDetail(scenario.family, state);
+			const commands = scenario.family === 'other-videos'
+				? state.root.mediaData.map((part) => assertCommand(state, PlexMediaType.OtherVideos, state.root.id, [{
+						mediaId: state.root.id, dataId: part.id, mediaDataType: PlexMediaType.OtherVideos, audioQuality: AudioQuality.None, videoQuality: part.videoResolution,
+					}]))
+				: [assertCommand(state, target.type, target.id)];
 			if (scenario.family === 'music') {
-				cy.getCy(`music-album-${state.root.children[0]!.id}`).find('.q-expansion-item__container > .q-item').first().click();
-				cy.getCy(`music-track-checkbox-${state.root.children[0]!.id}-${target.id}`).click();
+				const album = state.root.children[0]!;
+				cy.getCy(`music-album-${album.id}`).find('.q-expansion-item__container > .q-item').first().click();
+				selectMediaTableRow(`music-album-${album.id}`, target.title);
 			} else if (scenario.family === 'photos') {
 				cy.getCy(`photo-asset-checkbox-${target.id}`).click();
 			} else {
@@ -633,7 +658,7 @@ for (const scenario of [
 			}
 			visibleCy('media-overview-bar-download-button').click();
 			cy.wait('@create').its('request.body').should('deep.equal', {
-				downloadMedias: [assertCommand(state, target.type, target.id)],
+				downloadMedias: commands,
 				destinationFolderPathId: null,
 				customDestinationFolderPath: '',
 			});

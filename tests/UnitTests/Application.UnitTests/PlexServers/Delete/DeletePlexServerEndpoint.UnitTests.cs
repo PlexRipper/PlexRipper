@@ -37,8 +37,7 @@ public class DeletePlexServerEndpointUnitTests
             .PlexLibraries.Where(x => x.PlexServerId == otherServerId)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
-        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand())
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand()).ReturnsAsync(Result.Ok());
         var targetMovieDownloadId = Guid.Parse("91301000-0000-0000-0000-000000000001");
         var targetMovieFileDownloadId = Guid.Parse("91301000-0000-0000-0000-000000000002");
         var otherMovieDownloadId = Guid.Parse("91301000-0000-0000-0000-000000000003");
@@ -80,7 +79,7 @@ public class DeletePlexServerEndpointUnitTests
                         FileName = "target-server-movie.mkv",
                         FileLocationUrl = "/library/parts/913013/file.mkv",
                         HashId = "target-server-movie-hash",
-                        Quality = VideoQuality.FullHD,
+                        VideoQuality = VideoQuality.FullHD,
                         DirectoryMeta = CreateDownloadTaskDirectory(),
                         DataReceived = 0,
                         DataTotal = 10,
@@ -143,7 +142,7 @@ public class DeletePlexServerEndpointUnitTests
                         FileName = "other-server-movie.mkv",
                         FileLocationUrl = "/library/parts/913023/file.mkv",
                         HashId = "other-server-movie-hash",
-                        Quality = VideoQuality.FullHD,
+                        VideoQuality = VideoQuality.FullHD,
                         DirectoryMeta = CreateDownloadTaskDirectory(),
                         DataReceived = 0,
                         DataTotal = 10,
@@ -246,8 +245,7 @@ public class DeletePlexServerEndpointUnitTests
             .PlexServers.IgnoreIsEnabledFilter()
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
-        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand())
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand()).ReturnsAsync(Result.Ok());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
@@ -261,7 +259,11 @@ public class DeletePlexServerEndpointUnitTests
         (
             await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == server.Id, CancellationToken)
         ).ShouldBeFalse();
-        Mock.Mock<ICommandExecutor>().Verify(x => x.Send(It.IsAny<QueueMediaOverviewRebuildCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<QueueMediaOverviewRebuildCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     private static DownloadTaskDirectory CreateDownloadTaskDirectory() =>
@@ -287,8 +289,7 @@ public class DeletePlexServerEndpointUnitTests
 
         var dbContext = IDbContext;
         var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
-        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand())
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand()).ReturnsAsync(Result.Ok());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(

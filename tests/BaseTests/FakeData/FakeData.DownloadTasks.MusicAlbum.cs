@@ -2,31 +2,32 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static Faker<DownloadTaskMusicAlbum> _downloadTaskMusicAlbumFaker = new Faker<DownloadTaskMusicAlbum>()
-        .ApplyDownloadTaskParentBase(DownloadTaskType.MusicAlbum)
-        .Ignore(x => x.ParentId)
-        .Ignore(x => x.Parent)
-        .Ignore(x => x.Children)
-        .FinishWith(
-            (_, album) =>
-            {
-                album.FullTitle = album.Title;
-
-                var trackIndex = 1;
-                foreach (var track in album.Children)
+    private static readonly Faker<DownloadTaskMusicAlbum> _downloadTaskMusicAlbumFaker =
+        new Faker<DownloadTaskMusicAlbum>()
+            .ApplyDownloadTaskParentBase(DownloadTaskType.MusicAlbum)
+            .Ignore(x => x.ParentId)
+            .Ignore(x => x.Parent)
+            .Ignore(x => x.Children)
+            .FinishWith(
+                (_, album) =>
                 {
-                    track.Title = $"{track.Title} {trackIndex++}";
-                    track.FullTitle = $"{album.FullTitle}/{track.Title}";
+                    album.FullTitle = album.Title;
 
-                    var fileIndex = 1;
-                    foreach (var file in track.Children)
+                    var trackIndex = 1;
+                    foreach (var track in album.Children)
                     {
-                        file.FullTitle = $"{track.FullTitle}/{fileIndex++}-{file.FileName}";
-                        file.DirectoryMeta.MusicAlbumFolder = album.Title.SanitizeFolderName();
+                        track.Title = $"{track.Title} {trackIndex++}";
+                        track.FullTitle = $"{album.FullTitle}/{track.Title}";
+
+                        var fileIndex = 1;
+                        foreach (var file in track.Children)
+                        {
+                            file.FullTitle = $"{track.FullTitle}/{fileIndex++}-{file.FileName}";
+                            file.DirectoryMeta.MusicAlbumFolder = album.Title.SanitizeFolderName();
+                        }
                     }
                 }
-            }
-        );
+            );
 
     public static Faker<DownloadTaskMusicAlbum> GetDownloadTaskMusicAlbum(
         Seed seed,

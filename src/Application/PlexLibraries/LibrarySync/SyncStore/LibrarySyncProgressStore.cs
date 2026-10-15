@@ -17,92 +17,24 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
     public LibraryProgress? Get(int plexLibraryId) =>
         _store.TryGetValue(plexLibraryId, out var progress) ? progress : null;
 
-    public async Task StartAsync(int plexLibraryId, PlexMediaType type, CancellationToken cancellationToken = default)
+    public async Task StartAsync(
+        int plexLibraryId,
+        PlexMediaType type,
+        IReadOnlyDictionary<PlexMediaType, int>? progressTotals = null
+    )
     {
-        IReadOnlyList<LibraryProgressItem> items;
-
-        if (type == PlexMediaType.Movie)
-        {
-            items =
-            [
-                new LibraryProgressItem
-                {
-                    MediaType = PlexMediaType.Movie,
-                    Received = 0,
-                    Total = -1,
-                    TimeRemaining = TimeSpan.Zero,
-                },
-            ];
-        }
-        else if (type == PlexMediaType.TvShow)
-        {
-            items =
-            [
-                new LibraryProgressItem
-                {
-                    MediaType = PlexMediaType.TvShow,
-                    Received = 0,
-                    Total = -1,
-                    TimeRemaining = TimeSpan.Zero,
-                },
-                new LibraryProgressItem
-                {
-                    MediaType = PlexMediaType.Season,
-                    Received = 0,
-                    Total = -1,
-                    TimeRemaining = TimeSpan.Zero,
-                },
-                new LibraryProgressItem
-                {
-                    MediaType = PlexMediaType.Episode,
-                    Received = 0,
-                    Total = -1,
-                    TimeRemaining = TimeSpan.Zero,
-                },
-            ];
-        }
-        else if (type == PlexMediaType.MusicArtist)
-        {
-            items = new[] { PlexMediaType.MusicArtist, PlexMediaType.MusicAlbum, PlexMediaType.MusicTrack }
-                .Select(mediaType => new LibraryProgressItem
-                {
-                    MediaType = mediaType,
-                    Received = 0,
-                    Total = -1,
-                    TimeRemaining = TimeSpan.Zero,
-                })
-                .ToList();
-        }
-        else if (type == PlexMediaType.PhotoAlbum)
-        {
-            items = new[] { PlexMediaType.PhotoAlbum, PlexMediaType.PhotoImage }
-                .Select(mediaType => new LibraryProgressItem
-                {
-                    MediaType = mediaType,
-                    Received = 0,
-                    Total = -1,
-                    TimeRemaining = TimeSpan.Zero,
-                })
-                .ToList();
-        }
-        else if (type == PlexMediaType.OtherVideos)
-        {
-            items = new[] { PlexMediaType.OtherVideos }
-                .Select(mediaType => new LibraryProgressItem
-                {
-                    MediaType = mediaType,
-                    Received = 0,
-                    Total = -1,
-                    TimeRemaining = TimeSpan.Zero,
-                })
-                .ToList();
-        }
-        else
-        {
-            _log.Here()
-                .Warning("Unsupported PlexMediaType {PlexMediaType} for library {PlexLibraryId}", type, plexLibraryId);
-            return;
-        }
+        var items = type.GetFamilyTypes()
+            .Select(mediaType => new LibraryProgressItem
+            {
+                MediaType = mediaType,
+                Received = 0,
+                Total =
+                    progressTotals is not null && progressTotals.TryGetValue(mediaType, out var total) && total >= 0
+                        ? total
+                        : -1,
+                TimeRemaining = TimeSpan.Zero,
+            })
+            .ToList();
 
         var progress = new LibraryProgress
         {
@@ -123,21 +55,23 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
         CancellationToken cancellationToken = default
     )
     {
-        _store.AddOrUpdate(
+        var updated = _store.AddOrUpdate(
             plexLibraryId,
             _ => throw new InvalidOperationException("Library not initialized."),
             (_, existing) =>
             {
-                // Upsert: replace if the media type already exists, otherwise append
+                // Keep the preflight total for this refresh. A per-type retrieval total is
+                // only used when the preflight could not determine that layer's total.
                 var replaced = false;
                 var updatedItems = existing
-                    .Items.Select(i =>
+                    .Items.Select(existingItem =>
                     {
-                        if (i.MediaType != item.MediaType)
-                            return i;
+                        if (existingItem.MediaType != item.MediaType)
+                            return existingItem;
 
                         replaced = true;
-                        return item;
+                        var total = existingItem.Total >= 0 ? existingItem.Total : item.Total;
+                        return item with { Total = total };
                     })
                     .ToList();
 
@@ -151,7 +85,7 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             }
         );
 
-        await SendProgressUpdateAsync(plexLibraryId);
+        await SendProgressUpdateAsync(updated);
     }
 
     public async Task UpdateErrorAsync(

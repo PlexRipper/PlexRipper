@@ -1,4 +1,3 @@
-
 namespace Reaparr.Application.UnitTests;
 
 public class MediaOverviewRankBuilderMovieUnitTests
@@ -16,7 +15,7 @@ public class MediaOverviewRankBuilderMovieUnitTests
             .RuleFor(x => x.UpdatedAt, _ => new DateTime(2024, 2, 3))
             .RuleFor(x => x.Duration, _ => 3)
             .RuleFor(x => x.MediaSize, _ => 3)
-            .RuleFor(x => x.Quality, _ => VideoQuality.FullHD)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.FullHD)
             .Generate(3);
 
         // Act
@@ -34,10 +33,7 @@ public class MediaOverviewRankBuilderMovieUnitTests
         var source = FakeData
             .GetMediaOverviewMovieSnapshots(new Seed(2))
             .RuleFor(x => x.PlexMovieId, f => new[] { 8, 3, 5 }[f.IndexFaker])
-            .RuleFor(
-                x => x.UpdatedAt,
-                f => new DateTime?[] { null, null, new DateTime(2024, 2, 10) }[f.IndexFaker]
-            )
+            .RuleFor(x => x.UpdatedAt, f => new DateTime?[] { null, null, new DateTime(2024, 2, 10) }[f.IndexFaker])
             .Generate(3);
 
         // Act
@@ -57,16 +53,20 @@ public class MediaOverviewRankBuilderMovieUnitTests
             .RuleFor(x => x.PlexMovieId, f => new[] { 40, 10, 30, 20 }[f.IndexFaker])
             .RuleFor(x => x.SearchTitle, f => new[] { "zulu", "alpha", "mike", "bravo" }[f.IndexFaker])
             .RuleFor(x => x.Year, f => new[] { 2022, 2020, 2021, 2019 }[f.IndexFaker])
-            .RuleFor(x => x.AddedAt, f => new[] { 4, 1, 3, 2 }.Select(day => new DateTime(2024, 1, day)).ElementAt(f.IndexFaker))
+            .RuleFor(
+                x => x.AddedAt,
+                f => new[] { 4, 1, 3, 2 }.Select(day => new DateTime(2024, 1, day)).ElementAt(f.IndexFaker)
+            )
             .RuleFor(
                 x => x.UpdatedAt,
-                f => new[] { 4, 1, 3, 2 }
-                    .Select(day => (DateTime?)new DateTime(2024, 2, day))
-                    .ElementAt(f.IndexFaker)
+                f => new[] { 4, 1, 3, 2 }.Select(day => (DateTime?)new DateTime(2024, 2, day)).ElementAt(f.IndexFaker)
             )
             .RuleFor(x => x.Duration, f => new[] { 400, 100, 300, 200 }[f.IndexFaker])
             .RuleFor(x => x.MediaSize, f => new[] { 4000L, 1000L, 3000L, 2000L }[f.IndexFaker])
-            .RuleFor(x => x.Quality, f => new[] { VideoQuality.UHD_4K, VideoQuality.SD, VideoQuality.FullHD, VideoQuality.HD }[f.IndexFaker])
+            .RuleFor(
+                x => x.VideoQuality,
+                f => new[] { VideoQuality.UHD_4K, VideoQuality.SD, VideoQuality.FullHD, VideoQuality.HD }[f.IndexFaker]
+            )
             .Generate(4);
 
         // Act
@@ -103,11 +103,31 @@ public class MediaOverviewRankBuilderMovieUnitTests
         // Assert
         first
             .OrderBy(x => x.PlexMovieId)
-            .Select(x => new { x.PlexMovieId, x.TitleRank, x.YearRank, x.AddedAtRank, x.UpdatedAtRank, x.DurationRank, x.MediaSizeRank, x.QualityRank })
+            .Select(x => new
+            {
+                x.PlexMovieId,
+                x.TitleRank,
+                x.YearRank,
+                x.AddedAtRank,
+                x.UpdatedAtRank,
+                x.DurationRank,
+                x.MediaSizeRank,
+                x.QualityRank,
+            })
             .ShouldBe(
                 second
                     .OrderBy(x => x.PlexMovieId)
-                    .Select(x => new { x.PlexMovieId, x.TitleRank, x.YearRank, x.AddedAtRank, x.UpdatedAtRank, x.DurationRank, x.MediaSizeRank, x.QualityRank })
+                    .Select(x => new
+                    {
+                        x.PlexMovieId,
+                        x.TitleRank,
+                        x.YearRank,
+                        x.AddedAtRank,
+                        x.UpdatedAtRank,
+                        x.DurationRank,
+                        x.MediaSizeRank,
+                        x.QualityRank,
+                    })
             );
     }
 
@@ -120,25 +140,25 @@ public class MediaOverviewRankBuilderMovieUnitTests
             .RuleFor(x => x.PlexMovieId, f => new[] { 12, 4 }[f.IndexFaker])
             .RuleFor(x => x.SearchTitle, _ => "same")
             .RuleFor(x => x.Year, f => new[] { 2020, 2019 }[f.IndexFaker])
-            .RuleFor(x => x.AddedAt, f => new[] { 2, 1 }.Select(day => new DateTime(2024, 1, day)).ElementAt(f.IndexFaker))
             .RuleFor(
-                x => x.UpdatedAt,
-                f => new[] { (DateTime?)null, new DateTime(2024, 2, 1) }[f.IndexFaker]
+                x => x.AddedAt,
+                f => new[] { 2, 1 }.Select(day => new DateTime(2024, 1, day)).ElementAt(f.IndexFaker)
             )
+            .RuleFor(x => x.UpdatedAt, f => new[] { (DateTime?)null, new DateTime(2024, 2, 1) }[f.IndexFaker])
             .RuleFor(x => x.Duration, f => new[] { 100, 200 }[f.IndexFaker])
             .RuleFor(x => x.MediaSize, f => new[] { 200L, 100L }[f.IndexFaker])
-            .RuleFor(x => x.Quality, f => new[] { VideoQuality.HD, VideoQuality.FullHD }[f.IndexFaker])
+            .RuleFor(x => x.VideoQuality, f => new[] { VideoQuality.HD, VideoQuality.FullHD }[f.IndexFaker])
             .Generate(2);
         var tvShows = FakeData
             .GetMediaOverviewTvShowSnapshots(new Seed(6))
             .RuleFor(x => x.PlexTvShowId, f => new[] { 12, 4 }[f.IndexFaker])
             .RuleFor(x => x.SearchTitle, _ => "same")
             .RuleFor(x => x.Year, f => new[] { 2020, 2019 }[f.IndexFaker])
-            .RuleFor(x => x.AddedAt, f => new[] { 2, 1 }.Select(day => new DateTime(2024, 1, day)).ElementAt(f.IndexFaker))
             .RuleFor(
-                x => x.UpdatedAt,
-                f => new[] { (DateTime?)null, new DateTime(2024, 2, 1) }[f.IndexFaker]
+                x => x.AddedAt,
+                f => new[] { 2, 1 }.Select(day => new DateTime(2024, 1, day)).ElementAt(f.IndexFaker)
             )
+            .RuleFor(x => x.UpdatedAt, f => new[] { (DateTime?)null, new DateTime(2024, 2, 1) }[f.IndexFaker])
             .RuleFor(x => x.Duration, f => new[] { 100, 200 }[f.IndexFaker])
             .RuleFor(x => x.MediaSize, f => new[] { 200L, 100L }[f.IndexFaker])
             .RuleFor(x => x.Quality, f => new[] { VideoQuality.HD, VideoQuality.FullHD }[f.IndexFaker])
@@ -151,11 +171,31 @@ public class MediaOverviewRankBuilderMovieUnitTests
         // Assert
         movieResult
             .OrderBy(x => x.PlexMovieId)
-            .Select(x => new { x.PlexMovieId, x.TitleRank, x.YearRank, x.AddedAtRank, x.UpdatedAtRank, x.DurationRank, x.MediaSizeRank, x.QualityRank })
+            .Select(x => new
+            {
+                x.PlexMovieId,
+                x.TitleRank,
+                x.YearRank,
+                x.AddedAtRank,
+                x.UpdatedAtRank,
+                x.DurationRank,
+                x.MediaSizeRank,
+                x.QualityRank,
+            })
             .ShouldBe(
                 tvResult
                     .OrderBy(x => x.PlexTvShowId)
-                    .Select(x => new { PlexMovieId = x.PlexTvShowId, x.TitleRank, x.YearRank, x.AddedAtRank, x.UpdatedAtRank, x.DurationRank, x.MediaSizeRank, x.QualityRank })
+                    .Select(x => new
+                    {
+                        PlexMovieId = x.PlexTvShowId,
+                        x.TitleRank,
+                        x.YearRank,
+                        x.AddedAtRank,
+                        x.UpdatedAtRank,
+                        x.DurationRank,
+                        x.MediaSizeRank,
+                        x.QualityRank,
+                    })
             );
     }
 }

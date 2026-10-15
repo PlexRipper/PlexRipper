@@ -14,7 +14,7 @@ public static class LibraryMediaItemMappers
     public static List<PlexCountry> ToPlexCountry(this IEnumerable<LibraryMediaItemCountryDTO>? source) =>
         source?.Select(x => x.ToPlexCountry()).ToList() ?? [];
 
-    public static PlexGenre ToPlexGenre(this LibraryMediaItemGenreDTO source) =>
+    public static PlexGenreVideo ToPlexGenreVideo(this LibraryMediaItemGenreDTO source) =>
         new()
         {
             Name = source.Name,
@@ -22,6 +22,16 @@ public static class LibraryMediaItemMappers
             Type = source.Name.ToPlexGenreType(),
         };
 
-    public static List<PlexGenre> ToPlexGenre(this IEnumerable<LibraryMediaItemGenreDTO>? source) =>
-        source?.Select(x => x.ToPlexGenre()).ToList() ?? [];
+    public static List<PlexGenreVideo> ToPlexGenreVideo(this IEnumerable<LibraryMediaItemGenreDTO>? source) =>
+        source?.Select(x => x.ToPlexGenreVideo()).ToList() ?? [];
+
+    public static PlexGenreAudio ToPlexGenreAudio(this LibraryMediaItemGenreDTO source) =>
+        new()
+        {
+            Name = source.Name,
+            Key = source.Key,
+        };
+
+    public static List<PlexGenreAudio> ToPlexGenreAudio(this IEnumerable<LibraryMediaItemGenreDTO>? source) =>
+        source?.Select(x => x.ToPlexGenreAudio()).ToList() ?? [];
 }

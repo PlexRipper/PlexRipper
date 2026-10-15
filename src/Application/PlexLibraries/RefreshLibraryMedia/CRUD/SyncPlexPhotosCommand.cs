@@ -61,7 +61,7 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
                 x.ChildCount,
                 x.Duration,
                 x.MediaSize,
-                x.Quality
+                x.VideoQuality
             ))
             .ToListAsync(ct);
         var currentPhotos = await _dbContext
@@ -95,7 +95,7 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
                     || album.ChildCount != existing.ChildCount
                     || album.Duration != existing.Duration
                     || album.MediaSize != existing.MediaSize
-                    || album.Quality != existing.Quality
+                    || album.VideoQuality != existing.VideoQuality
                 )
                     updatedAlbums.Add(album);
             }
@@ -232,7 +232,7 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
         int ChildCount,
         int Duration,
         long MediaSize,
-        VideoQuality Quality
+        VideoQuality VideoQuality
     );
 
     private sealed record CurrentPhoto(

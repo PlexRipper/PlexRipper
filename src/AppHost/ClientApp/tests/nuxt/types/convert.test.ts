@@ -30,11 +30,8 @@ describe('Convert media identities', () => {
 
 	test.each([
 		[DownloadTaskType.MusicTrackData, PlexMediaType.MusicTrack],
-		[DownloadTaskType.MusicTrackPart, PlexMediaType.MusicTrack],
 		[DownloadTaskType.PhotoData, PlexMediaType.PhotoImage],
-		[DownloadTaskType.PhotoPart, PlexMediaType.PhotoImage],
 		[DownloadTaskType.OtherVideoData, PlexMediaType.OtherVideos],
-		[DownloadTaskType.OtherVideoPart, PlexMediaType.OtherVideos],
 	])('Should retain the source media family for %s file tasks', (taskType, mediaType) => {
 		// Act
 		const convertedMediaType = Convert.toPlexMediaType(taskType);
@@ -59,5 +56,21 @@ describe('Convert media identities', () => {
 
 		// Assert
 		expect(mediaType).toBe(PlexMediaType.Unknown);
+	});
+	test('Should assign a distinct icon to each new media type and subtype', () => {
+		const mediaTypeIcons = [
+			[PlexMediaType.MusicArtist, 'mdi-music'],
+			[PlexMediaType.MusicAlbum, 'mdi-album'],
+			[PlexMediaType.MusicTrack, 'mdi-music-note'],
+			[PlexMediaType.PhotoAlbum, 'mdi-image-multiple'],
+			[PlexMediaType.PhotoImage, 'mdi-image'],
+			[PlexMediaType.OtherVideos, 'mdi-video'],
+		] as const;
+
+		const icons = mediaTypeIcons.map(([mediaType]) => Convert.mediaTypeToIcon(mediaType));
+		expect(new Set(icons).size).toBe(mediaTypeIcons.length);
+		for (const [mediaType, icon] of mediaTypeIcons) {
+			expect(Convert.mediaTypeToIcon(mediaType)).toBe(icon);
+		}
 	});
 });

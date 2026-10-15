@@ -36,11 +36,10 @@
         "music-media-list": {
             "select-artist": "Wybierz wykonawcę {title}",
             "select-album": "Wybierz album {title}",
-            "select-track": "Wybierz utwór {title}",
             "selected-count": "Wybrano: {count}",
             "track-count": "Utwory: {count}",
-            "disc-label": "Płyta {number}",
-            "unknown-disc": "Nieokreślona płyta",
+            "record-label": "Wytwórnia",
+            "release-date": "Data wydania",
             "no-tracks": "Nie znaleziono utworów",
             "no-albums": "Nie znaleziono albumów"
         },
@@ -50,6 +49,7 @@
             "duration": "Czas trwania",
             "size": "Rozmiar",
             "year": "Rok",
+            "genres": "Gatunki",
             "originally-available": "Pierwsza dostępność",
             "added-at": "Dodano",
             "updated-at": "Zaktualizowano",
@@ -75,9 +75,6 @@
             "retry": "Spróbuj ponownie"
         },
         "other-video-media-list": {
-            "originals": "Wersje oryginalne",
-            "select-video": "Wybierz film {title}",
-            "selected-count": "Wybrano: {count}",
             "empty": "Brak oryginalnych plików."
         },
         "other-video-details": {
@@ -146,7 +143,9 @@
             "media-count-label": "Liczba mediów:",
             "summary": "Podsumowanie:",
             "one-movie-count": "1 Film",
-            "movie-file-count": "{movieFileCount} pliki filmowe"
+            "movie-file-count": "{movieFileCount} pliki filmowe",
+            "read-more": "Czytaj więcej",
+            "full-summary": "Pełne podsumowanie"
         },
         "directory-browser": {
             "add-download-path": "Dodaj nową niestandardową ścieżkę pobierania",
@@ -221,6 +220,14 @@
             "no-filter-results": "Brak wyników wyszukiwania multimediów zgodnych z aktualnymi ustawieniami filtra. Dostosuj lub zresetuj filtry, aby wyświetlić dostępne wyniki.",
             "library-disabled": "Biblioteka \"{library}\" jest wyłączona. Włącz ją i zsynchronizuj ponownie, zanim wyświetlisz jej multimedia.",
             "enable-library-button": "Włącz bibliotekę",
+            "sync-queued-title": "Odświeżanie w kolejce",
+            "sync-queued-offline": "Oczekiwanie na powrót serwera do trybu online.",
+            "sync-queued-busy": "Oczekiwanie na zakończenie odświeżania {library} na serwerze {server}.",
+            "sync-queued-waiting": "Oczekiwanie na rozpoczęcie odświeżania.",
+            "sync-queued-automatic": "Biblioteka zostanie odświeżona automatycznie, gdy nadejdzie jej kolej.",
+            "view-sync-activity": "Wyświetl aktywność synchronizacji",
+            "cancel-queued-refresh": "Anuluj odświeżanie w kolejce",
+            "requesting-refresh": "Żądanie odświeżenia…",
             "comparison": {
                 "details-column-title": "Title",
                 "details-column-location": "Location",
@@ -486,8 +493,10 @@
             "movies-metadata": "{movieCount} Filmy - {fileSize} ",
             "tv-shows-metadata": "{tvShowCount} Programy telewizyjne - {seasonCount} Sezony - {episodeCount} Odcinki - {fileSize} ",
             "music-metadata": "Wykonawcy: {artistCount} - {fileSize}",
+            "music-library-metadata": "Wykonawcy: {artistCount} - Albumy: {albumCount} - Utwory: {trackCount} - {fileSize}",
             "music-detail-metadata": "Albumy: {albumCount} - Utwory: {trackCount} - {fileSize}",
             "photos-metadata": "Albumy: {albumCount} - {fileSize}",
+            "photos-library-metadata": "Albumy: {albumCount} - Zdjęcia: {photoCount} - Klipy: {clipCount} - {fileSize}",
             "photo-detail-metadata": "Elementy: {assetCount} - {fileSize}",
             "other-videos-metadata": "Filmy: {videoCount} - {fileSize}"
         },
@@ -507,9 +516,13 @@
             "fetching-servers": "Pobieranie dostępnych serwerów do synchronizacji multimediów",
             "finished": "Synchronizacja zakończona: {completed} ukończonych, {failed} nieudanych, {cancelled} anulowanych",
             "no-active-syncs": "Brak aktywnych synchronizacji bibliotek",
+            "queued-summary": "Odświeżania bibliotek czekają na swoją kolej.",
             "status": {
                 "unknown": "Nieznany",
                 "queued": "W kolejce",
+                "queued-offline": "W kolejce — oczekiwanie na powrót serwera do trybu online.",
+                "queued-busy": "Oczekiwanie na zakończenie odświeżania {library} na serwerze {server}.",
+                "queued-waiting": "W kolejce — oczekiwanie na rozpoczęcie.",
                 "processing": "W toku",
                 "completed": "Ukończona",
                 "failed": "Nieudana",

@@ -138,7 +138,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         // Sync metadata such as Countries, Roles and Genre using separate DbContext instances
         // to avoid EF Core DbContext thread-safety issues when running in parallel.
-        var genreDict = command.LibraryMetadata.PlexGenres;
+        var genreDict = command.LibraryMetadata.PlexGenresVideo;
         var countryDict = command.LibraryMetadata.PlexCountries;
         var actorDict = command.LibraryMetadata.PlexActors;
 
@@ -257,10 +257,10 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         var deletedEpisodes = currentEpisodes.Where(x => !incomingEpisodeKeys.Contains(x.PlexApiRatingKey)).ToList();
 
         foreach (var show in incomingShows)
-            show.Quality =
+            show.VideoQuality =
                 show.Seasons.SelectMany(x => x.Episodes)
                     .SelectMany(x => x.MediaDataList)
-                    .Select(x => (VideoQuality?)x.Quality)
+                    .Select(x => (VideoQuality?)x.VideoQuality)
                     .Max()
                 ?? VideoQuality.Unknown;
 
@@ -404,13 +404,13 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                             .Select(mediaData => new PlexTvShowSeasonMediaQuality
                             {
                                 Id = 0,
-                                Quality = mediaData.Quality,
+                                VideoQuality = mediaData.VideoQuality,
                                 PlexLibraryId = plexLibraryId,
                                 PlexTvShowSeasonId = season.Id,
                                 PlexTvShowSeason = season,
                             })
                     )
-                    .DistinctBy(x => (x.Quality, x.PlexTvShowSeasonId))
+                    .DistinctBy(x => (Quality: x.VideoQuality, x.PlexTvShowSeasonId))
                     .ToList();
                 if (seasonQualities.Count > 0)
                     await ctx.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, txCt);
@@ -423,12 +423,12 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                             .Select(mediaData => new PlexTvShowMediaQuality
                             {
                                 Id = 0,
-                                Quality = mediaData.Quality,
+                                VideoQuality = mediaData.VideoQuality,
                                 PlexLibraryId = plexLibraryId,
                                 PlexTvShowId = show.Id,
                             })
                     )
-                    .DistinctBy(x => (x.Quality, x.PlexTvShowId))
+                    .DistinctBy(x => (Quality: x.VideoQuality, x.PlexTvShowId))
                     .ToList();
                 if (tvShowQualities.Count > 0)
                     await ctx.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, txCt);
@@ -461,7 +461,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
     private async Task<Result> SyncTvShowGenres(
         List<PlexTvShow> plexTvShows,
-        Dictionary<string, PlexGenre> genreDict,
+        Dictionary<string, PlexGenreVideo> genreDict,
         int plexLibraryId,
         string libraryName,
         CancellationToken cancellationToken

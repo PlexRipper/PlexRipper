@@ -104,17 +104,20 @@ public class GetMediaDetailByIdEndpointUnitTests
     public async Task ShouldReturnPhotoAlbumImagesWithOriginalIds_WhenPhotoAlbumDetailIsRequested()
     {
         // Arrange
-        await SetupDatabase(62307, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumCount = 2;
-            config.PhotoCount = 2;
-        });
+        await SetupDatabase(
+            62307,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 2;
+                config.PhotoCount = 2;
+            }
+        );
         var dbContext = IDbContext;
         var album = await dbContext
             .PlexPhotoAlbums.Include(x => x.Photos)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.MediaDataList)
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
         album.Photos.Count.ShouldBe(2);
@@ -145,38 +148,39 @@ public class GetMediaDetailByIdEndpointUnitTests
             photo.Children.ShouldBeEmpty();
             photo.DiscNumber.ShouldBeNull();
             photo.TrackNumber.ShouldBeNull();
-            photo.MediaData.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId)).ShouldBe(
-                original.MediaDataList.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId))
-            );
-            photo.Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType)).ShouldBe(
-                original.MediaDataList.Select(x => (x.Id, original.Id, PlexMediaType.PhotoImage))
-            );
+            photo
+                .MediaData.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId))
+                .ShouldBe(original.MediaDataList.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId)));
+            photo
+                .Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType))
+                .ShouldBe(original.MediaDataList.Select(x => (x.Id, original.Id, PlexMediaType.PhotoImage)));
             var validation = await PlexMediaDtoValidator.ValidateAsync(photo, CancellationToken);
             validation.Errors.ShouldBeEmpty();
         }
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Test]
     public async Task ShouldReturnMusicHierarchyWithStoredDiscAndTrackNumbers_WhenArtistDetailIsRequested()
     {
         // Arrange
-        await SetupDatabase(62503, config =>
-        {
-            config.PlexMusicLibraryCount = 1;
-            config.MusicArtistCount = 2;
-            config.MusicAlbumCount = 2;
-            config.MusicTrackCount = 3;
-        });
+        await SetupDatabase(
+            62503,
+            config =>
+            {
+                config.PlexMusicLibraryCount = 1;
+                config.MusicArtistCount = 2;
+                config.MusicAlbumCount = 2;
+                config.MusicTrackCount = 3;
+            }
+        );
         var dbContext = IDbContext;
         var artist = await dbContext
-            .PlexArtists.AsTracking()
+            .PlexMusicArtists.AsTracking()
             .Include(x => x.Albums)
-            .ThenInclude(x => x.Tracks)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.Tracks)
+                    .ThenInclude(x => x.MediaDataList)
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
         artist.Albums.Count.ShouldBe(2);
@@ -199,25 +203,60 @@ public class GetMediaDetailByIdEndpointUnitTests
         await dbContext.SaveChangesAsync(CancellationToken);
         tracks.Select(x => (x.DiscNumber, x.TrackNumber)).ShouldBe(numbering);
         var persistedTracks = await dbContext
-            .PlexTracks.Where(x => x.PlexAlbum!.PlexArtistId == artist.Id)
+            .PlexMusicTracks.Where(x => x.PlexAlbum!.PlexArtistId == artist.Id)
             .OrderBy(x => x.Id)
-            .Select(x => new { x.Id, x.DiscNumber, x.TrackNumber })
+            .Select(x => new
+            {
+                x.Id,
+                x.DiscNumber,
+                x.TrackNumber,
+            })
             .ToListAsync(CancellationToken);
         persistedTracks.Select(x => x.Id).ShouldBe(tracks.Select(x => x.Id));
         persistedTracks.Select(x => (x.DiscNumber, x.TrackNumber)).ShouldBe(numbering);
-        var isOwned = await dbContext.PlexLibraries.WhereIsOwned().AnyAsync(x => x.Id == artist.PlexLibraryId, CancellationToken);
+        var isOwned = await dbContext
+            .PlexLibraries.WhereIsOwned()
+            .AnyAsync(x => x.Id == artist.PlexLibraryId, CancellationToken);
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.Is<ApplyComparisonStateCommand>(c =>
-                c.PlexLibraryId == artist.PlexLibraryId && c.MediaType == PlexMediaType.MusicArtist
-                && c.Items.Count == 9), CancellationToken))
-            .Returns<ICommand<Result>, CancellationToken>((cmd, ct) => isOwned
-                ? new ApplyOwnedMusicComparisonStateCommandHandler(IDbContext, Mock.Mock<Quartz.IScheduler>().Object)
-                    .ExecuteAsync(new ApplyOwnedMusicComparisonStateCommand(((ApplyComparisonStateCommand)cmd).Items, artist.PlexLibraryId), ct)
-                : new ApplyRemoteMusicComparisonStateCommandHandler(IDbContext, Mock.Mock<Quartz.IScheduler>().Object)
-                    .ExecuteAsync(new ApplyRemoteMusicComparisonStateCommand(((ApplyComparisonStateCommand)cmd).Items, artist.PlexLibraryId), ct))
+            .Setup(x =>
+                x.Send(
+                    It.Is<ApplyComparisonStateCommand>(c =>
+                        c.PlexLibraryId == artist.PlexLibraryId
+                        && c.MediaType == PlexMediaType.MusicArtist
+                        && c.Items.Count == 9
+                    ),
+                    CancellationToken
+                )
+            )
+            .Returns<ICommand<Result>, CancellationToken>(
+                (cmd, ct) =>
+                    isOwned
+                        ? new ApplyOwnedMusicComparisonStateCommandHandler(
+                            IDbContext,
+                            Mock.Mock<Quartz.IScheduler>().Object
+                        ).ExecuteAsync(
+                            new ApplyOwnedMusicComparisonStateCommand(
+                                ((ApplyComparisonStateCommand)cmd).Items,
+                                artist.PlexLibraryId
+                            ),
+                            ct
+                        )
+                        : new ApplyRemoteMusicComparisonStateCommandHandler(
+                            IDbContext,
+                            Mock.Mock<Quartz.IScheduler>().Object
+                        ).ExecuteAsync(
+                            new ApplyRemoteMusicComparisonStateCommand(
+                                ((ApplyComparisonStateCommand)cmd).Items,
+                                artist.PlexLibraryId
+                            ),
+                            ct
+                        )
+            )
             .Verifiable(Times.Once());
         Mock.Mock<Quartz.IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(CancellationToken)).ReturnsAsync([]);
-        Mock.Mock<Quartz.IScheduler>().Setup(x => x.GetJobKeys(Quartz.Impl.Matchers.GroupMatcher<Quartz.JobKey>.AnyGroup(), CancellationToken)).ReturnsAsync([]);
+        Mock.Mock<Quartz.IScheduler>()
+            .Setup(x => x.GetJobKeys(Quartz.Impl.Matchers.GroupMatcher<Quartz.JobKey>.AnyGroup(), CancellationToken))
+            .ReturnsAsync([]);
 
         // Act
         var response = await TestEndpointHandleAsync(
@@ -237,16 +276,17 @@ public class GetMediaDetailByIdEndpointUnitTests
         dto.ParentId.ShouldBeNull();
         dto.DiscNumber.ShouldBeNull();
         dto.TrackNumber.ShouldBeNull();
-        dto.Children.Select(x => x.Id).ShouldBe(artist.Albums.OrderBy(x => x.SortIndex).ThenBy(x => x.Id).Select(x => x.Id));
+        dto.Children.Select(x => x.Id)
+            .ShouldBe(artist.Albums.OrderBy(x => x.SortIndex).ThenBy(x => x.Id).Select(x => x.Id));
         dto.Children.ShouldAllBe(x => x.ParentId == artist.Id && x.Type == PlexMediaType.MusicAlbum);
         dto.GrandChildCount.ShouldBe(6);
         dto.Children.ShouldAllBe(x => x.DiscNumber == null && x.TrackNumber == null);
         foreach (var album in dto.Children)
         {
             var originalAlbum = artist.Albums.Single(x => x.Id == album.Id);
-            album.Children.Select(x => x.Id).ShouldBe(
-                originalAlbum.Tracks.OrderBy(x => x.SortIndex).ThenBy(x => x.Id).Select(x => x.Id)
-            );
+            album
+                .Children.Select(x => x.Id)
+                .ShouldBe(originalAlbum.Tracks.OrderBy(x => x.SortIndex).ThenBy(x => x.Id).Select(x => x.Id));
             foreach (var track in album.Children)
             {
                 var originalTrack = originalAlbum.Tracks.Single(x => x.Id == track.Id);
@@ -257,12 +297,18 @@ public class GetMediaDetailByIdEndpointUnitTests
                 );
                 track.Children.ShouldBeEmpty();
                 track.ComparisonId.ShouldBe(PlexMediaComparisonState.NotCompared.ToComparisonId());
-                track.MediaData.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId, x.AudioCodec)).ShouldBe(
-                    originalTrack.MediaDataList.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId, x.AudioCodec))
-                );
-                track.Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType, x.Quality)).ShouldBe(
-                    originalTrack.MediaDataList.Select(x => (x.Id, originalTrack.Id, PlexMediaType.MusicTrack, VideoQuality.Unknown))
-                );
+                track
+                    .MediaData.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId, x.AudioCodec))
+                    .ShouldBe(
+                        originalTrack.MediaDataList.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId, x.AudioCodec))
+                    );
+                track
+                    .Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType, Quality: x.VideoQuality))
+                    .ShouldBe(
+                        originalTrack.MediaDataList.Select(x =>
+                            (x.Id, originalTrack.Id, PlexMediaType.MusicTrack, VideoQuality.Unknown)
+                        )
+                    );
                 var validation = await PlexMediaDtoValidator.ValidateAsync(track, CancellationToken);
                 validation.Errors.ShouldBeEmpty();
             }
@@ -274,11 +320,14 @@ public class GetMediaDetailByIdEndpointUnitTests
     public async Task ShouldReturnOtherVideoOriginalPartsAndVersionSelectors_WhenDetailIsRequested()
     {
         // Arrange
-        var seed = await SetupDatabase(62504, config =>
-        {
-            config.PlexOtherVideoLibraryCount = 1;
-            config.OtherVideoCount = 1;
-        });
+        var seed = await SetupDatabase(
+            62504,
+            config =>
+            {
+                config.PlexOtherVideoLibraryCount = 1;
+                config.OtherVideoCount = 1;
+            }
+        );
         using var dbContext = IDbContext;
         var video = await dbContext.PlexOtherVideos.Include(x => x.MediaDataList).SingleAsync(CancellationToken);
         var original = video.MediaDataList.Single();
@@ -295,7 +344,9 @@ public class GetMediaDetailByIdEndpointUnitTests
         parts[1].UpdateInitProperty(nameof(original.PlexApiMediaId), original.PlexApiMediaId + 1);
         dbContext.PlexOtherVideoData.AddRange(parts);
         await dbContext.SaveChangesAsync(CancellationToken);
-        (await dbContext.PlexOtherVideoData.CountAsync(x => x.PlexOtherVideoId == video.Id, CancellationToken)).ShouldBe(3);
+        (
+            await dbContext.PlexOtherVideoData.CountAsync(x => x.PlexOtherVideoId == video.Id, CancellationToken)
+        ).ShouldBe(3);
 
         // Act
         var response = await TestEndpointHandleAsync(
@@ -314,19 +365,17 @@ public class GetMediaDetailByIdEndpointUnitTests
         dto.DiscNumber.ShouldBeNull();
         dto.TrackNumber.ShouldBeNull();
         dto.ComparisonId.ShouldBe(PlexMediaComparisonState.NotCompared.ToComparisonId());
-        dto.MediaData.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId)).Order().ShouldBe(
-            new[] { original }.Concat(parts).Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId)).Order()
-        );
-        dto.Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType)).Order().ShouldBe(
-            new[] { original, parts[1] }.Select(x => (x.Id, video.Id, PlexMediaType.OtherVideos)).Order()
-        );
+        dto.MediaData.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId))
+            .Order()
+            .ShouldBe(new[] { original }.Concat(parts).Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId)).Order());
+        dto.Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType))
+            .Order()
+            .ShouldBe(new[] { original, parts[1] }.Select(x => (x.Id, video.Id, PlexMediaType.OtherVideos)).Order());
         dto.MediaData.Single(x => x.Id == original.Id).FileName.ShouldBe(original.OriginalFilename.GetFileName());
         var validation = await PlexMediaDtoValidator.ValidateAsync(dto, CancellationToken);
         validation.Errors.ShouldBeEmpty();
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Test]
@@ -335,34 +384,71 @@ public class GetMediaDetailByIdEndpointUnitTests
     public async Task ShouldReturnRootWithoutChildren_WhenHierarchyIsEmpty(PlexMediaType type)
     {
         // Arrange
-        await SetupDatabase(62308, config =>
-        {
-            config.PlexMusicLibraryCount = 1;
-            config.MusicArtistCount = 1;
-            config.MusicAlbumCount = 0;
-            config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumCount = 1;
-            config.PhotoCount = 0;
-        });
+        await SetupDatabase(
+            62308,
+            config =>
+            {
+                config.PlexMusicLibraryCount = 1;
+                config.MusicArtistCount = 1;
+                config.MusicAlbumCount = 0;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 1;
+                config.PhotoCount = 0;
+            }
+        );
         var dbContext = IDbContext;
-        BasePlexMedia root = type == PlexMediaType.MusicArtist
-            ? await dbContext.PlexArtists.SingleAsync(CancellationToken)
-            : await dbContext.PlexPhotoAlbums.SingleAsync(CancellationToken);
+        BasePlexMedia root =
+            type == PlexMediaType.MusicArtist
+                ? await dbContext.PlexMusicArtists.SingleAsync(CancellationToken)
+                : await dbContext.PlexPhotoAlbums.SingleAsync(CancellationToken);
         root.ChildCount.ShouldBe(0);
         if (type == PlexMediaType.MusicArtist)
         {
-            var isOwned = await dbContext.PlexLibraries.WhereIsOwned().AnyAsync(x => x.Id == root.PlexLibraryId, CancellationToken);
+            var isOwned = await dbContext
+                .PlexLibraries.WhereIsOwned()
+                .AnyAsync(x => x.Id == root.PlexLibraryId, CancellationToken);
             Mock.Mock<ICommandExecutor>()
-                .Setup(x => x.Send(It.Is<ApplyComparisonStateCommand>(c => c.PlexLibraryId == root.PlexLibraryId
-                    && c.MediaType == PlexMediaType.MusicArtist && c.Items.Count == 1), CancellationToken))
-                .Returns<ICommand<Result>, CancellationToken>((cmd, ct) => isOwned
-                    ? new ApplyOwnedMusicComparisonStateCommandHandler(IDbContext, Mock.Mock<Quartz.IScheduler>().Object)
-                        .ExecuteAsync(new ApplyOwnedMusicComparisonStateCommand(((ApplyComparisonStateCommand)cmd).Items, root.PlexLibraryId), ct)
-                    : new ApplyRemoteMusicComparisonStateCommandHandler(IDbContext, Mock.Mock<Quartz.IScheduler>().Object)
-                        .ExecuteAsync(new ApplyRemoteMusicComparisonStateCommand(((ApplyComparisonStateCommand)cmd).Items, root.PlexLibraryId), ct))
+                .Setup(x =>
+                    x.Send(
+                        It.Is<ApplyComparisonStateCommand>(c =>
+                            c.PlexLibraryId == root.PlexLibraryId
+                            && c.MediaType == PlexMediaType.MusicArtist
+                            && c.Items.Count == 1
+                        ),
+                        CancellationToken
+                    )
+                )
+                .Returns<ICommand<Result>, CancellationToken>(
+                    (cmd, ct) =>
+                        isOwned
+                            ? new ApplyOwnedMusicComparisonStateCommandHandler(
+                                IDbContext,
+                                Mock.Mock<Quartz.IScheduler>().Object
+                            ).ExecuteAsync(
+                                new ApplyOwnedMusicComparisonStateCommand(
+                                    ((ApplyComparisonStateCommand)cmd).Items,
+                                    root.PlexLibraryId
+                                ),
+                                ct
+                            )
+                            : new ApplyRemoteMusicComparisonStateCommandHandler(
+                                IDbContext,
+                                Mock.Mock<Quartz.IScheduler>().Object
+                            ).ExecuteAsync(
+                                new ApplyRemoteMusicComparisonStateCommand(
+                                    ((ApplyComparisonStateCommand)cmd).Items,
+                                    root.PlexLibraryId
+                                ),
+                                ct
+                            )
+                )
                 .Verifiable(Times.Once());
             Mock.Mock<Quartz.IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(CancellationToken)).ReturnsAsync([]);
-            Mock.Mock<Quartz.IScheduler>().Setup(x => x.GetJobKeys(Quartz.Impl.Matchers.GroupMatcher<Quartz.JobKey>.AnyGroup(), CancellationToken)).ReturnsAsync([]);
+            Mock.Mock<Quartz.IScheduler>()
+                .Setup(x =>
+                    x.GetJobKeys(Quartz.Impl.Matchers.GroupMatcher<Quartz.JobKey>.AnyGroup(), CancellationToken)
+                )
+                .ReturnsAsync([]);
         }
 
         // Act
@@ -381,9 +467,11 @@ public class GetMediaDetailByIdEndpointUnitTests
         dto.Children.ShouldBeEmpty();
         dto.ComparisonId.ShouldBe(PlexMediaComparisonState.NotCompared.ToComparisonId());
         Mock.Mock<ICommandExecutor>().Verify();
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()),
-            type == PlexMediaType.MusicArtist ? Times.Once() : Times.Never());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()),
+                type == PlexMediaType.MusicArtist ? Times.Once() : Times.Never()
+            );
     }
 
     [Test]
@@ -403,10 +491,8 @@ public class GetMediaDetailByIdEndpointUnitTests
         response.StatusCode.ShouldBe(404);
         response.Response.ShouldNotBeNull().IsSuccess.ShouldBeFalse();
         response.Response.Errors.Count.ShouldBe(1);
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Test]
@@ -419,7 +505,9 @@ public class GetMediaDetailByIdEndpointUnitTests
     [Arguments(PlexMediaType.MusicTrack)]
     [Arguments(PlexMediaType.PhotoImage)]
     [Arguments((PlexMediaType)999)]
-    public async Task ShouldRejectUnsupportedDetailTypesWithoutExecutingEndpoint_WhenValidatingRequest(PlexMediaType type)
+    public async Task ShouldRejectUnsupportedDetailTypesWithoutExecutingEndpoint_WhenValidatingRequest(
+        PlexMediaType type
+    )
     {
         // Arrange
         var request = new GetMediaDetailByIdEndpointRequest(1, type);
@@ -429,14 +517,13 @@ public class GetMediaDetailByIdEndpointUnitTests
 
         // Assert
         response.IsValid.ShouldBeFalse();
-        response.ValidationResult.ShouldNotBeNull().Errors.Select(x => x.PropertyName).ShouldBe(
-            new[] { nameof(GetMediaDetailByIdEndpointRequest.Type) }
-        );
+        response
+            .ValidationResult.ShouldNotBeNull()
+            .Errors.Select(x => x.PropertyName)
+            .ShouldBe(new[] { nameof(GetMediaDetailByIdEndpointRequest.Type) });
         response.Response.ShouldBeNull();
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Test]
@@ -641,7 +728,6 @@ public class GetMediaDetailByIdEndpointUnitTests
         episodes.Count.ShouldBe(3);
         episodes.ShouldAllBe(x => x.ComparisonId == PlexMediaComparisonState.Owned.ToComparisonId());
     }
-
 }
 
 public class GetMediaDetailByIdMusicComparisonEndpointUnitTests
@@ -651,11 +737,17 @@ public class GetMediaDetailByIdMusicComparisonEndpointUnitTests
     public async Task ShouldMapActualMusicCoverageByTypedIdentity_WhenArtistAlbumAndTrackIdsCollide()
     {
         // Arrange
-        await SetupDatabase(963530, config =>
-        {
-            config.PlexServerCount = 2; config.PlexMusicLibraryCount = 1;
-            config.MusicArtistCount = 1; config.MusicAlbumCount = 1; config.MusicTrackCount = 2;
-        });
+        await SetupDatabase(
+            963530,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMusicLibraryCount = 1;
+                config.MusicArtistCount = 1;
+                config.MusicAlbumCount = 1;
+                config.MusicTrackCount = 2;
+            }
+        );
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var remote = libraries[0];
@@ -663,48 +755,100 @@ public class GetMediaDetailByIdMusicComparisonEndpointUnitTests
         await SetOwnedOverrideAsync(remote.PlexServerId, false);
         await SetOwnedOverrideAsync(owned.PlexServerId, true);
         await dbContext.PlexLibraries.ExecuteUpdateAsync(x => x.SetProperty(y => y.Outdated, false), CancellationToken);
-        var remoteArtist = await dbContext.PlexArtists.SingleAsync(x => x.PlexLibraryId == remote.Id, CancellationToken);
-        var ownedArtist = await dbContext.PlexArtists.SingleAsync(x => x.PlexLibraryId == owned.Id, CancellationToken);
-        var remoteAlbum = await dbContext.PlexAlbums.SingleAsync(x => x.PlexArtistId == remoteArtist.Id, CancellationToken);
-        var ownedAlbum = await dbContext.PlexAlbums.SingleAsync(x => x.PlexArtistId == ownedArtist.Id, CancellationToken);
-        var remoteTracks = await dbContext.PlexTracks.Where(x => x.PlexAlbumId == remoteAlbum.Id).OrderBy(x => x.Id).ToListAsync(CancellationToken);
-        var ownedTrack = await dbContext.PlexTracks.Where(x => x.PlexAlbumId == ownedAlbum.Id).OrderBy(x => x.Id).FirstAsync(CancellationToken);
+        var remoteArtist = await dbContext.PlexMusicArtists.SingleAsync(
+            x => x.PlexLibraryId == remote.Id,
+            CancellationToken
+        );
+        var ownedArtist = await dbContext.PlexMusicArtists.SingleAsync(
+            x => x.PlexLibraryId == owned.Id,
+            CancellationToken
+        );
+        var remoteAlbum = await dbContext.PlexMusicAlbums.SingleAsync(
+            x => x.PlexArtistId == remoteArtist.Id,
+            CancellationToken
+        );
+        var ownedAlbum = await dbContext.PlexMusicAlbums.SingleAsync(
+            x => x.PlexArtistId == ownedArtist.Id,
+            CancellationToken
+        );
+        var remoteTracks = await dbContext
+            .PlexMusicTracks.Where(x => x.PlexAlbumId == remoteAlbum.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var ownedTrack = await dbContext
+            .PlexMusicTracks.Where(x => x.PlexAlbumId == ownedAlbum.Id)
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
         remoteArtist.Id.ShouldBe(remoteAlbum.Id);
         remoteArtist.Id.ShouldBe(remoteTracks[0].Id);
-        dbContext.PlexComparisonScopes.Add(new PlexComparisonState
-        {
-            RemotePlexLibraryId = remote.Id, OwnedPlexLibraryId = owned.Id,
-            MediaType = PlexMediaType.MusicArtist, CompletedAt = DateTime.UtcNow,
-        });
-        dbContext.PlexMusicArtistComparisons.Add(new PlexMusicArtistComparison
-        {
-            RemotePlexLibraryId = remote.Id, OwnedPlexLibraryId = owned.Id,
-            RemotePlexMediaId = remoteArtist.Id, OwnedPlexMediaId = ownedArtist.Id,
-            MatchType = PlexMediaComparisonMatchType.MusicBrainzArtistId, ComparedAt = DateTime.UtcNow,
-        });
-        dbContext.PlexMusicAlbumComparisons.Add(new PlexMusicAlbumComparison
-        {
-            RemotePlexLibraryId = remote.Id, OwnedPlexLibraryId = owned.Id,
-            RemotePlexMediaId = remoteAlbum.Id, OwnedPlexMediaId = ownedAlbum.Id,
-            MatchType = PlexMediaComparisonMatchType.MusicBrainzReleaseId, ComparedAt = DateTime.UtcNow,
-        });
-        dbContext.PlexMusicTrackComparisons.Add(new PlexMusicTrackComparison
-        {
-            RemotePlexLibraryId = remote.Id, OwnedPlexLibraryId = owned.Id,
-            RemotePlexMediaId = remoteTracks[0].Id, OwnedPlexMediaId = ownedTrack.Id,
-            MatchType = PlexMediaComparisonMatchType.MusicBrainzReleaseTrackId, ComparedAt = DateTime.UtcNow,
-        });
+        dbContext.PlexComparisonScopes.Add(
+            new PlexComparisonState
+            {
+                RemotePlexLibraryId = remote.Id,
+                OwnedPlexLibraryId = owned.Id,
+                MediaType = PlexMediaType.MusicArtist,
+                CompletedAt = DateTime.UtcNow,
+            }
+        );
+        dbContext.PlexMusicArtistComparisons.Add(
+            new PlexMusicArtistComparison
+            {
+                RemotePlexLibraryId = remote.Id,
+                OwnedPlexLibraryId = owned.Id,
+                RemotePlexMediaId = remoteArtist.Id,
+                OwnedPlexMediaId = ownedArtist.Id,
+                MatchType = PlexMediaComparisonMatchType.MusicBrainzArtistId,
+                ComparedAt = DateTime.UtcNow,
+            }
+        );
+        dbContext.PlexMusicAlbumComparisons.Add(
+            new PlexMusicAlbumComparison
+            {
+                RemotePlexLibraryId = remote.Id,
+                OwnedPlexLibraryId = owned.Id,
+                RemotePlexMediaId = remoteAlbum.Id,
+                OwnedPlexMediaId = ownedAlbum.Id,
+                MatchType = PlexMediaComparisonMatchType.MusicBrainzReleaseId,
+                ComparedAt = DateTime.UtcNow,
+            }
+        );
+        dbContext.PlexMusicTrackComparisons.Add(
+            new PlexMusicTrackComparison
+            {
+                RemotePlexLibraryId = remote.Id,
+                OwnedPlexLibraryId = owned.Id,
+                RemotePlexMediaId = remoteTracks[0].Id,
+                OwnedPlexMediaId = ownedTrack.Id,
+                MatchType = PlexMediaComparisonMatchType.MusicBrainzReleaseTrackId,
+                ComparedAt = DateTime.UtcNow,
+            }
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.Is<ApplyComparisonStateCommand>(c => c.MediaType == PlexMediaType.MusicArtist
-                && c.PlexLibraryId == remote.Id && c.Items.Count == 4), CancellationToken))
-            .Returns<ICommand<Result>, CancellationToken>((cmd, ct) =>
-                new ApplyRemoteMusicComparisonStateCommandHandler(IDbContext, Mock.Mock<Quartz.IScheduler>().Object)
-                    .ExecuteAsync(new ApplyRemoteMusicComparisonStateCommand(((ApplyComparisonStateCommand)cmd).Items, remote.Id), ct))
+            .Setup(x =>
+                x.Send(
+                    It.Is<ApplyComparisonStateCommand>(c =>
+                        c.MediaType == PlexMediaType.MusicArtist && c.PlexLibraryId == remote.Id && c.Items.Count == 4
+                    ),
+                    CancellationToken
+                )
+            )
+            .Returns<ICommand<Result>, CancellationToken>(
+                (cmd, ct) =>
+                    new ApplyRemoteMusicComparisonStateCommandHandler(
+                        IDbContext,
+                        Mock.Mock<Quartz.IScheduler>().Object
+                    ).ExecuteAsync(
+                        new ApplyRemoteMusicComparisonStateCommand(((ApplyComparisonStateCommand)cmd).Items, remote.Id),
+                        ct
+                    )
+            )
             .Verifiable(Times.Once());
 
         // Act
-        var response = await TestEndpointHandleAsync(new GetMediaDetailByIdEndpointRequest(remoteArtist.Id, PlexMediaType.MusicArtist));
+        var response = await TestEndpointHandleAsync(
+            new GetMediaDetailByIdEndpointRequest(remoteArtist.Id, PlexMediaType.MusicArtist)
+        );
 
         // Assert
         response.IsValid.ShouldBeTrue();
@@ -713,12 +857,29 @@ public class GetMediaDetailByIdMusicComparisonEndpointUnitTests
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         var root = result.Value.ShouldNotBeNull();
-        (root.Id, root.Type, root.ComparisonId).ShouldBe((remoteArtist.Id, PlexMediaType.MusicArtist, PlexMediaComparisonState.Partial.ToComparisonId()));
+        (root.Id, root.Type, root.ComparisonId).ShouldBe(
+            (remoteArtist.Id, PlexMediaType.MusicArtist, PlexMediaComparisonState.Partial.ToComparisonId())
+        );
         var album = root.Children.ShouldHaveSingleItem();
-        (album.Id, album.Type, album.ComparisonId).ShouldBe((remoteAlbum.Id, PlexMediaType.MusicAlbum, PlexMediaComparisonState.Partial.ToComparisonId()));
-        album.Children.OrderBy(x => x.Id).Select(x => (x.Id, x.Type, x.ComparisonId)).ShouldBe(
-            remoteTracks.Select(x => (x.Id, PlexMediaType.MusicTrack,
-                (x.Id == remoteTracks[0].Id ? PlexMediaComparisonState.Owned : PlexMediaComparisonState.Missing).ToComparisonId())));
+        (album.Id, album.Type, album.ComparisonId).ShouldBe(
+            (remoteAlbum.Id, PlexMediaType.MusicAlbum, PlexMediaComparisonState.Partial.ToComparisonId())
+        );
+        album
+            .Children.OrderBy(x => x.Id)
+            .Select(x => (x.Id, x.Type, x.ComparisonId))
+            .ShouldBe(
+                remoteTracks.Select(x =>
+                    (
+                        x.Id,
+                        PlexMediaType.MusicTrack,
+                        (
+                            x.Id == remoteTracks[0].Id
+                                ? PlexMediaComparisonState.Owned
+                                : PlexMediaComparisonState.Missing
+                        ).ToComparisonId()
+                    )
+                )
+            );
         Mock.Mock<ICommandExecutor>().Verify();
     }
 }

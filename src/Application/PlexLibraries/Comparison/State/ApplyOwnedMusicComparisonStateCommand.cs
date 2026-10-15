@@ -29,21 +29,14 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
     {
         var items = command.Items;
         foreach (var item in items)
-        {
             item.SetComparisonState(PlexMediaComparisonState.NotCompared);
-        }
 
         if (items.Count == 0)
             return Result.Ok();
 
         var ownedLibraryExists = await _dbContext
             .PlexLibraries.WhereIsOwned()
-            .AnyAsync(x =>
-                x.Id == command.OwnedLibraryId
-                && x.Type == PlexMediaType.MusicArtist
-                && !x.Outdated,
-                ct
-            );
+            .AnyAsync(x => x.Id == command.OwnedLibraryId && x.Type == PlexMediaType.MusicArtist && !x.Outdated, ct);
 
         if (!ownedLibraryExists)
             return Result.Ok();
@@ -63,16 +56,13 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
                 .ToListAsync(ct);
 
             var hasActiveJobs = await _scheduler.HasActiveJobs(
-                remoteLibraryIds
-                    .Select(x => PlexLibraryComparisonJob.GetJobKey(command.OwnedLibraryId, x)),
+                remoteLibraryIds.Select(x => PlexLibraryComparisonJob.GetJobKey(command.OwnedLibraryId, x)),
                 ct
             );
             if (hasActiveJobs)
             {
                 foreach (var item in items)
-                {
                     item.SetComparisonState(PlexMediaComparisonState.Pending);
-                }
             }
 
             return Result.Ok();
@@ -80,11 +70,13 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
 
         var artistIds = items.Where(x => x.Type == PlexMediaType.MusicArtist).Select(x => x.Id).ToHashSet();
         var albumIds = items.Where(x => x.Type == PlexMediaType.MusicAlbum).Select(x => x.Id).ToHashSet();
+        var trackIds = items.Where(x => x.Type == PlexMediaType.MusicTrack).Select(x => x.Id).ToHashSet();
 
         var artistHits = await (
             from comparison in _dbContext.PlexMusicArtistComparisons
-            join ownedArtist in _dbContext.PlexArtists on comparison.OwnedPlexMediaId equals ownedArtist.Id
-            join remoteAlbum in _dbContext.PlexAlbums on comparison.RemotePlexMediaId equals remoteAlbum.PlexArtistId
+            join ownedArtist in _dbContext.PlexMusicArtists on comparison.OwnedPlexMediaId equals ownedArtist.Id
+            join remoteAlbum in _dbContext.PlexMusicAlbums
+                on comparison.RemotePlexMediaId equals remoteAlbum.PlexArtistId
             where
                 comparison.OwnedPlexLibraryId == command.OwnedLibraryId
                 && currentRemoteLibraryIds.Contains(comparison.RemotePlexLibraryId)
@@ -101,9 +93,9 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
 
         var albumHits = await (
             from comparison in _dbContext.PlexMusicAlbumComparisons
-            join ownedAlbum in _dbContext.PlexAlbums on comparison.OwnedPlexMediaId equals ownedAlbum.Id
-            join ownedArtist in _dbContext.PlexArtists on ownedAlbum.PlexArtistId equals ownedArtist.Id
-            join remoteAlbum in _dbContext.PlexAlbums on comparison.RemotePlexMediaId equals remoteAlbum.Id
+            join ownedAlbum in _dbContext.PlexMusicAlbums on comparison.OwnedPlexMediaId equals ownedAlbum.Id
+            join ownedArtist in _dbContext.PlexMusicArtists on ownedAlbum.PlexArtistId equals ownedArtist.Id
+            join remoteAlbum in _dbContext.PlexMusicAlbums on comparison.RemotePlexMediaId equals remoteAlbum.Id
             where
                 comparison.OwnedPlexLibraryId == command.OwnedLibraryId
                 && currentRemoteLibraryIds.Contains(comparison.RemotePlexLibraryId)
@@ -124,10 +116,10 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
 
         var trackHits = await (
             from comparison in _dbContext.PlexMusicTrackComparisons
-            join ownedTrack in _dbContext.PlexTracks on comparison.OwnedPlexMediaId equals ownedTrack.Id
-            join ownedAlbum in _dbContext.PlexAlbums on ownedTrack.PlexAlbumId equals ownedAlbum.Id
-            join ownedArtist in _dbContext.PlexArtists on ownedAlbum.PlexArtistId equals ownedArtist.Id
-            join remoteTrack in _dbContext.PlexTracks on comparison.RemotePlexMediaId equals remoteTrack.Id
+            join ownedTrack in _dbContext.PlexMusicTracks on comparison.OwnedPlexMediaId equals ownedTrack.Id
+            join ownedAlbum in _dbContext.PlexMusicAlbums on ownedTrack.PlexAlbumId equals ownedAlbum.Id
+            join ownedArtist in _dbContext.PlexMusicArtists on ownedAlbum.PlexArtistId equals ownedArtist.Id
+            join remoteTrack in _dbContext.PlexMusicTracks on comparison.RemotePlexMediaId equals remoteTrack.Id
             join albumComparison in _dbContext.PlexMusicAlbumComparisons
                 on new
                 {
@@ -148,20 +140,21 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
                 && (
                     (artistIds.Contains(ownedArtist.Id) && ownedArtist.PlexLibraryId == command.OwnedLibraryId)
                     || (albumIds.Contains(ownedAlbum.Id) && ownedAlbum.PlexLibraryId == command.OwnedLibraryId)
+                    || (trackIds.Contains(ownedTrack.Id) && ownedTrack.PlexLibraryId == command.OwnedLibraryId)
                 )
             select new
             {
                 OwnedArtistId = ownedArtist.Id,
                 OwnedAlbumId = ownedAlbum.Id,
+                OwnedTrackId = ownedTrack.Id,
                 comparison.RemotePlexLibraryId,
                 RemoteAlbumId = remoteTrack.PlexAlbumId,
                 RemoteTrackId = remoteTrack.Id,
+                comparison.HitState,
             }
         ).ToListAsync(ct);
 
-        var albumHitSet = albumHits
-            .Select(x => (x.OwnedArtistId, x.RemotePlexLibraryId, x.RemoteAlbumId))
-            .ToHashSet();
+        var albumHitSet = albumHits.Select(x => (x.OwnedArtistId, x.RemotePlexLibraryId, x.RemoteAlbumId)).ToHashSet();
 
         var artistTrackHitLookup = trackHits
             .GroupBy(x => (x.OwnedArtistId, x.RemotePlexLibraryId, x.RemoteAlbumId))
@@ -174,9 +167,8 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
         var partialArtistIds = artistHits
             .Where(x =>
                 !albumHitSet.Contains((x.OwnedArtistId, x.RemotePlexLibraryId, x.RemoteAlbumId))
-                || artistTrackHitLookup.GetValueOrDefault(
-                    (x.OwnedArtistId, x.RemotePlexLibraryId, x.RemoteAlbumId)
-                ) < x.TrackCount
+                || artistTrackHitLookup.GetValueOrDefault((x.OwnedArtistId, x.RemotePlexLibraryId, x.RemoteAlbumId))
+                    < x.TrackCount
             )
             .Select(x => x.OwnedArtistId)
             .ToHashSet();
@@ -185,11 +177,23 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
             .Where(x =>
                 albumIds.Contains(x.OwnedAlbumId)
                 && x.OwnedLibraryId == command.OwnedLibraryId
-                && albumTrackHitLookup.GetValueOrDefault(
-                    (x.OwnedAlbumId, x.RemotePlexLibraryId, x.RemoteAlbumId)
-                ) < x.TrackCount
+                && albumTrackHitLookup.GetValueOrDefault((x.OwnedAlbumId, x.RemotePlexLibraryId, x.RemoteAlbumId))
+                    < x.TrackCount
             )
             .Select(x => x.OwnedAlbumId)
+            .ToHashSet();
+
+        var higherArtistIds = trackHits
+            .Where(x => x.HitState == PlexMediaComparisonHitState.HigherQuality)
+            .Select(x => x.OwnedArtistId)
+            .ToHashSet();
+        var higherAlbumIds = trackHits
+            .Where(x => x.HitState == PlexMediaComparisonHitState.HigherQuality)
+            .Select(x => x.OwnedAlbumId)
+            .ToHashSet();
+        var higherTrackIds = trackHits
+            .Where(x => x.HitState == PlexMediaComparisonHitState.HigherQuality)
+            .Select(x => x.OwnedTrackId)
             .ToHashSet();
 
         foreach (var item in items)
@@ -200,12 +204,26 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
                 PlexMediaType.MusicAlbum => partialAlbumIds.Contains(item.Id),
                 _ => false,
             };
+            var hasHigherQuality = item.Type switch
+            {
+                PlexMediaType.MusicArtist => higherArtistIds.Contains(item.Id),
+                PlexMediaType.MusicAlbum => higherAlbumIds.Contains(item.Id),
+                PlexMediaType.MusicTrack => higherTrackIds.Contains(item.Id),
+                _ => false,
+            };
 
-            item.SetComparisonState(
-                hasPartialMissingChildren ? PlexMediaComparisonState.Partial : PlexMediaComparisonState.Owned
-            );
+            item.SetComparisonState(GetState(hasPartialMissingChildren, hasHigherQuality));
         }
 
         return Result.Ok();
     }
+
+    private static PlexMediaComparisonState GetState(bool hasPartialChildren, bool hasHigherQuality) =>
+        (hasPartialChildren, hasHigherQuality) switch
+        {
+            (true, true) => PlexMediaComparisonState.PartialAndHigherQuality,
+            (true, false) => PlexMediaComparisonState.Partial,
+            (false, true) => PlexMediaComparisonState.HigherQuality,
+            _ => PlexMediaComparisonState.Owned,
+        };
 }

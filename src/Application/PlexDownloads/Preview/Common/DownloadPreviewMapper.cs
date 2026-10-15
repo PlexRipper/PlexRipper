@@ -19,7 +19,8 @@ public static class DownloadPreviewMapper
             Qualities = source
                 .Qualities.Select(x => new PlexMediaQualityDTO
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
+                    AudioQuality = x.AudioQuality,
                     MediaDataType = x.MediaDataType,
                     DataId = x.DataId,
                     MediaId = x.MediaId,
@@ -86,7 +87,7 @@ public static class DownloadPreviewMapper
                 .MediaDataList.SortByQuality()
                 .Select(x => new PlexMediaQuality
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = x.Id,
                     MediaId = source.Id,
@@ -120,7 +121,7 @@ public static class DownloadPreviewMapper
                 .Qualities.SortByQuality()
                 .Select(x => new PlexMediaQuality
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = NO_MEDIA_DATA_ID,
                     MediaId = source.Id,
@@ -153,7 +154,7 @@ public static class DownloadPreviewMapper
                 .Qualities.SortByQuality()
                 .Select(x => new PlexMediaQuality
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = NO_MEDIA_DATA_ID,
                     MediaId = source.Id,
@@ -186,7 +187,7 @@ public static class DownloadPreviewMapper
                 .MediaDataList.SortByQuality()
                 .Select(x => new PlexMediaQuality
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     MediaId = source.Id,
                     DataId = x.Id,
@@ -266,7 +267,8 @@ public static class DownloadPreviewMapper
 
     internal static DownloadPreview ProjectToDownloadPreviewMapper(
         this PlexMusicTrack source,
-        List<IGrouping<int, PlexMusicTrackMediaData>> groups
+        List<IGrouping<int, PlexMusicTrackMediaData>> groups,
+        int? selectedDataId = null
     ) =>
         new()
         {
@@ -282,12 +284,18 @@ public static class DownloadPreviewMapper
             PhotoAlbumId = default,
             Children = [],
             Qualities = groups
-                .Select(group => new PlexMediaQuality
+                .OrderBy(group => group.Key)
+                .Select(group =>
                 {
-                    Quality = VideoQuality.Unknown,
-                    MediaDataType = source.Type,
-                    DataId = group.Min(x => x.Id),
-                    MediaId = source.Id,
+                    var (representative, quality) = group.PickAudioQuality(selectedDataId);
+                    return new PlexMediaQuality
+                    {
+                        VideoQuality = VideoQuality.None,
+                        AudioQuality = quality,
+                        MediaDataType = PlexMediaType.MusicTrack,
+                        DataId = representative!.Id,
+                        MediaId = source.Id,
+                    };
                 })
                 .ToList(),
         };
@@ -322,7 +330,7 @@ public static class DownloadPreviewMapper
             Qualities = groups
                 .Select(group => new PlexMediaQuality
                 {
-                    Quality = group.First().Quality,
+                    VideoQuality = group.First().VideoQuality,
                     MediaDataType = source.Type,
                     DataId = group.Min(x => x.Id),
                     MediaId = source.Id,
@@ -379,7 +387,7 @@ public static class DownloadPreviewMapper
                 .MediaDataList.GroupBy(x => x.PlexApiMediaId)
                 .Select(group => new PlexMediaQuality
                 {
-                    Quality = VideoQuality.Unknown,
+                    VideoQuality = VideoQuality.Unknown,
                     MediaDataType = PlexMediaType.PhotoImage,
                     DataId = group.Min(x => x.Id),
                     MediaId = source.Id,

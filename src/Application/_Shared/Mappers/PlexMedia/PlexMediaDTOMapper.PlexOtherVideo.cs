@@ -27,11 +27,11 @@ public static partial class PlexMediaDTOMapper
             Qualities = source
                 .MediaDataList.GroupBy(x => x.PlexApiMediaId)
                 .Select(group => group.OrderBy(x => x.PartIndex).ThenBy(x => x.Id).First())
-                .OrderByDescending(x => x.Quality)
+                .OrderByDescending(x => x.VideoQuality)
                 .ThenBy(x => x.PlexApiMediaId)
                 .Select(x => new PlexMediaQualityDTO
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = PlexMediaType.OtherVideos,
                     DataId = x.Id,
                     MediaId = source.Id,
@@ -47,6 +47,9 @@ public static partial class PlexMediaDTOMapper
             ContentRating = source.ContentRating,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
+            RecordLabel = null,
+            ReleaseDate = null,
+            Genres = source.Genres.ToDTO(),
             Children = [],
             DiscNumber = null,
             TrackNumber = null,
@@ -67,5 +70,6 @@ public static partial class PlexMediaDTOMapper
             VideoResolution = source.VideoResolution,
             VideoCodec = source.VideoCodec,
             AudioCodec = source.AudioCodec,
+            AudioQuality = AudioQuality.None,
         };
 }

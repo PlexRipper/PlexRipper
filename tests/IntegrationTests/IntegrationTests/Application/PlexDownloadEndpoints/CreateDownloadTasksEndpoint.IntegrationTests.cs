@@ -94,9 +94,9 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             .SingleAsync(CancellationToken);
         episode.TvShowId.ShouldBe(show.Id);
         episode.TvShowSeasonId.ShouldBe(season.Id);
-        var artist = await arrangeContext.PlexArtists.SingleAsync(CancellationToken);
-        var album = await arrangeContext.PlexAlbums.SingleAsync(CancellationToken);
-        var track = await arrangeContext.PlexTracks.Include(x => x.MediaDataList).SingleAsync(CancellationToken);
+        var artist = await arrangeContext.PlexMusicArtists.SingleAsync(CancellationToken);
+        var album = await arrangeContext.PlexMusicAlbums.SingleAsync(CancellationToken);
+        var track = await arrangeContext.PlexMusicTracks.Include(x => x.MediaDataList).SingleAsync(CancellationToken);
         album.PlexArtistId.ShouldBe(artist.Id);
         track.PlexAlbumId.ShouldBe(album.Id);
         var photoAlbum = await arrangeContext.PlexPhotoAlbums.SingleAsync(CancellationToken);
@@ -242,8 +242,10 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         foreach (var expected in expectedFiles)
             fileSystem.File.Exists(expected.Destination).ShouldBeFalse();
 
-        var control = await arrangeContext.DownloadTaskOtherVideoFiles.AsTracking()
-            .Include(x => x.Parent).SingleAsync(CancellationToken);
+        var control = await arrangeContext
+            .DownloadTaskOtherVideoFiles.AsTracking()
+            .Include(x => x.Parent)
+            .SingleAsync(CancellationToken);
         control.DownloadStatus = DownloadStatus.Paused;
         control.Parent!.DownloadStatus = DownloadStatus.Paused;
         control.DirectoryMeta.DownloadRootPath = paths.DefaultDownloadsDestinationFolder;
@@ -321,7 +323,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                         MediaDataType = PlexMediaType.Movie,
                         MediaId = x.PlexMovieId,
                         DataId = x.Id,
-                        Quality = x.Quality,
+                        VideoQuality = x.VideoQuality,
                     })
                     .ToList(),
             },

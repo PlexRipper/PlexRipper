@@ -274,7 +274,6 @@ public class DownloadJob : IJob
                     );
                 break;
             case DownloadTaskType.PhotoData:
-            case DownloadTaskType.PhotoPart:
                 await _dbContext
                     .DownloadTaskPhotoImageFiles.Where(x => x.Id == downloadTask.Id)
                     .ExecuteUpdateAsync(
@@ -283,7 +282,6 @@ public class DownloadJob : IJob
                     );
                 break;
             case DownloadTaskType.MusicTrackData:
-            case DownloadTaskType.MusicTrackPart:
                 await _dbContext
                     .DownloadTaskMusicTrackFiles.Where(x => x.Id == downloadTask.Id)
                     .ExecuteUpdateAsync(
@@ -292,7 +290,6 @@ public class DownloadJob : IJob
                     );
                 break;
             case DownloadTaskType.OtherVideoData:
-            case DownloadTaskType.OtherVideoPart:
                 await _dbContext
                     .DownloadTaskOtherVideoFiles.Where(x => x.Id == downloadTask.Id)
                     .ExecuteUpdateAsync(

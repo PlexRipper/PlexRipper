@@ -2,7 +2,7 @@ import { headers, route } from '@fixtures';
 import { generatePlexMedia, generateResultDTO, type MockConfig } from '@mock';
 import { PlexLibraryPaths, PlexMediaPaths, SettingsPaths } from '@api/api-paths';
 import { MediaMetaDataTypes, MediaSortField } from '@enums';
-import { PlexMediaType, VideoQuality, ViewMode, type PlexMediaDTO, type PlexMediaMetadataDTO, type PlexMediaStatisticsDTO, type SettingsModelDTO } from '@dto';
+import { AudioQuality, PlexMediaType, VideoQuality, ViewMode, type PlexMediaDTO, type PlexMediaMetadataDTO, type PlexMediaStatisticsDTO, type SettingsModelDTO } from '@dto';
 
 const families = [
 	{ type: PlexMediaType.MusicArtist, path: 'music', name: 'Music', viewField: 'musicArtistViewMode' },
@@ -33,7 +33,7 @@ function createRoots(type: PlexMediaType, config: MockConfig, libraryId: number,
 					const track = create(album.id + trackIndex + 1, PlexMediaType.MusicTrack, `Track ${trackIndex + 1}`, album.id);
 					track.discNumber = albumIndex === 0 ? [1, 2, 1, null][trackIndex] : 1;
 					track.trackNumber = albumIndex === 0 ? [1, 1, 2, null][trackIndex] : 1;
-					track.mediaData = [{ id: track.id, plexApiMediaId: track.id, plexApiPartId: track.id, fileName: `original-${track.id}.flac`, audioCodec: 'flac', videoCodec: '', videoResolution: VideoQuality.Unknown, duration: 6000, size: 1024 }];
+					track.mediaData = [{ id: track.id, plexApiMediaId: track.id, plexApiPartId: track.id, fileName: `original-${track.id}.flac`, audioCodec: '', audioQuality: AudioQuality.Unknown, videoCodec: '', videoResolution: VideoQuality.None, duration: 6000, size: 1024 }];
 					return track;
 				});
 				album.childCount = album.children.length;
@@ -46,17 +46,17 @@ function createRoots(type: PlexMediaType, config: MockConfig, libraryId: number,
 			root.children = Array.from({ length: 20 }, (_, index) => {
 				const asset = create(root.id + 10 + index, PlexMediaType.PhotoImage, `Holiday asset ${index + 1}`, root.id);
 				const isClip = index === 19;
-				asset.mediaData = [{ id: asset.id, plexApiMediaId: asset.id, plexApiPartId: asset.id, fileName: isClip ? `${'holiday-original-recording-'.repeat(8)}.mp4` : `holiday-${index + 1}.jpg`, audioCodec: isClip ? 'aac' : '', videoCodec: isClip ? 'h264' : '', videoResolution: VideoQuality.Unknown, duration: isClip ? 6000 : 0, size: 1024 }];
+				asset.mediaData = [{ id: asset.id, plexApiMediaId: asset.id, plexApiPartId: asset.id, fileName: isClip ? `${'holiday-original-recording-'.repeat(8)}.mp4` : `holiday-${index + 1}.jpg`, audioCodec: isClip ? 'aac' : '', audioQuality: AudioQuality.None, videoCodec: isClip ? 'h264' : '', videoResolution: VideoQuality.Unknown, duration: isClip ? 6000 : 0, size: 1024 }];
 				return asset;
 			});
 			root.childCount = root.children.length;
 		} else {
 			const resolution = root.id === 100 ? VideoQuality.FullHD : VideoQuality.HD;
 			root.mediaData = [
-				...Array.from({ length: 18 }, (_, index) => ({ id: root.id * 100 + index, plexApiMediaId: root.id, plexApiPartId: root.id * 100 + index, fileName: `multipart-original-part-${index + 1}.mp4`, audioCodec: 'aac', videoCodec: 'h264', videoResolution: resolution, duration: 6000, size: 1024 })),
-				{ id: root.id * 100 + 20, plexApiMediaId: root.id + 1, plexApiPartId: root.id * 100 + 20, fileName: `${'alternative-original-'.repeat(8)}.mkv`, audioCodec: 'flac', videoCodec: 'hevc', videoResolution: resolution, duration: 12000, size: 2048 },
+				...Array.from({ length: 18 }, (_, index) => ({ id: root.id * 100 + index, plexApiMediaId: root.id, plexApiPartId: root.id * 100 + index, fileName: `multipart-original-part-${index + 1}.mp4`, audioCodec: 'aac', audioQuality: AudioQuality.None, videoCodec: 'h264', videoResolution: resolution, duration: 6000, size: 1024 })),
+				{ id: root.id * 100 + 20, plexApiMediaId: root.id + 1, plexApiPartId: root.id * 100 + 20, fileName: `${'alternative-original-'.repeat(8)}.mkv`, audioCodec: 'flac', audioQuality: AudioQuality.None, videoCodec: 'hevc', videoResolution: resolution, duration: 12000, size: 2048 },
 			];
-			root.qualities = [{ dataId: root.mediaData[0]!.id, mediaId: root.id, mediaDataType: type, quality: resolution }];
+			root.qualities = [{ dataId: root.mediaData[0]!.id, mediaId: root.id, mediaDataType: type, audioQuality: AudioQuality.None, videoQuality: resolution }];
 		}
 	}
 	return roots;
@@ -136,6 +136,15 @@ function assertTouchControl(selector: string) {
 	});
 }
 
+function selectMediaTableRow(containerCy: string, title: string) {
+	cy.getCy(containerCy).then(($container) => {
+		const rows = $container.find('[data-cy="media-q-table-mobile-card"], tbody tr');
+		const matches = rows.filter((_, row) => row.textContent?.includes(title) ?? false);
+		expect(matches, `media table row ${title}`).to.have.length(1);
+		cy.wrap(matches).find('[role="checkbox"]').click();
+	});
+}
+
 function scrollLastFileIntoViewport(selector: string) {
 	cy.get(selector).then(($last) => {
 		let parent = $last[0]!.parentElement;
@@ -152,8 +161,8 @@ function scrollLastFileIntoViewport(selector: string) {
 	});
 	cy.get(selector).should(($last) => {
 		const bounds = $last[0]!.getBoundingClientRect();
-		expect(bounds.top, 'last original can be reached on a phone').to.be.gte(0);
-		expect(bounds.bottom, 'last original fits below the screen edge').to.be.lte($last[0]!.ownerDocument.defaultView!.innerHeight);
+		expect(Math.round(bounds.top), 'last original can be reached on a phone').to.be.gte(0);
+		expect(Math.round(bounds.bottom), 'last original fits below the screen edge').to.be.lte(Math.round($last[0]!.ownerDocument.defaultView!.innerHeight));
 	});
 }
 
@@ -220,26 +229,23 @@ for (const family of families) {
 				cy.contains('.media-poster-card', root.title).find('[data-cy="media-poster-menu-trigger"]').click();
 				cy.getCy('media-poster-menu-details').should('be.visible').click({ scrollBehavior: false });
 				cy.location('pathname').should('eq', `/${family.path}/${library.id}/details/${root.id}`);
-				cy.get('h1').should('have.text', root.title);
-				cy.get('dl').should('contain.text', '1960').find('dt').should('not.contain.text', 'Updated');
+				cy.get('.media-title').should('have.text', root.title);
+				cy.get('.media-info-container table').should('contain.text', '1960').find('td').should('not.contain.text', 'Updated');
 				if (family.type === PlexMediaType.MusicArtist) {
 					assertTouchControl('music-artist-checkbox');
 					const album = root.children[0]!;
-					cy.getCy(`music-album-${album.id}`).find('.q-expansion-item__container > .q-item').first().click();
-					cy.getCy(`music-disc-${album.id}-1`).should('contain.text', 'Disc 1');
-					cy.getCy(`music-disc-${album.id}-2`).should('contain.text', 'Disc 2');
-					cy.getCy(`music-disc-${album.id}-unknown`).should('contain.text', 'Unspecified disc');
-					cy.getCy(`music-track-number-${album.id}-${album.children[0]!.id}`).should('have.text', '1');
-					cy.getCy(`music-track-number-${album.id}-${album.children[1]!.id}`).should('have.text', '1');
-					cy.getCy(`music-track-number-${album.id}-${album.children[3]!.id}`).should('not.exist');
-					const track = root.children[0]!.children[0]!;
-					cy.getCy(`music-track-checkbox-${root.children[0]!.id}-${track.id}`).click();
-					cy.contains('original-' + track.id + '.flac').should('be.visible');
+					const albumPanelCy = `music-album-${album.id}`;
+					cy.getCy(albumPanelCy).find('.q-expansion-item__container > .q-item').first().click();
+					cy.getCy(albumPanelCy).find('[data-cy="media-q-table-mobile-card"], tbody tr').should('have.length', album.children.length);
+					for (const track of album.children)
+						cy.getCy(albumPanelCy).should('contain.text', track.title);
+					const track = album.children[0]!;
+					selectMediaTableRow(albumPanelCy, track.title);
 					cy.getCy('music-artist-checkbox').should('have.attr', 'aria-checked', 'mixed');
-					cy.getCy(`music-disc-${album.id}-1`).find('.q-expansion-item__container > .q-item').first().scrollIntoView().focus().type('{enter}');
-					cy.getCy(`music-track-checkbox-${album.id}-${track.id}`).should('not.be.visible');
-					cy.getCy(`music-disc-${album.id}-1`).find('.q-expansion-item__container > .q-item').first().type('{enter}');
-					cy.getCy(`music-track-checkbox-${album.id}-${track.id}`).should('have.attr', 'aria-checked', 'true');
+					cy.getCy(albumPanelCy).find('.q-expansion-item__container > .q-item').first().click();
+					cy.getCy(albumPanelCy).find('[data-cy="media-q-table-mobile-card"], tbody tr').filter(`:contains("${track.title}")`).should('not.be.visible');
+					cy.getCy(albumPanelCy).find('.q-expansion-item__container > .q-item').first().click();
+					cy.getCy(albumPanelCy).find('[data-cy="media-q-table-mobile-card"], tbody tr').filter(`:contains("${track.title}")`).find('[role="checkbox"]').should('have.attr', 'aria-checked', 'true');
 				} else if (family.type === PlexMediaType.PhotoAlbum) {
 					const asset = root.children.at(-1)!;
 					const selector = `[data-cy="photo-asset-${asset.id}"]`;
@@ -255,12 +261,12 @@ for (const family of families) {
 						expect(bounds.height, 'asset thumbnail height').to.be.closeTo(72, 1);
 					});
 				} else {
-					scrollLastFileIntoViewport('.other-video-files__item:last-child');
-					cy.get('.other-video-files').should('contain.text', 'multipart-original-part-18.mp4').and('contain.text', 'hevc').and('contain.text', 'flac');
+					scrollLastFileIntoViewport('[data-cy="other-video-media-list"] [data-cy="media-q-table-mobile-card"]:last-child');
+					cy.getCy('other-video-media-list').should('contain.text', 'multipart-original-part-18.mp4');
 					cy.getCy('other-video-root-checkbox').scrollIntoView();
 					assertTouchControl('other-video-root-checkbox');
 					cy.getCy('other-video-root-checkbox').click();
-					cy.getCy('other-video-selected-count').should('contain.text', '1');
+					cy.getCy('other-video-selected-count').should('contain.text', String(root.mediaData.length));
 				}
 				cy.getCy('media-overview-bar-mobile-menu').click();
 				cy.getCy('media-overview-bar-mobile-download-button').should('be.visible');

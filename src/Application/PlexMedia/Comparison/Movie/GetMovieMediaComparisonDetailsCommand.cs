@@ -76,7 +76,7 @@ public class GetMovieMediaComparisonDetailsCommandHandler
                     type: PlexMediaType.Movie,
                     title: movie.Title,
                     state: PlexMediaComparisonState.Missing,
-                    remoteQuality: movie.Quality,
+                    remoteQuality: movie.VideoQuality,
                     ownedQuality: VideoQuality.None,
                     remoteLocation: FirstFileNameOrEmpty(movie),
                     ownedLocation: string.Empty,

@@ -188,6 +188,9 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 			}
 			state.refreshDataNotificationSubject.next(data);
 		});
+		notificationHubConnection?.onreconnected?.(() => {
+			libraryStore.refreshLibrarySyncStatus().subscribe();
+		});
 	}
 
 	function updateState<T>(propertyName: keyof ISignalRStoreState, newObject: T, idName: keyof T): void {

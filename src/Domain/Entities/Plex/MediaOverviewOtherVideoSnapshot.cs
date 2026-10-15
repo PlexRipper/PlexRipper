@@ -5,7 +5,7 @@ public class MediaOverviewOtherVideoSnapshot : BaseMediaOverviewSnapshot
     public required int QualityRank { get; set; }
 
     [NotMapped]
-    public VideoQuality Quality { get; set; }
+    public VideoQuality VideoQuality { get; set; }
 
     public required int PlexOtherVideoId { get; set; }
 

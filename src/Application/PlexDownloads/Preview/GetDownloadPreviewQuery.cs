@@ -120,7 +120,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
             {
                 case PlexMediaType.MusicArtist:
                     var artists = await _dbContext
-                        .PlexArtists.Where(x =>
+                        .PlexMusicArtists.Where(x =>
                             ids.Contains(x.Id)
                             && x.PlexLibraryId == library.Id
                             && x.PlexServerId == library.PlexServerId
@@ -134,7 +134,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
                     break;
                 case PlexMediaType.MusicAlbum:
                     var albums = await _dbContext
-                        .PlexAlbums.Where(x =>
+                        .PlexMusicAlbums.Where(x =>
                             ids.Contains(x.Id)
                             && x.PlexLibraryId == library.Id
                             && x.PlexServerId == library.PlexServerId
@@ -148,7 +148,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
                     break;
                 default:
                     tracks = await _dbContext
-                        .PlexTracks.Where(x =>
+                        .PlexMusicTracks.Where(x =>
                             ids.Contains(x.Id)
                             && x.PlexLibraryId == library.Id
                             && x.PlexServerId == library.PlexServerId
@@ -208,7 +208,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
             )
                 return ResultExtensions.Create400BadRequestResult("The selected track hierarchy is invalid.");
 
-            var preview = track.ProjectToDownloadPreviewMapper(groups);
+            var preview = track.ProjectToDownloadPreviewMapper(groups, selectedData?.Id);
 
             if (!artistPreviews.TryGetValue(artist.Id, out var artistPreview))
             {
@@ -586,9 +586,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
         var imageScope = imageSelections
             .SelectMany(selection => selection.MediaIds.Select(id => (Id: id, Selection: selection)))
             .ToDictionary(x => x.Id, x => x.Selection);
-        var selectedQualities = groupedSelections
-            .SelectMany(x => x.Qualities)
-            .ToList();
+        var selectedQualities = groupedSelections.SelectMany(x => x.Qualities).ToList();
         var selectedDataIds = selectedQualities.Select(x => x.DataId).Distinct().ToList();
         var selectedData = await _dbContext
             .PlexPhotoData.Where(x => imageIds.Contains(x.PlexPhotoId) && selectedDataIds.Contains(x.Id))
@@ -618,7 +616,9 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
                 continue;
 
             var selector = selection.Qualities.FirstOrDefault(x => x.MediaId == image.Id);
-            var selectedOriginal = selectedData.FirstOrDefault(x => x.Id == selector?.DataId && x.PlexPhotoId == image.Id);
+            var selectedOriginal = selectedData.FirstOrDefault(x =>
+                x.Id == selector?.DataId && x.PlexPhotoId == image.Id
+            );
             if (selectedOriginal is null)
                 continue;
 
@@ -739,7 +739,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
                 season.Children.AddRange(seasonEpisodes);
                 season.Size = season.Children.Sum(x => x.Size);
                 season.ChildCount = season.Children.Count;
-                season.Qualities.AddRange(seasonEpisodes.SelectMany(x => x.Qualities).DistinctBy(x => x.Quality));
+                season.Qualities.AddRange(seasonEpisodes.SelectMany(x => x.Qualities).DistinctBy(x => x.VideoQuality));
             }
         }
 
@@ -756,7 +756,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
                 tvShow.Children.AddRange(tvShowSeasons);
                 tvShow.Size = tvShow.Children.Sum(x => x.Size);
                 tvShow.ChildCount = tvShow.Children.Count;
-                tvShow.Qualities.AddRange(tvShowSeasons.SelectMany(x => x.Qualities).DistinctBy(x => x.Quality));
+                tvShow.Qualities.AddRange(tvShowSeasons.SelectMany(x => x.Qualities).DistinctBy(x => x.VideoQuality));
             }
         }
     }

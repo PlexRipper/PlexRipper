@@ -1,25 +1,35 @@
 <template>
 	<!-- Show all available qualities as chips -->
 	<div
-		v-if="qualities.length"
+		v-if="displayQualities.length"
 		class="media-quality-container">
 		<!-- Show all available qualities as chips -->
-		<MediaVideoQuality
-			v-for="(quality, j) in qualities"
-			:key="j"
-			:quality="quality.quality"
-			:clickable="clickable"
-			:truncated="truncated"
-			:count="qualities.length"
-			@click="$emit('download', [quality])" />
+		<template
+			v-for="(quality, j) in displayQualities"
+			:key="j">
+			<MediaAudioQuality
+				v-if="isAudioMediaType(quality.mediaDataType)"
+				:quality="quality.audioQuality ?? AudioQuality.Unknown"
+				:truncated="truncated"
+				:count="displayQualities.length"
+				:clickable="clickable"
+				@click="$emit('download', [quality])" />
+			<MediaVideoQuality
+				v-else
+				:quality="quality.videoQuality"
+				:clickable="clickable"
+				:truncated="truncated"
+				:count="qualities.length"
+				@click="$emit('download', [quality])" />
+		</template>
 	</div>
 </template>
 
 <script setup lang="ts">
-import type { PlexMediaQualityDTO } from '@dto';
+import { AudioQuality, PlexMediaType, type PlexMediaQualityDTO } from '@dto';
 import type { IMediaActionEmits } from '@interfaces';
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
 	qualities: PlexMediaQualityDTO[];
 	truncated?: boolean; // Whether to truncate the display of qualities
 	// Whether the chips are clickable
@@ -30,6 +40,24 @@ withDefaults(defineProps<{
 });
 
 defineEmits<IMediaActionEmits>();
+
+const displayQualities = computed(() => {
+	const parentQualities = new Set<string>();
+	return props.qualities.filter((quality) => {
+		if (![PlexMediaType.MusicArtist, PlexMediaType.MusicAlbum].includes(quality.mediaDataType))
+			return true;
+
+		const key = `${quality.mediaDataType}:${quality.audioQuality ?? AudioQuality.Unknown}`;
+		if (parentQualities.has(key))
+			return false;
+		parentQualities.add(key);
+		return true;
+	});
+});
+
+function isAudioMediaType(mediaType: PlexMediaType): boolean {
+	return [PlexMediaType.MusicArtist, PlexMediaType.MusicAlbum, PlexMediaType.MusicTrack].includes(mediaType);
+}
 </script>
 
 <style lang="scss" scoped>

@@ -1,84 +1,57 @@
 <template>
-	<section
-		class="other-video-files"
-		data-cy="other-video-media-list"
-		:aria-label="t('components.other-video-media-list.originals')">
-		<div
-			v-if="originals.length"
-			class="other-video-files__selection q-pa-sm">
-			<q-checkbox
-				class="other-video-files__control"
-				:model-value="rootSelected"
-				:aria-label="t('components.other-video-media-list.select-video', { title: mediaItem.title })"
-				data-cy="other-video-root-checkbox"
-				@update:model-value="selectAll($event)" />
-			<strong>{{ t('components.other-video-media-list.originals') }}</strong>
-			<span data-cy="other-video-selected-count">{{ t('components.other-video-media-list.selected-count', { count: rootSelected ? 1 : 0 }) }}</span>
-		</div>
-		<div
-			v-if="originals.length"
-			role="radiogroup"
-			:aria-label="t('general.labels.select-original', { title: mediaItem.title })">
-			<q-radio
-				class="other-video-files__control"
-				data-cy="other-video-original-automatic"
-				:model-value="selectedOriginal"
-				:val="null"
-				:label="t('general.labels.automatic-original')"
-				@update:model-value="selectOriginal($event)" />
-			<q-list
-				bordered
-				separator>
-				<q-item
-					v-for="original in originals"
-					:key="original.id"
-					:data-cy="`other-video-original-files-${original.id}`"
-					class="other-video-files__item">
-					<q-item-section side>
-						<q-radio
-							class="other-video-files__control"
-							:data-cy="`other-video-original-${original.id}`"
-							:model-value="selectedOriginal"
-							:val="original.id"
-							:label="t('general.labels.original')"
-							:aria-label="t('general.labels.select-original', { title: original.files.map((file) => file.fileName).join(', ') })"
-							@update:model-value="selectOriginal($event)" />
-					</q-item-section>
-					<q-item-section>
-						<div
-							v-for="file in original.files"
-							:key="file.id"
-							class="other-video-files__file">
-							<strong class="other-video-files__name">{{ file.fileName }}</strong>
-							<div class="other-video-files__metadata">
-								<QFileSize :size="file.size" />
-								<QDuration
-									v-if="file.duration > 0"
-									:value="file.duration"
-									short />
-								<MediaVideoQuality
-									v-if="file.videoResolution !== VideoQuality.Unknown"
-									:quality="file.videoResolution" />
-								<span v-if="file.videoCodec">{{ file.videoCodec }}</span>
-								<span v-if="file.audioCodec">{{ file.audioCodec }}</span>
-							</div>
-						</div>
-					</q-item-section>
-				</q-item>
-			</q-list>
-		</div>
-		<p
-			v-if="!originals.length"
-			role="status"
-			data-cy="other-video-files-empty">
-			{{ t('components.other-video-media-list.empty') }}
-		</p>
-	</section>
+	<q-list
+		v-if="mediaRows.length > 0"
+		data-cy="other-video-media-list">
+		<q-item>
+			<QRow align="center">
+				<QCol cols="auto">
+					<q-checkbox
+						class="other-video-media-list-root-checkbox"
+						:aria-label="`${t('general.commands.selection')} ${mediaItem.title}`"
+						data-cy="other-video-root-checkbox"
+						:model-value="rootSelected"
+						@update:model-value="rootSetSelected($event)" />
+				</QCol>
+				<QCol class="q-ml-md">
+					<QSubHeader bold>
+						{{ mediaItem.title }}
+					</QSubHeader>
+				</QCol>
+				<QCol
+					v-if="selectedCount"
+					cols="auto">
+					<span
+						class="text-weight-bold"
+						data-cy="other-video-selected-count">
+						{{ t('components.media-list.selected-count', { selectedCount }) }}
+					</span>
+				</QCol>
+			</QRow>
+		</q-item>
+		<MediaQTable
+			:rows="mediaRows"
+			:selection="selection"
+			:download-media-factory="toOtherVideoPartDownloadMedia"
+			@selection="onSelection" />
+	</q-list>
+	<q-list v-else>
+		<q-item>
+			<q-item-section>
+				<QText
+					size="h4"
+					align="center"
+					data-cy="other-video-files-empty">
+					{{ t('components.other-video-media-list.empty') }}
+				</QText>
+			</q-item-section>
+		</q-item>
+	</q-list>
 </template>
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { PlexMediaType, VideoQuality, type PlexMediaDTO, type PlexMediaDataDTO, type DownloadMediaDTO } from '@dto';
+import { AudioQuality, PlexMediaType, type DownloadMediaDTO, type PlexMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO } from '@dto';
+import type { ISelection } from '@interfaces';
 import { useMediaOverviewStore, useSettingsStore } from '@store';
 import { sendMediaOverviewDownloadCommand, useMediaOverviewBarDownloadCommandBus } from '@composables/event-bus';
 
@@ -86,76 +59,97 @@ const props = defineProps<{ mediaItem: PlexMediaDTO }>();
 const { t } = useI18n();
 const mediaOverviewStore = useMediaOverviewStore();
 const settingsStore = useSettingsStore();
-const rootSelected = ref(false);
-const selectedOriginal = ref<number | null>(null);
-const originals = computed(() => {
-	const groups = new Map<number, { id: number; files: PlexMediaDataDTO[] }>();
-	for (const file of props.mediaItem.mediaData) {
-		const existing = groups.get(file.plexApiMediaId);
-		if (existing)
-			existing.files.push(file);
-		else
-			groups.set(file.plexApiMediaId, { id: file.id, files: [file] });
-	}
-	return Array.from(groups.values());
+const selection = ref<ISelection>({
+	indexKey: props.mediaItem.id,
+	keys: [],
+	allSelected: false,
 });
 
-function selectAll(value: boolean): void {
-	set(rootSelected, value && get(originals).length > 0);
+const mediaRows = computed((): PlexMediaSlimDTO[] => props.mediaItem.mediaData.map((mediaData) => ({
+	id: mediaData.id,
+	title: mediaData.fileName,
+	searchTitle: mediaData.fileName,
+	sortIndex: mediaData.plexApiPartId,
+	year: props.mediaItem.year,
+	duration: mediaData.duration,
+	mediaSize: mediaData.size,
+	childCount: 0,
+	grandChildCount: 0,
+	addedAt: props.mediaItem.addedAt,
+	updatedAt: props.mediaItem.updatedAt,
+	plexLibraryId: props.mediaItem.plexLibraryId,
+	plexServerId: props.mediaItem.plexServerId,
+	type: PlexMediaType.OtherVideos,
+	hasThumb: false,
+	plexApiRatingKey: props.mediaItem.plexApiRatingKey,
+	plexApiMetaDataKey: props.mediaItem.plexApiMetaDataKey,
+	comparisonId: props.mediaItem.comparisonId,
+	qualities: [{
+		dataId: mediaData.id,
+		mediaDataType: PlexMediaType.OtherVideos,
+		mediaId: props.mediaItem.id,
+		videoQuality: mediaData.videoResolution,
+		audioQuality: AudioQuality.None,
+	} satisfies PlexMediaQualityDTO],
+})));
+
+const selectedCount = computed(() => get(selection).keys.length);
+const rootSelected = computed((): boolean | null => get(selection).allSelected);
+
+function rootSetSelected(value: boolean): void {
+	set(selection, {
+		indexKey: props.mediaItem.id,
+		keys: value ? get(mediaRows).map((row) => row.id) : [],
+		allSelected: value,
+	});
 }
 
-function selectOriginal(dataId: number | null): void {
-	set(selectedOriginal, dataId);
+function onSelection(payload: ISelection): void {
+	set(selection, {
+		indexKey: props.mediaItem.id,
+		keys: payload.keys,
+		allSelected: payload.allSelected,
+	});
 }
-watch(() => props.mediaItem, () => {
-	set(rootSelected, false);
-	set(selectedOriginal, null);
-}, { flush: 'sync', deep: true });
-watch(rootSelected, (selected) => {
-	mediaOverviewStore.$patch({ downloadButtonVisible: selected });
-}, { immediate: true, flush: 'sync' });
-useMediaOverviewBarDownloadCommandBus().on(() => {
-	if (!get(rootSelected) || get(originals).length === 0)
-		return;
-	const file = get(originals).find((original) => original.id === get(selectedOriginal))?.files[0];
-	const command: DownloadMediaDTO = {
-		type: PlexMediaType.OtherVideos,
+
+function toOtherVideoPartDownloadMedia(row: PlexMediaSlimDTO): DownloadMediaDTO[] {
+	return [{
 		mediaIds: [props.mediaItem.id],
-		plexLibraryId: props.mediaItem.plexLibraryId,
+		type: PlexMediaType.OtherVideos,
 		plexServerId: props.mediaItem.plexServerId,
+		plexLibraryId: props.mediaItem.plexLibraryId,
+		qualities: row.qualities,
 		keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
-		qualities: file
-			? [{
-					mediaId: props.mediaItem.id, dataId: file.id, mediaDataType: PlexMediaType.OtherVideos, quality: file.videoResolution,
-				}]
-			: [],
-	};
-	sendMediaOverviewDownloadCommand([command]);
+	}];
+}
+
+watch(() => props.mediaItem, () => {
+	set(selection, {
+		indexKey: props.mediaItem.id,
+		keys: [],
+		allSelected: false,
+	});
+}, { flush: 'sync', deep: true });
+
+watch(selectedCount, (count) => {
+	mediaOverviewStore.$patch({ downloadButtonVisible: count > 0 });
+}, { immediate: true });
+
+useMediaOverviewBarDownloadCommandBus().on(() => {
+	const selectedRows = get(mediaRows).filter((row) => get(selection).keys.includes(row.id));
+	const downloadMedia = selectedRows.flatMap((row) => toOtherVideoPartDownloadMedia(row));
+	if (downloadMedia.length > 0)
+		sendMediaOverviewDownloadCommand(downloadMedia);
 });
+
 onBeforeUnmount(() => {
 	mediaOverviewStore.$patch({ downloadButtonVisible: false });
 });
 </script>
 
-<style scoped lang="scss">
-.other-video-files__selection,
-.other-video-files__metadata {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-.other-video-files__control {
-  min-width: 44px;
-  min-height: 44px;
-}
-.other-video-files__item .q-item__section--main {
-  min-width: 0;
-}
-.other-video-files__name {
-  overflow-wrap: anywhere;
-}
-.other-video-files__file + .other-video-files__file {
-  margin-top: 0.75rem;
+<style lang="scss">
+.other-video-media-list-root-checkbox {
+	min-width: 44px;
+	min-height: 44px;
 }
 </style>

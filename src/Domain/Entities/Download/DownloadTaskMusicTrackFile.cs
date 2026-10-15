@@ -13,6 +13,10 @@ public class DownloadTaskMusicTrackFile : DownloadTaskFileBase
 
     [NotMapped]
     public override DownloadTaskType DownloadTaskType => DownloadTaskType.MusicTrackData;
+    /// <summary>
+    /// The selected music encoding quality. Video quality does not apply to music files.
+    /// </summary>
+    public AudioQuality AudioQuality { get; init; } = AudioQuality.None;
 
     [NotMapped]
     public override bool IsDownloadable => true;

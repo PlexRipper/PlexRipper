@@ -4,7 +4,7 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
 {
     public void Configure(EntityTypeBuilder<PlexTvShowEpisode> builder)
     {
-        builder.Ignore(x => x.Quality);
+        builder.Ignore(x => x.VideoQuality);
 
         builder.HasIndex(x => x.SortIndex);
         builder.HasIndex(x => new { x.TvShowSeasonId, x.SortIndex });

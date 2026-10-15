@@ -135,6 +135,10 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
                 x.PlexServerId == serverId
                 && x.PlexLibraryId == libraryId
                 && x.Status == LibrarySyncJobStatus.Queued
+                && !_dbContext.LibrarySyncJobQueues.Any(other =>
+                    other.PlexServerId == x.PlexServerId
+                    && other.Status == LibrarySyncJobStatus.Processing
+                )
             )
             .ExecuteUpdateAsync(
                 s => s.SetProperty(x => x.Status, LibrarySyncJobStatus.Processing)

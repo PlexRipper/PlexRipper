@@ -36,11 +36,10 @@
         "music-media-list": {
             "select-artist": "Interpret {title} auswählen",
             "select-album": "Album {title} auswählen",
-            "select-track": "Titel {title} auswählen",
             "selected-count": "{count} ausgewählt",
             "track-count": "{count} Titel",
-            "disc-label": "Disc {number}",
-            "unknown-disc": "Nicht angegebene Disc",
+            "record-label": "Plattenlabel",
+            "release-date": "Veröffentlichungsdatum",
             "no-tracks": "Keine Titel gefunden",
             "no-albums": "Keine Alben gefunden"
         },
@@ -50,6 +49,7 @@
             "duration": "Dauer",
             "size": "Größe",
             "year": "Jahr",
+            "genres": "Genres",
             "originally-available": "Erstveröffentlichung",
             "added-at": "Hinzugefügt",
             "updated-at": "Aktualisiert",
@@ -75,9 +75,6 @@
             "retry": "Erneut versuchen"
         },
         "other-video-media-list": {
-            "originals": "Originalversionen",
-            "select-video": "Video {title} auswählen",
-            "selected-count": "{count} ausgewählt",
             "empty": "Keine Originaldateien verfügbar."
         },
         "other-video-details": {
@@ -146,7 +143,9 @@
             "media-count-label": "Medienanzahl:",
             "summary": "Zusammenfassung:",
             "one-movie-count": "1 Film",
-            "movie-file-count": "{movieFileCount} Filmdateien"
+            "movie-file-count": "{movieFileCount} Filmdateien",
+            "read-more": "Mehr lesen",
+            "full-summary": "Vollständige Zusammenfassung"
         },
         "directory-browser": {
             "add-download-path": "Neuen benutzerdefinierten Downloadpfad hinzufügen",
@@ -221,6 +220,14 @@
             "no-filter-results": "Keine Medienergebnisse entsprechen den aktuellen Filtereinstellungen. Bitte passen Sie Ihre Filter an oder setzen Sie sie zurück, um die verfügbaren Ergebnisse anzuzeigen",
             "library-disabled": "Die Mediathek \"{library}\" ist deaktiviert. Aktivieren Sie sie und synchronisieren Sie sie erneut, bevor Sie ihre Medien anzeigen.",
             "enable-library-button": "Mediathek aktivieren",
+            "sync-queued-title": "Aktualisierung vorgemerkt",
+            "sync-queued-offline": "Warten, bis der Server wieder online ist.",
+            "sync-queued-busy": "Warten, bis die Aktualisierung von {library} auf {server} abgeschlossen ist.",
+            "sync-queued-waiting": "Warten auf den Start dieser Aktualisierung.",
+            "sync-queued-automatic": "Diese Mediathek wird automatisch aktualisiert, sobald sie an der Reihe ist.",
+            "view-sync-activity": "Synchronisierungsaktivität anzeigen",
+            "cancel-queued-refresh": "Vorgemerkte Aktualisierung abbrechen",
+            "requesting-refresh": "Aktualisierung wird angefordert…",
             "comparison": {
                 "details-column-title": "Title",
                 "details-column-location": "Location",
@@ -486,8 +493,10 @@
             "movies-metadata": "{movieCount} Filme - {fileSize} ",
             "tv-shows-metadata": "{tvShowCount} TV-Sendungen - {seasonCount} Staffeln - {episodeCount} Folgen - {fileSize} ",
             "music-metadata": "{artistCount} Interpreten - {fileSize}",
+            "music-library-metadata": "{artistCount} Interpreten - {albumCount} Alben - {trackCount} Titel - {fileSize}",
             "music-detail-metadata": "{albumCount} Alben - {trackCount} Titel - {fileSize}",
             "photos-metadata": "{albumCount} Alben - {fileSize}",
+            "photos-library-metadata": "{albumCount} Alben - {photoCount} Fotos - {clipCount} Clips - {fileSize}",
             "photo-detail-metadata": "{assetCount} Elemente - {fileSize}",
             "other-videos-metadata": "{videoCount} Videos - {fileSize}"
         },
@@ -507,9 +516,13 @@
             "fetching-servers": "Abrufen zugänglicher Server zum Synchronisieren von Medien",
             "finished": "Synchronisierung beendet: {completed} abgeschlossen, {failed} fehlgeschlagen, {cancelled} abgebrochen",
             "no-active-syncs": "Keine aktiven Bibliothekssynchronisierungen",
+            "queued-summary": "Bibliotheksaktualisierungen warten, bis sie an der Reihe sind.",
             "status": {
                 "unknown": "Unbekannt",
                 "queued": "In Warteschlange",
+                "queued-offline": "Vorgemerkt — warten, bis der Server wieder online ist.",
+                "queued-busy": "Warten, bis die Aktualisierung von {library} auf {server} abgeschlossen ist.",
+                "queued-waiting": "Vorgemerkt — warten auf den Start.",
                 "processing": "In Bearbeitung",
                 "completed": "Abgeschlossen",
                 "failed": "Fehlgeschlagen",

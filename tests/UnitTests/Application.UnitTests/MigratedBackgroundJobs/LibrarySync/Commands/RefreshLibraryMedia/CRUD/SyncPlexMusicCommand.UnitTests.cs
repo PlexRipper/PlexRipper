@@ -6,8 +6,6 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
     [Arguments("initial")]
     [Arguments("unchanged")]
     [Arguments("update")]
-    [Arguments("album-move")]
-    [Arguments("track-move")]
     [Arguments("force")]
     [Arguments("empty")]
     public async Task ShouldReconcileMusicHierarchy_WithScopedOriginalsCountsAndReports(string scenario)
@@ -27,7 +25,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         var db = IDbContext;
         var library = await db.PlexLibraries.OrderBy(x => x.Id).FirstAsync(CancellationToken);
         var artists = await db
-            .PlexArtists.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id)
             .Include(x => x.Albums)
                 .ThenInclude(x => x.Tracks)
                     .ThenInclude(x => x.MediaDataList)
@@ -39,7 +37,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         var originalAlbumIds = originalAlbums.Select(x => x.Id).ToArray();
         var originalTrackIds = originalTracks.Select(x => x.Id).ToArray();
         var beforeData = await db
-            .PlexTrackData.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicTrackData.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.Id)
             .Select(x => new
             {
@@ -51,7 +49,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             })
             .ToListAsync(CancellationToken);
         var control = await db
-            .PlexTracks.Where(x => x.PlexLibraryId != library.Id)
+            .PlexMusicTracks.Where(x => x.PlexLibraryId != library.Id)
             .OrderBy(x => x.Id)
             .Select(x => new
             {
@@ -64,7 +62,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             })
             .ToListAsync(CancellationToken);
         var controlData = await db
-            .PlexTrackData.Where(x => x.PlexLibraryId != library.Id)
+            .PlexMusicTrackData.Where(x => x.PlexLibraryId != library.Id)
             .OrderBy(x => x.Id)
             .Select(x => new
             {
@@ -93,7 +91,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             originalTracks[0].MediaSize += addedSize;
         }
         if (scenario == "initial")
-            await db.PlexArtists.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(CancellationToken);
+            await db.PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(CancellationToken);
         if (scenario == "unchanged")
         {
             originalTracks[0].MediaSize = 1;
@@ -109,16 +107,6 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             originalTracks[0].Title = "Updated track";
             originalTracks[0].MediaSize = 123;
             originalTracks[0].MediaDataList.Single().UpdateInitProperty(nameof(BasePlexMediaData.Size), 123L);
-        }
-        if (scenario == "album-move")
-        {
-            artists[1].Albums.Add(artists[0].Albums.Single());
-            artists.RemoveAt(0);
-        }
-        if (scenario == "track-move")
-        {
-            originalAlbums[1].Tracks.AddRange(originalAlbums[0].Tracks);
-            artists[0].Albums.Clear();
         }
         if (scenario == "empty")
             artists.Clear();
@@ -158,22 +146,6 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
                 UpdatedTracks = 1,
                 DeletedTracks = 3,
             },
-            "album-move" => new CrudMusicReport
-            {
-                DeletedArtists = 1,
-                UnchangedArtists = 1,
-                UpdatedAlbums = 1,
-                UnchangedAlbums = 1,
-                UnchangedTracks = 4,
-            },
-            "track-move" => new CrudMusicReport
-            {
-                UnchangedArtists = 2,
-                DeletedAlbums = 1,
-                UnchangedAlbums = 1,
-                UpdatedTracks = 2,
-                UnchangedTracks = 2,
-            },
             "empty" => new CrudMusicReport
             {
                 DeletedArtists = 2,
@@ -191,15 +163,15 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         var albums = artists.SelectMany(x => x.Albums).ToList();
         var tracks = albums.SelectMany(x => x.Tracks).ToList();
         var afterArtists = await db
-            .PlexArtists.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToListAsync(CancellationToken);
         var afterAlbums = await db
-            .PlexAlbums.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicAlbums.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToListAsync(CancellationToken);
         var afterTracks = await db
-            .PlexTracks.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicTracks.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToListAsync(CancellationToken);
         afterArtists.Select(x => x.PlexApiRatingKey).ShouldBe(artists.Select(x => x.PlexApiRatingKey).Order());
@@ -210,17 +182,11 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             .Select(x => (x.PlexApiRatingKey, x.PlexAlbumId))
             .ShouldBe(tracks.OrderBy(x => x.PlexApiRatingKey).Select(x => (x.PlexApiRatingKey, x.PlexAlbum!.Id)));
         afterTracks.ShouldAllBe(x => x.PlexLibraryId == library.Id && x.PlexServerId == library.PlexServerId);
-        if (scenario is "unchanged" or "album-move" or "track-move")
+        if (scenario == "unchanged")
         {
             afterTracks.Select(x => x.Id).Order().ShouldBe(originalTrackIds.Order());
-            afterAlbums
-                .Select(x => x.Id)
-                .Order()
-                .ShouldBe(scenario == "track-move" ? originalAlbumIds.Skip(1).Order() : originalAlbumIds.Order());
-            afterArtists
-                .Select(x => x.Id)
-                .Order()
-                .ShouldBe(scenario == "album-move" ? originalArtistIds.Skip(1).Order() : originalArtistIds.Order());
+            afterAlbums.Select(x => x.Id).Order().ShouldBe(originalAlbumIds.Order());
+            afterArtists.Select(x => x.Id).Order().ShouldBe(originalArtistIds.Order());
         }
         if (scenario == "update")
         {
@@ -230,7 +196,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             afterTracks.Single().Title.ShouldBe("Updated track");
         }
         var afterData = await db
-            .PlexTrackData.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicTrackData.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.Id)
             .Select(x => new
             {
@@ -241,7 +207,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
                 x.OriginalFilename,
             })
             .ToListAsync(CancellationToken);
-        if (scenario is "unchanged" or "album-move")
+        if (scenario == "unchanged")
             afterData.ShouldBe(beforeData);
         else
             afterData
@@ -262,13 +228,13 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             scenario switch
             {
                 "empty" => 0,
-                "update" => 123,
+                "update" => tracks.Sum(x => x.MediaSize),
                 _ => beforeData.Sum(x => x.Size) + addedSize,
             }
         );
         (
             await db
-                .PlexTracks.Where(x => x.PlexLibraryId != library.Id)
+                .PlexMusicTracks.Where(x => x.PlexLibraryId != library.Id)
                 .OrderBy(x => x.Id)
                 .Select(x => new
                 {
@@ -283,7 +249,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         ).ShouldBe(control);
         (
             await db
-                .PlexTrackData.Where(x => x.PlexLibraryId != library.Id)
+                .PlexMusicTrackData.Where(x => x.PlexLibraryId != library.Id)
                 .OrderBy(x => x.Id)
                 .Select(x => new
                 {
@@ -299,83 +265,130 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task ShouldReplaceOrClearArtistMetadataWithoutChangingOtherLibraries_WhenArtistsAreUnchanged(
-        bool clearMetadata
+    public async Task ShouldReplaceOrClearAlbumCountriesWithoutChangingUnrefreshedAlbumsOrOtherLibraries_WhenAlbumTimestampChanges(
+        bool clearCountries
     )
     {
         // Arrange
-        var seed = await SetupDatabase(
-            625111,
-            x =>
+        await SetupDatabase(
+            625261,
+            config =>
             {
-                x.PlexServerCount = 1;
-                x.PlexMusicLibraryCount = 2;
-                x.MusicArtistCount = 2;
-                x.MusicAlbumCount = 0;
-                x.MusicTrackCount = 0;
+                config.PlexMusicLibraryCount = 2;
+                config.MusicArtistCount = 1;
+                config.MusicAlbumCount = 2;
+                config.MusicTrackCount = 1;
             }
         );
-        var db = IDbContext;
-        var library = await db.PlexLibraries.OrderBy(x => x.Id).FirstAsync(CancellationToken);
-        var artists = await db.PlexArtists.OrderBy(x => x.Id).ToListAsync(CancellationToken);
-        artists.Count.ShouldBe(4);
-        var actors = FakeData.GetPlexActors(seed).Generate(2);
-        var countries = FakeData.GetPlexCountries(seed).Generate(2);
-        var genres = FakeData.GetPlexGenres(seed).Generate(2);
-        db.PlexActors.AddRange(actors);
-        db.PlexCountries.AddRange(countries);
-        db.PlexGenres.AddRange(genres);
-        await db.SaveChangesAsync(CancellationToken);
-        foreach (var artist in artists)
-        {
-            db.PlexMusicArtistActors.Add(new PlexMusicArtistActors(actors[0].Id, artist.PlexLibraryId, artist.Id));
-            db.PlexMusicArtistCountries.Add(
-                new PlexMusicArtistCountries(countries[0].Id, artist.PlexLibraryId, artist.Id)
-            );
-            db.PlexMusicArtistGenres.Add(new PlexMusicArtistGenres(genres[0].Id, artist.PlexLibraryId, artist.Id));
-            if (artist.PlexLibraryId == library.Id)
+        var dbContext = IDbContext;
+        var library = await dbContext.PlexLibraries.OrderBy(x => x.Id).FirstAsync(CancellationToken);
+        var artist = await dbContext
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id)
+            .Include(x => x.Albums)
+                .ThenInclude(x => x.Tracks)
+                    .ThenInclude(x => x.MediaDataList)
+            .SingleAsync(CancellationToken);
+        var allAlbums = await dbContext.PlexMusicAlbums.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var allArtists = await dbContext.PlexMusicArtists.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        allAlbums.Count.ShouldBe(4);
+        allArtists.Count.ShouldBe(2);
+        var oldCountry = new PlexCountry { Name = "Old Album Country", Key = "Old Album Country".ToMd5Hash() };
+        var firstCountry = new PlexCountry { Name = "First Album Country", Key = "First Album Country".ToMd5Hash() };
+        var secondCountry = new PlexCountry { Name = "Second Album Country", Key = "Second Album Country".ToMd5Hash() };
+        dbContext.PlexCountries.AddRange(oldCountry, firstCountry, secondCountry);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        dbContext.PlexMusicAlbumCountries.AddRange(
+            allAlbums.Select(x => new PlexMusicAlbumCountries(oldCountry.Id, x.PlexLibraryId, x.Id))
+        );
+        dbContext.PlexMusicArtistCountries.AddRange(
+            allArtists.Select(x => new PlexMusicArtistCountries(oldCountry.Id, x.PlexLibraryId, x.Id))
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+        (await dbContext.PlexMusicAlbumCountries.OrderBy(x => x.PlexMusicAlbumId).ToListAsync(CancellationToken))
+            .Select(x => (x.PlexLibraryId, x.PlexMusicAlbumId, x.CountryId))
+            .ShouldBe(allAlbums.Select(x => (x.PlexLibraryId, x.Id, oldCountry.Id)));
+        var artistLinks = await dbContext
+            .PlexMusicArtistCountries.OrderBy(x => x.PlexMusicArtistId)
+            .Select(x => new
             {
-                library.Music.Add(artist);
-                if (!clearMetadata)
-                {
-                    artist.Actors.AddRange([actors[1], actors[1]]);
-                    artist.Countries.AddRange([countries[1], countries[1]]);
-                    artist.Genres.AddRange([genres[1], genres[1]]);
-                }
-            }
+                x.PlexLibraryId,
+                x.PlexMusicArtistId,
+                x.CountryId,
+            })
+            .ToListAsync(CancellationToken);
+        artistLinks
+            .Select(x => (x.PlexLibraryId, x.PlexMusicArtistId, x.CountryId))
+            .ShouldBe(allArtists.Select(x => (x.PlexLibraryId, x.Id, oldCountry.Id)));
+
+        var targetAlbum = artist.Albums.OrderBy(x => x.Id).First();
+        var unchangedAlbum = artist.Albums.OrderBy(x => x.Id).Last();
+        artist.UpdatedAt = artist.UpdatedAt.GetValueOrDefault().AddSeconds(1);
+        targetAlbum.UpdatedAt = targetAlbum.UpdatedAt.GetValueOrDefault().AddSeconds(1);
+        artist.Countries.Add(oldCountry);
+        unchangedAlbum.Countries.Add(firstCountry);
+        if (!clearCountries)
+        {
+            targetAlbum.Countries.Add(firstCountry);
+            targetAlbum.Countries.Add(secondCountry);
+            targetAlbum.Countries.Add(firstCountry);
         }
-        await db.SaveChangesAsync(CancellationToken);
+        library.Music.Add(artist);
         var metadata = new InsertMediaMetaDataCommandResponse(library)
         {
-            PlexActors = actors.ToDictionary(x => x.Key),
-            PlexCountries = countries.ToDictionary(x => x.Key),
-            PlexGenres = genres.ToDictionary(x => x.Key),
+            PlexCountries = new[] { oldCountry, firstCountry, secondCountry }.ToDictionary(x => x.Key),
         };
 
         // Act
-        var result = await TestHandlerExecuteAsync<CrudMusicReport>(new SyncPlexMusicCommand(metadata, false));
+        var result = await TestHandlerExecuteAsync<CrudMusicReport>(new SyncPlexMusicCommand(metadata));
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
         result.Errors.Count.ShouldBe(0);
-        result.Value.ShouldBe(new CrudMusicReport { UnchangedArtists = 2 });
-        var expectedArtists = artists.Where(x => !clearMetadata || x.PlexLibraryId != library.Id).ToList();
-        (await db.PlexMusicArtistActors.OrderBy(x => x.PlexMusicArtistId).ToListAsync(CancellationToken))
-            .Select(x => (x.PlexLibraryId, x.PlexMusicArtistId, x.PlexActorId))
-            .ShouldBe(
-                expectedArtists.Select(x => (x.PlexLibraryId, x.Id, actors[x.PlexLibraryId == library.Id ? 1 : 0].Id))
-            );
-        (await db.PlexMusicArtistCountries.OrderBy(x => x.PlexMusicArtistId).ToListAsync(CancellationToken))
-            .Select(x => (x.PlexLibraryId, x.PlexMusicArtistId, x.CountryId))
-            .ShouldBe(
-                expectedArtists.Select(x =>
-                    (x.PlexLibraryId, x.Id, countries[x.PlexLibraryId == library.Id ? 1 : 0].Id)
-                )
-            );
-        (await db.PlexMusicArtistGenres.OrderBy(x => x.PlexMusicArtistId).ToListAsync(CancellationToken))
-            .Select(x => (x.PlexLibraryId, x.PlexMusicArtistId, x.GenresId))
-            .ShouldBe(
-                expectedArtists.Select(x => (x.PlexLibraryId, x.Id, genres[x.PlexLibraryId == library.Id ? 1 : 0].Id))
-            );
+        result.Value.ShouldBe(
+            new CrudMusicReport
+            {
+                UpdatedArtists = 1,
+                UpdatedAlbums = 1,
+                UnchangedAlbums = 1,
+                UnchangedTracks = 2,
+            }
+        );
+        var expectedLinks = allAlbums
+            .Where(x => x.Id != targetAlbum.Id)
+            .Select(x => (PlexLibraryId: x.PlexLibraryId, PlexMusicAlbumId: x.Id, CountryId: oldCountry.Id))
+            .ToList();
+        if (!clearCountries)
+        {
+            expectedLinks.Add((library.Id, targetAlbum.Id, firstCountry.Id));
+            expectedLinks.Add((library.Id, targetAlbum.Id, secondCountry.Id));
+        }
+        (
+            await dbContext
+                .PlexMusicAlbumCountries.OrderBy(x => x.PlexMusicAlbumId)
+                .ThenBy(x => x.CountryId)
+                .ToListAsync(CancellationToken)
+        )
+            .Select(x => (x.PlexLibraryId, x.PlexMusicAlbumId, x.CountryId))
+            .ShouldBe(expectedLinks.OrderBy(x => x.PlexMusicAlbumId).ThenBy(x => x.CountryId));
+        (
+            await dbContext
+                .PlexMusicArtistCountries.OrderBy(x => x.PlexMusicArtistId)
+                .Select(x => new
+                {
+                    x.PlexLibraryId,
+                    x.PlexMusicArtistId,
+                    x.CountryId,
+                })
+                .ToListAsync(CancellationToken)
+        ).ShouldBe(artistLinks);
+        (
+            await dbContext
+                .PlexCountries.Where(x => x.Id == oldCountry.Id || x.Id == firstCountry.Id || x.Id == secondCountry.Id)
+                .OrderBy(x => x.Id)
+                .Select(x => new { x.Id, x.Key })
+                .ToListAsync(CancellationToken)
+        )
+            .Select(x => (x.Id, x.Key))
+            .ShouldBe(new[] { oldCountry, firstCountry, secondCountry }.Select(x => (x.Id, x.Key)));
     }
 }

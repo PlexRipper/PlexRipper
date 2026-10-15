@@ -86,7 +86,6 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             switch (downloadTask.DownloadTaskType)
             {
                 case DownloadTaskType.MovieData:
-                case DownloadTaskType.MoviePart:
                     var refreshResult = await RefreshMovieDownloadTask(childKey, cancellationToken);
                     if (refreshResult.IsCancelled)
                         return refreshResult.LogWarning();
@@ -100,7 +99,6 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     break;
 
                 case DownloadTaskType.EpisodeData:
-                case DownloadTaskType.EpisodePart:
                     var refreshEpisodeResult = await RefreshEpisodeMovieDownloadTask(childKey, cancellationToken);
                     if (refreshEpisodeResult.IsCancelled)
                         return refreshEpisodeResult.LogWarning();
@@ -112,7 +110,6 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     }
                     break;
                 case DownloadTaskType.PhotoData:
-                case DownloadTaskType.PhotoPart:
                     var refreshPhotoResult = await RefreshPhotoDownloadTask(childKey, cancellationToken);
                     if (refreshPhotoResult.IsCancelled)
                         return refreshPhotoResult.LogWarning();
@@ -123,7 +120,6 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     }
                     break;
                 case DownloadTaskType.MusicTrackData:
-                case DownloadTaskType.MusicTrackPart:
                     var refreshMusicResult = await RefreshMusicDownloadTask(childKey, cancellationToken);
                     if (refreshMusicResult.IsCancelled)
                         return refreshMusicResult.LogWarning();
@@ -134,7 +130,6 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     }
                     break;
                 case DownloadTaskType.OtherVideoData:
-                case DownloadTaskType.OtherVideoPart:
                     var refreshOtherVideoResult = await RefreshOtherVideoDownloadTask(childKey, cancellationToken);
                     if (refreshOtherVideoResult.IsCancelled)
                         return refreshOtherVideoResult.LogWarning();
@@ -206,7 +201,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileName = x.GetFileName,
                 FileLocationUrl = x.Key,
                 HashId = downloadTask.HashId,
-                Quality = x.VideoResolution,
+                VideoQuality = x.VideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory
                 {
                     DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,
@@ -299,7 +294,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileName = x.GetFileName,
                 FileLocationUrl = x.Key,
                 HashId = downloadTask.HashId,
-                Quality = x.VideoResolution,
+                VideoQuality = x.VideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory
                 {
                     DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,
@@ -457,7 +452,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskMusicTrackFile), downloadTaskKey.Id).LogError();
 
         var source = await _dbContext
-            .PlexTrackData.Where(x =>
+            .PlexMusicTrackData.Where(x =>
                 x.PlexApiMediaId == downloadTask.PlexApiMediaId
                 && x.PlexApiPartId == downloadTask.PlexApiPartId
                 && x.PlexTrack!.PlexServerId == downloadTask.PlexServerId
@@ -471,10 +466,12 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 x.Key,
                 x.Size,
                 Quality = x.VideoResolution,
+                x.AudioQuality,
                 MusicArtistFolder = x.PlexTrack.PlexAlbum!.PlexArtist!.Title.SanitizeFolderName(),
                 MusicAlbumFolder = x.PlexTrack.PlexAlbum.Title.SanitizeFolderName(),
             })
             .FirstOrDefaultAsync(cancellationToken);
+
         if (source is null)
         {
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
@@ -506,6 +503,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     source.FileName,
                     FileLocationUrl = source.Key,
                     source.Quality,
+                    source.AudioQuality,
                     DataReceived = 0L,
                     DownloadSpeed = 0L,
                     DownloadClientType = PlexDownloadClientType.Direct,

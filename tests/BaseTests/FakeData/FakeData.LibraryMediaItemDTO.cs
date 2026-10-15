@@ -54,7 +54,7 @@ public static partial class FakeData
         var typeToUse = mediaType ?? PlexMediaType.Movie;
 
         return _libraryMediaItemDTO
-            .Clone()
+            .Clone() // Clone to isolate per-call media-type and collection rules.
             .RuleFor(x => x.Type, _ => typeToUse)
             .RuleFor(x => x.Title, (f, x) => f.PlexMedia().MediaTitle(x.Type))
             .RuleFor(x => x.Guid, (f, x) => f.PlexMedia().Guid(x.Type))
@@ -172,7 +172,19 @@ public static partial class FakeData
 
     #region LibraryMediaItemStreamDTO
 
-    private static Faker<LibraryMediaItemStreamDTO> GetLibraryMediaItemStreamDTOBase(Seed seed, StreamType streamType)
+    private static readonly Faker<LibraryMediaItemStreamDTO> _videoStreamFaker =
+        CreateLibraryMediaItemStreamDTOFaker(StreamType.Video);
+
+    private static readonly Faker<LibraryMediaItemStreamDTO> _audioStreamFaker =
+        CreateLibraryMediaItemStreamDTOFaker(StreamType.Audio);
+
+    private static readonly Faker<LibraryMediaItemStreamDTO> _subtitleStreamFaker =
+        CreateLibraryMediaItemStreamDTOFaker(StreamType.Subtitle);
+
+    private static readonly Faker<LibraryMediaItemStreamDTO> _unknownStreamFaker =
+        CreateLibraryMediaItemStreamDTOFaker(StreamType.Unknown);
+
+    private static Faker<LibraryMediaItemStreamDTO> CreateLibraryMediaItemStreamDTOFaker(StreamType streamType)
     {
         var baseFaker = new Faker<LibraryMediaItemStreamDTO>()
             .StrictMode(true)
@@ -275,7 +287,7 @@ public static partial class FakeData
                 .RuleFor(x => x.SamplingRate, _ => null);
         }
 
-        return baseFaker.UseSeed(seed.Next());
+        return baseFaker;
     }
 
     private static string GetCodecForStreamType(Faker f, StreamType streamType) =>
@@ -306,7 +318,15 @@ public static partial class FakeData
         };
 
     public static Faker<LibraryMediaItemStreamDTO> GetLibraryMediaItemStreamDTO(Seed seed, StreamType streamType) =>
-        GetLibraryMediaItemStreamDTOBase(seed, streamType);
+        (streamType switch
+        {
+            StreamType.Video => _videoStreamFaker,
+            StreamType.Audio => _audioStreamFaker,
+            StreamType.Subtitle => _subtitleStreamFaker,
+            StreamType.Unknown => _unknownStreamFaker,
+            _ => throw new ArgumentOutOfRangeException(nameof(streamType), streamType, null),
+        })
+            .UseSeed(seed.Next());
 
     #endregion
 
@@ -380,7 +400,7 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
         return _libraryMediaItemMediaDTO
-            .Clone()
+            .Clone() // Clone to isolate per-call part-list and seed state.
             .RuleFor(x => x.OptimizedForStreaming, f => f.Random.Bool())
             .RuleFor(
                 x => x.Parts,

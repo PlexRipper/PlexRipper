@@ -86,11 +86,18 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
                 .Distinct()
                 .ToListAsync(ct);
 
-            var genres = await _dbContext
-                .PlexLibraryGenres.Where(x => x.PlexLibraryId == req.PlexLibraryId)
-                .Select(x => x.PlexGenreId)
-                .Distinct()
-                .ToListAsync(ct);
+            var isAudioLibrary = plexLibrary.Type.IsMusicType();
+            var genres = isAudioLibrary
+                ? await _dbContext
+                    .PlexLibraryGenresAudio.Where(x => x.PlexLibraryId == req.PlexLibraryId)
+                    .Select(x => x.PlexGenreId)
+                    .Distinct()
+                    .ToListAsync(ct)
+                : await _dbContext
+                    .PlexLibraryGenresVideo.Where(x => x.PlexLibraryId == req.PlexLibraryId)
+                    .Select(x => x.PlexGenreId)
+                    .Distinct()
+                    .ToListAsync(ct);
 
             var qualities = await GetQualitiesForMediaType(req.MediaType, req.PlexLibraryId, ct);
 
@@ -123,12 +130,19 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
                 .Distinct()
                 .ToListAsync(ct);
 
-            var genres = await _dbContext
-                .PlexLibraries.Where(pl => pl.Type == req.MediaType)
-                .SelectMany(pl => pl.Genres)
-                .Select(g => g.Id)
-                .Distinct()
-                .ToListAsync(ct);
+            var genres = req.MediaType.IsMusicType()
+                ? await _dbContext
+                    .PlexLibraries.Where(pl => pl.Type == req.MediaType)
+                    .SelectMany(pl => pl.GenresAudio)
+                    .Select(g => g.Id)
+                    .Distinct()
+                    .ToListAsync(ct)
+                : await _dbContext
+                    .PlexLibraries.Where(pl => pl.Type == req.MediaType)
+                    .SelectMany(pl => pl.GenresVideo)
+                    .Select(g => g.Id)
+                    .Distinct()
+                    .ToListAsync(ct);
 
             var qualities = await GetQualitiesForMediaType(req.MediaType, ct: ct);
 
@@ -157,7 +171,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
         {
             var qualities = await _dbContext
                 .PlexMovieData.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => g.Key)
                 .ToListAsync(ct);
 
@@ -168,7 +182,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
         {
             var qualities = await _dbContext
                 .PlexTvShowMediaQualities.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => g.Key)
                 .ToListAsync(ct);
 
@@ -179,7 +193,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
         {
             var qualities = await _dbContext
                 .PlexOtherVideoData.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => g.Key)
                 .ToListAsync(ct);
 

@@ -25,7 +25,7 @@ public static partial class PlexMediaDataMapper
 
             Duration = source.Duration,
             MediaSize = source.Media.Sum(y => y.Parts.Sum(z => z.Size)),
-            Quality = mediaDataList.Count == 0 ? VideoQuality.Unknown : mediaDataList.Max(x => x.Quality),
+            VideoQuality = mediaDataList.Count == 0 ? VideoQuality.Unknown : mediaDataList.Max(x => x.VideoQuality),
             ChildCount = source.ChildCount,
             AddedAt = source.AddedAt,
             UpdatedAt = source.UpdatedAt,
@@ -44,7 +44,7 @@ public static partial class PlexMediaDataMapper
 
             Countries = source.Country.ToPlexCountry(),
             Actors = source.Role.ToPlexActor(),
-            Genres = source.Genre.ToPlexGenre(),
+            Genres = source.Genre.ToPlexGenreVideo(),
             MediaDataList = mediaDataList,
 
             FullTitle = $"{source.Title} ({source.Year})",
@@ -85,7 +85,7 @@ public static partial class PlexMediaDataMapper
             Size = source.Size,
             Container = source.Container,
             PlexApiRatingKey = root.RatingKey,
-            Quality = mediaItem.VideoResolution,
+            VideoQuality = mediaItem.VideoResolution,
             VideoCodec = mediaItem.VideoCodec,
             VideoResolution = mediaItem.VideoResolution,
             AudioCodec = mediaItem.AudioCodec,

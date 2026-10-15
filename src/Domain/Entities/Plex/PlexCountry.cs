@@ -17,5 +17,10 @@ public class PlexCountry : BaseEntity
 
     public ICollection<PlexMusicArtist> PlexMusicArtistCountries { get; set; } = [];
 
+    /// <summary>
+    /// Gets the album relationships associated with this country.
+    /// </summary>
+    public ICollection<PlexMusicAlbum> PlexMusicAlbumCountries { get; set; } = [];
+
     public ICollection<PlexOtherVideo> PlexOtherVideoCountries { get; set; } = [];
 }

@@ -120,7 +120,8 @@ public static partial class PlexMediaExtensions
             TimeRemaining = 0,
             FileName = mediaData.OriginalFilename.GetFileName(),
             FileLocationUrl = mediaData.Key,
-            Quality = mediaData.VideoResolution,
+            VideoQuality = VideoQuality.None,
+            AudioQuality = mediaData.AudioQuality,
             DirectoryMeta = new DownloadTaskDirectory
             {
                 DownloadRootPath = downloadRootPath,

@@ -24,7 +24,7 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
             .ChildRules(movie => movie.RuleFor(x => x.PlexApiRatingKey).GreaterThan(0));
 
         RuleFor(x => x.LibraryMetadata.PlexActors).NotNull();
-        RuleFor(x => x.LibraryMetadata.PlexGenres).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexGenresVideo).NotNull();
         RuleFor(x => x.LibraryMetadata.PlexCountries).NotNull();
 
         stopWatch.StopAndLog($"Finished validating {nameof(SyncPlexMoviesCommand)}");
@@ -100,7 +100,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
         var syncGenreResult = await SyncMovieGenres(
             plexMovies,
-            command.LibraryMetadata.PlexGenres,
+            command.LibraryMetadata.PlexGenresVideo,
             plexLibraryId,
             libraryName,
             cancellationToken
@@ -164,8 +164,8 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
         var deleted = currentMovies.Where(x => !incomingKeys.Contains(x.PlexApiRatingKey)).ToList();
         foreach (var movie in created.Concat(updated))
-            movie.Quality =
-                movie.MediaDataList.Count == 0 ? VideoQuality.Unknown : movie.MediaDataList.Max(x => x.Quality);
+            movie.VideoQuality =
+                movie.MediaDataList.Count == 0 ? VideoQuality.Unknown : movie.MediaDataList.Max(x => x.VideoQuality);
 
         report.CreatedMovies = created.Count;
         report.UpdatedMovies = updated.Count;
@@ -297,7 +297,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
     private async Task<Result<int>> SyncMovieGenres(
         List<PlexMovie> movies,
-        Dictionary<string, PlexGenre> plexGenreDict,
+        Dictionary<string, PlexGenreVideo> plexGenreDict,
         int libraryId,
         string libraryName,
         CancellationToken ct

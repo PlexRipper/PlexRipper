@@ -161,13 +161,13 @@ public class SearchTvShowCommandUnitTests : BaseCommandUnitTest<SearchTvShowComm
         using (var dbContext = IDbContext)
         {
             var tvShow = await dbContext.PlexTvShows.SingleAsync(CancellationToken);
-            var genre = new PlexGenre
+            var genre = new PlexGenreVideo
             {
                 Name = "Anime",
                 Key = "active-anime",
                 Type = PlexGenreType.Anime,
             };
-            dbContext.PlexGenres.Add(genre);
+            dbContext.PlexGenresVideo.Add(genre);
             await dbContext.SaveChangesAsync(CancellationToken);
             dbContext.PlexTvShowGenres.Add(new PlexTvShowGenres(genre.Id, tvShow.PlexLibraryId, tvShow.Id));
             await dbContext.SaveChangesAsync(CancellationToken);

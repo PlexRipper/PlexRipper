@@ -35,52 +35,44 @@ public static class DownloadTaskDirectoryExtensions
     private static string GetCategoryFolderName(DownloadTaskType type) =>
         type switch
         {
-            DownloadTaskType.Movie or DownloadTaskType.MovieData or DownloadTaskType.MoviePart =>
+            DownloadTaskType.Movie or DownloadTaskType.MovieData =>
                 IPathProvider.DefaultMovieFolderName,
             DownloadTaskType.TvShow
             or DownloadTaskType.Season
             or DownloadTaskType.Episode
-            or DownloadTaskType.EpisodeData
-            or DownloadTaskType.EpisodePart => IPathProvider.DefaultTvShowsFolderName,
+            or DownloadTaskType.EpisodeData => IPathProvider.DefaultTvShowsFolderName,
             DownloadTaskType.MusicArtist
             or DownloadTaskType.MusicAlbum
             or DownloadTaskType.MusicTrack
-            or DownloadTaskType.MusicTrackData
-            or DownloadTaskType.MusicTrackPart => IPathProvider.DefaultMusicFolderName,
+            or DownloadTaskType.MusicTrackData => IPathProvider.DefaultMusicFolderName,
             DownloadTaskType.PhotoAlbum
             or DownloadTaskType.PhotoImage
-            or DownloadTaskType.PhotoData
-            or DownloadTaskType.PhotoPart => IPathProvider.DefaultPhotosFolderName,
+            or DownloadTaskType.PhotoData => IPathProvider.DefaultPhotosFolderName,
             DownloadTaskType.OtherVideo
-            or DownloadTaskType.OtherVideoData
-            or DownloadTaskType.OtherVideoPart => IPathProvider.DefaultOtherFolderName,
+            or DownloadTaskType.OtherVideoData => IPathProvider.DefaultOtherFolderName,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported download task type."),
         };
 
     private static string GetRelativeDirectory(DownloadTaskDirectory directory, DownloadTaskType type) =>
         type switch
         {
-            DownloadTaskType.Movie or DownloadTaskType.MovieData or DownloadTaskType.MoviePart => directory.MovieFolder,
+            DownloadTaskType.Movie or DownloadTaskType.MovieData => directory.MovieFolder,
             DownloadTaskType.TvShow => directory.TvShowFolder,
             DownloadTaskType.Season
             or DownloadTaskType.Episode
-            or DownloadTaskType.EpisodeData
-            or DownloadTaskType.EpisodePart => Path.Combine(directory.TvShowFolder, directory.SeasonFolder),
+            or DownloadTaskType.EpisodeData => Path.Combine(directory.TvShowFolder, directory.SeasonFolder),
             DownloadTaskType.MusicArtist => directory.MusicArtistFolder,
             DownloadTaskType.MusicAlbum
             or DownloadTaskType.MusicTrack
-            or DownloadTaskType.MusicTrackData
-            or DownloadTaskType.MusicTrackPart => Path.Combine(
+            or DownloadTaskType.MusicTrackData => Path.Combine(
                 directory.MusicArtistFolder,
                 directory.MusicAlbumFolder
             ),
             DownloadTaskType.PhotoAlbum
             or DownloadTaskType.PhotoImage
-            or DownloadTaskType.PhotoData
-            or DownloadTaskType.PhotoPart => directory.PhotoAlbumFolder,
+            or DownloadTaskType.PhotoData => directory.PhotoAlbumFolder,
             DownloadTaskType.OtherVideo
-            or DownloadTaskType.OtherVideoData
-            or DownloadTaskType.OtherVideoPart => directory.OtherVideoFolder,
+            or DownloadTaskType.OtherVideoData => directory.OtherVideoFolder,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported download task type."),
         };
 

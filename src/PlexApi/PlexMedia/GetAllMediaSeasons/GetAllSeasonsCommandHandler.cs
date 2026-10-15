@@ -22,7 +22,7 @@ public class GetAllSeasonsCommandHandler : ICommandHandler<GetAllMediaSeasonsCom
         );
 
         if (mediaListResult.IsFailed)
-            return mediaListResult.ToResult();
+            return mediaListResult.ToResult().LogIfFailed();
 
         var mediaList = mediaListResult.Value.ToPlexTvShowSeasons();
         return Result.Ok(mediaList);

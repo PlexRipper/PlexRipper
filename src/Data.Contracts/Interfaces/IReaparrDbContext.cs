@@ -49,7 +49,9 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<PlexActor> PlexActors { get; }
 
-    DbSet<PlexGenre> PlexGenres { get; }
+    DbSet<PlexGenreVideo> PlexGenresVideo { get; }
+
+    DbSet<PlexGenreAudio> PlexGenresAudio { get; }
 
     DbSet<PlexCountry> PlexCountries { get; }
 
@@ -85,15 +87,19 @@ public interface IReaparrDbContext : IDisposable
 
     #region PlexMusic
 
-    DbSet<PlexMusicArtist> PlexArtists { get; }
+    DbSet<PlexMusicArtist> PlexMusicArtists { get; }
 
     DbSet<MediaOverviewMusicArtistSnapshot> MediaOverviewMusicArtistSnapshots { get; }
 
-    DbSet<PlexMusicAlbum> PlexAlbums { get; }
+    DbSet<PlexMusicAlbum> PlexMusicAlbums { get; }
 
-    DbSet<PlexMusicTrack> PlexTracks { get; }
+    DbSet<PlexMusicTrack> PlexMusicTracks { get; }
 
-    DbSet<PlexMusicTrackMediaData> PlexTrackData { get; }
+    DbSet<PlexMusicTrackMediaData> PlexMusicTrackData { get; }
+
+    DbSet<PlexMusicArtistMediaQuality> PlexMusicArtistMediaQualities { get; }
+
+    DbSet<PlexMusicAlbumMediaQuality> PlexMusicAlbumMediaQualities { get; }
 
     #endregion
 
@@ -141,7 +147,9 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<PlexLibraryCountries> PlexLibraryCountries { get; }
 
-    DbSet<PlexLibraryGenres> PlexLibraryGenres { get; }
+    DbSet<PlexLibraryGenresVideo> PlexLibraryGenresVideo { get; }
+
+    DbSet<PlexLibraryGenresAudio> PlexLibraryGenresAudio { get; }
 
     DbSet<PlexMovieActors> PlexMovieActors { get; }
 
@@ -160,6 +168,8 @@ public interface IReaparrDbContext : IDisposable
     DbSet<PlexMusicArtistGenres> PlexMusicArtistGenres { get; }
 
     DbSet<PlexMusicArtistCountries> PlexMusicArtistCountries { get; }
+
+    DbSet<PlexMusicAlbumCountries> PlexMusicAlbumCountries { get; }
 
     DbSet<PlexOtherVideoActors> PlexOtherVideoActors { get; }
 

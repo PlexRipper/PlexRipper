@@ -4,12 +4,46 @@ public static class PlexMediaQualityMappers
 {
     private const int NO_MEDIA_DATA_ID = -1;
 
+    #region PlexMusicArtistMediaQuality
+
+    public static PlexMediaQualityDTO ToDTO(this PlexMusicArtistMediaQuality source) =>
+        new()
+        {
+            VideoQuality = VideoQuality.None,
+            AudioQuality = source.AudioQuality,
+            MediaId = source.PlexMusicArtistId,
+            DataId = NO_MEDIA_DATA_ID,
+            MediaDataType = source.Type,
+        };
+
+    public static List<PlexMediaQualityDTO> ToDTO(this IEnumerable<PlexMusicArtistMediaQuality> source) =>
+        source.OrderBy(x => x.Id).Select(x => x.ToDTO()).ToList();
+
+    #endregion
+
+    #region PlexMusicAlbumMediaQuality
+
+    public static PlexMediaQualityDTO ToDTO(this PlexMusicAlbumMediaQuality source) =>
+        new()
+        {
+            VideoQuality = VideoQuality.None,
+            AudioQuality = source.AudioQuality,
+            MediaId = source.PlexMusicAlbumId,
+            DataId = NO_MEDIA_DATA_ID,
+            MediaDataType = source.Type,
+        };
+
+    public static List<PlexMediaQualityDTO> ToDTO(this IEnumerable<PlexMusicAlbumMediaQuality> source) =>
+        source.OrderBy(x => x.Id).Select(x => x.ToDTO()).ToList();
+
+    #endregion
+
     #region PlexTvShowMediaQuality
 
     public static PlexMediaQualityDTO ToDTO(this PlexTvShowMediaQuality source) =>
         new()
         {
-            Quality = source.Quality,
+            VideoQuality = source.VideoQuality,
             MediaId = NO_MEDIA_DATA_ID,
             DataId = NO_MEDIA_DATA_ID,
             MediaDataType = source.Type,
@@ -25,7 +59,7 @@ public static class PlexMediaQualityMappers
     public static PlexMediaQualityDTO ToDTO(this PlexTvShowSeasonMediaQuality source) =>
         new()
         {
-            Quality = source.Quality,
+            VideoQuality = source.VideoQuality,
             MediaDataType = source.Type,
             MediaId = source.PlexTvShowSeasonId,
             DataId = NO_MEDIA_DATA_ID,
@@ -43,7 +77,7 @@ public static class PlexMediaQualityMappers
         {
             DataId = source.Id,
             MediaDataType = PlexMediaType.Episode,
-            Quality = source.Quality,
+            VideoQuality = source.VideoQuality,
             MediaId = source.PlexTvShowEpisodeId,
         };
 

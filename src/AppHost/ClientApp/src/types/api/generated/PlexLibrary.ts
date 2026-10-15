@@ -175,7 +175,7 @@ export class PlexLibrary {
     data: RefreshLibraryMediaEndpointRequest,
     params: RequestParams = {},
   ) =>
-    axiosObservable<PlexLibraryDTO>({
+    axiosObservable<LibrarySyncJobQueueDTO>({
       url: `/api/PlexLibrary/refresh/${plexLibraryId}`,
       method: "POST",
       data: data,
@@ -183,7 +183,7 @@ export class PlexLibrary {
       type: ContentType.Json,
       responseType: "json",
       ...params,
-    }).pipe(apiCheckPipe<PlexLibraryDTO>);
+    }).pipe(apiCheckPipe<LibrarySyncJobQueueDTO>);
 
   /**
    * No description

@@ -35,36 +35,20 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         var byType = command.Keys.ToLookup(k => k.Type, k => k.Id);
 
         await DeleteAsync(_dbContext.DownloadTaskMovie, DownloadTaskType.Movie);
-        await DeleteAsync(_dbContext.DownloadTaskMovieFile, DownloadTaskType.MovieData, DownloadTaskType.MoviePart);
+        await DeleteAsync(_dbContext.DownloadTaskMovieFile, DownloadTaskType.MovieData);
         await DeleteAsync(_dbContext.DownloadTaskTvShow, DownloadTaskType.TvShow);
         await DeleteAsync(_dbContext.DownloadTaskTvShowSeason, DownloadTaskType.Season);
         await DeleteAsync(_dbContext.DownloadTaskTvShowEpisode, DownloadTaskType.Episode);
-        await DeleteAsync(
-            _dbContext.DownloadTaskTvShowEpisodeFile,
-            DownloadTaskType.EpisodeData,
-            DownloadTaskType.EpisodePart
-        );
+        await DeleteAsync(_dbContext.DownloadTaskTvShowEpisodeFile, DownloadTaskType.EpisodeData);
         await DeleteAsync(_dbContext.DownloadTaskPhotoAlbums, DownloadTaskType.PhotoAlbum);
         await DeleteAsync(_dbContext.DownloadTaskPhotoImages, DownloadTaskType.PhotoImage);
-        await DeleteAsync(
-            _dbContext.DownloadTaskPhotoImageFiles,
-            DownloadTaskType.PhotoData,
-            DownloadTaskType.PhotoPart
-        );
+        await DeleteAsync(_dbContext.DownloadTaskPhotoImageFiles, DownloadTaskType.PhotoData);
         await DeleteAsync(_dbContext.DownloadTaskMusicArtists, DownloadTaskType.MusicArtist);
         await DeleteAsync(_dbContext.DownloadTaskMusicAlbums, DownloadTaskType.MusicAlbum);
         await DeleteAsync(_dbContext.DownloadTaskMusicTracks, DownloadTaskType.MusicTrack);
-        await DeleteAsync(
-            _dbContext.DownloadTaskMusicTrackFiles,
-            DownloadTaskType.MusicTrackData,
-            DownloadTaskType.MusicTrackPart
-        );
+        await DeleteAsync(_dbContext.DownloadTaskMusicTrackFiles, DownloadTaskType.MusicTrackData);
         await DeleteAsync(_dbContext.DownloadTaskOtherVideos, DownloadTaskType.OtherVideo);
-        await DeleteAsync(
-            _dbContext.DownloadTaskOtherVideoFiles,
-            DownloadTaskType.OtherVideoData,
-            DownloadTaskType.OtherVideoPart
-        );
+        await DeleteAsync(_dbContext.DownloadTaskOtherVideoFiles, DownloadTaskType.OtherVideoData);
 
         // Exclude roots that were already directly deleted above — orphan cleanup only
         // applies to roots whose children were removed, not roots deleted explicitly.

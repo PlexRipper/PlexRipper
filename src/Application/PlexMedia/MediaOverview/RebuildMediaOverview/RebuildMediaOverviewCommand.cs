@@ -64,7 +64,7 @@ public sealed class RebuildMediaOverviewCommandHandler : ICommandHandler<Rebuild
                         UpdatedAt = x.UpdatedAt,
                         Duration = x.Duration,
                         MediaSize = x.MediaSize,
-                        Quality = x.Quality,
+                        VideoQuality = x.VideoQuality,
                         TitleRank = 0,
                         YearRank = 0,
                         AddedAtRank = 0,
@@ -104,7 +104,7 @@ public sealed class RebuildMediaOverviewCommandHandler : ICommandHandler<Rebuild
                         UpdatedAt = x.UpdatedAt,
                         Duration = x.Duration,
                         MediaSize = x.MediaSize,
-                        Quality = x.Quality,
+                        Quality = x.VideoQuality,
                         TitleRank = 0,
                         YearRank = 0,
                         AddedAtRank = 0,
@@ -132,7 +132,7 @@ public sealed class RebuildMediaOverviewCommandHandler : ICommandHandler<Rebuild
             case PlexMediaType.MusicArtist:
             {
                 var source = await context
-                    .PlexArtists.Select(x => new
+                    .PlexMusicArtists.Select(x => new
                     {
                         x.Id,
                         x.PlexLibraryId,
@@ -238,7 +238,7 @@ public sealed class RebuildMediaOverviewCommandHandler : ICommandHandler<Rebuild
                         x.UpdatedAt,
                         x.Duration,
                         x.MediaSize,
-                        x.Quality,
+                        x.VideoQuality,
                     })
                     .ToListAsync(cancellationToken);
                 var snapshots = source
@@ -249,7 +249,7 @@ public sealed class RebuildMediaOverviewCommandHandler : ICommandHandler<Rebuild
                         TitleRank = 0,
                         YearRank = 0,
                         AddedAtRank = 0,
-                        Quality = x.Quality,
+                        VideoQuality = x.VideoQuality,
                         QualityRank = 0,
                         UpdatedAtRank = 0,
                         DurationRank = 0,

@@ -26,7 +26,7 @@ public class PlexMediaSlimDTOValidator : AbstractValidator<PlexMediaSlimDTO>
         RuleForEach(x => x.Qualities)
             .ChildRules(y =>
             {
-                y.RuleFor(z => z.Quality).NotEqual(VideoQuality.Unknown);
+                y.RuleFor(z => z.VideoQuality).NotEqual(VideoQuality.Unknown);
             });
     }
 }

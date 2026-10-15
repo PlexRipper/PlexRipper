@@ -54,13 +54,13 @@ public static partial class FakeData
             .RuleFor(x => x.PlexApiMediaId, _ => GetUniqueNumber())
             .RuleFor(x => x.PlexApiPartId, _ => GetUniqueNumber())
             .RuleFor(
-                x => x.Quality,
+                x => x.VideoQuality,
                 f => f.PickRandom(VideoQuality.SD, VideoQuality.HD, VideoQuality.FullHD, VideoQuality.UHD_4K)
             )
             .RuleFor(
                 x => x.FileName,
                 (_, x) =>
-                    $"{x.MediaType.ToPlexMediaTypeString()}-{x.Title.SanitizeFolderName()}.[{x.Quality.ToResolutionLabel()}].file.mp4"
+                    $"{x.MediaType.ToPlexMediaTypeString()}-{x.Title.SanitizeFolderName()}.[{x.VideoQuality.ToResolutionLabel()}].file.mp4"
             )
             .RuleFor(x => x.FileLocationUrl, _ => DownloadFileUrl)
             .RuleFor(
@@ -83,7 +83,6 @@ public static partial class FakeData
             .RuleFor(x => x.DirectDownloadSnapshot, _ => null)
             .RuleFor(x => x.DownloadClientType, _ => PlexDownloadClientType.Direct);
     }
-
 
     private static string ToDefaultDestinationLocation(this PlexMediaType type)
     {

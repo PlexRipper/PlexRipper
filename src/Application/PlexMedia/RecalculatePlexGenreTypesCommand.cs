@@ -31,7 +31,7 @@ public class RecalculatePlexGenreTypesCommandHandler
     {
         var result = await Result.Try(async Task<Result<PlexGenreTypeRecalculationResult>> () =>
         {
-            var genres = await _dbContext.PlexGenres.AsTracking().ToListAsync(cancellationToken);
+            var genres = await _dbContext.PlexGenresVideo.AsTracking().ToListAsync(cancellationToken);
             var updatedCount = 0;
 
             foreach (var genre in genres)
@@ -50,7 +50,7 @@ public class RecalculatePlexGenreTypesCommandHandler
             var recalculationResult = new PlexGenreTypeRecalculationResult(genres.Count, updatedCount);
             _log.Here()
                 .Information(
-                    "Recalculated PlexGenre types: scanned {ScannedCount}, updated {UpdatedCount}",
+                    "Recalculated PlexGenreVideo types: scanned {ScannedCount}, updated {UpdatedCount}",
                     recalculationResult.ScannedCount,
                     recalculationResult.UpdatedCount
                 );

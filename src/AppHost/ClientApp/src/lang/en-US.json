@@ -36,11 +36,10 @@
         "music-media-list": {
             "select-artist": "Select artist {title}",
             "select-album": "Select album {title}",
-            "select-track": "Select track {title}",
             "selected-count": "{count} selected",
             "track-count": "{count} tracks",
-            "disc-label": "Disc {number}",
-            "unknown-disc": "Unspecified disc",
+            "record-label": "Record label",
+            "release-date": "Release date",
             "no-tracks": "No tracks found",
             "no-albums": "No albums found"
         },
@@ -50,6 +49,7 @@
             "duration": "Duration",
             "size": "Size",
             "year": "Year",
+            "genres": "Genres",
             "originally-available": "Originally available",
             "added-at": "Added",
             "updated-at": "Updated",
@@ -75,9 +75,6 @@
             "retry": "Retry"
         },
         "other-video-media-list": {
-            "originals": "Original versions",
-            "select-video": "Select video {title}",
-            "selected-count": "{count} selected",
             "empty": "No original files available."
         },
         "other-video-details": {
@@ -146,7 +143,9 @@
             "media-count-label": "Media count:",
             "summary": "Summary:",
             "one-movie-count": "1 Movie",
-            "movie-file-count": "{movieFileCount} Movie files"
+            "movie-file-count": "{movieFileCount} Movie files",
+            "read-more": "Read more",
+            "full-summary": "Full summary"
         },
         "directory-browser": {
             "add-download-path": "Add New Custom Download Path",
@@ -221,6 +220,14 @@
             "no-filter-results": "No media results match the current filter settings. Please adjust or reset your filters to display available results",
             "library-disabled": "The library \"{library}\" is disabled. Enable it and resync the library before viewing its media.",
             "enable-library-button": "Enable library",
+            "sync-queued-title": "Refresh queued",
+            "sync-queued-offline": "Waiting for the server to come online.",
+            "sync-queued-busy": "Waiting for {library} to finish refreshing on {server}.",
+            "sync-queued-waiting": "Waiting for this refresh to start.",
+            "sync-queued-automatic": "This library will refresh automatically when its turn comes.",
+            "view-sync-activity": "View sync activity",
+            "cancel-queued-refresh": "Cancel queued refresh",
+            "requesting-refresh": "Requesting refresh…",
             "comparison": {
                 "details-column-title": "Title",
                 "details-column-location": "Location",
@@ -486,8 +493,10 @@
             "movies-metadata": "{movieCount} Movies - {fileSize} ",
             "tv-shows-metadata": "{tvShowCount} TV Shows - {seasonCount} Seasons - {episodeCount} Episodes - {fileSize} ",
             "music-metadata": "{artistCount} Artists - {fileSize}",
+            "music-library-metadata": "{artistCount} Artists - {albumCount} Albums - {trackCount} Tracks - {fileSize}",
             "music-detail-metadata": "{albumCount} Albums - {trackCount} Tracks - {fileSize}",
             "photos-metadata": "{albumCount} Albums - {fileSize}",
+            "photos-library-metadata": "{albumCount} Albums - {photoCount} Photos - {clipCount} Clips - {fileSize}",
             "photo-detail-metadata": "{assetCount} Assets - {fileSize}",
             "other-videos-metadata": "{videoCount} Videos - {fileSize}"
         },
@@ -507,9 +516,13 @@
             "fetching-servers": "Retrieving accessible servers for syncing media",
             "finished": "Sync finished: {completed} completed, {failed} failed, {cancelled} cancelled",
             "no-active-syncs": "No active library syncs",
+            "queued-summary": "Library refreshes are waiting for their turn.",
             "status": {
                 "unknown": "Unknown",
                 "queued": "Queued",
+                "queued-offline": "Queued — waiting for the server to come online.",
+                "queued-busy": "Waiting for {library} to finish refreshing on {server}.",
+                "queued-waiting": "Queued — waiting to start.",
                 "processing": "Processing",
                 "completed": "Completed",
                 "failed": "Failed",

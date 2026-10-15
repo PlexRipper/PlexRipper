@@ -975,13 +975,13 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
         using (var dbContext = IDbContext)
         {
             var tvShow = await dbContext.PlexTvShows.SingleAsync(CancellationToken);
-            var genre = new PlexGenre
+            var genre = new PlexGenreVideo
             {
                 Name = genreType.ToString(),
                 Key = $"torznab-{genreType}",
                 Type = genreType,
             };
-            dbContext.PlexGenres.Add(genre);
+            dbContext.PlexGenresVideo.Add(genre);
             await dbContext.SaveChangesAsync(CancellationToken);
             dbContext.PlexTvShowGenres.Add(new PlexTvShowGenres(genre.Id, tvShow.PlexLibraryId, tvShow.Id));
             await dbContext.SaveChangesAsync(CancellationToken);
@@ -1032,13 +1032,13 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
         using (var dbContext = IDbContext)
         {
             var tvShow = await dbContext.PlexTvShows.SingleAsync(CancellationToken);
-            var genre = new PlexGenre
+            var genre = new PlexGenreVideo
             {
                 Name = "Sport / Documentary",
                 Key = "torznab-group",
                 Type = PlexGenreType.Group,
             };
-            dbContext.PlexGenres.Add(genre);
+            dbContext.PlexGenresVideo.Add(genre);
             await dbContext.SaveChangesAsync(CancellationToken);
             dbContext.PlexTvShowGenres.Add(new PlexTvShowGenres(genre.Id, tvShow.PlexLibraryId, tvShow.Id));
             await dbContext.SaveChangesAsync(CancellationToken);
@@ -1089,19 +1089,19 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
         {
             var movie = await dbContext.PlexMovies.SingleAsync(CancellationToken);
             var tvShow = await dbContext.PlexTvShows.SingleAsync(CancellationToken);
-            var foreign = new PlexGenre
+            var foreign = new PlexGenreVideo
             {
                 Name = "Foreign",
                 Key = "mixed-foreign",
                 Type = PlexGenreType.Foreign,
             };
-            var anime = new PlexGenre
+            var anime = new PlexGenreVideo
             {
                 Name = "Anime",
                 Key = "mixed-anime",
                 Type = PlexGenreType.Anime,
             };
-            dbContext.PlexGenres.AddRange(foreign, anime);
+            dbContext.PlexGenresVideo.AddRange(foreign, anime);
             await dbContext.SaveChangesAsync(CancellationToken);
             dbContext.PlexMovieGenres.Add(new PlexMovieGenres(foreign.Id, movie.PlexLibraryId, movie.Id));
             dbContext.PlexTvShowGenres.Add(new PlexTvShowGenres(anime.Id, tvShow.PlexLibraryId, tvShow.Id));

@@ -36,7 +36,7 @@ describe('LibraryStore.getLibrarySyncQueueGrouped()', () => {
 		// Arrange
 		const libraryStore = useLibraryStore();
 		libraryStore.syncQueues = [
-			generateLibrarySyncJobQueue({ plexLibraryId: 23, plexServerId: 1, status: LibrarySyncJobStatus.Queued }),
+			generateLibrarySyncJobQueue({ plexLibraryId: 23, plexServerId: 1, status: LibrarySyncJobStatus.Processing }),
 		];
 		const progress = generateLibrarySyncProgress({
 			libraryId: 23,
@@ -54,6 +54,31 @@ describe('LibraryStore.getLibrarySyncQueueGrouped()', () => {
 		// Assert
 		expect(result[0]?.progress[0]?.timeRemaining).toBe('00:00:00.1482404');
 		expect(result[0]?.progress[0]?.isComplete).toBe(false);
+	});
+
+	test('Should suppress previous-run progress while a library is queued', () => {
+		// Arrange
+		const libraryStore = useLibraryStore();
+		libraryStore.syncQueues = [
+			generateLibrarySyncJobQueue({ plexLibraryId: 24, plexServerId: 1, status: LibrarySyncJobStatus.Queued }),
+		];
+		const progress = generateLibrarySyncProgress({
+			libraryId: 24,
+			type: PlexMediaType.Episode,
+			received: 4796,
+			total: 4796,
+			items: [generateLibrarySyncProgressItem(PlexMediaType.Episode, { received: 4399, total: 4399 })],
+		});
+		progress.timeRemaining = '00:00:00.1482404';
+
+		// Act
+		libraryStore.updateLibraryProgress(progress);
+		const result = libraryStore.getLibrarySyncQueueGrouped(1);
+
+		// Assert
+		expect(result[0]?.progress[0]?.percentage).toBeUndefined();
+		expect(result[0]?.progress[0]?.isComplete).toBe(false);
+		expect(result[0]?.progress[0]?.timeRemaining).toBeUndefined();
 	});
 
 	test('Should project terminal queue statuses as complete without SignalR progress', () => {

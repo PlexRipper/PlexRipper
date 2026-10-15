@@ -114,6 +114,7 @@
 					:width="verticalButtonWidth"
 					cy="media-overview-refresh-library-btn"
 					icon="mdi-refresh"
+					:disabled="refreshDisabled"
 					@click="$emit('action', 'refresh-library');" />
 
 				<!--	Media Options button	-->
@@ -249,6 +250,7 @@
 						<q-item
 							v-if="!mediaOverviewStore.allMediaMode && !detailMode"
 							v-close-popup
+							:disable="refreshDisabled"
 							clickable
 							data-cy="media-overview-bar-mobile-refresh-button"
 							@click="$emit('action', 'refresh-library')">
@@ -332,9 +334,11 @@ withDefaults(defineProps<{
 	libraryId?: number;
 	detailMode?: boolean;
 	mediaDetailItem?: PlexMediaDTO | null;
+	refreshDisabled?: boolean;
 }>(), {
 	libraryId: 0,
 	detailMode: false,
+	refreshDisabled: false,
 });
 
 defineEmits<{

@@ -15,7 +15,7 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             .ReturnsAsync(Result.Fail<List<PlexLibrary>>(error))
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.StartAsync(library.Id, library.Type, CancellationToken))
+            .Setup(x => x.StartAsync(library.Id, library.Type))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
@@ -53,7 +53,7 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             .ReturnsAsync(Result.Ok(new List<PlexLibrary>()))
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.StartAsync(library.Id, library.Type, CancellationToken))
+            .Setup(x => x.StartAsync(library.Id, library.Type))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
@@ -91,16 +91,15 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
         Mock.SetupCommand(() => It.Is<GetLibrarySectionsCommand>(x => x.PlexServerId == library.PlexServerId))
             .ReturnsAsync(Result.Ok(new List<PlexLibrary> { library }))
             .Verifiable(Times.Once());
+
+        SetupProgressTotalsCommand(library);
+
         Mock.SetupCommand(() =>
                 It.Is<GetAllMediaByTypeFromPlexApiCommand>(x =>
                     x.PlexLibrary.Id == library.Id && x.MediaType == PlexMediaType.Movie
                 )
             )
             .ReturnsAsync(Result.Fail<List<LibraryMediaItemDTO>>(error))
-            .Verifiable(Times.Once());
-        Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.StartAsync(library.Id, library.Type, CancellationToken))
-            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x =>
@@ -158,6 +157,9 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
         Mock.SetupCommand(() => It.Is<GetLibrarySectionsCommand>(x => x.PlexServerId == original.PlexServerId))
             .ReturnsAsync(Result.Ok(new List<PlexLibrary> { section }))
             .Verifiable(Times.Once());
+
+        SetupProgressTotalsCommand(original);
+
         Mock.SetupCommand(() =>
                 It.Is<GetAllMediaByTypeFromPlexApiCommand>(x =>
                     x.PlexLibrary.Id == original.Id
@@ -166,10 +168,6 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
                 )
             )
             .ReturnsAsync(Result.Ok(sources))
-            .Verifiable(Times.Once());
-        Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.StartAsync(original.Id, type, CancellationToken))
-            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act
@@ -180,12 +178,20 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
         result.Errors.Count.ShouldBe(0);
         result.Value.Library.Id.ShouldBe(original.Id);
         result.Value.Library.PlexServerId.ShouldBe(original.PlexServerId);
-        result
-            .Value.Countries.Select(x => (x.Key, x.Name))
-            .ShouldBe(countries.Select(x => (x.Key, x.Name)), ignoreOrder: true);
-        result
-            .Value.Genres.Select(x => (x.Key, x.Name))
-            .ShouldBe(genres.Select(x => (x.Key, x.Name)), ignoreOrder: true);
+        if (type == PlexMediaType.MusicArtist)
+        {
+            result
+                .Value.GenresAudio.Select(x => (x.Key, x.Name))
+                .ShouldBe(genres.Select(x => (x.Key, x.Name)), ignoreOrder: true);
+            result.Value.GenresVideo.ShouldBeEmpty();
+        }
+        else
+        {
+            result
+                .Value.GenresVideo.Select(x => (x.Key, x.Name))
+                .ShouldBe(genres.Select(x => (x.Key, x.Name)), ignoreOrder: true);
+            result.Value.GenresAudio.ShouldBeEmpty();
+        }
         result
             .Value.Actors.Select(x => (x.Key, x.Name))
             .ShouldBe(actors.Select(x => (x.Key, x.Name)), ignoreOrder: true);
@@ -274,16 +280,15 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
         Mock.SetupCommand(() => It.Is<GetLibrarySectionsCommand>(x => x.PlexServerId == library.PlexServerId))
             .ReturnsAsync(Result.Ok(new List<PlexLibrary> { library }))
             .Verifiable(Times.Once());
+
+        SetupProgressTotalsCommand(library);
+
         Mock.SetupCommand(() =>
                 It.Is<GetAllMediaByTypeFromPlexApiCommand>(x =>
                     x.PlexLibrary.Id == library.Id && x.MediaType == rootType
                 )
             )
             .ReturnsAsync(Result.Ok(new List<LibraryMediaItemDTO>()))
-            .Verifiable(Times.Once());
-        Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.StartAsync(library.Id, type, CancellationToken))
-            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act
@@ -313,7 +318,46 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             );
     }
 
+    [Test]
+    public async Task ShouldMapMusicTrackInventoryWithoutRequestingDetailMetadata()
+    {
+        // Arrange
+        var library = CreateLibrary(PlexMediaType.MusicArtist);
+        var source = FakeData
+            .GetLibraryMediaItemDTO(new Seed(9110), mediaType: PlexMediaType.MusicTrack)
+            .RuleFor(x => x.Title, "Inventory track")
+            .RuleFor(x => x.Guid, "local://track/300")
+            .Generate() with
+        {
+            RatingKey = 300,
+            ParentRatingKey = "200",
+        };
+        Mock.SetupCommand(() =>
+                It.Is<GetAllMediaByTypeFromPlexApiCommand>(x =>
+                    x.PlexLibrary == library && x.MediaType == PlexMediaType.MusicTrack
+                )
+            )
+            .ReturnsAsync(Result.Ok(new List<LibraryMediaItemDTO> { source }))
+            .Verifiable(Times.Once());
 
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new GetLibraryMediaFromPlexApiCommand(library, PlexMediaType.MusicTrack),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var track = result.Value.Library.Tracks.ShouldHaveSingleItem();
+        (track.PlexApiRatingKey, track.ParentKey).ShouldBe((300, 200));
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GetDetailMetadataByRatingKeysCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+    }
 
     [Test]
     [Arguments(PlexMediaType.MusicAlbum, false)]
@@ -406,4 +450,16 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             ScannedAt = null,
             ContentChangedAt = 1,
         };
+
+    private void SetupProgressTotalsCommand(PlexLibrary library)
+    {
+        var totals = library.Type.GetFamilyTypes().ToDictionary(mediaType => mediaType, _ => 3);
+        Mock.SetupCommand(() => It.Is<GetLibraryMediaTotalsCommand>(x => x.PlexLibrary.Id == library.Id))
+            .ReturnsAsync(Result.Ok<IReadOnlyDictionary<PlexMediaType, int>>(totals))
+            .Verifiable(Times.Once());
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.StartAsync(library.Id, library.Type, It.IsAny<IReadOnlyDictionary<PlexMediaType, int>>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+    }
 }

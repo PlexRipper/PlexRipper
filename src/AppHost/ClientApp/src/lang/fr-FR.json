@@ -36,11 +36,10 @@
         "music-media-list": {
             "select-artist": "Sélectionner l’artiste {title}",
             "select-album": "Sélectionner l’album {title}",
-            "select-track": "Sélectionner la piste {title}",
             "selected-count": "{count} sélectionnés",
             "track-count": "{count} pistes",
-            "disc-label": "Disque {number}",
-            "unknown-disc": "Disque non précisé",
+            "record-label": "Label",
+            "release-date": "Date de sortie",
             "no-tracks": "Aucune piste trouvée",
             "no-albums": "Aucun album trouvé"
         },
@@ -50,6 +49,7 @@
             "duration": "Durée",
             "size": "Taille",
             "year": "Année",
+            "genres": "Genres",
             "originally-available": "Première disponibilité",
             "added-at": "Ajout",
             "updated-at": "Mise à jour",
@@ -75,9 +75,6 @@
             "retry": "Réessayer"
         },
         "other-video-media-list": {
-            "originals": "Versions originales",
-            "select-video": "Sélectionner la vidéo {title}",
-            "selected-count": "{count} sélectionnés",
             "empty": "Aucun fichier original disponible."
         },
         "other-video-details": {
@@ -146,7 +143,9 @@
             "media-count-label": "Nombre de médias :",
             "summary": "Sommaire:",
             "one-movie-count": "1 film",
-            "movie-file-count": "{movieFileCount} fichiers de film"
+            "movie-file-count": "{movieFileCount} fichiers de film",
+            "read-more": "Lire plus",
+            "full-summary": "Résumé complet"
         },
         "directory-browser": {
             "add-download-path": "Ajouter un nouveau chemin de téléchargement personnalisé",
@@ -221,6 +220,14 @@
             "no-filter-results": "Aucun résultat multimédia ne correspond aux paramètres de filtre actuels. Veuillez ajuster ou réinitialiser vos filtres pour afficher les résultats disponibles.",
             "library-disabled": "La bibliothèque \"{library}\" est désactivée. Activez-la puis resynchronisez-la avant d'afficher ses médias.",
             "enable-library-button": "Activer la bibliothèque",
+            "sync-queued-title": "Actualisation en attente",
+            "sync-queued-offline": "En attente du retour en ligne du serveur.",
+            "sync-queued-busy": "En attente de la fin de l'actualisation de {library} sur {server}.",
+            "sync-queued-waiting": "En attente du démarrage de cette actualisation.",
+            "sync-queued-automatic": "Cette bibliothèque s'actualisera automatiquement lorsque son tour viendra.",
+            "view-sync-activity": "Voir l'activité de synchronisation",
+            "cancel-queued-refresh": "Annuler l'actualisation en attente",
+            "requesting-refresh": "Demande d'actualisation…",
             "comparison": {
                 "details-column-title": "Title",
                 "details-column-location": "Location",
@@ -486,8 +493,10 @@
             "movies-metadata": "{movieCount} Films - {fileSize} ",
             "tv-shows-metadata": "{tvShowCount} Séries TV - {seasonCount} Saisons - {episodeCount} Épisodes - {fileSize} ",
             "music-metadata": "{artistCount} Artistes - {fileSize}",
+            "music-library-metadata": "{artistCount} Artistes - {albumCount} Albums - {trackCount} Pistes - {fileSize}",
             "music-detail-metadata": "{albumCount} Albums - {trackCount} Pistes - {fileSize}",
             "photos-metadata": "{albumCount} Albums - {fileSize}",
+            "photos-library-metadata": "{albumCount} Albums - {photoCount} Photos - {clipCount} Clips - {fileSize}",
             "photo-detail-metadata": "{assetCount} Éléments - {fileSize}",
             "other-videos-metadata": "{videoCount} Vidéos - {fileSize}"
         },
@@ -507,9 +516,13 @@
             "fetching-servers": "Récupération des serveurs accessibles pour la synchronisation des médias",
             "finished": "Synchronisation terminée : {completed} réussies, {failed} échouées, {cancelled} annulées",
             "no-active-syncs": "Aucune synchronisation de bibliothèque active",
+            "queued-summary": "Les actualisations de bibliothèques attendent leur tour.",
             "status": {
                 "unknown": "Inconnu",
                 "queued": "En attente",
+                "queued-offline": "En attente du retour en ligne du serveur.",
+                "queued-busy": "En attente de la fin de l'actualisation de {library} sur {server}.",
+                "queued-waiting": "En attente du démarrage.",
                 "processing": "En cours",
                 "completed": "Terminée",
                 "failed": "Échouée",

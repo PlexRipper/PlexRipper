@@ -150,7 +150,7 @@ public class SetLibraryEnabledEndpointUnitTests
 
         dbContext.PlexLibraries.AddRange(libraries);
         await dbContext.SaveChangesAsync(CancellationToken);
-        dbContext.PlexArtists.AddRange(
+        dbContext.PlexMusicArtists.AddRange(
             CreateArtist(targetMusic.Id, serverId, 201, "Target artist"),
             CreateArtist(controlMusic.Id, serverId, 202, "Control artist")
         );
@@ -170,9 +170,17 @@ public class SetLibraryEnabledEndpointUnitTests
             )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Exactly(2));
-        Mock.Mock<ICommandExecutor>().Setup(x => x.Send(It.Is<InvalidateLibraryComparisonJobsCommand>(
-            c => c.PlexLibraryIds.SequenceEqual(new[] { targetMusic.Id })), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(
+                    It.Is<InvalidateLibraryComparisonJobsCommand>(c =>
+                        c.PlexLibraryIds.SequenceEqual(new[] { targetMusic.Id })
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
         Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand())
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Exactly(2));
@@ -194,7 +202,7 @@ public class SetLibraryEnabledEndpointUnitTests
 
         // Assert
         var remainingArtists = await dbContext
-            .PlexArtists.AsNoTracking()
+            .PlexMusicArtists.AsNoTracking()
             .Select(x => new { x.PlexLibraryId, x.PlexApiRatingKey })
             .ToListAsync(CancellationToken);
         remainingArtists.ShouldBe([new { PlexLibraryId = controlMusic.Id, PlexApiRatingKey = 202 }]);

@@ -97,6 +97,8 @@ export default {
     [
       '@semantic-release/github',
       {
+        // Keep the release unpublished until all desktop assets are uploaded.
+        draftRelease: true,
         // Disable automatic comments on issues/PRs
         successCommentCondition: false,
         failCommentCondition: false,

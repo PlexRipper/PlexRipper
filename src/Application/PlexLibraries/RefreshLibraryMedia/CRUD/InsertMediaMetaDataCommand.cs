@@ -37,9 +37,14 @@ public record InsertMediaMetaDataCommandResponse
     public required Dictionary<string, PlexActor> PlexActors { get; init; } = new();
 
     /// <summary>
-    /// The string key is the hashkey of the genre name for this <see cref="PlexLibrary"/>
+    /// The string key is the hashkey of each video genre name for this <see cref="PlexLibrary"/>.
     /// </summary>
-    public required Dictionary<string, PlexGenre> PlexGenres { get; init; } = new();
+    public required Dictionary<string, PlexGenreVideo> PlexGenresVideo { get; init; } = new();
+
+    /// <summary>
+    /// The string key is the hashkey of each audio genre name for this <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required Dictionary<string, PlexGenreAudio> PlexGenresAudio { get; init; } = new();
 
     /// <summary>
     /// The string key is the hashkey of the country name for this <see cref="PlexLibrary"/>
@@ -65,14 +70,21 @@ public class InsertMediaMetaDataCommandHandler
     )
     {
         var roles = command.LibraryMetadata.Actors;
-        var genres = command.LibraryMetadata.Genres;
+        var genresVideo = command.LibraryMetadata.GenresVideo;
+        var genresAudio = command.LibraryMetadata.GenresAudio;
         var countries = command.LibraryMetadata.Countries;
 
-        _log.Here().Debug("[InsertMetaData] Starting InsertGenres ({Count} items)", genres.Count);
-        var syncGenresResult = await InsertGenres(genres, ct);
-        _log.Here().Debug("[InsertMetaData] InsertGenres done. IsFailed={IsFailed}", syncGenresResult.IsFailed);
-        if (syncGenresResult.IsFailed)
-            return syncGenresResult.ToResult();
+        _log.Here().Debug("[InsertMetaData] Starting InsertGenresVideo ({Count} items)", genresVideo.Count);
+        var syncGenresVideoResult = await InsertGenresVideo(genresVideo, ct);
+        _log.Here().Debug("[InsertMetaData] InsertGenresVideo done. IsFailed={IsFailed}", syncGenresVideoResult.IsFailed);
+        if (syncGenresVideoResult.IsFailed)
+            return syncGenresVideoResult.ToResult();
+
+        _log.Here().Debug("[InsertMetaData] Starting InsertGenresAudio ({Count} items)", genresAudio.Count);
+        var syncGenresAudioResult = await InsertGenresAudio(genresAudio, ct);
+        _log.Here().Debug("[InsertMetaData] InsertGenresAudio done. IsFailed={IsFailed}", syncGenresAudioResult.IsFailed);
+        if (syncGenresAudioResult.IsFailed)
+            return syncGenresAudioResult.ToResult();
 
         _log.Here().Debug("[InsertMetaData] Starting InsertCountries ({Count} items)", countries.Count);
         var syncCountriesResult = await InsertCountries(countries, ct);
@@ -91,7 +103,8 @@ public class InsertMediaMetaDataCommandHandler
             new InsertMediaMetaDataCommandResponse(command.LibraryMetadata.Library)
             {
                 PlexActors = syncRolesResult.Value,
-                PlexGenres = syncGenresResult.Value,
+                PlexGenresVideo = syncGenresVideoResult.Value,
+                PlexGenresAudio = syncGenresAudioResult.Value,
                 PlexCountries = syncCountriesResult.Value,
                 PhotoClipCount = command.LibraryMetadata.PhotoClipCount,
             }
@@ -159,48 +172,35 @@ public class InsertMediaMetaDataCommandHandler
         return Result.Ok(result);
     }
 
-    private async Task<Result<Dictionary<string, PlexGenre>>> InsertGenres(
-        IReadOnlyCollection<PlexGenre> sourceList,
+    private async Task<Result<Dictionary<string, PlexGenreVideo>>> InsertGenresVideo(
+        IReadOnlyCollection<PlexGenreVideo> sourceList,
         CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
+        _log.Here().Debug("Started inserting {RawCount} {GenreType} genres", sourceList.Count, nameof(PlexGenreVideo));
 
-        _log.Here()
-            .Debug(
-                "Started inserting {RawCount} {NameOfPlexGenre} (pre-filtered/grouped)",
-                sourceList.Count,
-                nameof(PlexGenre)
-            );
-
-        // Distinct by Genre Name because PlexId is not globally unique across all Plex servers
-        var newPlexGenres = sourceList
+        var newGenres = sourceList
             .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
             .DistinctBy(x => x.Key)
             .ToList();
-        if (newPlexGenres.Count == 0)
+        if (newGenres.Count == 0)
         {
-            _log.Here().Debug("No {NameOfPlexGenre} to insert ", nameof(PlexGenre));
-            return Result.Ok(new Dictionary<string, PlexGenre>());
+            _log.Here().Debug("No {GenreType} genres to insert", nameof(PlexGenreVideo));
+            return Result.Ok(new Dictionary<string, PlexGenreVideo>());
         }
 
-        _log.Here()
-            .Debug("Inserting {Count} {NameOfPlexGenre} after deduplication", newPlexGenres.Count, nameof(PlexGenre));
-
-        var existingIdByKey = await _dbContext.InsertOrIgnorePlexGenresAsync(newPlexGenres, ct);
-
-        // Build result dictionary from merged Id map — avoids re-fetching all genres from DB
-        var result = new Dictionary<string, PlexGenre>(newPlexGenres.Count);
-        foreach (var genre in newPlexGenres)
+        var existingIdByKey = await _dbContext.InsertOrIgnorePlexGenresVideoAsync(newGenres, ct);
+        var result = new Dictionary<string, PlexGenreVideo>(newGenres.Count);
+        foreach (var genre in newGenres)
         {
             if (!existingIdByKey.TryGetValue(genre.Key, out var id))
             {
-                _log.Here()
-                    .Warning(
-                        "{NameOfPlexGenre} with key {GenreKey} not found in DB after insert; skipping",
-                        nameof(PlexGenre),
-                        genre.Key
-                    );
+                _log.Here().Warning(
+                    "{GenreType} with key {GenreKey} not found in DB after insert; skipping",
+                    nameof(PlexGenreVideo),
+                    genre.Key
+                );
                 continue;
             }
 
@@ -208,8 +208,47 @@ public class InsertMediaMetaDataCommandHandler
             result[genre.Key] = genre;
         }
 
-        stopWatch.StopAndLog($"Finished inserting {newPlexGenres.Count} {nameof(PlexGenre)}");
+        stopWatch.StopAndLog($"Finished inserting {newGenres.Count} {nameof(PlexGenreVideo)}");
+        return Result.Ok(result);
+    }
 
+    private async Task<Result<Dictionary<string, PlexGenreAudio>>> InsertGenresAudio(
+        IReadOnlyCollection<PlexGenreAudio> sourceList,
+        CancellationToken ct
+    )
+    {
+        var stopWatch = Stopwatch.StartNew();
+        _log.Here().Debug("Started inserting {RawCount} {GenreType} genres", sourceList.Count, nameof(PlexGenreAudio));
+
+        var newGenres = sourceList
+            .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
+            .DistinctBy(x => x.Key)
+            .ToList();
+        if (newGenres.Count == 0)
+        {
+            _log.Here().Debug("No {GenreType} genres to insert", nameof(PlexGenreAudio));
+            return Result.Ok(new Dictionary<string, PlexGenreAudio>());
+        }
+
+        var existingIdByKey = await _dbContext.InsertOrIgnorePlexGenresAudioAsync(newGenres, ct);
+        var result = new Dictionary<string, PlexGenreAudio>(newGenres.Count);
+        foreach (var genre in newGenres)
+        {
+            if (!existingIdByKey.TryGetValue(genre.Key, out var id))
+            {
+                _log.Here().Warning(
+                    "{GenreType} with key {GenreKey} not found in DB after insert; skipping",
+                    nameof(PlexGenreAudio),
+                    genre.Key
+                );
+                continue;
+            }
+
+            genre.Id = id;
+            result[genre.Key] = genre;
+        }
+
+        stopWatch.StopAndLog($"Finished inserting {newGenres.Count} {nameof(PlexGenreAudio)}");
         return Result.Ok(result);
     }
 

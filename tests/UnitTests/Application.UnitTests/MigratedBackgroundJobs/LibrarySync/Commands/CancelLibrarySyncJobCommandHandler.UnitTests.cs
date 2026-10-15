@@ -88,8 +88,20 @@ public class CancelLibrarySyncJobCommandHandlerUnitTests : BaseCommandUnitTest<C
             .Verifiable(Times.Once());
         Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(
+                    It.Is<List<RefreshDataType>>(types =>
+                        types.Count == 1 && types[0] == RefreshDataType.PlexLibrarySyncStatus
+                    )
+                )
+            )
             .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
         // Act
@@ -103,6 +115,7 @@ public class CancelLibrarySyncJobCommandHandlerUnitTests : BaseCommandUnitTest<C
         updatedQueueItem.CompletedAt.ShouldNotBeNull();
         Mock.Mock<IScheduler>().Verify();
         Mock.Mock<INotificationHubService>().Verify();
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -156,5 +169,82 @@ public class CancelLibrarySyncJobCommandHandlerUnitTests : BaseCommandUnitTest<C
         Mock.Mock<IScheduler>().Verify(x => x.Interrupt(jobKey, It.IsAny<CancellationToken>()), Times.Exactly(2));
         Mock.Mock<IScheduler>().Verify(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>()), Times.Once());
         Mock.Mock<IScheduler>().Verify();
+    }
+    [Test]
+    public async Task ShouldCancelOnlyTargetedLibrary_AndAdvanceQueue()
+    {
+        // Arrange
+        await SetupDatabase(
+            3103,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var libraries = dbContext.PlexLibraries.OrderBy(x => x.Id).ToList();
+        await dbContext.LibrarySyncJobQueues.AddRangeAsync(
+            libraries.Select((library, index) => new LibrarySyncJobQueue
+                {
+                    PlexServerId = library.PlexServerId,
+                    PlexLibraryId = library.Id,
+                    Priority = index + 1,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                })
+                .ToList(),
+            CancellationToken
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var targetLibrary = libraries[0];
+        var retainedLibrary = libraries[1];
+        var jobKey = LibrarySyncJob.GetJobKey(targetLibrary.PlexServerId, targetLibrary.Id);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.Interrupt(jobKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Exactly(2));
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true)
+            .Verifiable(Times.Once());
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        Mock.Mock<INotificationHubService>()
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(
+                    It.Is<List<RefreshDataType>>(types =>
+                        types.Count == 1 && types[0] == RefreshDataType.PlexLibrarySyncStatus
+                    )
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new CancelLibrarySyncJobCommand(targetLibrary.Id));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var queueItems = await dbContext
+            .LibrarySyncJobQueues.AsNoTracking()
+            .OrderBy(x => x.PlexLibraryId)
+            .Select(x => new { x.PlexLibraryId, x.Status })
+            .ToListAsync(CancellationToken);
+        queueItems.ShouldBe([
+            new { PlexLibraryId = targetLibrary.Id, Status = LibrarySyncJobStatus.Cancelled },
+            new { PlexLibraryId = retainedLibrary.Id, Status = LibrarySyncJobStatus.Queued },
+        ]);
+        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<INotificationHubService>().Verify();
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 }

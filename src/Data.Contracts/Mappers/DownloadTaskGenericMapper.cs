@@ -39,7 +39,8 @@ public static class DownloadTaskGenericMapper
             IsDownloadable = task.IsDownloadable,
             DownloadDirectory = downloadDirectory,
             DestinationDirectory = destinationDirectory,
-            Quality = VideoQuality.None,
+            VideoQuality = VideoQuality.None,
+            AudioQuality = AudioQuality.None,
             FileLocationUrl = string.Empty,
             DownloadSpeed = task.DownloadSpeed,
             FileTransferSpeed = task.FileTransferSpeed,
@@ -89,7 +90,10 @@ public static class DownloadTaskGenericMapper
             DownloadSpeed = file.DownloadSpeed,
             FileTransferSpeed = file.FileTransferSpeed,
             Children = [],
-            Quality = file is DownloadTaskTvShowEpisodeFile ? VideoQuality.None : file.Quality,
+            VideoQuality = file is DownloadTaskTvShowEpisodeFile or DownloadTaskMusicTrackFile
+                ? VideoQuality.None
+                : file.VideoQuality,
+            AudioQuality = file is DownloadTaskMusicTrackFile musicFile ? musicFile.AudioQuality : AudioQuality.None,
             ParentId = file.ToParentKey()!.Id,
             PlexServer = file.PlexServer,
             PlexServerId = file.PlexServerId,

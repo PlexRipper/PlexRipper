@@ -102,8 +102,8 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieFileTask.CreatedAt.ShouldNotBe(default);
         movieFileTask.FileName.ShouldNotBeNullOrEmpty();
         movieFileTask.FileLocationUrl.ShouldNotBeNullOrEmpty();
-        movieFileTask.Quality.ShouldNotBe(VideoQuality.None);
-        movieFileTask.Quality.ShouldNotBe(VideoQuality.Unknown);
+        movieFileTask.VideoQuality.ShouldNotBe(VideoQuality.None);
+        movieFileTask.VideoQuality.ShouldNotBe(VideoQuality.Unknown);
         movieFileTask.DataTotal.ShouldBeGreaterThan(0);
         movieFileTask.DirectoryMeta.ShouldNotBeNull();
         movieFileTask.DirectoryMeta.DownloadRootPath.ShouldNotBeNullOrEmpty();
@@ -246,12 +246,11 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
                 * config.MusicTrackFileDownloadTasksCount
         );
         artist.DataTotal.ShouldBe(files.Sum(file => file.DataTotal));
-        files.ShouldAllBe(
-            file =>
-                file.DownloadTaskType == DownloadTaskType.MusicTrackData
-                && file.Quality == VideoQuality.None
-                && file.FileName.EndsWith(".flac", StringComparison.Ordinal)
-                && file.DirectoryMeta.MusicArtistFolder == artist.Title.SanitizeFolderName()
+        files.ShouldAllBe(file =>
+            file.DownloadTaskType == DownloadTaskType.MusicTrackData
+            && file.VideoQuality == VideoQuality.None
+            && file.FileName.EndsWith(".flac", StringComparison.Ordinal)
+            && file.DirectoryMeta.MusicArtistFolder == artist.Title.SanitizeFolderName()
         );
     }
 
@@ -260,11 +259,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
     {
         // Arrange
         var seed = new Seed(24682);
-        var config = new FakeDataConfig
-        {
-            PhotoImageDownloadTasksCount = 2,
-            PhotoImageFileDownloadTasksCount = 3,
-        };
+        var config = new FakeDataConfig { PhotoImageDownloadTasksCount = 2, PhotoImageFileDownloadTasksCount = 3 };
 
         // Act
         var album = FakeData
@@ -283,21 +278,19 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         album.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoAlbum);
         album.MediaType.ShouldBe(PlexMediaType.PhotoAlbum);
         album.Children.Count.ShouldBe(config.PhotoImageDownloadTasksCount);
-        album.Children.ShouldAllBe(
-            image =>
-                image.DownloadTaskType == DownloadTaskType.PhotoImage
-                && image.FullTitle.StartsWith(album.FullTitle, StringComparison.Ordinal)
-                && image.Children.Count == config.PhotoImageFileDownloadTasksCount
+        album.Children.ShouldAllBe(image =>
+            image.DownloadTaskType == DownloadTaskType.PhotoImage
+            && image.FullTitle.StartsWith(album.FullTitle, StringComparison.Ordinal)
+            && image.Children.Count == config.PhotoImageFileDownloadTasksCount
         );
         files.Count.ShouldBe(config.PhotoImageDownloadTasksCount * config.PhotoImageFileDownloadTasksCount);
         album.DataTotal.ShouldBe(files.Sum(file => file.DataTotal));
-        files.ShouldAllBe(
-            file =>
-                file.DownloadTaskType == DownloadTaskType.PhotoData
-                && file.Quality == VideoQuality.None
-                && file.FileName.EndsWith(".jpg", StringComparison.Ordinal)
-                && file.FullTitle.StartsWith(album.FullTitle, StringComparison.Ordinal)
-                && file.DirectoryMeta.PhotoAlbumFolder == album.Title.SanitizeFolderName()
+        files.ShouldAllBe(file =>
+            file.DownloadTaskType == DownloadTaskType.PhotoData
+            && file.VideoQuality == VideoQuality.None
+            && file.FileName.EndsWith(".jpg", StringComparison.Ordinal)
+            && file.FullTitle.StartsWith(album.FullTitle, StringComparison.Ordinal)
+            && file.DirectoryMeta.PhotoAlbumFolder == album.Title.SanitizeFolderName()
         );
     }
 
@@ -334,32 +327,33 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
             }
         );
         var dbContext = IDbContext;
-        var library = await dbContext.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.PhotoAlbum, CancellationToken);
+        var library = await dbContext.PlexLibraries.SingleAsync(
+            x => x.Type == PlexMediaType.PhotoAlbum,
+            CancellationToken
+        );
 
         // Act
-        var album = await dbContext.DownloadTaskPhotoAlbums
-            .Include(x => x.Children)
-            .ThenInclude(x => x.Children)
+        var album = await dbContext
+            .DownloadTaskPhotoAlbums.Include(x => x.Children)
+                .ThenInclude(x => x.Children)
             .SingleAsync(CancellationToken);
         var images = album.Children.OrderBy(x => x.Id).ToList();
         var files = images.SelectMany(image => image.Children).OrderBy(x => x.Id).ToList();
 
         // Assert
         images.Count.ShouldBe(photoImageCount);
-        images.ShouldAllBe(
-            image =>
-                image.ParentId == album.Id
-                && image.PlexServerId == library.PlexServerId
-                && image.PlexLibraryId == library.Id
-                && image.Children.Count == photoImageFileCount
+        images.ShouldAllBe(image =>
+            image.ParentId == album.Id
+            && image.PlexServerId == library.PlexServerId
+            && image.PlexLibraryId == library.Id
+            && image.Children.Count == photoImageFileCount
         );
         files.Count.ShouldBe(photoImageCount * photoImageFileCount);
-        files.ShouldAllBe(
-            file =>
-                images.Any(image => image.Id == file.ParentId)
-                && file.PlexServerId == library.PlexServerId
-                && file.PlexLibraryId == library.Id
-                && file.DirectoryMeta.PhotoAlbumFolder == album.Title.SanitizeFolderName()
+        files.ShouldAllBe(file =>
+            images.Any(image => image.Id == file.ParentId)
+            && file.PlexServerId == library.PlexServerId
+            && file.PlexLibraryId == library.Id
+            && file.DirectoryMeta.PhotoAlbumFolder == album.Title.SanitizeFolderName()
         );
     }
 
@@ -383,12 +377,11 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         video.DownloadTaskType.ShouldBe(DownloadTaskType.OtherVideo);
         files.Count.ShouldBe(config.OtherVideoFileDownloadTasksCount);
         video.DataTotal.ShouldBe(files.Sum(file => file.DataTotal));
-        files.ShouldAllBe(
-            file =>
-                file.DownloadTaskType == DownloadTaskType.OtherVideoData
-                && file.Quality == VideoQuality.FullHD
-                && file.FileName.EndsWith(".mp4", StringComparison.Ordinal)
-                && file.DirectoryMeta.OtherVideoFolder == video.Title.SanitizeFolderName()
+        files.ShouldAllBe(file =>
+            file.DownloadTaskType == DownloadTaskType.OtherVideoData
+            && file.VideoQuality == VideoQuality.FullHD
+            && file.FileName.EndsWith(".mp4", StringComparison.Ordinal)
+            && file.DirectoryMeta.OtherVideoFolder == video.Title.SanitizeFolderName()
         );
     }
 

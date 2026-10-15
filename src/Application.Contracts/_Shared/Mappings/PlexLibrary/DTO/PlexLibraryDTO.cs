@@ -32,6 +32,20 @@ public record PlexLibraryDTO
 
     public required int Count { get; set; }
 
+    public required int MusicArtistCount { get; set; }
+
+    public required int MusicAlbumCount { get; set; }
+
+    public required int MusicTrackCount { get; set; }
+
+    public required int PhotoAlbumCount { get; set; }
+
+    public required int PhotoImageCount { get; set; }
+
+    public required int PhotoClipCount { get; set; }
+
+    public required int OtherVideoCount { get; set; }
+
     public required int SeasonCount { get; set; }
 
     public required int EpisodeCount { get; set; }

@@ -2,34 +2,35 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static Faker<DownloadTaskMusicArtist> _downloadTaskMusicArtistFaker = new Faker<DownloadTaskMusicArtist>()
-        .ApplyDownloadTaskParentBase(DownloadTaskType.MusicArtist)
-        .Ignore(x => x.Children)
-        .FinishWith(
-            (_, artist) =>
-            {
-                artist.FullTitle = artist.Title;
-
-                var albumIndex = 1;
-                foreach (var album in artist.Children)
+    private static readonly Faker<DownloadTaskMusicArtist> _downloadTaskMusicArtistFaker =
+        new Faker<DownloadTaskMusicArtist>()
+            .ApplyDownloadTaskParentBase(DownloadTaskType.MusicArtist)
+            .Ignore(x => x.Children)
+            .FinishWith(
+                (_, artist) =>
                 {
-                    album.Title = $"{album.Title} {albumIndex++}";
-                    album.FullTitle = $"{artist.FullTitle}/{album.Title}";
+                    artist.FullTitle = artist.Title;
 
-                    foreach (var track in album.Children)
+                    var albumIndex = 1;
+                    foreach (var album in artist.Children)
                     {
-                        track.FullTitle = $"{album.FullTitle}/{track.Title}";
-                        var fileIndex = 1;
-                        foreach (var file in track.Children)
+                        album.Title = $"{album.Title} {albumIndex++}";
+                        album.FullTitle = $"{artist.FullTitle}/{album.Title}";
+
+                        foreach (var track in album.Children)
                         {
-                            file.FullTitle = $"{track.FullTitle}/{fileIndex++}-{file.FileName}";
-                            file.DirectoryMeta.MusicArtistFolder = artist.Title.SanitizeFolderName();
-                            file.DirectoryMeta.MusicAlbumFolder = album.Title.SanitizeFolderName();
+                            track.FullTitle = $"{album.FullTitle}/{track.Title}";
+                            var fileIndex = 1;
+                            foreach (var file in track.Children)
+                            {
+                                file.FullTitle = $"{track.FullTitle}/{fileIndex++}-{file.FileName}";
+                                file.DirectoryMeta.MusicArtistFolder = artist.Title.SanitizeFolderName();
+                                file.DirectoryMeta.MusicAlbumFolder = album.Title.SanitizeFolderName();
+                            }
                         }
                     }
                 }
-            }
-        );
+            );
 
     public static Faker<DownloadTaskMusicArtist> GetDownloadTaskMusicArtist(
         Seed seed,

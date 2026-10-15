@@ -6,7 +6,6 @@ public class StopDownloadTaskCommandPhotoUnitTests : BaseCommandUnitTest<StopDow
     [Arguments(DownloadTaskType.PhotoAlbum)]
     [Arguments(DownloadTaskType.PhotoImage)]
     [Arguments(DownloadTaskType.PhotoData)]
-    [Arguments(DownloadTaskType.PhotoPart)]
     public async Task ShouldStopOnlySelectedPhotoAndPreserveQueuedSibling_WhenStopping(DownloadTaskType selection)
     {
         // Arrange

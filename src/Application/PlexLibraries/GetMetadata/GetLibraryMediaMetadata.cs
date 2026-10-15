@@ -94,12 +94,20 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
                 select new PlexCountryDTO { Id = c.Id, Name = c.Name }
             ).ToListAsync(ct);
 
-            var genres = await (
-                from lg in _dbContext.PlexLibraryGenres
-                join g in _dbContext.PlexGenres on lg.PlexGenreId equals g.Id
-                where lg.PlexLibraryId == req.PlexLibraryId
-                select new PlexGenreDTO { Id = g.Id, Name = g.Name }
-            ).ToListAsync(ct);
+            var isAudioLibrary = req.MediaType.IsMusicType() || plexLibrary.Type.IsMusicType();
+            var genres = isAudioLibrary
+                ? await (
+                    from lg in _dbContext.PlexLibraryGenresAudio
+                    join g in _dbContext.PlexGenresAudio on lg.PlexGenreId equals g.Id
+                    where lg.PlexLibraryId == req.PlexLibraryId
+                    select new PlexGenreDTO { Id = g.Id, Name = g.Name }
+                ).ToListAsync(ct)
+                : await (
+                    from lg in _dbContext.PlexLibraryGenresVideo
+                    join g in _dbContext.PlexGenresVideo on lg.PlexGenreId equals g.Id
+                    where lg.PlexLibraryId == req.PlexLibraryId
+                    select new PlexGenreDTO { Id = g.Id, Name = g.Name }
+                ).ToListAsync(ct);
 
             var uniqueQualities = await GetQualitiesForMediaType(req.MediaType, req.PlexLibraryId, ct);
 
@@ -139,12 +147,19 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
                 .Distinct()
                 .CountAsync(ct);
 
-            var genreCount = await _dbContext
-                .PlexLibraries.Where(pl => pl.Type == req.MediaType)
-                .SelectMany(pl => pl.Genres)
-                .Select(g => g.Id)
-                .Distinct()
-                .CountAsync(ct);
+            var genreCount = req.MediaType.IsMusicType()
+                ? await _dbContext
+                    .PlexLibraries.Where(pl => pl.Type == req.MediaType)
+                    .SelectMany(pl => pl.GenresAudio)
+                    .Select(g => g.Id)
+                    .Distinct()
+                    .CountAsync(ct)
+                : await _dbContext
+                    .PlexLibraries.Where(pl => pl.Type == req.MediaType)
+                    .SelectMany(pl => pl.GenresVideo)
+                    .Select(g => g.Id)
+                    .Distinct()
+                    .CountAsync(ct);
 
             // Get actual unique data efficiently
             var uniqueRoles = await _dbContext
@@ -161,12 +176,19 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
                 .Distinct()
                 .ToListAsync(ct);
 
-            var uniqueGenres = await _dbContext
-                .PlexLibraries.Where(pl => pl.Type == req.MediaType)
-                .SelectMany(pl => pl.Genres)
-                .Select(g => new PlexGenreDTO { Id = g.Id, Name = g.Name })
-                .Distinct()
-                .ToListAsync(ct);
+            var uniqueGenres = req.MediaType.IsMusicType()
+                ? await _dbContext
+                    .PlexLibraries.Where(pl => pl.Type == req.MediaType)
+                    .SelectMany(pl => pl.GenresAudio)
+                    .Select(g => new PlexGenreDTO { Id = g.Id, Name = g.Name })
+                    .Distinct()
+                    .ToListAsync(ct)
+                : await _dbContext
+                    .PlexLibraries.Where(pl => pl.Type == req.MediaType)
+                    .SelectMany(pl => pl.GenresVideo)
+                    .Select(g => new PlexGenreDTO { Id = g.Id, Name = g.Name })
+                    .Distinct()
+                    .ToListAsync(ct);
 
             var uniqueQualities = await GetQualitiesForMediaType(req.MediaType, ct: ct);
 
@@ -201,7 +223,7 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
         {
             uniqueQualities = await _dbContext
                 .PlexMovieData.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => new PlexQualityDTO
                 {
                     Name = ((int)g.Key).ToString(),
@@ -215,7 +237,7 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
         {
             uniqueQualities = await _dbContext
                 .PlexTvShowMediaQualities.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => new PlexQualityDTO
                 {
                     Name = ((int)g.Key).ToString(),
@@ -229,7 +251,7 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
         {
             uniqueQualities = await _dbContext
                 .PlexOtherVideoData.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => new PlexQualityDTO
                 {
                     Name = ((int)g.Key).ToString(),

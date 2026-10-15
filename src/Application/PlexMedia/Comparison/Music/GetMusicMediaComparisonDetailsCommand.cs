@@ -29,7 +29,7 @@ public class GetMusicMediaComparisonDetailsCommandHandler
         CancellationToken ct
     )
     {
-        var artist = await _dbContext.PlexArtists.SingleOrDefaultAsync(x => x.Id == command.PlexMusicArtistId, ct);
+        var artist = await _dbContext.PlexMusicArtists.SingleOrDefaultAsync(x => x.Id == command.PlexMusicArtistId, ct);
         if (artist is null)
             return ResultExtensions.EntityNotFound(nameof(PlexMusicArtist), command.PlexMusicArtistId).LogError();
 
@@ -73,7 +73,7 @@ public class GetMusicMediaComparisonDetailsCommandHandler
             return [];
 
         var albums = await _dbContext
-            .PlexAlbums.Where(x => x.PlexLibraryId == artist.PlexLibraryId && x.PlexArtistId == artist.Id)
+            .PlexMusicAlbums.Where(x => x.PlexLibraryId == artist.PlexLibraryId && x.PlexArtistId == artist.Id)
             .OrderBy(x => x.PlexLibraryId)
             .ThenBy(x => x.SortIndex)
             .ThenBy(x => x.Id)
@@ -81,7 +81,7 @@ public class GetMusicMediaComparisonDetailsCommandHandler
 
         var albumIds = albums.Select(x => x.Id).ToHashSet();
         var tracks = await _dbContext
-            .PlexTracks.Include(x => x.MediaDataList)
+            .PlexMusicTracks.Include(x => x.MediaDataList)
             .Where(x => x.PlexLibraryId == artist.PlexLibraryId && albumIds.Contains(x.PlexAlbumId))
             .OrderBy(x => x.DiscNumber)
             .ThenBy(x => x.TrackNumber)
@@ -108,7 +108,7 @@ public class GetMusicMediaComparisonDetailsCommandHandler
 
         var ownedTrackIds = hits.Select(x => x.OwnedPlexMediaId).ToHashSet();
         var ownedTracks = await _dbContext
-            .PlexTracks.Include(x => x.MediaDataList)
+            .PlexMusicTracks.Include(x => x.MediaDataList)
             .Where(x => ownedTrackIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, ct);
 
@@ -133,7 +133,7 @@ public class GetMusicMediaComparisonDetailsCommandHandler
             )
             .Select(x => x.RemotePlexMediaId);
         var albums = await _dbContext
-            .PlexAlbums.Where(x =>
+            .PlexMusicAlbums.Where(x =>
                 currentRemoteLibraryIds.Contains(x.PlexLibraryId) && remoteArtistIds.Contains(x.PlexArtistId)
             )
             .OrderBy(x => x.PlexLibraryId)
@@ -143,7 +143,7 @@ public class GetMusicMediaComparisonDetailsCommandHandler
 
         var albumIds = albums.Select(x => x.Id).ToHashSet();
         var tracks = await _dbContext
-            .PlexTracks.Include(x => x.MediaDataList)
+            .PlexMusicTracks.Include(x => x.MediaDataList)
             .Where(x => currentRemoteLibraryIds.Contains(x.PlexLibraryId) && albumIds.Contains(x.PlexAlbumId))
             .OrderBy(x => x.DiscNumber)
             .ThenBy(x => x.TrackNumber)
@@ -152,7 +152,7 @@ public class GetMusicMediaComparisonDetailsCommandHandler
 
         var albumHitIds = await (
             from comparison in _dbContext.PlexMusicAlbumComparisons
-            join ownedAlbum in _dbContext.PlexAlbums on comparison.OwnedPlexMediaId equals ownedAlbum.Id
+            join ownedAlbum in _dbContext.PlexMusicAlbums on comparison.OwnedPlexMediaId equals ownedAlbum.Id
             where
                 comparison.OwnedPlexLibraryId == artist.PlexLibraryId
                 && currentRemoteLibraryIds.Contains(comparison.RemotePlexLibraryId)
@@ -164,8 +164,8 @@ public class GetMusicMediaComparisonDetailsCommandHandler
         var trackIds = tracks.Select(x => x.Id).ToHashSet();
         var hits = await (
             from comparison in _dbContext.PlexMusicTrackComparisons
-            join ownedTrack in _dbContext.PlexTracks on comparison.OwnedPlexMediaId equals ownedTrack.Id
-            join ownedAlbum in _dbContext.PlexAlbums on ownedTrack.PlexAlbumId equals ownedAlbum.Id
+            join ownedTrack in _dbContext.PlexMusicTracks on comparison.OwnedPlexMediaId equals ownedTrack.Id
+            join ownedAlbum in _dbContext.PlexMusicAlbums on ownedTrack.PlexAlbumId equals ownedAlbum.Id
             where
                 comparison.OwnedPlexLibraryId == artist.PlexLibraryId
                 && currentRemoteLibraryIds.Contains(comparison.RemotePlexLibraryId)
@@ -176,7 +176,7 @@ public class GetMusicMediaComparisonDetailsCommandHandler
 
         var ownedTrackIds = hits.Select(x => x.OwnedPlexMediaId).ToHashSet();
         var ownedTracks = await _dbContext
-            .PlexTracks.Include(x => x.MediaDataList)
+            .PlexMusicTracks.Include(x => x.MediaDataList)
             .Where(x => ownedTrackIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, ct);
 
@@ -198,13 +198,73 @@ public class GetMusicMediaComparisonDetailsCommandHandler
 
         foreach (var album in albums)
         {
-            var children = tracksByAlbum[album.Id];
-            var albumState = !albumHitIds.Contains(album.Id)
-                ? PlexMediaComparisonState.Missing
-                : children.Any(x => !trackHitLookup[x.Id].Any())
-                    ? PlexMediaComparisonState.Partial
-                    : PlexMediaComparisonState.Owned;
+            var children = tracksByAlbum[album.Id].ToList();
             var albumRowId = ++rowId;
+            var childRows = new List<ComparisonDetailsRow>(children.Count);
+            foreach (var track in children)
+            {
+                var trackHits = trackHitLookup[track.Id].ToList();
+                var hit = trackHits
+                    .OrderByDescending(x => x.HitState == PlexMediaComparisonHitState.HigherQuality)
+                    .ThenBy(x => x.OwnedPlexLibraryId)
+                    .ThenBy(x => x.OwnedPlexMediaId)
+                    .ThenBy(x => x.Id)
+                    .FirstOrDefault();
+                var ownedTrack = hit is null ? null : ownedTracks.GetValueOrDefault(hit.OwnedPlexMediaId);
+                var remoteRepresentative = GetBestAudioFile(track);
+                var ownedRepresentative = ownedTrack is null ? null : GetBestAudioFile(ownedTrack);
+                var remoteFile = hit?.RemotePlexMediaDataId is int remoteDataId
+                    ? track.MediaDataList.SingleOrDefault(x => x.Id == remoteDataId) ?? remoteRepresentative
+                    : remoteRepresentative;
+                var ownedFile = hit?.OwnedPlexMediaDataId is int ownedDataId
+                    ? ownedTrack?.MediaDataList.SingleOrDefault(x => x.Id == ownedDataId) ?? ownedRepresentative
+                    : ownedRepresentative;
+                var trackState =
+                    hit is null ? PlexMediaComparisonState.Missing
+                    : hit.HitState == PlexMediaComparisonHitState.HigherQuality ? PlexMediaComparisonState.HigherQuality
+                    : PlexMediaComparisonState.Owned;
+                childRows.Add(
+                    new ComparisonDetailsRow
+                    {
+                        RowId = ++rowId,
+                        ParentRowId = albumRowId,
+                        Level = 1,
+                        PlexMediaId = track.Id,
+                        Type = PlexMediaType.MusicTrack,
+                        Title = track.Title,
+                        ComparisonId = trackState.ToComparisonId(),
+                        IsActionable =
+                            trackState is PlexMediaComparisonState.Missing or PlexMediaComparisonState.HigherQuality,
+                        RemoteQuality = VideoQuality.None,
+                        OwnedQuality = VideoQuality.None,
+                        RemoteAudioQuality = ResolveAudioQuality(
+                            hit?.RemoteAudioQuality ?? AudioQuality.Unknown,
+                            remoteFile
+                        ),
+                        OwnedAudioQuality = hit is null
+                            ? AudioQuality.None
+                            : ResolveAudioQuality(hit.OwnedAudioQuality, ownedFile),
+                        RemotePlexMediaDataId = remoteFile?.Id ?? hit?.RemotePlexMediaDataId,
+                        OwnedPlexMediaDataId = ownedFile?.Id ?? hit?.OwnedPlexMediaDataId,
+                        RemoteLocation = remoteFile?.GetFileName ?? GetFirstFileName(track),
+                        OwnedLocation =
+                            ownedFile?.GetFileName
+                            ?? (ownedTrack is null ? string.Empty : GetFirstFileName(ownedTrack)),
+                        RemotePlexLibraryId = track.PlexLibraryId,
+                        RemotePlexServerId = track.PlexServerId,
+                    }
+                );
+            }
+
+            var albumState =
+                !albumHitIds.Contains(album.Id) ? PlexMediaComparisonState.Missing
+                : childRows.Any(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId())
+                    ? childRows.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId())
+                            ? PlexMediaComparisonState.PartialAndHigherQuality
+                        : PlexMediaComparisonState.Partial
+                : childRows.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId())
+                    ? PlexMediaComparisonState.HigherQuality
+                : PlexMediaComparisonState.Owned;
             rows.Add(
                 new ComparisonDetailsRow
                 {
@@ -214,47 +274,35 @@ public class GetMusicMediaComparisonDetailsCommandHandler
                     Type = PlexMediaType.MusicAlbum,
                     Title = album.Title,
                     ComparisonId = albumState.ToComparisonId(),
-                    IsActionable = albumState is PlexMediaComparisonState.Missing or PlexMediaComparisonState.Partial,
+                    IsActionable =
+                        albumState
+                            is PlexMediaComparisonState.Missing
+                                or PlexMediaComparisonState.Partial
+                                or PlexMediaComparisonState.HigherQuality
+                                or PlexMediaComparisonState.PartialAndHigherQuality,
                     RemoteQuality = VideoQuality.None,
                     OwnedQuality = VideoQuality.None,
+                    RemoteAudioQuality = AudioQuality.None,
+                    OwnedAudioQuality = AudioQuality.None,
                     RemotePlexLibraryId = album.PlexLibraryId,
                     RemotePlexServerId = album.PlexServerId,
                 }
             );
-
-            foreach (var track in children)
-            {
-                var hit = trackHitLookup[track.Id].MinBy(x => (x.OwnedPlexLibraryId, x.OwnedPlexMediaId));
-                var ownedTrack = hit is null ? null : ownedTracks.GetValueOrDefault(hit.OwnedPlexMediaId);
-                rows.Add(
-                    new ComparisonDetailsRow
-                    {
-                        RowId = ++rowId,
-                        ParentRowId = albumRowId,
-                        Level = 1,
-                        PlexMediaId = track.Id,
-                        Type = PlexMediaType.MusicTrack,
-                        Title = track.Title,
-                        ComparisonId = (hit is null ? PlexMediaComparisonState.Missing : PlexMediaComparisonState.Owned)
-                            .ToComparisonId(),
-                        IsActionable = hit is null,
-                        RemoteQuality = VideoQuality.None,
-                        OwnedQuality = VideoQuality.None,
-                        RemoteLocation = track
-                            .MediaDataList.Select(x => x.GetFileName)
-                            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
-                            ?? string.Empty,
-                        OwnedLocation = ownedTrack
-                            ?.MediaDataList.Select(x => x.GetFileName)
-                            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
-                            ?? string.Empty,
-                        RemotePlexLibraryId = track.PlexLibraryId,
-                        RemotePlexServerId = track.PlexServerId,
-                    }
-                );
-            }
+            rows.AddRange(childRows);
         }
 
         return rows;
     }
+
+    private static PlexMusicTrackMediaData? GetBestAudioFile(PlexMusicTrack track) =>
+        track.MediaDataList.Count == 0 ? null : track.MediaDataList.ToList().GetBestAudioFile();
+
+    private static AudioQuality ResolveAudioQuality(AudioQuality persistedQuality, PlexMusicTrackMediaData? file) =>
+        persistedQuality is AudioQuality.None or AudioQuality.Unknown
+            ? file?.ClassifyAudioQuality() ?? persistedQuality
+            : persistedQuality;
+
+    private static string GetFirstFileName(PlexMusicTrack track) =>
+        track.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
+        ?? string.Empty;
 }

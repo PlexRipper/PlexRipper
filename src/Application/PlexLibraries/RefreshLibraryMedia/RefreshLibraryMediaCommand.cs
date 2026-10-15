@@ -113,7 +113,7 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
                 ),
                 ct
             ),
-            _ => Result.Fail($"Unsupported Plex library family: {newPlexLibrary.Type}"),
+            _ => Result.Fail("Unsupported Plex library family: {PlexMediaType}", newPlexLibrary.Type),
         };
 
         if (refreshLibraryResult.IsFailed)

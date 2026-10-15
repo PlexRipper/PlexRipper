@@ -55,10 +55,10 @@ public class GetTvShowMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMed
         result.Value.Items[0].Year.ShouldBe(expectedYear);
         result
             .Value.Items[0]
-            .Qualities.Select(x => x.Quality)
-            .ShouldBe(tvShows[1].Qualities.OrderBy(x => x.Quality).Select(x => x.Quality));
+            .Qualities.Select(x => x.VideoQuality)
+            .ShouldBe(tvShows[1].Qualities.OrderBy(x => x.VideoQuality).Select(x => x.VideoQuality));
         result.Value.Qualities.ShouldBe(
-            result.Value.Items[0].Qualities.Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
+            result.Value.Items[0].Qualities.Select(x => x.VideoQuality.ToId()).Distinct().OrderBy(x => x)
         );
     }
 

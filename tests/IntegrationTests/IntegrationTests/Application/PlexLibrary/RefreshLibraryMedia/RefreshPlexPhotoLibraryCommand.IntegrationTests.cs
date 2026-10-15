@@ -53,11 +53,11 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         (await beforeContext.PlexPhotoImages.ToListAsync(CancellationToken)).ShouldBeEmpty();
         (await beforeContext.PlexPhotoData.ToListAsync(CancellationToken)).ShouldBeEmpty();
         var firstArtists = await beforeContext
-            .PlexArtists.OrderBy(x => x.PlexApiRatingKey)
+            .PlexMusicArtists.OrderBy(x => x.PlexApiRatingKey)
             .Select(x => new { x.Id, x.PlexApiRatingKey })
             .ToListAsync(CancellationToken);
         var firstAlbums = await beforeContext
-            .PlexAlbums.OrderBy(x => x.PlexApiRatingKey)
+            .PlexMusicAlbums.OrderBy(x => x.PlexApiRatingKey)
             .Select(x => new
             {
                 x.Id,
@@ -66,7 +66,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
             })
             .ToListAsync(CancellationToken);
         var firstTracks = await beforeContext
-            .PlexTracks.OrderBy(x => x.PlexApiRatingKey)
+            .PlexMusicTracks.OrderBy(x => x.PlexApiRatingKey)
             .Select(x => new
             {
                 x.Id,
@@ -75,7 +75,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
             })
             .ToListAsync(CancellationToken);
         var firstTrackData = await beforeContext
-            .PlexTrackData.OrderBy(x => x.PlexApiPartId)
+            .PlexMusicTrackData.OrderBy(x => x.PlexApiPartId)
             .Select(x => new
             {
                 x.Id,
@@ -123,7 +123,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         var response = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = photoLibrary.Id });
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         response.Result.IsSuccess.ShouldBeTrue();
@@ -189,7 +189,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         var repeatResponse = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = photoLibrary.Id, ForceLibrarySync = true });
         repeatResponse.Response.IsSuccessStatusCode.ShouldBeTrue();
         repeatResponse.Result.IsSuccess.ShouldBeTrue();
@@ -199,13 +199,13 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         using var repeatedContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
         (
             await repeatedContext
-                .PlexArtists.OrderBy(x => x.PlexApiRatingKey)
+                .PlexMusicArtists.OrderBy(x => x.PlexApiRatingKey)
                 .Select(x => new { x.Id, x.PlexApiRatingKey })
                 .ToListAsync(CancellationToken)
         ).ShouldBe(firstArtists);
         (
             await repeatedContext
-                .PlexAlbums.OrderBy(x => x.PlexApiRatingKey)
+                .PlexMusicAlbums.OrderBy(x => x.PlexApiRatingKey)
                 .Select(x => new
                 {
                     x.Id,
@@ -216,7 +216,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         ).ShouldBe(firstAlbums);
         (
             await repeatedContext
-                .PlexTracks.OrderBy(x => x.PlexApiRatingKey)
+                .PlexMusicTracks.OrderBy(x => x.PlexApiRatingKey)
                 .Select(x => new
                 {
                     x.Id,
@@ -227,7 +227,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         ).ShouldBe(firstTracks);
         (
             await repeatedContext
-                .PlexTrackData.OrderBy(x => x.PlexApiPartId)
+                .PlexMusicTrackData.OrderBy(x => x.PlexApiPartId)
                 .Select(x => new
                 {
                     x.Id,
@@ -334,13 +334,13 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         ).ShouldBe(0);
         (
             await disabledContext
-                .PlexArtists.OrderBy(x => x.PlexApiRatingKey)
+                .PlexMusicArtists.OrderBy(x => x.PlexApiRatingKey)
                 .Select(x => new { x.Id, x.PlexApiRatingKey })
                 .ToListAsync(CancellationToken)
         ).ShouldBe(firstArtists);
         (
             await disabledContext
-                .PlexTrackData.OrderBy(x => x.PlexApiPartId)
+                .PlexMusicTrackData.OrderBy(x => x.PlexApiPartId)
                 .Select(x => new
                 {
                     x.Id,

@@ -10,8 +10,7 @@ public record GenerateDownloadTaskMusicTracksCommand : ICommand<Result<DownloadT
     public CreateDownloadTasksRequest Request { get; }
 }
 
-public class GenerateDownloadTaskMusicTracksCommandValidator
-    : AbstractValidator<GenerateDownloadTaskMusicTracksCommand>
+public class GenerateDownloadTaskMusicTracksCommandValidator : AbstractValidator<GenerateDownloadTaskMusicTracksCommand>
 {
     public GenerateDownloadTaskMusicTracksCommandValidator()
     {
@@ -43,14 +42,17 @@ public class GenerateDownloadTaskMusicTracksCommandHandler
     )
     {
         var request = command.Request;
-        var trackSelections = request.DownloadMedias.MergeAndGroupList().FindAll(x => x.Type == PlexMediaType.MusicTrack);
+        var trackSelections = request
+            .DownloadMedias.MergeAndGroupList()
+            .FindAll(x => x.Type == PlexMediaType.MusicTrack);
         if (trackSelections.Count == 0)
             return ResultExtensions.IsEmpty(nameof(trackSelections)).LogWarning();
         if (request.Integration is not null)
             return ResultExtensions
                 .Create400BadRequestResult("Music downloads do not support Sonarr or Radarr integrations.")
                 .LogError();
-        _log.Here().Debug("Creating {TrackCount} Music track download tasks", trackSelections.Sum(x => x.MediaIds.Count));
+        _log.Here()
+            .Debug("Creating {TrackCount} Music track download tasks", trackSelections.Sum(x => x.MediaIds.Count));
 
         var downloadRootPath = (await _dbContext.GetDownloadFolder(null)).DirectoryPath;
         var createdTrackIds = new HashSet<int>();
@@ -72,7 +74,7 @@ public class GenerateDownloadTaskMusicTracksCommandHandler
 
             var trackIds = selection.MediaIds.Distinct().ToList();
             var tracks = await _dbContext
-                .PlexTracks.Include(x => x.PlexAlbum)
+                .PlexMusicTracks.Include(x => x.PlexAlbum)
                     .ThenInclude(x => x!.PlexArtist)
                 .Include(x => x.MediaDataList)
                 .Where(x =>
@@ -100,10 +102,7 @@ public class GenerateDownloadTaskMusicTracksCommandHandler
             foreach (var track in tracks)
             {
                 var selectedQuality = selection.Qualities.FirstOrDefault(x => x.MediaId == track.Id);
-                var selectedMedia = selectedQuality is null
-                    ? null
-                    : track.MediaDataList.FirstOrDefault(x => x.Id == selectedQuality.DataId);
-                selectedMedia ??= track.MediaDataList.PickMediaQuality();
+                var (selectedMedia, _) = track.MediaDataList.PickAudioQuality(selectedQuality?.DataId);
                 if (selectedMedia is null)
                 {
                     _log.Here().Warning("Music track {TrackId} has no media data available", track.Id);
@@ -137,9 +136,7 @@ public class GenerateDownloadTaskMusicTracksCommandHandler
                     }
                     artistTasks.Add(artistKey, artistTask);
                 }
-                var albumTask = artistTask.Children.SingleOrDefault(x =>
-                    x.PlexApiRatingKey == album.PlexApiRatingKey
-                );
+                var albumTask = artistTask.Children.SingleOrDefault(x => x.PlexApiRatingKey == album.PlexApiRatingKey);
                 if (albumTask is null)
                 {
                     albumTask = album.MapToDownloadTask(artistTask, null);
@@ -147,9 +144,7 @@ public class GenerateDownloadTaskMusicTracksCommandHandler
                     _dbContext.DownloadTaskMusicAlbums.Add(albumTask);
                 }
 
-                var trackTask = albumTask.Children.SingleOrDefault(x =>
-                    x.PlexApiRatingKey == track.PlexApiRatingKey
-                );
+                var trackTask = albumTask.Children.SingleOrDefault(x => x.PlexApiRatingKey == track.PlexApiRatingKey);
                 if (trackTask is null)
                 {
                     trackTask = track.MapToDownloadTask(albumTask, null);
@@ -161,8 +156,7 @@ public class GenerateDownloadTaskMusicTracksCommandHandler
                 {
                     if (
                         trackTask.Children.Any(x =>
-                            x.PlexApiMediaId == mediaData.PlexApiMediaId
-                            && x.PlexApiPartId == mediaData.PlexApiPartId
+                            x.PlexApiMediaId == mediaData.PlexApiMediaId && x.PlexApiPartId == mediaData.PlexApiPartId
                         )
                     )
                         continue;

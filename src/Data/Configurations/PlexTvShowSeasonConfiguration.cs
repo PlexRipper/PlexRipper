@@ -4,7 +4,7 @@ public class PlexTvShowSeasonConfiguration : IEntityTypeConfiguration<PlexTvShow
 {
     public void Configure(EntityTypeBuilder<PlexTvShowSeason> builder)
     {
-        builder.Ignore(x => x.Quality);
+        builder.Ignore(x => x.VideoQuality);
 
         builder.HasIndex(x => new { x.PlexLibraryId, x.SortIndex });
         // GetMediaDetailByIdEndpoint.GetPlexTvShow loads every season with Where(x => x.TvShowId == id);

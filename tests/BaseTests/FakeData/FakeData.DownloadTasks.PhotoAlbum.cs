@@ -2,13 +2,13 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
+
     public static Faker<DownloadTaskPhotoAlbum> GetDownloadTaskPhotoAlbum(
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-
         return new Faker<DownloadTaskPhotoAlbum>()
             .ApplyDownloadTaskParentBase(DownloadTaskType.PhotoAlbum)
             .UseSeed(seed.Next())

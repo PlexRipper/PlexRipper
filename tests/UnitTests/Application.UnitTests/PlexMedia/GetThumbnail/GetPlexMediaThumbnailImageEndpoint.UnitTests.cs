@@ -1,9 +1,15 @@
 using System.Net;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Reaparr.Application.UnitTests;
 
-public class GetPlexMediaThumbnailImageEndpointUnitTests : BaseUnitTest<GetPlexMediaThumbnailImageEndpoint>
+public class GetPlexMediaThumbnailImageEndpointUnitTests
+    : BaseEndpointUnitTest<
+        GetPlexMediaThumbnailImageEndpoint,
+        GetPlexMediaThumbnailImageEndpointRequest,
+        byte[]
+    >
 {
     [Test]
     public void ShouldBuildTranscodeUrl_WithEncodedOriginalThumbnailUrl()
@@ -126,6 +132,60 @@ public class GetPlexMediaThumbnailImageEndpointUnitTests : BaseUnitTest<GetPlexM
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         handler.RequestUris.ShouldBe([new Uri("https://plex.example/photo/:/transcode")]);
+    }
+
+    [Test]
+    public async Task ShouldReturnNotFound_WhenPlexThumbnailIsMissing()
+    {
+        // Arrange
+        await SetupDatabase(
+            1001,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+            }
+        );
+        var plexServerId = await IDbContext.PlexServers.Select(x => x.Id).SingleAsync(CancellationToken);
+        var handler = new StubHttpMessageHandler(
+            new HttpResponseMessage(HttpStatusCode.NotFound),
+            new HttpResponseMessage(HttpStatusCode.NotFound)
+        );
+        using var client = new HttpClient(handler);
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        var clientFactory = new Mock<IHttpClientFactory>();
+        clientFactory
+            .Setup(x => x.CreateClient(HttpClientModule.PlexThumbnailClientName))
+            .Returns(client)
+            .Verifiable(Times.Once());
+
+        var request = new GetPlexMediaThumbnailImageEndpointRequest
+        {
+            PlexServerId = plexServerId,
+            PlexKey = 1,
+            MetaDataKey = 2,
+            Width = 300,
+            Height = 450,
+        };
+
+        // Act
+        var result = await TestEndpointHandleAsync(
+            request,
+            services =>
+            {
+                services.AddSingleton(Mock.Container.Resolve<IAppRuntimeInfo>());
+                services.AddSingleton<IMemoryCache>(cache);
+                services.AddSingleton(clientFactory.Object);
+            }
+        );
+
+        // Assert
+        result.IsValid.ShouldBeTrue();
+        result.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
+        handler.RequestUris.Select(x => x.AbsolutePath).ShouldBe([
+            "/photo/:/transcode",
+            $"/library/metadata/{request.PlexKey}/thumb/{request.MetaDataKey}",
+        ]);
+        clientFactory.Verify();
     }
 
     private sealed class StubHttpMessageHandler(params HttpResponseMessage[] responses) : HttpMessageHandler

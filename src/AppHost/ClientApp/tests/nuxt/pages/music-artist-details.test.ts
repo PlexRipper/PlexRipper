@@ -31,9 +31,10 @@ function artist(children: PlexMediaDTO[] = []): PlexMediaDTO {
 		hasArt: false,
 		hasTheme: false,
 		hasThumb: false,
+		genres: [],
 		id: 12,
-		mediaData: [],
 		mediaSize: 0,
+		mediaData: [],
 		plexApiMetaDataKey: 12,
 		plexApiRatingKey: 12,
 		plexLibraryId: 4,
@@ -95,10 +96,48 @@ describe('Music artist details page', () => {
 		const wrapper = await render();
 
 		// Assert
-		expect(wrapper.get('h1').text()).toBe('Artist');
+		expect(wrapper.get('.media-title').text()).toBe('Artist');
 		expect(wrapper.get('[data-cy="music-media-list-empty"]').text()).toBe('No albums found');
-		expect(wrapper.text()).toContain('Originally available');
-		expect(wrapper.findAll('dt').map((label) => label.text())).not.toContain('Updated');
+		const info = wrapper.get('.media-info-container');
+		expect(info.find('.media-info-detail-grid').exists()).toBe(true);
+		expect(info.findAll('.media-info-detail-column')).toHaveLength(2);
+		expect(info.text()).not.toContain('Albums');
+		expect(info.text()).not.toContain('Tracks');
+		expect(info.text()).toContain('Originally available');
+		expect(info.text()).not.toContain('Updated');
+	});
+
+	test('Should render the summary in the shared detail info table', async () => {
+		// Arrange
+		const item = artist();
+		item.summary = 'A long artist biography rendered with the shared detail layout.';
+		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValue(of(item));
+
+		// Act
+		const wrapper = await render();
+
+		// Assert
+		expect(wrapper.find('.media-detail-header').exists()).toBe(true);
+		expect(wrapper.get('.media-info-container').text()).toContain(item.summary);
+		expect(wrapper.find('[data-cy="music-detail-summary"]').exists()).toBe(false);
+	});
+
+	test('Should render supplied artist genres in the shared metadata table', async () => {
+		// Arrange
+		const item = artist();
+		item.genres = [
+			{ id: 1, name: 'Soul' },
+			{ id: 2, name: 'Pop' },
+		];
+		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValue(of(item));
+
+		// Act
+		const wrapper = await render();
+
+		// Assert
+		const genres = wrapper.get('[data-cy="music-detail-genres"]');
+		expect(genres.text()).toContain('Genres');
+		expect(genres.text()).toContain('Soul, Pop');
 	});
 
 	test('Should discard an old response after direct navigation to another artist', async () => {
@@ -115,7 +154,7 @@ describe('Music artist details page', () => {
 		await nextTick();
 
 		// Assert
-		expect(wrapper.find('h1').exists()).toBe(false);
+		expect(wrapper.find('.media-title').exists()).toBe(false);
 		expect(wrapper.find('[data-cy="music-media-list-empty"]').exists()).toBe(false);
 
 		// Act
@@ -123,7 +162,7 @@ describe('Music artist details page', () => {
 		await nextTick();
 
 		// Assert
-		expect(wrapper.get('h1').text()).toBe('Current Artist');
+		expect(wrapper.get('.media-title').text()).toBe('Current Artist');
 	});
 
 	test('Should clear the old artist and reject a response belonging to another library', async () => {
@@ -131,7 +170,7 @@ describe('Music artist details page', () => {
 		const second = new Subject<PlexMediaDTO>();
 		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValueOnce(of(artist())).mockReturnValueOnce(second);
 		const wrapper = await render();
-		expect(wrapper.get('h1').text()).toBe('Artist');
+		expect(wrapper.get('.media-title').text()).toBe('Artist');
 
 		// Act
 		route.params.id = '5';
@@ -140,7 +179,7 @@ describe('Music artist details page', () => {
 		await nextTick();
 
 		// Assert
-		expect(wrapper.find('h1').exists()).toBe(false);
+		expect(wrapper.find('.media-title').exists()).toBe(false);
 		expect(wrapper.get('[data-cy="music-details-error"]').text()).toContain('Unable to load');
 		expect(wrapper.find('[data-cy="music-media-list-empty"]').exists()).toBe(false);
 	});
@@ -167,7 +206,7 @@ describe('Music artist details page', () => {
 
 		// Assert
 		expect(wrapper.find('[data-cy="music-details-error"]').exists()).toBe(false);
-		expect(wrapper.get('h1').text()).toBe('Artist');
+		expect(wrapper.get('.media-title').text()).toBe('Artist');
 	});
 
 	test('Should reject invalid direct-navigation IDs without requesting media', async () => {

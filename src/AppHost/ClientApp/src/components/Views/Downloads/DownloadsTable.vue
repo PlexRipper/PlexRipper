@@ -53,7 +53,9 @@
 			</QRow>
 		</template>
 		<template #default>
-			<div class="download-table-desktop">
+			<div
+				v-if="!$q.screen.lt.md"
+				class="download-table-desktop">
 				<!-- Download Table Per Server -->
 				<QTreeTable
 					:nodes="nodes"
@@ -95,100 +97,104 @@
 					</template>
 				</QTreeTable>
 			</div>
-			<div
+			<QVirtualScroll
+				v-if="$q.screen.lt.md"
 				class="download-cards"
-				data-cy="download-mobile-list">
-				<article
-					v-for="entry in mobileNodes"
-					:key="String(entry.node.key)"
-					class="download-card"
-					:class="{ 'download-card--child': entry.depth > 0 }"
-					:style="{ '--download-depth': entry.depth }">
-					<div
-						class="download-card__top"
-						:class="{ 'download-card__top--expandable': entry.hasChildren }">
-						<q-btn
-							v-if="entry.hasChildren"
-							class="download-card__expand"
-							flat
-							round
-							dense
-							:icon="isMobileNodeExpanded(entry.node) ? 'mdi-chevron-down' : 'mdi-chevron-right'"
-							:aria-label="entry.node.data.title"
-							:aria-expanded="isMobileNodeExpanded(entry.node)"
-							:data-cy="`download-node-toggle-${entry.node.data.id}`"
-							@click.stop="toggleMobileNode(entry.node)" />
-						<q-checkbox
-							:model-value="getMobileSelectionValue(entry.node)"
-							:aria-label="`${t('general.commands.selection')} ${entry.node.data.title}`"
-							@update:model-value="toggleMobileSelection(entry.node, $event === true)" />
-						<QMediaTypeIcon
-							v-if="entry.node.data.mediaType"
-							:media-type="entry.node.data.mediaType"
-							:size="26" />
-						<div class="download-card__identity">
-							<QText
-								:cy="`column-title-${entry.node.data.id}`"
-								class="download-card__title"
-								:value="entry.node.data.title" />
-							<QText
-								:cy="`column-status-${entry.node.data.id}`"
-								class="download-card__status"
-								:value="translateDownloadStatus(entry.node.data.status)" />
+				data-cy="download-mobile-list"
+				:items="mobileNodes"
+				:virtual-scroll-item-size="220">
+				<template #default="{ item: entry }: { item: MobileDownloadNode }">
+					<article
+						:key="String(entry.node.key)"
+						class="download-card"
+						:class="{ 'download-card--child': entry.depth > 0 }"
+						:style="{ '--download-depth': entry.depth }">
+						<div
+							class="download-card__top"
+							:class="{ 'download-card__top--expandable': entry.hasChildren }">
+							<q-btn
+								v-if="entry.hasChildren"
+								class="download-card__expand"
+								flat
+								round
+								dense
+								:icon="isMobileNodeExpanded(entry.node) ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+								:aria-label="entry.node.data.title"
+								:aria-expanded="isMobileNodeExpanded(entry.node)"
+								:data-cy="`download-node-toggle-${entry.node.data.id}`"
+								@click.stop="toggleMobileNode(entry.node)" />
+							<q-checkbox
+								:model-value="getMobileSelectionValue(entry.node)"
+								:aria-label="`${t('general.commands.selection')} ${entry.node.data.title}`"
+								@update:model-value="toggleMobileSelection(entry.node, $event === true)" />
+							<QMediaTypeIcon
+								v-if="entry.node.data.mediaType"
+								:media-type="entry.node.data.mediaType"
+								:size="26" />
+							<div class="download-card__identity">
+								<QText
+									:cy="`column-title-${entry.node.data.id}`"
+									class="download-card__title"
+									:value="entry.node.data.title" />
+								<QText
+									:cy="`column-status-${entry.node.data.id}`"
+									class="download-card__status"
+									:value="translateDownloadStatus(entry.node.data.status)" />
+							</div>
 						</div>
-					</div>
-					<QProgressBar
-						:cy="`column-percentage-${entry.node.data.id}`"
-						:value="entry.node.data.percentage" />
-					<dl class="download-card__metrics">
-						<div class="download-card__metric">
-							<dt>{{ t('components.downloads-table.columns.data-received') }}</dt>
-							<dd>
-								<QFileSize
-									:cy="`column-dataReceived-${entry.node.data.id}`"
-									:size="entry.node.data.dataReceived" />
-							</dd>
+						<QProgressBar
+							:cy="`column-percentage-${entry.node.data.id}`"
+							:value="entry.node.data.percentage" />
+						<dl class="download-card__metrics">
+							<div class="download-card__metric">
+								<dt>{{ t('components.downloads-table.columns.data-received') }}</dt>
+								<dd>
+									<QFileSize
+										:cy="`column-dataReceived-${entry.node.data.id}`"
+										:size="entry.node.data.dataReceived" />
+								</dd>
+							</div>
+							<div class="download-card__metric">
+								<dt>{{ t('components.downloads-table.columns.data-total') }}</dt>
+								<dd>
+									<QFileSize
+										:cy="`column-dataTotal-${entry.node.data.id}`"
+										:size="entry.node.data.dataTotal" />
+								</dd>
+							</div>
+							<div class="download-card__metric">
+								<dt>{{ t('components.downloads-table.columns.speed') }}</dt>
+								<dd>
+									<QFileSize
+										:cy="`column-downloadSpeed-${entry.node.data.id}`"
+										:size="entry.node.data.downloadSpeed"
+										speed />
+								</dd>
+							</div>
+							<div class="download-card__metric">
+								<dt>{{ t('components.downloads-table.columns.time-remaining') }}</dt>
+								<dd>
+									<QDuration
+										:cy="`column-timeRemaining-${entry.node.data.id}`"
+										:value="entry.node.data.timeRemaining"
+										short />
+								</dd>
+							</div>
+						</dl>
+						<div class="download-card__actions">
+							<IconSquareButton
+								v-for="action in entry.node.data.actions"
+								:key="`${entry.node.data.id}-${kebabCase(action.type)}`"
+								:cy="`column-actions-${kebabCase(action.type)}-${entry.node.data.id}`"
+								:disabled="action.disabled"
+								:icon="toButtonIcon(action.type)"
+								:aria-label="`${String(action.type)}: ${entry.node.data.title}`"
+								:loading="action.loading"
+								@click.stop="onTableAction({ action: action.type, data: entry.node.data })" />
 						</div>
-						<div class="download-card__metric">
-							<dt>{{ t('components.downloads-table.columns.data-total') }}</dt>
-							<dd>
-								<QFileSize
-									:cy="`column-dataTotal-${entry.node.data.id}`"
-									:size="entry.node.data.dataTotal" />
-							</dd>
-						</div>
-						<div class="download-card__metric">
-							<dt>{{ t('components.downloads-table.columns.speed') }}</dt>
-							<dd>
-								<QFileSize
-									:cy="`column-downloadSpeed-${entry.node.data.id}`"
-									:size="entry.node.data.downloadSpeed"
-									speed />
-							</dd>
-						</div>
-						<div class="download-card__metric">
-							<dt>{{ t('components.downloads-table.columns.time-remaining') }}</dt>
-							<dd>
-								<QDuration
-									:cy="`column-timeRemaining-${entry.node.data.id}`"
-									:value="entry.node.data.timeRemaining"
-									short />
-							</dd>
-						</div>
-					</dl>
-					<div class="download-card__actions">
-						<IconSquareButton
-							v-for="action in entry.node.data.actions"
-							:key="`${entry.node.data.id}-${kebabCase(action.type)}`"
-							:cy="`column-actions-${kebabCase(action.type)}-${entry.node.data.id}`"
-							:disabled="action.disabled"
-							:icon="toButtonIcon(action.type)"
-							:aria-label="`${String(action.type)}: ${entry.node.data.title}`"
-							:loading="action.loading"
-							@click.stop="onTableAction({ action: action.type, data: entry.node.data })" />
-					</div>
-				</article>
-			</div>
+					</article>
+				</template>
+			</QVirtualScroll>
 		</template>
 	</q-expansion-item>
 
@@ -222,6 +228,7 @@ const downloadStore = useDownloadStore();
 const dialogStore = useDialogStore();
 const serverConnectionStore = useServerConnectionStore();
 const accountStore = useAccountStore();
+const $q = useQuasar();
 
 const { t } = useI18n();
 
@@ -236,6 +243,21 @@ interface MobileDownloadNode {
 	hasChildren: boolean;
 }
 
+interface MappedDownloadNodeCache {
+	treeNode: DownloadTreeNode;
+	children: DownloadTreeNode[];
+	childrenData: IDownloadTableNode[];
+	status: DownloadStatus;
+	percentage: number;
+	dataReceived: number;
+	dataTotal: number;
+	downloadSpeed: number;
+	timeRemaining: number;
+	title: string;
+	mediaType: DownloadProgressDTO['mediaType'];
+	loadingAction: DownloadActions | undefined;
+}
+
 const loadingIds = ref<{
 	id: string;
 	action: DownloadActions;
@@ -243,6 +265,9 @@ const loadingIds = ref<{
 const isExpanded = ref(true);
 const clearCompletedLoading = ref(false);
 const collapsedMobileNodeKeys = shallowRef<ReadonlySet<string>>(new Set());
+const loadingActionById = computed(() => new Map(get(loadingIds).map(({ id, action }) => [id, action])));
+const treeNodeCache = new WeakMap<DownloadProgressDTO, MappedDownloadNodeCache>();
+const treeNodeListCache = new WeakMap<DownloadProgressDTO[], DownloadTreeNode[]>();
 
 const props = defineProps<{
 	loading?: boolean;
@@ -255,8 +280,7 @@ defineEmits<{
 }>();
 
 const nodes = computed((): DownloadTreeNode[] => {
-	// TODO: Move property mapping to back-end to increase performance
-	return mapToTreeNodes(downloadStore.getDownloadsByServerId(props.plexServer.id));
+	return mapToTreeNodes(props.downloadRows);
 });
 const mobileNodes = computed(() => flattenNodes(get(nodes)));
 
@@ -294,29 +318,89 @@ const hasCompletedDownloads = computed((): boolean => {
 	return containsCompletedTasks(props.downloadRows);
 });
 
-function mapToTreeNodes(value: DownloadProgressDTO[]): DownloadTreeNode[] {
-	return value?.map((node) => {
-		const children = mapToTreeNodes(node.children);
-		const data = {
-			...node,
-			key: node.id,
-			label: node.title,
-			children: children.map((child) => child.data!),
-			actions: toDownloadActions(node.status).map((action) => ({
-				type: action,
-				// show loading icon on action and disable the rest
-				loading: get(loadingIds).some((y) => node.id === y.id && action === y.action),
-				disabled: get(loadingIds).some((y) => node.id === y.id && action !== y.action),
-			})),
-		};
+function mapToTreeNodes(value: DownloadProgressDTO[], loadingActions = get(loadingActionById)): DownloadTreeNode[] {
+	const previous = treeNodeListCache.get(value);
+	let next = previous;
+	let changed = previous === undefined || previous.length !== value.length;
 
-		return {
-			key: node.id,
-			label: node.title,
-			data,
-			children,
-		};
-	}) ?? [];
+	if (changed) {
+		next = previous?.slice(0, value.length) ?? new Array<DownloadTreeNode>(value.length);
+	}
+
+	for (let index = 0; index < value.length; index++) {
+		const mappedNode = mapToTreeNode(value[index]!, loadingActions);
+		if (next![index] === mappedNode) continue;
+
+		if (!changed) {
+			next = previous!.slice();
+			changed = true;
+		}
+
+		next![index] = mappedNode;
+	}
+
+	if (!changed) return previous!;
+
+	treeNodeListCache.set(value, next!);
+	return next!;
+}
+
+function mapToTreeNode(node: DownloadProgressDTO, loadingActions: Map<string, DownloadActions>): DownloadTreeNode {
+	const children = mapToTreeNodes(node.children, loadingActions);
+	const loadingAction = loadingActions.get(node.id);
+	const cached = treeNodeCache.get(node);
+
+	if (cached
+		&& cached.children === children
+		&& cached.status === node.status
+		&& cached.percentage === node.percentage
+		&& cached.dataReceived === node.dataReceived
+		&& cached.dataTotal === node.dataTotal
+		&& cached.downloadSpeed === node.downloadSpeed
+		&& cached.timeRemaining === node.timeRemaining
+		&& cached.title === node.title
+		&& cached.mediaType === node.mediaType
+		&& cached.loadingAction === loadingAction) {
+		return cached.treeNode;
+	}
+
+	const childrenData = cached?.children === children
+		? cached.childrenData
+		: children.map((child) => child.data);
+	const data = {
+		...node,
+		key: node.id,
+		label: node.title,
+		children: childrenData,
+		actions: toDownloadActions(node.status).map((action) => ({
+			type: action,
+			loading: loadingAction === action,
+			disabled: loadingAction !== undefined && action !== loadingAction,
+		})),
+	};
+	const treeNode = {
+		key: node.id,
+		label: node.title,
+		data,
+		children,
+	};
+
+	treeNodeCache.set(node, {
+		treeNode,
+		children,
+		childrenData,
+		status: node.status,
+		percentage: node.percentage,
+		dataReceived: node.dataReceived,
+		dataTotal: node.dataTotal,
+		downloadSpeed: node.downloadSpeed,
+		timeRemaining: node.timeRemaining,
+		title: node.title,
+		mediaType: node.mediaType,
+		loadingAction,
+	});
+
+	return treeNode;
 }
 
 const getDownloadTableColumns: QTreeTableColumn[] = [
@@ -580,10 +664,6 @@ function getAllIds(nodes: IDownloadTableNode[]): string[] {
   flex-wrap: nowrap;
 }
 
-.download-cards {
-  display: none;
-}
-
 .inaccessible-item-text {
   text-decoration: line-through;
   opacity: 0.62;
@@ -622,14 +702,16 @@ function getAllIds(nodes: IDownloadTableNode[]): string[] {
     margin: 0.5rem !important;
   }
 
-  .download-table-desktop {
-    display: none;
+  .download-cards {
+    min-width: 0;
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    padding: 0.375rem;
   }
 
-  .download-cards {
+  .download-cards .q-virtual-scroll__content {
     display: grid;
     gap: 0.375rem;
-    padding: 0.375rem;
   }
 
   .download-card {

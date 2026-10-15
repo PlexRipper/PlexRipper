@@ -25,5 +25,7 @@ public static partial class FakeData
         .RuleFor(x => x.Quality, f => f.Random.Enum<VideoQuality>());
 
     public static Faker<MediaOverviewTvShowSnapshot> GetMediaOverviewTvShowSnapshots(Seed seed) =>
-        _mediaOverviewTvShowSnapshot.Clone().UseSeed(seed.Next());
+        _mediaOverviewTvShowSnapshot
+            .Clone() // Clone to isolate per-call random state.
+            .UseSeed(seed.Next());
 }

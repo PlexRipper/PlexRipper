@@ -4,6 +4,9 @@ public class PlexMusicTrackComparisonConfiguration : IEntityTypeConfiguration<Pl
 {
     public void Configure(EntityTypeBuilder<PlexMusicTrackComparison> builder)
     {
+        builder.Property(x => x.HitState).HasDefaultValue(PlexMediaComparisonHitState.Matched);
+        builder.Property(x => x.RemoteAudioQuality).HasDefaultValue(AudioQuality.Unknown);
+        builder.Property(x => x.OwnedAudioQuality).HasDefaultValue(AudioQuality.Unknown);
         builder.HasIndex(x => new { x.OwnedPlexLibraryId, x.OwnedPlexMediaId });
         builder.HasIndex(x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId });
         builder.HasIndex(x => new

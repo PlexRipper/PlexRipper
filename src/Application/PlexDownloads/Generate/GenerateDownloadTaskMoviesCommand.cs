@@ -80,7 +80,9 @@ public class GenerateDownloadTaskMoviesCommandHandler
 
             if (plexLibrary.PlexServerId != downloadMediaDto.PlexServerId || plexLibrary.Type != PlexMediaType.Movie)
                 return ResultExtensions
-                    .Create400BadRequestResult("The selected Movie library does not match the requested server or media type.")
+                    .Create400BadRequestResult(
+                        "The selected Movie library does not match the requested server or media type."
+                    )
                     .LogError();
 
             var plexServer = plexLibrary.PlexServer!;
@@ -220,7 +222,7 @@ public class GenerateDownloadTaskMoviesCommandHandler
                 _log.Here()
                     .Debug(
                         "Selected requested quality {Quality} for movie {MovieTitle} (DataId: {DataId})",
-                        requestedQuality.Quality,
+                        requestedQuality.VideoQuality,
                         plexMovie.Title,
                         requestedQuality.DataId
                     );
@@ -235,7 +237,7 @@ public class GenerateDownloadTaskMoviesCommandHandler
             _log.Here()
                 .Debug(
                     "Selected best available quality {Quality} for movie {MovieTitle} (DataId: {DataId})",
-                    bestQuality.Quality,
+                    bestQuality.VideoQuality,
                     plexMovie.Title,
                     bestQuality.Id
                 );

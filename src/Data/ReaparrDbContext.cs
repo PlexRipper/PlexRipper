@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Reaparr.Data;
 
+// TODO Sort and move tables to separate partial classes for better organization and maintainability
 public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbContextDatabase
 {
     private const int MAX_TRANSACTION_ATTEMPTS = 2;
@@ -25,11 +26,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
-    public DbSet<PlexMusicArtist> PlexArtists { get; set; }
+    public DbSet<PlexMusicArtist> PlexMusicArtists { get; set; }
     public DbSet<MediaOverviewMusicArtistSnapshot> MediaOverviewMusicArtistSnapshots { get; set; }
-    public DbSet<PlexMusicAlbum> PlexAlbums { get; set; }
-    public DbSet<PlexMusicTrack> PlexTracks { get; set; }
-    public DbSet<PlexMusicTrackMediaData> PlexTrackData { get; set; }
+    public DbSet<PlexMusicAlbum> PlexMusicAlbums { get; set; }
+    public DbSet<PlexMusicTrack> PlexMusicTracks { get; set; }
+    public DbSet<PlexMusicTrackMediaData> PlexMusicTrackData { get; set; }
+    public DbSet<PlexMusicArtistMediaQuality> PlexMusicArtistMediaQualities { get; set; }
+    public DbSet<PlexMusicAlbumMediaQuality> PlexMusicAlbumMediaQualities { get; set; }
 
     public DbSet<PlexPhotoAlbum> PlexPhotoAlbums { get; set; }
     public DbSet<PlexPhotoImage> PlexPhotoImages { get; set; }
@@ -59,7 +62,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexActor> PlexActors { get; set; }
 
-    public DbSet<PlexGenre> PlexGenres { get; set; }
+    public DbSet<PlexGenreVideo> PlexGenresVideo { get; set; }
+
+    public DbSet<PlexGenreAudio> PlexGenresAudio { get; set; }
 
     public DbSet<PlexCountry> PlexCountries { get; set; }
 
@@ -119,7 +124,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexLibraryCountries> PlexLibraryCountries { get; set; }
 
-    public DbSet<PlexLibraryGenres> PlexLibraryGenres { get; set; }
+    public DbSet<PlexLibraryGenresVideo> PlexLibraryGenresVideo { get; set; }
+
+    public DbSet<PlexLibraryGenresAudio> PlexLibraryGenresAudio { get; set; }
 
     public DbSet<PlexMovieActors> PlexMovieActors { get; set; }
 
@@ -138,6 +145,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public DbSet<PlexMusicArtistGenres> PlexMusicArtistGenres { get; set; }
 
     public DbSet<PlexMusicArtistCountries> PlexMusicArtistCountries { get; set; }
+
+    public DbSet<PlexMusicAlbumCountries> PlexMusicAlbumCountries { get; set; }
 
     public DbSet<PlexOtherVideoActors> PlexOtherVideoActors { get; set; }
 

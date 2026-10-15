@@ -189,7 +189,7 @@ public class SyncPlexOtherVideosCommandHandler
         var keys = new HashSet<(int GenreId, int VideoId)>();
         foreach (var video in videos)
         foreach (var genre in video.Genres)
-            if (metadata.PlexGenres.TryGetValue(genre.Key, out var stored) && keys.Add((stored.Id, video.Id)))
+            if (metadata.PlexGenresVideo.TryGetValue(genre.Key, out var stored) && keys.Add((stored.Id, video.Id)))
                 rows.Add(new PlexOtherVideoGenres(stored.Id, metadata.PlexLibraryId, video.Id));
 
         return _dbContext.ExecuteTransactionAsync(

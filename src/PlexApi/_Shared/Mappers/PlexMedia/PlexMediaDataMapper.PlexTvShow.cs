@@ -22,7 +22,7 @@ public static partial class PlexMediaDataMapper
 
             Duration = source.Duration,
             MediaSize = source.Media.Sum(y => y.Parts.Sum(z => z.Size)),
-            Quality = VideoQuality.Unknown,
+            VideoQuality = VideoQuality.Unknown,
             ChildCount = source.ChildCount,
             GrandChildCount = 0, // This is set later on in BuildTvShowTree
             AddedAt = source.AddedAt,
@@ -44,7 +44,7 @@ public static partial class PlexMediaDataMapper
 
             Countries = source.Country.ToPlexCountry(),
             Actors = source.Role.ToPlexActor(),
-            Genres = source.Genre.ToPlexGenre(),
+            Genres = source.Genre.ToPlexGenreVideo(),
 
             // Ignore the following
             PlexLibrary = default,

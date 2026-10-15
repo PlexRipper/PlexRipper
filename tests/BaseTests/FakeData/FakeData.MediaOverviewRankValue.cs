@@ -15,5 +15,7 @@ public static partial class FakeData
         );
 
     public static Faker<MediaOverviewRankValue> GetMediaOverviewRankValues(Seed seed) =>
-        _mediaOverviewRankValue.Clone().UseSeed(seed.Next());
+        _mediaOverviewRankValue
+            .Clone() // Clone to isolate per-call random state.
+            .UseSeed(seed.Next());
 }

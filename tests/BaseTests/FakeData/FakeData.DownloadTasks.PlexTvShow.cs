@@ -2,9 +2,8 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static Faker<DownloadTaskTvShow> CreateDownloadTaskTvShowFaker()
-    {
-        return new Faker<DownloadTaskTvShow>()
+    private static readonly Faker<DownloadTaskTvShow> _downloadTaskTvShowFaker =
+        new Faker<DownloadTaskTvShow>()
             .ApplyDownloadTaskParentBase(DownloadTaskType.TvShow)
             .Ignore(x => x.Children)
             .FinishWith(
@@ -33,13 +32,12 @@ public static partial class FakeData
                     }
                 }
             );
-    }
 
     public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return CreateDownloadTaskTvShowFaker()
+        return _downloadTaskTvShowFaker
             .UseSeed(seed.Next())
             .RuleFor(
                 x => x.DataTotal,

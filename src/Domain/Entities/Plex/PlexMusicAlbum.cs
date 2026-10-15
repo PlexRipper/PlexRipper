@@ -13,19 +13,29 @@ public class PlexMusicAlbum : BasePlexMedia
 
     public PlexMusicArtist? PlexArtist { get; set; }
 
-    public string? MusicBrainzReleaseId { get; set; }
+    /// <summary>
+    /// Native Plex album identifier normalized from Plex metadata.
+    /// Stores the lowercase identifier suffix without a Plex URI prefix or library-local <see cref="BasePlexMedia.PlexApiRatingKey"/>.
+    /// Null when Plex does not provide a valid native album identifier.
+    /// </summary>
+    public required string? PlexApiIdentityId { get; set; }
 
-    public string? MusicBrainzReleaseGroupId { get; set; }
+    public required string? MusicBrainzReleaseId { get; set; }
 
     public DateTime? ReleaseDate { get; set; }
 
-    public string? RecordLabel { get; set; }
+    public required string? RecordLabel { get; set; }
 
-    public string? Country { get; set; }
+    /// <summary>
+    /// Gets the countries associated with this album from Plex metadata.
+    /// </summary>
+    public ICollection<PlexCountry> Countries { get; init; } = [];
 
-    public int? DiscCount { get; set; }
+    public required int? DiscCount { get; set; }
 
-    public int? TrackCount { get; set; }
+    public required int? TrackCount { get; set; }
 
     public ICollection<PlexMusicTrack> Tracks { get; set; } = [];
+
+    public ICollection<PlexMusicAlbumMediaQuality> Qualities { get; set; } = [];
 }

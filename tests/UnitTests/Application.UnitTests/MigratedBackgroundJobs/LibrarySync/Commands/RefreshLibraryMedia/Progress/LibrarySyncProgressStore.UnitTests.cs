@@ -14,7 +14,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Returns(Task.CompletedTask);
 
         // Act
-        await Sut.StartAsync(1, PlexMediaType.Movie, CancellationToken);
+        await Sut.StartAsync(1, PlexMediaType.Movie);
 
         // Assert
         capturedDto.ShouldNotBeNull();
@@ -24,6 +24,110 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
 
         Mock.Mock<IProgressHubService>()
             .Verify(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()), Times.Once());
+    }
+
+    [Test]
+    public async Task ShouldInitializeAllKnownTotalsBeforeRetrievalStarts()
+    {
+        // Arrange
+        LibrarySyncProgressDTO? capturedDto = null;
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
+            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await Sut.StartAsync(
+            6,
+            PlexMediaType.TvShow,
+            new Dictionary<PlexMediaType, int>
+            {
+                [PlexMediaType.TvShow] = 208,
+                [PlexMediaType.Season] = 1088,
+                [PlexMediaType.Episode] = 17185,
+            }
+        );
+
+        // Assert
+        capturedDto.ShouldNotBeNull();
+        capturedDto
+            .Items.Select(x => (x.MediaType, x.Received, x.Total))
+            .ShouldBe([
+                (PlexMediaType.TvShow, 0, 208),
+                (PlexMediaType.Season, 0, 1088),
+                (PlexMediaType.Episode, 0, 17185),
+            ]);
+        capturedDto.Percentage.ShouldBe(0);
+        capturedDto.IsComplete.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ShouldPreserveKnownTotals_OnEveryProgressUpdate()
+    {
+        // Arrange
+        var sentProgress = new List<LibrarySyncProgressDTO>();
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
+            .Callback<LibrarySyncProgressDTO>(dto => sentProgress.Add(dto))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(3));
+
+        await Sut.StartAsync(
+            7,
+            PlexMediaType.TvShow,
+            new Dictionary<PlexMediaType, int>
+            {
+                [PlexMediaType.TvShow] = 208,
+                [PlexMediaType.Season] = 1088,
+                [PlexMediaType.Episode] = 17185,
+            }
+        );
+
+        // Act
+        await Sut.UpdateItemAsync(
+            7,
+            new LibraryProgressItem
+            {
+                MediaType = PlexMediaType.TvShow,
+                Received = 10,
+                Total = 999,
+                TimeRemaining = TimeSpan.Zero,
+            },
+            CancellationToken
+        );
+        await Sut.UpdateItemAsync(
+            7,
+            new LibraryProgressItem
+            {
+                MediaType = PlexMediaType.Season,
+                Received = 20,
+                Total = 999,
+                TimeRemaining = TimeSpan.Zero,
+            },
+            CancellationToken
+        );
+
+        // Assert
+        sentProgress
+            .Select(dto => dto.Items.Select(item => (item.MediaType, item.Total)).ToArray())
+            .ShouldBe([
+                [
+                    (PlexMediaType.TvShow, 208),
+                    (PlexMediaType.Season, 1088),
+                    (PlexMediaType.Episode, 17185),
+                ],
+                [
+                    (PlexMediaType.TvShow, 208),
+                    (PlexMediaType.Season, 1088),
+                    (PlexMediaType.Episode, 17185),
+                ],
+                [
+                    (PlexMediaType.TvShow, 208),
+                    (PlexMediaType.Season, 1088),
+                    (PlexMediaType.Episode, 17185),
+                ],
+            ]);
+        Mock.Mock<IProgressHubService>().Verify();
     }
 
     [Test]
@@ -53,7 +157,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         var expectedTypes = new[] { first, second, third }.Where(x => x != PlexMediaType.None).ToList();
 
         // Act
-        await Sut.StartAsync(10, libraryType, CancellationToken);
+        await Sut.StartAsync(10, libraryType);
 
         // Assert
         capturedDto.ShouldNotBeNull();
@@ -109,7 +213,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(1, PlexMediaType.Movie, CancellationToken);
+        await Sut.StartAsync(1, PlexMediaType.Movie);
 
         var movieItem = new LibraryProgressItem
         {
@@ -144,7 +248,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(2, PlexMediaType.TvShow, CancellationToken);
+        await Sut.StartAsync(2, PlexMediaType.TvShow);
 
         // Pre-populate items via StartAsync and then update each one
         await Sut.UpdateItemAsync(
@@ -200,7 +304,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Exactly(2));
-        await Sut.StartAsync(20, PlexMediaType.TvShow, CancellationToken);
+        await Sut.StartAsync(20, PlexMediaType.TvShow);
 
         // Act
         await Sut.UpdateItemAsync(
@@ -219,7 +323,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         capturedDto.ShouldNotBeNull();
         capturedDto.Received.ShouldBe(4);
         capturedDto.Total.ShouldBe(10);
-        capturedDto.Percentage.ShouldBe(40);
+        capturedDto.Percentage.ShouldBe(0);
         capturedDto.IsComplete.ShouldBeFalse();
         capturedDto
             .Items.Select(x => (x.MediaType, x.Total, x.IsComplete))
@@ -247,7 +351,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(3, PlexMediaType.TvShow, CancellationToken);
+        await Sut.StartAsync(3, PlexMediaType.TvShow);
 
         await Sut.UpdateItemAsync(
             3,
@@ -303,7 +407,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(4, PlexMediaType.TvShow, CancellationToken);
+        await Sut.StartAsync(4, PlexMediaType.TvShow);
 
         await Sut.UpdateItemAsync(
             4,
@@ -355,7 +459,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(5, PlexMediaType.TvShow, CancellationToken);
+        await Sut.StartAsync(5, PlexMediaType.TvShow);
 
         var tvShowItem = new LibraryProgressItem
         {
@@ -394,7 +498,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Returns(Task.CompletedTask);
 
         const int plexLibraryId = 42;
-        await Sut.StartAsync(plexLibraryId, PlexMediaType.Movie, CancellationToken);
+        await Sut.StartAsync(plexLibraryId, PlexMediaType.Movie);
 
         await Sut.UpdateItemAsync(
             plexLibraryId,

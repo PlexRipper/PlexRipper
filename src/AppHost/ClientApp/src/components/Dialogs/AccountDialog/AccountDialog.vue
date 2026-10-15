@@ -26,11 +26,17 @@
 		</template>
 		<!-- Dialog Actions	-->
 		<template #actions>
-			<div class="account-dialog-actions">
-				<div class="account-dialog-actions__group">
+			<div
+				class="account-dialog-actions"
+				:class="{
+					'account-dialog-actions--new': accountDialogStore.isNewAccount,
+					'account-dialog-actions--token': !accountDialogStore.isNewAccount && accountDialogStore.isAuthTokenMode,
+				}">
+				<div
+					v-if="!accountDialogStore.isNewAccount"
+					class="account-dialog-actions__group">
 					<!-- Delete account -->
 					<DeleteButton
-						v-if="!accountDialogStore.isNewAccount"
 						cy="account-dialog-delete-button"
 						@click="dialogStore.openDialog(DialogType.AccountConfirmationDialog)" />
 					<BaseButton
@@ -46,6 +52,7 @@
 						:color="validationStyle.color"
 						:icon="validationStyle.icon"
 						:label="validationStyle.text"
+						:aria-label="validationStyle.text || $t('general.commands.validated')"
 						:loading="accountDialogStore.validateLoading"
 						:disabled="accountDialogStore.validateLoading"
 						cy="account-dialog-validate-button"
@@ -171,36 +178,57 @@ function saveAccount() {
   }
 }
 
-@media (max-width: $breakpoint-xs-max) {
+@media (min-width: $breakpoint-sm-min) {
   .account-dialog-actions {
     display: grid;
-    grid-template-columns: repeat(4, minmax(44px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    &--new {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &--token {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 
     &__group {
       display: contents;
     }
 
-    &__group:last-child .q-btn:first-child {
-      grid-column: 3;
+    .q-btn {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .q-btn__content {
+      min-width: 0;
+      white-space: normal;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-xs-max) {
+  .account-dialog-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+
+    &__group {
+      flex: 1 1 100%;
+      flex-wrap: wrap;
+      min-width: 0;
     }
 
     .q-btn {
-      width: 100%;
+      flex: 0 1 auto;
+      max-width: 100%;
       min-width: 44px;
       min-height: 44px;
-      padding-inline: 0;
+      padding-inline: 16px;
     }
 
-    .q-btn__content > .block {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
+    .q-btn__content {
+      min-width: 0;
+      white-space: normal;
     }
   }
 }

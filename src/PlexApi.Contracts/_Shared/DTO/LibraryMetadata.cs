@@ -14,7 +14,9 @@ public record LibraryMetadata
 
     public required IReadOnlyCollection<PlexCountry> Countries { get; init; } = [];
 
-    public required IReadOnlyCollection<PlexGenre> Genres { get; init; } = [];
+    public required IReadOnlyCollection<PlexGenreVideo> GenresVideo { get; init; } = [];
+
+    public required IReadOnlyCollection<PlexGenreAudio> GenresAudio { get; init; } = [];
 
     public required IReadOnlyCollection<PlexActor> Actors { get; init; } = [];
 

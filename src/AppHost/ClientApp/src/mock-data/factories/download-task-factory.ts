@@ -1,7 +1,7 @@
 import { randMovie, randDirectoryPath, randUrl, randFileName, randNumber, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import type { MockConfig } from '@mock';
-import { DownloadStatus, type DownloadTaskDTO, DownloadTaskType } from '@dto';
+import { AudioQuality, DownloadStatus, type DownloadTaskDTO, DownloadTaskType } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 import Convert from '@class/Convert';
 
@@ -47,16 +47,21 @@ export function generateDownloadTask({
 }): DownloadTaskDTO {
 	checkConfig(config);
 	incrementSeed();
+	const audioQuality = [DownloadTaskType.MusicTrack, DownloadTaskType.MusicTrackData].includes(type)
+		? AudioQuality.Unknown
+		: AudioQuality.None;
 	const title = randMovie();
+	const { audioQuality: partialAudioQuality, ...partialData } = partial;
 	return {
 		id,
 		title,
 		dataReceived: 0,
 		dataTotal: 1000000000, // 1 GB in bytes
+		percentage: 0,
 		downloadSpeed: 0,
 		fileTransferSpeed: 0,
-		percentage: 0,
 		mediaType: Convert.toPlexMediaType(type),
+		audioQuality: partialAudioQuality ?? audioQuality,
 		status: DownloadStatus.Queued,
 		timeRemaining: 0,
 		destinationDirectory: randDirectoryPath(),
@@ -72,7 +77,7 @@ export function generateDownloadTask({
 		plexServerId: 0,
 		createdAt: new Date().toISOString(),
 		children: [],
-		...partial,
+		...partialData,
 	};
 }
 

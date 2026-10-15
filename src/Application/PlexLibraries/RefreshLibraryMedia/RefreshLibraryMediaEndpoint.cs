@@ -18,7 +18,8 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
     }
 }
 
-public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointRequest, ResultDTO<PlexLibraryDTO>>
+public class RefreshLibraryMediaEndpoint
+    : Endpoint<RefreshLibraryMediaEndpointRequest, ResultDTO<LibrarySyncJobQueueDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -36,7 +37,7 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
         Post(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<LibrarySyncJobQueueDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
@@ -51,7 +52,7 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
             new QueueLibrarySyncJobCommand([req.PlexLibraryId], req.ForceLibrarySync, req.ForceMediaRefresh),
             ct
         );
-        if (result.IsFailed)
+        if (result.IsCancelledOrFailed)
         {
             await Send.FluentResult(result, ct);
             return;
@@ -64,6 +65,18 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
             return;
         }
 
-        await Send.FluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
+        var queueItem = await _dbContext
+            .LibrarySyncJobQueues.Where(x => x.PlexLibraryId == req.PlexLibraryId)
+            .FirstOrDefaultAsync(ct);
+        if (queueItem is null)
+        {
+            await Send.FluentResult(
+                ResultExtensions.EntityNotFound(nameof(LibrarySyncJobQueue), req.PlexLibraryId),
+                ct: ct
+            );
+            return;
+        }
+
+        await Send.FluentResult(Result.Ok(queueItem), x => x.ToDTO(), ct);
     }
 }

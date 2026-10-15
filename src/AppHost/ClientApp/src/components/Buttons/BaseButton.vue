@@ -45,6 +45,7 @@ export default defineComponent({
 				loading: props.loading,
 				disable: props.disabled,
 				'data-cy': props.cy,
+				'aria-label': props.ariaLabel || undefined,
 				flat: style.flat,
 				round: style.round,
 				rounded: style.rounded,

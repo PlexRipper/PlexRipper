@@ -20,7 +20,7 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.MoviePart or DownloadTaskType.MovieData => await Result.Try(
+            DownloadTaskType.MovieData => await Result.Try(
                 async Task<List<DownloadTaskLogBase>> () =>
                     await dbContext
                         .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
@@ -57,7 +57,7 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => await Result.Try(
+            DownloadTaskType.EpisodeData => await Result.Try(
                 async Task<List<DownloadTaskLogBase>> () =>
                     await dbContext
                         .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
@@ -94,7 +94,7 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart => await Result.Try(
+            DownloadTaskType.MusicTrackData => await Result.Try(
                 async Task<List<DownloadTaskLogBase>> () =>
                     await dbContext
                         .DownloadTaskTrackFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
@@ -122,7 +122,7 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.PhotoData or DownloadTaskType.PhotoPart => await Result.Try(
+            DownloadTaskType.PhotoData => await Result.Try(
                 async Task<List<DownloadTaskLogBase>> () =>
                     await dbContext
                         .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
@@ -141,7 +141,7 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.OtherVideoData or DownloadTaskType.OtherVideoPart => await Result.Try(
+            DownloadTaskType.OtherVideoData => await Result.Try(
                 async Task<List<DownloadTaskLogBase>> () =>
                     await dbContext
                         .DownloadTaskOtherVideoFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
@@ -168,7 +168,7 @@ public static partial class DbContextExtensions
                     .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskMovieId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
             ),
-            DownloadTaskType.MoviePart or DownloadTaskType.MovieData => await Result.Try(() =>
+            DownloadTaskType.MovieData => await Result.Try(() =>
                 dbContext
                     .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
@@ -188,7 +188,7 @@ public static partial class DbContextExtensions
                     .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowEpisodeId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
             ),
-            DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => await Result.Try(() =>
+            DownloadTaskType.EpisodeData => await Result.Try(() =>
                 dbContext
                     .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
@@ -208,7 +208,7 @@ public static partial class DbContextExtensions
                     .DownloadTaskTrackFileLogs.Where(x => x.DownloadTaskTrackId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
             ),
-            DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart => await Result.Try(() =>
+            DownloadTaskType.MusicTrackData => await Result.Try(() =>
                 dbContext
                     .DownloadTaskTrackFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
@@ -223,7 +223,7 @@ public static partial class DbContextExtensions
                     .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskPhotoId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
             ),
-            DownloadTaskType.PhotoData or DownloadTaskType.PhotoPart => await Result.Try(() =>
+            DownloadTaskType.PhotoData => await Result.Try(() =>
                 dbContext
                     .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
@@ -233,7 +233,7 @@ public static partial class DbContextExtensions
                     .DownloadTaskOtherVideoFileLogs.Where(x => x.DownloadTaskOtherVideoId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
             ),
-            DownloadTaskType.OtherVideoData or DownloadTaskType.OtherVideoPart => await Result.Try(() =>
+            DownloadTaskType.OtherVideoData => await Result.Try(() =>
                 dbContext
                     .DownloadTaskOtherVideoFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
@@ -251,7 +251,7 @@ public static partial class DbContextExtensions
         string message
     )
     {
-        if (downloadTaskKey.Type is DownloadTaskType.MovieData or DownloadTaskType.MoviePart)
+        if (downloadTaskKey.Type is DownloadTaskType.MovieData)
         {
             var parentId = await dbContext
                 .DownloadTaskMovieFile.Where(x => x.Id == downloadTaskKey.Id)
@@ -270,7 +270,7 @@ public static partial class DbContextExtensions
             );
         }
 
-        if (downloadTaskKey.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart)
+        if (downloadTaskKey.Type is DownloadTaskType.EpisodeData)
         {
             var ids = await dbContext
                 .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTaskKey.Id)
@@ -297,7 +297,7 @@ public static partial class DbContextExtensions
             );
         }
 
-        if (downloadTaskKey.Type is DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart)
+        if (downloadTaskKey.Type is DownloadTaskType.MusicTrackData)
         {
             var ids = await dbContext
                 .DownloadTaskMusicTrackFiles.Where(x => x.Id == downloadTaskKey.Id)
@@ -324,7 +324,7 @@ public static partial class DbContextExtensions
             );
         }
 
-        if (downloadTaskKey.Type is DownloadTaskType.PhotoData or DownloadTaskType.PhotoPart)
+        if (downloadTaskKey.Type is DownloadTaskType.PhotoData)
         {
             var ids = await dbContext
                 .DownloadTaskPhotoImageFiles.Where(x => x.Id == downloadTaskKey.Id)
@@ -344,7 +344,7 @@ public static partial class DbContextExtensions
             );
         }
 
-        if (downloadTaskKey.Type is DownloadTaskType.OtherVideoData or DownloadTaskType.OtherVideoPart)
+        if (downloadTaskKey.Type is DownloadTaskType.OtherVideoData)
         {
             var parentId = await dbContext
                 .DownloadTaskOtherVideoFiles.Where(x => x.Id == downloadTaskKey.Id)

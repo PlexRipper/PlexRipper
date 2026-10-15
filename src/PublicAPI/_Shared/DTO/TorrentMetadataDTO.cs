@@ -36,7 +36,7 @@ public record TorrentMetadataDTO
     /// The desired video quality for the torrent download.
     /// </summary>
     [QueryParam]
-    public required VideoQuality Quality { get; init; }
+    public required VideoQuality VideoQuality { get; init; }
 
     /// <summary>
     /// The internal database ID of the Plex library containing this media.
@@ -58,7 +58,7 @@ public record TorrentMetadataDTO
             { nameof(DataId), DataId.ToString() },
             { nameof(PartId), PartId.ToString() },
             { nameof(PlexApiPartId), PlexApiPartId.ToString() },
-            { nameof(Quality), Quality.ToString() },
+            { nameof(VideoQuality), VideoQuality.ToString() },
             { nameof(LibraryId), LibraryId.ToString() },
             { nameof(ServerId), ServerId.ToString() },
         };

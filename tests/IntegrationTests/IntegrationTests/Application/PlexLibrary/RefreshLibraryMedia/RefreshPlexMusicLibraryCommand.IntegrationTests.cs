@@ -34,16 +34,16 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
         await client.SignIn();
         var library = await container.DbContext.PlexLibraries.SingleAsync(CancellationToken);
         library.Type.ShouldBe(PlexMediaType.MusicArtist);
-        (await container.DbContext.PlexArtists.ToListAsync(CancellationToken)).ShouldBeEmpty();
-        (await container.DbContext.PlexAlbums.ToListAsync(CancellationToken)).ShouldBeEmpty();
-        (await container.DbContext.PlexTracks.ToListAsync(CancellationToken)).ShouldBeEmpty();
-        (await container.DbContext.PlexTrackData.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        (await container.DbContext.PlexMusicArtists.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        (await container.DbContext.PlexMusicAlbums.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        (await container.DbContext.PlexMusicTracks.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        (await container.DbContext.PlexMusicTrackData.ToListAsync(CancellationToken)).ShouldBeEmpty();
 
         // Act
         var response = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = library.Id });
         await container.BackgroundJobScheduler.AwaitScheduler(CancellationToken);
 
@@ -76,16 +76,16 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
                 0,
                 0,
                 0,
-                await firstContext.PlexTrackData.SumAsync(x => x.Size, CancellationToken),
+                await firstContext.PlexMusicTrackData.SumAsync(x => x.Size, CancellationToken),
                 true
             )
         );
         var artists = await firstContext
-            .PlexArtists.OrderBy(x => x.PlexApiRatingKey)
+            .PlexMusicArtists.OrderBy(x => x.PlexApiRatingKey)
             .Select(x => new { x.Id, x.PlexApiRatingKey })
             .ToListAsync(CancellationToken);
         var albums = await firstContext
-            .PlexAlbums.OrderBy(x => x.PlexApiRatingKey)
+            .PlexMusicAlbums.OrderBy(x => x.PlexApiRatingKey)
             .Select(x => new
             {
                 x.Id,
@@ -94,7 +94,7 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
             })
             .ToListAsync(CancellationToken);
         var tracks = await firstContext
-            .PlexTracks.OrderBy(x => x.PlexApiRatingKey)
+            .PlexMusicTracks.OrderBy(x => x.PlexApiRatingKey)
             .Select(x => new
             {
                 x.Id,
@@ -103,7 +103,7 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
             })
             .ToListAsync(CancellationToken);
         var originals = await firstContext
-            .PlexTrackData.OrderBy(x => x.PlexApiPartId)
+            .PlexMusicTrackData.OrderBy(x => x.PlexApiPartId)
             .Select(x => new
             {
                 x.Id,
@@ -119,11 +119,26 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
             })
             .ToListAsync(CancellationToken);
         (artists.Count, albums.Count, tracks.Count, originals.Count).ShouldBe((2, 4, 8, 8));
+        var albumCountryLinks = await firstContext
+            .PlexMusicAlbumCountries.OrderBy(x => x.PlexMusicAlbumId).ThenBy(x => x.CountryId)
+            .Select(x => new { x.PlexLibraryId, x.PlexMusicAlbumId, x.CountryId })
+            .ToListAsync(CancellationToken);
+        albumCountryLinks.Count.ShouldBe(albums.Count * 2);
+        albumCountryLinks.Select(x => x.PlexLibraryId).Distinct().ShouldBe([library.Id]);
+        albumCountryLinks.GroupBy(x => x.PlexMusicAlbumId).ShouldAllBe(x => x.Count() == 2);
+        albumCountryLinks
+            .Select(x => x.PlexMusicAlbumId)
+            .Distinct()
+            .OrderBy(x => x)
+            .ShouldBe(albums.Select(x => x.Id).OrderBy(x => x));
+        var countryIds = (await firstContext.PlexCountries.Select(x => x.Id).ToListAsync(CancellationToken)).ToHashSet();
+        albumCountryLinks.ShouldAllBe(x => countryIds.Contains(x.CountryId));
+
 
         var repeatResponse = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = library.Id, ForceLibrarySync = true });
         repeatResponse.Response.IsSuccessStatusCode.ShouldBeTrue();
         repeatResponse.Result.IsSuccess.ShouldBeTrue();
@@ -133,13 +148,13 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
         using var repeatedContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
         (
             await repeatedContext
-                .PlexArtists.OrderBy(x => x.PlexApiRatingKey)
+                .PlexMusicArtists.OrderBy(x => x.PlexApiRatingKey)
                 .Select(x => new { x.Id, x.PlexApiRatingKey })
                 .ToListAsync(CancellationToken)
         ).ShouldBe(artists);
         (
             await repeatedContext
-                .PlexAlbums.OrderBy(x => x.PlexApiRatingKey)
+                .PlexMusicAlbums.OrderBy(x => x.PlexApiRatingKey)
                 .Select(x => new
                 {
                     x.Id,
@@ -150,7 +165,7 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
         ).ShouldBe(albums);
         (
             await repeatedContext
-                .PlexTracks.OrderBy(x => x.PlexApiRatingKey)
+                .PlexMusicTracks.OrderBy(x => x.PlexApiRatingKey)
                 .Select(x => new
                 {
                     x.Id,
@@ -161,7 +176,7 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
         ).ShouldBe(tracks);
         (
             await repeatedContext
-                .PlexTrackData.OrderBy(x => x.PlexApiPartId)
+                .PlexMusicTrackData.OrderBy(x => x.PlexApiPartId)
                 .Select(x => new
                 {
                     x.Id,
@@ -177,5 +192,11 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
                 })
                 .ToListAsync(CancellationToken)
         ).ShouldBe(originals);
+        (
+            await repeatedContext
+                .PlexMusicAlbumCountries.OrderBy(x => x.PlexMusicAlbumId).ThenBy(x => x.CountryId)
+                .Select(x => new { x.PlexLibraryId, x.PlexMusicAlbumId, x.CountryId })
+                .ToListAsync(CancellationToken)
+        ).ShouldBe(albumCountryLinks);
     }
 }

@@ -327,7 +327,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 _log.Here()
                     .Debug(
                         "Selected requested quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
-                        requestedQuality.Quality,
+                        requestedQuality.VideoQuality,
                         tvShowEpisode.PlexApiRatingKey,
                         tvShowEpisode.Title,
                         requestedQuality.DataId
@@ -343,7 +343,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             _log.Here()
                 .Debug(
                     "Selected best available quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
-                    bestQuality.Quality,
+                    bestQuality.VideoQuality,
                     tvShowEpisode.PlexApiRatingKey,
                     tvShowEpisode.Title,
                     bestQuality.Id

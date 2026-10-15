@@ -8,13 +8,13 @@ public class RecalculatePlexGenreTypesCommandUnitTests : BaseCommandUnitTest<Rec
         // Arrange
         await SetupDatabase(7101);
         await SeedGenres(
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Sport",
                 Key = "sport",
                 Type = PlexGenreType.Sport,
             },
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Documentaire",
                 Key = "documentaire",
@@ -43,13 +43,13 @@ public class RecalculatePlexGenreTypesCommandUnitTests : BaseCommandUnitTest<Rec
         // Arrange
         await SetupDatabase(7102);
         await SeedGenres(
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Sport",
                 Key = "sport",
                 Type = PlexGenreType.Unknown,
             },
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Documentaire",
                 Key = "documentaire",
@@ -78,31 +78,31 @@ public class RecalculatePlexGenreTypesCommandUnitTests : BaseCommandUnitTest<Rec
         // Arrange
         await SetupDatabase(7103);
         await SeedGenres(
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Sport",
                 Key = "sport",
                 Type = PlexGenreType.Unknown,
             },
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Comedy",
                 Key = "comedy",
                 Type = PlexGenreType.Comedy,
             },
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Sport / Documentary",
                 Key = "sport-documentary",
                 Type = PlexGenreType.Unknown,
             },
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Unclassified",
                 Key = "unclassified",
                 Type = PlexGenreType.Unknown,
             },
-            new PlexGenre
+            new PlexGenreVideo
             {
                 Name = "Asia",
                 Key = "asia",
@@ -146,16 +146,16 @@ public class RecalculatePlexGenreTypesCommandUnitTests : BaseCommandUnitTest<Rec
         result.Value.UpdatedCount.ShouldBe(0);
     }
 
-    private async Task SeedGenres(params PlexGenre[] genres)
+    private async Task SeedGenres(params PlexGenreVideo[] genres)
     {
         using var dbContext = IDbContext;
-        dbContext.PlexGenres.AddRange(genres);
+        dbContext.PlexGenresVideo.AddRange(genres);
         await dbContext.SaveChangesAsync(CancellationToken);
     }
 
     private async Task<Dictionary<string, PlexGenreType>> GetGenreTypes()
     {
         using var dbContext = IDbContext;
-        return await dbContext.PlexGenres.ToDictionaryAsync(x => x.Key, x => x.Type, CancellationToken);
+        return await dbContext.PlexGenresVideo.ToDictionaryAsync(x => x.Key, x => x.Type, CancellationToken);
     }
 }

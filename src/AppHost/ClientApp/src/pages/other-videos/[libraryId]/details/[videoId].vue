@@ -1,53 +1,61 @@
 <template>
 	<QPage data-cy="other-video-details">
 		<template v-if="mediaItem && !loading && !error">
-			<MediaOverviewBar
+			<MediaDetailsLayout
 				:library-id="libraryId"
-				:media-detail-item="mediaItem"
-				detail-mode
-				@action="onAction" />
-			<QScroll class="page-content-minus-media-overview-bar">
-				<div class="other-video-details__content q-pa-md">
-					<header class="other-video-details__header">
-						<MediaPosterImage
-							:media-item="mediaItem"
-							:actions="false" />
-						<div class="other-video-details__info">
-							<h1 class="text-h4 q-mt-none">
-								{{ mediaItem.title }}
-							</h1>
-							<p
-								v-if="mediaItem.summary"
-								class="other-video-details__summary">
-								{{ mediaItem.summary }}
-							</p>
-							<dl class="other-video-details__metadata">
-								<dt>{{ t('components.other-video-details.duration') }}</dt>
-								<dd><QDuration :value="mediaItem.duration" /></dd>
-								<dt>{{ t('components.other-video-details.size') }}</dt>
-								<dd><QFileSize :size="mediaItem.mediaSize" /></dd>
-								<dt>{{ t('components.other-video-details.file-count') }}</dt>
-								<dd>{{ mediaItem.mediaData.length }}</dd>
-								<template v-if="mediaItem.year > 0">
-									<dt>{{ t('components.other-video-details.year') }}</dt><dd>{{ mediaItem.year }}</dd>
-								</template>
-								<template
-									v-for="date in dates"
-									:key="date.key">
-									<dt>{{ date.label }}</dt><dd>
-										<QDateTime
-											:text="date.value"
-											short-date />
-									</dd>
-								</template>
-							</dl>
-						</div>
-					</header>
-					<OtherVideoMediaList
-						:key="`${libraryId}-${mediaItem.id}`"
-						:media-item="mediaItem" />
-				</div>
-			</QScroll>
+				:media-item="mediaItem"
+				:summary-label="t('components.details-overview.summary')"
+				@action="onAction">
+				<template #details>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.other-video-details.duration') }}
+						</td>
+						<td class="media-info-column">
+							<QDuration :value="mediaItem.duration" />
+						</td>
+					</tr>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.other-video-details.size') }}
+						</td>
+						<td class="media-info-column">
+							<QFileSize :size="mediaItem.mediaSize" />
+						</td>
+					</tr>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.other-video-details.file-count') }}
+						</td>
+						<td class="media-info-column">
+							{{ mediaItem.mediaData.length }}
+						</td>
+					</tr>
+					<tr v-if="mediaItem.year > 0">
+						<td class="media-info-column">
+							{{ t('components.other-video-details.year') }}
+						</td>
+						<td class="media-info-column">
+							{{ mediaItem.year }}
+						</td>
+					</tr>
+					<tr
+						v-for="date in dates"
+						:key="date.key">
+						<td class="media-info-column">
+							{{ date.label }}
+						</td>
+						<td class="media-info-column">
+							<QDateTime
+								:text="date.value"
+								short-date />
+						</td>
+					</tr>
+				</template>
+				<OtherVideoMediaList
+					:key="`${libraryId}-${mediaItem.id}`"
+					:media-item="mediaItem" />
+			</MediaDetailsLayout>
 		</template>
 		<p
 			v-else-if="loading"
@@ -157,38 +165,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-.other-video-details__header {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-}
-.other-video-details__info {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.other-video-details__summary {
-  white-space: pre-wrap;
-}
-.other-video-details__metadata {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem 1rem;
-}
-.other-video-details__metadata dd {
-  margin: 0;
-}
 .other-video-details__control {
-  min-width: 44px;
-  min-height: 44px;
-}
-@media (max-width: 599px) {
-  .other-video-details__header {
-    flex-direction: column;
-    align-items: center;
-  }
-  .other-video-details__info {
-    width: 100%;
-  }
+	min-width: 44px;
+	min-height: 44px;
 }
 </style>

@@ -12,24 +12,33 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
     public async Task ShouldRejectWrongMediaScope_WhenPreviewingNewFamilies(PlexMediaType type, bool wrongServer)
     {
         // Arrange
-        await SetupDatabase(62830, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMusicLibraryCount = 1;
-            config.MusicArtistCount = 1;
-            config.MusicAlbumCount = 1;
-            config.MusicTrackCount = 1;
-            config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumCount = 1;
-            config.PhotoCount = 1;
-            config.PlexOtherVideoLibraryCount = 1;
-            config.OtherVideoCount = 1;
-        });
+        await SetupDatabase(
+            62830,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMusicLibraryCount = 1;
+                config.MusicArtistCount = 1;
+                config.MusicAlbumCount = 1;
+                config.MusicTrackCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 1;
+                config.PhotoCount = 1;
+                config.PlexOtherVideoLibraryCount = 1;
+                config.OtherVideoCount = 1;
+            }
+        );
         var dbContext = IDbContext;
         List<BasePlexMedia> media = type switch
         {
-            PlexMediaType.MusicTrack => [.. await dbContext.PlexTracks.OrderBy(x => x.Id).ToListAsync(CancellationToken)],
-            PlexMediaType.PhotoImage => [.. await dbContext.PlexPhotoImages.OrderBy(x => x.Id).ToListAsync(CancellationToken)],
+            PlexMediaType.MusicTrack =>
+            [
+                .. await dbContext.PlexMusicTracks.OrderBy(x => x.Id).ToListAsync(CancellationToken),
+            ],
+            PlexMediaType.PhotoImage =>
+            [
+                .. await dbContext.PlexPhotoImages.OrderBy(x => x.Id).ToListAsync(CancellationToken),
+            ],
             _ => [.. await dbContext.PlexOtherVideos.OrderBy(x => x.Id).ToListAsync(CancellationToken)],
         };
         var target = media[0];
@@ -46,9 +55,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                 Qualities = [],
             },
         ]);
-        var pipeline = new ValidationPipeline<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>(
-            [new GetDownloadPreviewQueryValidator()]
-        );
+        var pipeline = new ValidationPipeline<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>([
+            new GetDownloadPreviewQueryValidator(),
+        ]);
 
         // Act
         var result = await pipeline.ExecuteAsync(
@@ -85,16 +94,19 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
     public async Task ShouldReturnAlbumImageHierarchyWithSourceIds_WhenPhotoSelectionIsRequested(PlexMediaType type)
     {
         // Arrange
-        await SetupDatabase(62306, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumCount = 1;
-            config.PhotoCount = 2;
-        });
+        await SetupDatabase(
+            62306,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 1;
+                config.PhotoCount = 2;
+            }
+        );
         var album = await IDbContext
             .PlexPhotoAlbums.Include(x => x.Photos)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.MediaDataList)
             .SingleAsync(CancellationToken);
         var selectedImages = type == PlexMediaType.PhotoAlbum ? album.Photos.ToList() : [album.Photos.First()];
         var query = new GetDownloadPreviewQuery([
@@ -123,7 +135,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         previewAlbum.Children.ShouldAllBe(x => x.PhotoAlbumId == album.Id);
         previewAlbum.Children.ShouldAllBe(x => x.MediaType == PlexMediaType.PhotoImage);
         previewAlbum.Children.ShouldAllBe(x => x.Qualities.Count == 1);
-        previewAlbum.Children.SelectMany(x => x.Qualities).ShouldAllBe(x => x.MediaDataType == PlexMediaType.PhotoImage);
+        previewAlbum
+            .Children.SelectMany(x => x.Qualities)
+            .ShouldAllBe(x => x.MediaDataType == PlexMediaType.PhotoImage);
         previewAlbum.Size.ShouldBe(previewAlbum.Children.Sum(x => x.Size));
     }
 
@@ -137,17 +151,20 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
     )
     {
         // Arrange
-        await SetupDatabase(62820, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumCount = 2;
-            config.PhotoCount = 1;
-        });
+        await SetupDatabase(
+            62820,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 2;
+                config.PhotoCount = 1;
+            }
+        );
         var dbContext = IDbContext;
         var albums = await dbContext
             .PlexPhotoAlbums.Include(x => x.Photos)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.MediaDataList)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
         var targetAlbum = albums[0];
@@ -174,7 +191,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = outsider.Id,
                         DataId = outsiderOriginal.Id,
                         MediaDataType = PlexMediaType.PhotoImage,
-                        Quality = VideoQuality.Unknown,
+                        VideoQuality = VideoQuality.Unknown,
                     },
                 ],
             },
@@ -193,9 +210,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             );
         }
         var query = new GetDownloadPreviewQuery(selections);
-        var pipeline = new ValidationPipeline<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>(
-            [new GetDownloadPreviewQueryValidator()]
-        );
+        var pipeline = new ValidationPipeline<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>([
+            new GetDownloadPreviewQueryValidator(),
+        ]);
 
         // Act
         var result = await pipeline.ExecuteAsync(
@@ -208,14 +225,25 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         var expectedImages = selectOutsiderSeparately ? new[] { target, outsider } : [target];
-        result.Value.SelectMany(x => x.Children).OrderBy(x => x.Id)
+        result
+            .Value.SelectMany(x => x.Children)
+            .OrderBy(x => x.Id)
             .Select(x => (x.Id, x.PhotoAlbumId, x.MediaType, x.Size))
-            .ShouldBe(expectedImages.OrderBy(x => x.Id)
-                .Select(x => (x.Id, x.PlexPhotoAlbumId, PlexMediaType.PhotoImage, x.MediaDataList.Sum(y => y.Size))));
-        result.Value.SelectMany(x => x.Children).SelectMany(x => x.Qualities).OrderBy(x => x.MediaId)
+            .ShouldBe(
+                expectedImages
+                    .OrderBy(x => x.Id)
+                    .Select(x => (x.Id, x.PlexPhotoAlbumId, PlexMediaType.PhotoImage, x.MediaDataList.Sum(y => y.Size)))
+            );
+        result
+            .Value.SelectMany(x => x.Children)
+            .SelectMany(x => x.Qualities)
+            .OrderBy(x => x.MediaId)
             .Select(x => (x.MediaId, x.DataId, x.MediaDataType))
-            .ShouldBe(expectedImages.OrderBy(x => x.Id)
-                .Select(x => (x.Id, x.MediaDataList.Single().Id, PlexMediaType.PhotoImage)));
+            .ShouldBe(
+                expectedImages
+                    .OrderBy(x => x.Id)
+                    .Select(x => (x.Id, x.MediaDataList.Single().Id, PlexMediaType.PhotoImage))
+            );
     }
 
     [Test]
@@ -229,24 +257,28 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
     )
     {
         // Arrange
-        await SetupDatabase(62821, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumCount = 1;
-            config.PhotoCount = 0;
-            config.PhotoClipCount = 1;
-        });
+        await SetupDatabase(
+            62821,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 1;
+                config.PhotoCount = 0;
+                config.PhotoClipCount = 1;
+            }
+        );
         var dbContext = IDbContext;
         var album = await dbContext
             .PlexPhotoAlbums.Include(x => x.Photos)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.MediaDataList)
             .SingleAsync(CancellationToken);
         var clip = album.Photos.Single();
         var original = clip.MediaDataList.Single();
         original.Container.ShouldBe("mp4");
         original.VideoCodec.ShouldBe("h264");
-        var secondPart = FakeData.GetPlexPhotoMediaData(new Seed(62822), isClip: true)
+        var secondPart = FakeData
+            .GetPlexPhotoMediaData(new Seed(62822), isClip: true)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.PlexPhotoId, _ => clip.Id)
             .RuleFor(x => x.PlexServerId, _ => clip.PlexServerId)
@@ -255,7 +287,8 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .RuleFor(x => x.PlexApiMediaId, _ => original.PlexApiMediaId)
             .RuleFor(x => x.PlexApiPartId, _ => original.PlexApiPartId + 1)
             .Generate();
-        var alternate = FakeData.GetPlexPhotoMediaData(new Seed(62823), isClip: true)
+        var alternate = FakeData
+            .GetPlexPhotoMediaData(new Seed(62823), isClip: true)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.PlexPhotoId, _ => clip.Id)
             .RuleFor(x => x.PlexServerId, _ => clip.PlexServerId)
@@ -271,37 +304,35 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
         storedOriginalIds.ShouldBe([original.Id, secondPart.Id, alternate.Id]);
-        var query = new GetDownloadPreviewQuery(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = type,
-                    PlexServerId = clip.PlexServerId,
-                    PlexLibraryId = clip.PlexLibraryId,
-                    MediaIds = type == PlexMediaType.PhotoAlbum ? [album.Id] : [clip.Id],
-                    Qualities =
-                    [
-                        new PlexMediaQualityDTO
-                        {
-                            MediaId = clip.Id,
-                            DataId = secondPart.Id,
-                            MediaDataType = mismatchedSelectorType ? PlexMediaType.Movie : PlexMediaType.PhotoImage,
-                            Quality = VideoQuality.Unknown,
-                        },
-                        new PlexMediaQualityDTO
-                        {
-                            MediaId = clip.Id,
-                            DataId = alternate.Id,
-                            MediaDataType = PlexMediaType.PhotoImage,
-                            Quality = VideoQuality.Unknown,
-                        },
-                    ],
-                },
-            ]
-        );
-        var pipeline = new ValidationPipeline<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>(
-            [new GetDownloadPreviewQueryValidator()]
-        );
+        var query = new GetDownloadPreviewQuery([
+            new DownloadMediaDTO
+            {
+                Type = type,
+                PlexServerId = clip.PlexServerId,
+                PlexLibraryId = clip.PlexLibraryId,
+                MediaIds = type == PlexMediaType.PhotoAlbum ? [album.Id] : [clip.Id],
+                Qualities =
+                [
+                    new PlexMediaQualityDTO
+                    {
+                        MediaId = clip.Id,
+                        DataId = secondPart.Id,
+                        MediaDataType = mismatchedSelectorType ? PlexMediaType.Movie : PlexMediaType.PhotoImage,
+                        VideoQuality = VideoQuality.Unknown,
+                    },
+                    new PlexMediaQualityDTO
+                    {
+                        MediaId = clip.Id,
+                        DataId = alternate.Id,
+                        MediaDataType = PlexMediaType.PhotoImage,
+                        VideoQuality = VideoQuality.Unknown,
+                    },
+                ],
+            },
+        ]);
+        var pipeline = new ValidationPipeline<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>([
+            new GetDownloadPreviewQueryValidator(),
+        ]);
 
         // Act
         var result = await pipeline.ExecuteAsync(
@@ -314,12 +345,15 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         var previewAlbum = result.Value.Single();
-        (previewAlbum.Id, previewAlbum.MediaType, previewAlbum.ChildCount).ShouldBe((album.Id, PlexMediaType.PhotoAlbum, 1));
+        (previewAlbum.Id, previewAlbum.MediaType, previewAlbum.ChildCount).ShouldBe(
+            (album.Id, PlexMediaType.PhotoAlbum, 1)
+        );
         var previewClip = previewAlbum.Children.Single();
         (previewClip.Id, previewClip.PhotoAlbumId, previewClip.MediaType).ShouldBe(
             (clip.Id, album.Id, PlexMediaType.PhotoImage)
         );
-        previewClip.Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+        previewClip
+            .Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             .ShouldBe([(clip.Id, original.Id, PlexMediaType.PhotoImage, VideoQuality.Unknown)]);
         previewClip.Size.ShouldBe(original.Size + secondPart.Size);
         previewClip.ChildCount.ShouldBe(2);
@@ -333,15 +367,21 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
     public async Task ShouldKeepLocalOriginalAvailable_WhenFirstPhotoSelectorIsForeignOrStale(bool stale)
     {
         // Arrange
-        await SetupDatabase(62311, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumCount = 1;
-            config.PhotoCount = 2;
-        });
+        await SetupDatabase(
+            62311,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 1;
+                config.PhotoCount = 2;
+            }
+        );
         var dbContext = IDbContext;
-        var images = await dbContext.PlexPhotoImages.Include(x => x.MediaDataList).OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var images = await dbContext
+            .PlexPhotoImages.Include(x => x.MediaDataList)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
         var target = images[0];
         var wrongData = images[1].MediaDataList.Single();
         var query = new GetDownloadPreviewQuery([
@@ -358,14 +398,14 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = target.Id,
                         DataId = stale ? int.MaxValue : wrongData.Id,
                         MediaDataType = PlexMediaType.PhotoImage,
-                        Quality = VideoQuality.Unknown,
+                        VideoQuality = VideoQuality.Unknown,
                     },
                     new PlexMediaQualityDTO
                     {
                         MediaId = target.Id,
                         DataId = target.MediaDataList.Single().Id,
                         MediaDataType = PlexMediaType.PhotoImage,
-                        Quality = VideoQuality.Unknown,
+                        VideoQuality = VideoQuality.Unknown,
                     },
                 ],
             },
@@ -379,8 +419,10 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         result.Errors.Count.ShouldBe(0);
         var preview = result.Value.Single().Children.Single();
         (preview.Id, preview.PhotoAlbumId, preview.MediaType, preview.Size).ShouldBe(
-            (target.Id, target.PlexPhotoAlbumId, PlexMediaType.PhotoImage, target.MediaDataList.Single().Size));
-        preview.Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType))
+            (target.Id, target.PlexPhotoAlbumId, PlexMediaType.PhotoImage, target.MediaDataList.Single().Size)
+        );
+        preview
+            .Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType))
             .ShouldBe([(target.Id, target.MediaDataList.Single().Id, PlexMediaType.PhotoImage)]);
     }
 
@@ -391,23 +433,28 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
     public async Task ShouldReturnTypedAncestorsAndSelectedDescendants_WhenMusicIsRequested(PlexMediaType type)
     {
         // Arrange
-        await SetupDatabase(62801, config =>
-        {
-            config.PlexMusicLibraryCount = 1;
-            config.MusicArtistCount = 2;
-            config.MusicAlbumCount = 2;
-            config.MusicTrackCount = 2;
-        });
+        await SetupDatabase(
+            62801,
+            config =>
+            {
+                config.PlexMusicLibraryCount = 1;
+                config.MusicArtistCount = 2;
+                config.MusicAlbumCount = 2;
+                config.MusicTrackCount = 2;
+            }
+        );
         var dbContext = IDbContext;
-        var artist = await dbContext.PlexArtists
-            .Include(x => x.Albums).ThenInclude(x => x.Tracks).ThenInclude(x => x.MediaDataList)
-            .OrderBy(x => x.Id).FirstAsync(CancellationToken);
+        var artist = await dbContext
+            .PlexMusicArtists.Include(x => x.Albums)
+                .ThenInclude(x => x.Tracks)
+                    .ThenInclude(x => x.MediaDataList)
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
         var album = artist.Albums.OrderBy(x => x.Id).First();
         var track = album.Tracks.OrderBy(x => x.Id).First();
         var selectedAlbums = type == PlexMediaType.MusicArtist ? artist.Albums.ToList() : [album];
-        var selectedTracks = type == PlexMediaType.MusicTrack
-            ? [track]
-            : selectedAlbums.SelectMany(x => x.Tracks).ToList();
+        var selectedTracks =
+            type == PlexMediaType.MusicTrack ? [track] : selectedAlbums.SelectMany(x => x.Tracks).ToList();
         var selectedId = type switch
         {
             PlexMediaType.MusicArtist => artist.Id,
@@ -435,7 +482,8 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         (previewArtist.Id, previewArtist.MediaType).ShouldBe((artist.Id, PlexMediaType.MusicArtist));
         previewArtist.ChildCount.ShouldBe(selectedAlbums.Count);
         previewArtist.Size.ShouldBe(selectedTracks.Sum(x => x.MediaDataList.Sum(y => y.Size)));
-        previewArtist.Children.OrderBy(x => x.Id)
+        previewArtist
+            .Children.OrderBy(x => x.Id)
             .Select(x => (x.Id, x.MediaType, x.ArtistId))
             .ShouldBe(selectedAlbums.OrderBy(x => x.Id).Select(x => (x.Id, PlexMediaType.MusicAlbum, artist.Id)));
         foreach (var previewAlbum in previewArtist.Children)
@@ -443,11 +491,23 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             var expectedTracks = selectedTracks.Where(x => x.PlexAlbumId == previewAlbum.Id).ToList();
             previewAlbum.ChildCount.ShouldBe(expectedTracks.Count);
             previewAlbum.Size.ShouldBe(expectedTracks.Sum(x => x.MediaDataList.Sum(y => y.Size)));
-            previewAlbum.Children.OrderBy(x => x.Id)
+            previewAlbum
+                .Children.OrderBy(x => x.Id)
                 .Select(x => (x.Id, x.MediaType, x.ArtistId, x.AlbumId, x.Size, x.ChildCount))
-                .ShouldBe(expectedTracks.OrderBy(x => x.Id).Select(x =>
-                    (x.Id, PlexMediaType.MusicTrack, artist.Id, previewAlbum.Id,
-                        x.MediaDataList.Sum(y => y.Size), x.MediaDataList.Count)));
+                .ShouldBe(
+                    expectedTracks
+                        .OrderBy(x => x.Id)
+                        .Select(x =>
+                            (
+                                x.Id,
+                                PlexMediaType.MusicTrack,
+                                artist.Id,
+                                previewAlbum.Id,
+                                x.MediaDataList.Sum(y => y.Size),
+                                x.MediaDataList.Count
+                            )
+                        )
+                );
         }
     }
 
@@ -459,36 +519,43 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
     public async Task ShouldKeepTypedTreesAndOriginalGroupsSeparate_WhenMediaIdsOverlap(int selectorCase)
     {
         // Arrange
-        await SetupDatabase(62802, config =>
-        {
-            config.PlexMovieLibraryCount = 1;
-            config.MovieCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = 1;
-            config.PlexMusicLibraryCount = 1;
-            config.MusicArtistCount = 1;
-            config.MusicAlbumCount = 1;
-            config.MusicTrackCount = 1;
-            config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumCount = 1;
-            config.PhotoCount = 1;
-            config.PlexOtherVideoLibraryCount = 1;
-            config.OtherVideoCount = 1;
-        });
+        await SetupDatabase(
+            62802,
+            config =>
+            {
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
+                config.PlexMusicLibraryCount = 1;
+                config.MusicArtistCount = 1;
+                config.MusicAlbumCount = 1;
+                config.MusicTrackCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 1;
+                config.PhotoCount = 1;
+                config.PlexOtherVideoLibraryCount = 1;
+                config.OtherVideoCount = 1;
+            }
+        );
         var dbContext = IDbContext;
         var movie = await dbContext.PlexMovies.SingleAsync(CancellationToken);
         var episode = await dbContext.PlexTvShowEpisodes.SingleAsync(CancellationToken);
-        var track = await dbContext.PlexTracks.Include(x => x.PlexAlbum).ThenInclude(x => x!.PlexArtist)
-            .Include(x => x.MediaDataList).SingleAsync(CancellationToken);
+        var track = await dbContext
+            .PlexMusicTracks.Include(x => x.PlexAlbum)
+                .ThenInclude(x => x!.PlexArtist)
+            .Include(x => x.MediaDataList)
+            .SingleAsync(CancellationToken);
         var image = await dbContext.PlexPhotoImages.SingleAsync(CancellationToken);
         var video = await dbContext.PlexOtherVideos.Include(x => x.MediaDataList).SingleAsync(CancellationToken);
         new[] { movie.Id, episode.Id, track.Id, image.Id, video.Id }.ShouldAllBe(x => x == movie.Id);
         var album = track.PlexAlbum!;
         var artist = album.PlexArtist!;
         var selectOriginal = selectorCase is 1 or 2;
-        var trackParts = FakeData.GetPlexMusicTrackMediaData(new Seed(62803))
+        var trackParts = FakeData
+            .GetPlexMusicTrackMediaData(new Seed(62803))
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.PlexTrackId, _ => track.Id)
             .RuleFor(x => x.PlexLibraryId, _ => track.PlexLibraryId)
@@ -498,7 +565,8 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .RuleFor(x => x.PartIndex, f => f.IndexFaker)
             .RuleFor(x => x.Size, _ => 100)
             .Generate(2);
-        var videoParts = FakeData.GetPlexOtherVideoMediaData(new Seed(62804))
+        var videoParts = FakeData
+            .GetPlexOtherVideoMediaData(new Seed(62804))
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.PlexOtherVideoId, _ => video.Id)
             .RuleFor(x => x.PlexLibraryId, _ => video.PlexLibraryId)
@@ -506,14 +574,18 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .RuleFor(x => x.PlexApiRatingKey, _ => video.PlexApiRatingKey)
             .RuleFor(x => x.PlexApiMediaId, _ => video.MediaDataList.Single().PlexApiMediaId + 1)
             .RuleFor(x => x.PartIndex, f => f.IndexFaker)
-            .RuleFor(x => x.Quality, _ => VideoQuality.UHD_4K)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.UHD_4K)
             .RuleFor(x => x.Size, _ => 300)
             .Generate(2);
-        dbContext.PlexTrackData.AddRange(trackParts);
+        dbContext.PlexMusicTrackData.AddRange(trackParts);
         dbContext.PlexOtherVideoData.AddRange(videoParts);
         await dbContext.SaveChangesAsync(CancellationToken);
-        var trackData = await dbContext.PlexTrackData.Where(x => x.PlexTrackId == track.Id).ToListAsync(CancellationToken);
-        var videoData = await dbContext.PlexOtherVideoData.Where(x => x.PlexOtherVideoId == video.Id).ToListAsync(CancellationToken);
+        var trackData = await dbContext
+            .PlexMusicTrackData.Where(x => x.PlexTrackId == track.Id)
+            .ToListAsync(CancellationToken);
+        var videoData = await dbContext
+            .PlexOtherVideoData.Where(x => x.PlexOtherVideoId == video.Id)
+            .ToListAsync(CancellationToken);
         trackData.Count.ShouldBe(3);
         videoData.Count.ShouldBe(3);
         var expectedTrackData = selectOriginal ? trackParts : trackData;
@@ -521,60 +593,81 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery([
             new DownloadMediaDTO
             {
-                Type = PlexMediaType.Movie, MediaIds = [movie.Id],
-                PlexServerId = movie.PlexServerId, PlexLibraryId = movie.PlexLibraryId, Qualities = [],
+                Type = PlexMediaType.Movie,
+                MediaIds = [movie.Id],
+                PlexServerId = movie.PlexServerId,
+                PlexLibraryId = movie.PlexLibraryId,
+                Qualities = [],
             },
             new DownloadMediaDTO
             {
-                Type = PlexMediaType.Episode, MediaIds = [episode.Id],
-                PlexServerId = episode.PlexServerId, PlexLibraryId = episode.PlexLibraryId, Qualities = [],
+                Type = PlexMediaType.Episode,
+                MediaIds = [episode.Id],
+                PlexServerId = episode.PlexServerId,
+                PlexLibraryId = episode.PlexLibraryId,
+                Qualities = [],
             },
             new DownloadMediaDTO
             {
-                Type = PlexMediaType.MusicTrack, MediaIds = [track.Id],
-                PlexServerId = track.PlexServerId, PlexLibraryId = track.PlexLibraryId,
-                Qualities = selectorCase == 0
-                    ? []
-                    : [
-                        new PlexMediaQualityDTO
-                        {
-                            MediaId = track.Id,
-                            DataId = selectorCase == 3 ? int.MaxValue : trackParts[1].Id,
-                            MediaDataType = selectorCase == 2 ? PlexMediaType.Movie : PlexMediaType.MusicTrack,
-                            Quality = VideoQuality.Unknown,
-                        },
-                        new PlexMediaQualityDTO
-                        {
-                            MediaId = track.Id, DataId = track.MediaDataList.Single().Id,
-                            MediaDataType = PlexMediaType.MusicTrack, Quality = VideoQuality.Unknown,
-                        },
-                    ],
+                Type = PlexMediaType.MusicTrack,
+                MediaIds = [track.Id],
+                PlexServerId = track.PlexServerId,
+                PlexLibraryId = track.PlexLibraryId,
+                Qualities =
+                    selectorCase == 0
+                        ? []
+                        :
+                        [
+                            new PlexMediaQualityDTO
+                            {
+                                MediaId = track.Id,
+                                DataId = selectorCase == 3 ? int.MaxValue : trackParts[1].Id,
+                                MediaDataType = selectorCase == 2 ? PlexMediaType.Movie : PlexMediaType.MusicTrack,
+                                VideoQuality = VideoQuality.Unknown,
+                            },
+                            new PlexMediaQualityDTO
+                            {
+                                MediaId = track.Id,
+                                DataId = track.MediaDataList.Single().Id,
+                                MediaDataType = PlexMediaType.MusicTrack,
+                                VideoQuality = VideoQuality.Unknown,
+                            },
+                        ],
             },
             new DownloadMediaDTO
             {
-                Type = PlexMediaType.PhotoImage, MediaIds = [image.Id],
-                PlexServerId = image.PlexServerId, PlexLibraryId = image.PlexLibraryId, Qualities = [],
+                Type = PlexMediaType.PhotoImage,
+                MediaIds = [image.Id],
+                PlexServerId = image.PlexServerId,
+                PlexLibraryId = image.PlexLibraryId,
+                Qualities = [],
             },
             new DownloadMediaDTO
             {
-                Type = PlexMediaType.OtherVideos, MediaIds = [video.Id],
-                PlexServerId = video.PlexServerId, PlexLibraryId = video.PlexLibraryId,
-                Qualities = selectorCase == 0
-                    ? []
-                    : [
-                        new PlexMediaQualityDTO
-                        {
-                            MediaId = video.Id,
-                            DataId = selectorCase == 3 ? int.MaxValue : videoParts[1].Id,
-                            MediaDataType = selectorCase == 2 ? PlexMediaType.Movie : PlexMediaType.OtherVideos,
-                            Quality = VideoQuality.UHD_4K,
-                        },
-                        new PlexMediaQualityDTO
-                        {
-                            MediaId = video.Id, DataId = video.MediaDataList.Single().Id,
-                            MediaDataType = PlexMediaType.OtherVideos, Quality = VideoQuality.Unknown,
-                        },
-                    ],
+                Type = PlexMediaType.OtherVideos,
+                MediaIds = [video.Id],
+                PlexServerId = video.PlexServerId,
+                PlexLibraryId = video.PlexLibraryId,
+                Qualities =
+                    selectorCase == 0
+                        ? []
+                        :
+                        [
+                            new PlexMediaQualityDTO
+                            {
+                                MediaId = video.Id,
+                                DataId = selectorCase == 3 ? int.MaxValue : videoParts[1].Id,
+                                MediaDataType = selectorCase == 2 ? PlexMediaType.Movie : PlexMediaType.OtherVideos,
+                                VideoQuality = VideoQuality.UHD_4K,
+                            },
+                            new PlexMediaQualityDTO
+                            {
+                                MediaId = video.Id,
+                                DataId = video.MediaDataList.Single().Id,
+                                MediaDataType = PlexMediaType.OtherVideos,
+                                VideoQuality = VideoQuality.Unknown,
+                            },
+                        ],
             },
         ]);
 
@@ -584,72 +677,117 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-        result.Value.OrderBy(x => x.MediaType).Select(x => (x.Id, x.MediaType))
-            .ShouldBe(new[]
-            {
-                (movie.Id, PlexMediaType.Movie), (episode.TvShowId, PlexMediaType.TvShow),
-                (artist.Id, PlexMediaType.MusicArtist), (image.PlexPhotoAlbumId, PlexMediaType.PhotoAlbum),
-                (video.Id, PlexMediaType.OtherVideos),
-            }.OrderBy(x => x.Item2));
+        result
+            .Value.OrderBy(x => x.MediaType)
+            .Select(x => (x.Id, x.MediaType))
+            .ShouldBe(
+                new[]
+                {
+                    (movie.Id, PlexMediaType.Movie),
+                    (episode.TvShowId, PlexMediaType.TvShow),
+                    (artist.Id, PlexMediaType.MusicArtist),
+                    (image.PlexPhotoAlbumId, PlexMediaType.PhotoAlbum),
+                    (video.Id, PlexMediaType.OtherVideos),
+                }.OrderBy(x => x.Item2)
+            );
         var previewShow = result.Value.Single(x => x.MediaType == PlexMediaType.TvShow);
         var previewSeason = previewShow.Children.Single();
-        (previewSeason.Id, previewSeason.MediaType, previewSeason.TvShowId)
-            .ShouldBe((episode.TvShowSeasonId, PlexMediaType.Season, episode.TvShowId));
+        (previewSeason.Id, previewSeason.MediaType, previewSeason.TvShowId).ShouldBe(
+            (episode.TvShowSeasonId, PlexMediaType.Season, episode.TvShowId)
+        );
         var previewEpisode = previewSeason.Children.Single();
-        (previewEpisode.Id, previewEpisode.MediaType, previewEpisode.TvShowId, previewEpisode.SeasonId)
-            .ShouldBe((episode.Id, PlexMediaType.Episode, episode.TvShowId, episode.TvShowSeasonId));
+        (previewEpisode.Id, previewEpisode.MediaType, previewEpisode.TvShowId, previewEpisode.SeasonId).ShouldBe(
+            (episode.Id, PlexMediaType.Episode, episode.TvShowId, episode.TvShowSeasonId)
+        );
         var previewArtist = result.Value.Single(x => x.MediaType == PlexMediaType.MusicArtist);
         var previewAlbum = previewArtist.Children.Single();
-        (previewAlbum.Id, previewAlbum.MediaType, previewAlbum.ArtistId)
-            .ShouldBe((album.Id, PlexMediaType.MusicAlbum, artist.Id));
+        (previewAlbum.Id, previewAlbum.MediaType, previewAlbum.ArtistId).ShouldBe(
+            (album.Id, PlexMediaType.MusicAlbum, artist.Id)
+        );
         var previewTrack = previewAlbum.Children.Single();
-        (previewTrack.Id, previewTrack.MediaType, previewTrack.ArtistId, previewTrack.AlbumId)
-            .ShouldBe((track.Id, PlexMediaType.MusicTrack, artist.Id, album.Id));
+        (previewTrack.Id, previewTrack.MediaType, previewTrack.ArtistId, previewTrack.AlbumId).ShouldBe(
+            (track.Id, PlexMediaType.MusicTrack, artist.Id, album.Id)
+        );
         previewTrack.Size.ShouldBe(expectedTrackData.Sum(x => x.Size));
         previewTrack.ChildCount.ShouldBe(expectedTrackData.Count);
         previewAlbum.Size.ShouldBe(previewTrack.Size);
         previewArtist.Size.ShouldBe(previewTrack.Size);
-        previewTrack.Qualities.OrderBy(x => x.DataId).Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
-            .ShouldBe(expectedTrackData.GroupBy(x => x.PlexApiMediaId).OrderBy(x => x.Min(y => y.Id))
-                .Select(x => (track.Id, x.Min(y => y.Id), PlexMediaType.MusicTrack, VideoQuality.Unknown)));
+        previewTrack
+            .Qualities.OrderBy(x => x.DataId)
+            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            .ShouldBe(
+                expectedTrackData
+                    .GroupBy(x => x.PlexApiMediaId)
+                    .OrderBy(x => x.Min(y => y.Id))
+                    .Select(x =>
+                        (
+                            track.Id,
+                            selectorCase is 1 or 2 ? trackParts[1].Id : x.Min(y => y.Id),
+                            PlexMediaType.MusicTrack,
+                            VideoQuality.None
+                        )
+                    )
+            );
         var previewPhotoAlbum = result.Value.Single(x => x.MediaType == PlexMediaType.PhotoAlbum);
         var previewImage = previewPhotoAlbum.Children.Single();
-        (previewImage.Id, previewImage.MediaType, previewImage.PhotoAlbumId)
-            .ShouldBe((image.Id, PlexMediaType.PhotoImage, image.PlexPhotoAlbumId));
+        (previewImage.Id, previewImage.MediaType, previewImage.PhotoAlbumId).ShouldBe(
+            (image.Id, PlexMediaType.PhotoImage, image.PlexPhotoAlbumId)
+        );
         var previewVideo = result.Value.Single(x => x.MediaType == PlexMediaType.OtherVideos);
         previewVideo.Children.ShouldBeEmpty();
         previewVideo.Size.ShouldBe(expectedVideoData.Sum(x => x.Size));
         previewVideo.ChildCount.ShouldBe(expectedVideoData.Count);
-        previewVideo.Qualities.OrderBy(x => x.DataId).Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
-            .ShouldBe(expectedVideoData.GroupBy(x => x.PlexApiMediaId).OrderBy(x => x.Min(y => y.Id))
-                .Select(x => (video.Id, x.Min(y => y.Id), PlexMediaType.OtherVideos, x.First().Quality)));
+        previewVideo
+            .Qualities.OrderBy(x => x.DataId)
+            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            .ShouldBe(
+                expectedVideoData
+                    .GroupBy(x => x.PlexApiMediaId)
+                    .OrderBy(x => x.Min(y => y.Id))
+                    .Select(x =>
+                        (video.Id, x.Min(y => y.Id), PlexMediaType.OtherVideos, Quality: x.First().VideoQuality)
+                    )
+            );
         result.Value.Single(x => x.MediaType == PlexMediaType.Movie).Children.ShouldBeEmpty();
         var dto = result.Value.ToDTO();
         dto.TotalSize.ShouldBe(result.Value.Sum(x => x.Size));
         dto.Previews.Select(x => x.Type).Order().ShouldBe(result.Value.Select(x => x.MediaType).Order());
-        var dtoTrack = dto.Previews.Single(x => x.Type == PlexMediaType.MusicArtist)
-            .Children.Single().Children.Single();
+        var dtoTrack = dto
+            .Previews.Single(x => x.Type == PlexMediaType.MusicArtist)
+            .Children.Single()
+            .Children.Single();
         dtoTrack.Type.ShouldBe(PlexMediaType.MusicTrack);
-        dtoTrack.Qualities.OrderBy(x => x.DataId)
-            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
-            .ShouldBe(previewTrack.Qualities.OrderBy(x => x.DataId)
-                .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality)));
+        dtoTrack
+            .Qualities.OrderBy(x => x.DataId)
+            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            .ShouldBe(
+                previewTrack
+                    .Qualities.OrderBy(x => x.DataId)
+                    .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            );
         var dtoPhoto = dto.Previews.Single(x => x.Type == PlexMediaType.PhotoAlbum).Children.Single();
         dtoPhoto.Type.ShouldBe(PlexMediaType.PhotoImage);
-        dtoPhoto.Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
-            .ShouldBe(previewImage.Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality)));
+        dtoPhoto
+            .Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            .ShouldBe(
+                previewImage.Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            );
         var dtoVideo = dto.Previews.Single(x => x.Type == PlexMediaType.OtherVideos);
-        dtoVideo.Qualities.OrderBy(x => x.DataId)
-            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
-            .ShouldBe(previewVideo.Qualities.OrderBy(x => x.DataId)
-                .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality)));
-        var keys = dto.Previews.SelectMany(x => new[] { x }
-            .Concat(x.Children)
-            .Concat(x.Children.SelectMany(y => y.Children)))
+        dtoVideo
+            .Qualities.OrderBy(x => x.DataId)
+            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            .ShouldBe(
+                previewVideo
+                    .Qualities.OrderBy(x => x.DataId)
+                    .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            );
+        var keys = dto
+            .Previews.SelectMany(x => new[] { x }.Concat(x.Children).Concat(x.Children.SelectMany(y => y.Children)))
             .Select(x => x.Key)
             .ToList();
         keys.Distinct().Count().ShouldBe(keys.Count);
     }
+
     [Test]
     public async Task ShouldReturnTheCorrectDownloadPreview_WhenMixedMediaTypes()
     {
@@ -825,7 +963,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                     MediaId = movie.Id,
                     DataId = md.Id,
                     MediaDataType = PlexMediaType.Movie,
-                    Quality = VideoQuality.UHD_4K,
+                    VideoQuality = VideoQuality.UHD_4K,
                 })
             )
             .ToList();
@@ -885,7 +1023,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = movie.Id,
                         DataId = md.Id,
                         MediaDataType = PlexMediaType.Movie,
-                        Quality = VideoQuality.FullHD,
+                        VideoQuality = VideoQuality.FullHD,
                     })
             )
             .ToList();
@@ -1123,7 +1261,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = episode.Id,
                         DataId = md.Id,
                         MediaDataType = PlexMediaType.Episode,
-                        Quality = VideoQuality.HD,
+                        VideoQuality = VideoQuality.HD,
                     })
             )
             .ToList();
@@ -1389,7 +1527,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = movie.Id,
                         DataId = md.Id,
                         MediaDataType = PlexMediaType.Movie,
-                        Quality = VideoQuality.UHD_4K,
+                        VideoQuality = VideoQuality.UHD_4K,
                     })
             )
             .ToList();
@@ -1403,7 +1541,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = episode.Id,
                         DataId = md.Id,
                         MediaDataType = PlexMediaType.Episode,
-                        Quality = VideoQuality.HD,
+                        VideoQuality = VideoQuality.HD,
                     })
             )
             .ToList();

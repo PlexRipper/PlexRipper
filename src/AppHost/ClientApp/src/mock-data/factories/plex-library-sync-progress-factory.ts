@@ -21,9 +21,9 @@ export function generateLibrarySyncProgress({
 }): LibrarySyncProgressDTO {
 	const aggregateReceived = items.reduce((sum, item) => sum + item.received, 0);
 	const aggregateTotal = items.reduce((sum, item) => sum + Math.max(item.total, 0), 0);
-	const hasUnknownTotal = items.some(item => item.total < 0);
+	const hasUnknownTotal = items.some((item) => item.total < 0);
 	const percentage = hasUnknownTotal ? 0 : aggregateTotal === 0 ? 100 : Math.round((aggregateReceived / aggregateTotal) * 100);
-	const isComplete = items.length > 0 && items.every(item => item.isComplete);
+	const isComplete = items.length > 0 && items.every((item) => item.isComplete);
 
 	return {
 		plexLibraryId: libraryId,

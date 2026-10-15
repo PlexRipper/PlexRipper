@@ -16,7 +16,7 @@
 				@click="$emit('download', [quality])" />
 			<MediaVideoQuality
 				v-else
-				:quality="quality.quality"
+				:quality="quality.videoQuality"
 				:clickable="clickable"
 				:truncated="truncated"
 				:count="qualities.length"

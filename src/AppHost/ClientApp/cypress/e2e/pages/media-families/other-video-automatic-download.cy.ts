@@ -43,11 +43,19 @@ it('keeps multipart Other Video root downloads automatic instead of forcing the 
 					{ id: 30, plexApiMediaId: 2000, plexApiPartId: 2030, fileName: 'recording-alternative.mkv', duration: 12000, size: 1024, videoResolution: VideoQuality.UHD_4K, videoCodec: 'hevc', audioCodec: 'aac', audioQuality: AudioQuality.None },
 				],
 				qualities: [
-					{ mediaId: 100, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.FullHD, audioQuality: AudioQuality.None },
-					{ mediaId: 100, dataId: 30, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.UHD_4K, audioQuality: AudioQuality.None },
+					{ mediaId: 100, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, videoQuality: VideoQuality.FullHD, audioQuality: AudioQuality.None },
+					{ mediaId: 100, dataId: 30, mediaDataType: PlexMediaType.OtherVideos, videoQuality: VideoQuality.UHD_4K, audioQuality: AudioQuality.None },
 				],
 			},
 		});
+		const expectedCommands = media.mediaData.map((part) => ({
+			mediaIds: [media.id],
+			type: PlexMediaType.OtherVideos,
+			plexLibraryId: library.id,
+			plexServerId: library.plexServerId,
+			qualities: [{ mediaId: media.id, dataId: part.id, mediaDataType: PlexMediaType.OtherVideos, videoQuality: part.videoResolution, audioQuality: AudioQuality.None }],
+			keepCompletedInDownloadFolder: false,
+		}));
 		const metadata = { countries: [], countryCount: 0, genres: [], genreCount: 0, roles: [], roleCount: 0, qualities: [], qualityCount: 0, mediaCount: 1 };
 		cy.intercept('GET', PlexLibraryPaths.getAllPlexLibrariesEndpoint(), {
 			statusCode: 200, body: generateResultDTO([library]), ...headers,
@@ -81,14 +89,7 @@ it('keeps multipart Other Video root downloads automatic instead of forcing the 
 		cy.getCy('media-overview-bar-download-button').filter(':visible').click();
 
 		// Assert
-		cy.wait('@automaticPreview').its('request.body').should('deep.equal', [{
-			mediaIds: [media.id],
-			type: PlexMediaType.OtherVideos,
-			plexLibraryId: library.id,
-			plexServerId: library.plexServerId,
-			qualities: [],
-			keepCompletedInDownloadFolder: false,
-		}]);
+		cy.wait('@automaticPreview').its('request.body').should('deep.equal', expectedCommands);
 		cy.getCy('download-confirmation-dialog').should('be.visible').and('contain.text', media.title);
 	});
 });

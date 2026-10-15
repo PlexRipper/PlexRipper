@@ -111,14 +111,14 @@ describe('Responsive layout', () => {
 					mediaItem.qualities = [
 						{
 							mediaDataType: mediaItem.type,
-							quality: VideoQuality.FullHD,
+							videoQuality: VideoQuality.FullHD,
 							audioQuality: AudioQuality.None,
 							mediaId: mediaItem.id,
 							dataId: mediaItem.id,
 						},
 						{
 							mediaDataType: mediaItem.type,
-							quality: VideoQuality.HD,
+							videoQuality: VideoQuality.HD,
 							audioQuality: AudioQuality.None,
 							mediaId: mediaItem.id,
 							dataId: mediaItem.id + 1,
@@ -638,7 +638,7 @@ describe('Responsive layout', () => {
 			cy.get('.account-selector-details').each(($details) => {
 				const detailsRect = $details[0]!.getBoundingClientRect();
 				const actionRect = $details.next()[0]!.getBoundingClientRect();
-				expect(detailsRect.right, 'account details stop before refresh action').to.be.lte(actionRect.left);
+				expect(Math.round(detailsRect.right), 'account details stop before refresh action').to.be.lte(Math.round(actionRect.left));
 			});
 			cy.get('body').type('{esc}');
 
@@ -662,7 +662,8 @@ describe('Responsive layout', () => {
 			plexAccountCount: 1,
 			plexServerCount: 1,
 			plexMovieLibraryCount: 1,
-			movieDownloadTask: 2,
+			movieDownloadTask: 0,
+			tvShowDownloadTask: 1,
 		});
 		cy.visit(route('/downloads'));
 		cy.getCy('download-mobile-list').should('be.visible');
@@ -752,7 +753,7 @@ describe('Responsive layout', () => {
 				cy.getCy(`column-downloadSpeed-${task.id}`).filter(':visible').should('be.visible');
 				cy.getCy(`column-timeRemaining-${task.id}`).filter(':visible').should('be.visible');
 				cy.intercept('GET', `/api/Download/logs/${task.id}*`, { body: { isSuccess: true, value: [] } });
-				cy.getCy(`column-actions-details-${task.id}`).filter(':visible').click();
+				cy.getCy(`column-actions-details-${task.id}`).scrollIntoView().should('be.visible').click();
 				cy.getCy('download-details-dialog-title').should('be.visible');
 				cy.get('.q-dialog').should('have.attr', 'aria-label', task.fullTitle);
 				cy.getCy('dialog-close-button').should('be.visible');

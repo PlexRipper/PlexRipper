@@ -40,7 +40,7 @@ describe('Side bar', () => {
 			plexMovieLibraryCount: 1,
 			plexTvShowLibraryCount: 0,
 			override: {
-				plexAccounts: (accounts) => accounts.map((account) => ({ ...account, plexLibraryAccess: [] })),
+				plexAccounts: (accounts) => accounts.map((account) => ({ ...account, plexServerAccess: [], plexLibraryAccess: [] })),
 			},
 		});
 		cy.visitEmptyPage();

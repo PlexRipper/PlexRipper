@@ -378,7 +378,9 @@ function getActionableMusicTracks(rows: IComparisonDetailsRow[]): IComparisonDet
 			return [];
 		if (row.type === PlexMediaType.MusicTrack) {
 			return row.children.length === 0
-				&& [PlexMediaComparisonState.Missing, PlexMediaComparisonState.HigherQuality].includes(getComparisonState(row)) ? [row] : [];
+				&& [PlexMediaComparisonState.Missing, PlexMediaComparisonState.HigherQuality].includes(getComparisonState(row))
+				? [row]
+				: [];
 		}
 		return getActionableMusicTracks(row.children);
 	});
@@ -432,13 +434,15 @@ function toDownloadMediaCommand(row: IComparisonDetailsRow): DownloadMediaDTO {
 		mediaIds: [row.plexMediaId],
 		plexLibraryId: row.plexLibraryId,
 		plexServerId: row.plexServerId,
-		qualities: row.type === PlexMediaType.MusicTrack && row.remotePlexMediaDataId != null ? [{
-			mediaId: row.plexMediaId,
-			dataId: row.remotePlexMediaDataId,
-			mediaDataType: PlexMediaType.MusicTrack,
-			quality: VideoQuality.None,
-			audioQuality: row.remoteAudioQuality ?? AudioQuality.Unknown,
-		}] : [],
+		qualities: row.type === PlexMediaType.MusicTrack && row.remotePlexMediaDataId != null
+			? [{
+					mediaId: row.plexMediaId,
+					dataId: row.remotePlexMediaDataId,
+					mediaDataType: PlexMediaType.MusicTrack,
+					videoQuality: VideoQuality.None,
+					audioQuality: row.remoteAudioQuality ?? AudioQuality.Unknown,
+				}]
+			: [],
 		keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 	};
 }

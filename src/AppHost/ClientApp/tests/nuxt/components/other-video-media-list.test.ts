@@ -41,8 +41,8 @@ describe('OtherVideoMediaList - individual video selection', () => {
 					{ id: 30, plexApiMediaId: 200, plexApiPartId: 201, fileName: 'alternative.mkv', duration: 12000, size: 4096, videoResolution: VideoQuality.UHD_4K, videoCodec: 'hevc', audioCodec: 'flac', audioQuality: AudioQuality.None },
 				],
 				qualities: [
-					{ mediaId: 20, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.FullHD, audioQuality: AudioQuality.None },
-					{ mediaId: 20, dataId: 30, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.UHD_4K, audioQuality: AudioQuality.None },
+					{ mediaId: 20, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, videoQuality: VideoQuality.FullHD, audioQuality: AudioQuality.None },
+					{ mediaId: 20, dataId: 30, mediaDataType: PlexMediaType.OtherVideos, videoQuality: VideoQuality.UHD_4K, audioQuality: AudioQuality.None },
 				],
 			},
 		});
@@ -73,7 +73,7 @@ describe('OtherVideoMediaList - individual video selection', () => {
 
 		// Assert
 		expect(commands[0]?.[0]?.qualities).toEqual([
-			{ mediaId: 20, dataId: 30, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.UHD_4K, audioQuality: AudioQuality.None },
+			{ mediaId: 20, dataId: 30, mediaDataType: PlexMediaType.OtherVideos, videoQuality: VideoQuality.UHD_4K, audioQuality: AudioQuality.None },
 		]);
 
 		// Act
@@ -82,7 +82,7 @@ describe('OtherVideoMediaList - individual video selection', () => {
 
 		// Assert
 		expect(commands[1]?.[0]?.qualities).toEqual([
-			{ mediaId: 20, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.FullHD, audioQuality: AudioQuality.None },
+			{ mediaId: 20, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, videoQuality: VideoQuality.FullHD, audioQuality: AudioQuality.None },
 		]);
 	});
 
@@ -118,7 +118,6 @@ describe('OtherVideoMediaList - individual video selection', () => {
 		expect(wrapper.get('[data-cy="other-video-root-checkbox"]').attributes('aria-checked')).toBe('false');
 		expect(commands).toEqual([]);
 		expect(useMediaOverviewStore().downloadButtonVisible).toBe(false);
-
 	});
 
 	test('Should expose missing originals without offering an empty download', async () => {

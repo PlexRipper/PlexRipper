@@ -157,7 +157,7 @@ describe('Actual Music comparison frontend integration', () => {
 			cy.get('body').type('{esc}');
 			openComparison();
 			cy.getCy('media-comparison-details-table').should('contain.text', 'Partial album').and('contain.text', 'Owned album');
-			cy.getCy('media-comparison-details-dialog').should('not.contain.text', 'Current quality').and('not.contain.text', 'Available quality');
+			cy.getCy('media-comparison-details-table').find('thead').should('contain.text', 'Current quality').and('contain.text', 'Available quality');
 			expandAlbum('Partial album');
 			comparisonRow('Owned track').find('[data-cy^="media-comparison-details-download-"]').should('not.exist');
 			comparisonRow('Partial album').find('[data-cy^="media-comparison-details-download-"]').click();
@@ -183,7 +183,7 @@ describe('Actual Music comparison frontend integration', () => {
 			});
 			openComparison();
 			expandAlbum('Partial album');
-			comparisonRow('Missing track').find('[data-cy^="media-comparison-details-download-"]').should('be.visible').click();
+			comparisonRow('Missing track').find('.media-comparison-details__row-title [data-cy^="media-comparison-details-download-"]').scrollIntoView().should('be.visible').click();
 			assertMissingPreview(state.source.id, state.source.plexServerId, [112]);
 			cy.get('.q-layout').should(($layout) => expect($layout[0]!.scrollWidth).to.be.at.most($layout[0]!.clientWidth));
 		});
@@ -194,12 +194,14 @@ describe('Actual Music comparison frontend integration', () => {
 		setupMusic().then((state) => {
 			cy.visit(route(`/music/${state.library.id}/details/${state.artist.id}`));
 			cy.getPageData();
-			cy.get('h1').should('be.visible').and('have.text', state.artist.title);
+			cy.get('.media-title').should('be.visible').and('have.text', state.artist.title);
 			cy.getCy(`music-comparison-artist-${state.artist.id}`).scrollIntoView().should('be.visible');
 			cy.getCy('music-comparison-album-110').scrollIntoView().should('be.visible');
 			cy.getCy('music-album-110').find('.q-expansion-item__container > .q-item').first().click();
-			cy.getCy('music-comparison-track-110-111').scrollIntoView().should('be.visible');
-			cy.getCy('music-comparison-track-110-112').scrollIntoView().should('be.visible').click();
+			cy.getCy('music-album-110').contains('[data-cy="media-q-table-mobile-card"]', 'Owned track')
+				.find(`[data-cy="episode-comparison-chip-${PlexMediaComparisonState.Owned}"]`).scrollIntoView().should('be.visible');
+			cy.getCy('music-album-110').contains('[data-cy="media-q-table-mobile-card"]', 'Missing track')
+				.find(`[data-cy="episode-comparison-chip-${PlexMediaComparisonState.Missing}"]`).scrollIntoView().should('be.visible').click();
 			cy.then(() => expect(state.detailsRequests).to.equal(0));
 			cy.getCy('music-media-list').should('not.contain.text', '1080p').and('not.contain.text', 'Higher quality');
 			cy.getCy(`music-comparison-artist-${state.artist.id}`).scrollIntoView().click();

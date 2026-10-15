@@ -88,7 +88,7 @@ const mediaRows = computed((): PlexMediaSlimDTO[] => props.mediaItem.mediaData.m
 		dataId: mediaData.id,
 		mediaDataType: PlexMediaType.OtherVideos,
 		mediaId: props.mediaItem.id,
-		quality: mediaData.videoResolution,
+		videoQuality: mediaData.videoResolution,
 		audioQuality: AudioQuality.None,
 	} satisfies PlexMediaQualityDTO],
 })));

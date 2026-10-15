@@ -258,7 +258,7 @@ describe('MediaComparisonDetailsDialog - missing Music leaves and request lifeti
 			keepCompletedInDownloadFolder: false,
 			qualities: [{
 				mediaId: 81, dataId: 812, mediaDataType: PlexMediaType.MusicTrack,
-				quality: VideoQuality.None, audioQuality: AudioQuality.FLAC24Bit96KHz,
+				videoQuality: VideoQuality.None, audioQuality: AudioQuality.FLAC24Bit96KHz,
 			}],
 		}];
 		expect(download.mock.calls.map(([commands]) => commands)).toEqual([expected, expected]);

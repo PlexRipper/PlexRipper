@@ -164,7 +164,7 @@ function originalSelectors(assetIds: number[]): PlexMediaQualityDTO[] {
 		const file = original?.[0];
 		return file
 			? [{
-					mediaId: asset.id, dataId: file.id, mediaDataType: PlexMediaType.PhotoImage, quality: file.videoResolution,
+					mediaId: asset.id, dataId: file.id, mediaDataType: PlexMediaType.PhotoImage, videoQuality: file.videoResolution,
 					audioQuality: AudioQuality.None,
 				}]
 			: [];

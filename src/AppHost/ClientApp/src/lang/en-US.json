@@ -36,7 +36,6 @@
         "music-media-list": {
             "select-artist": "Select artist {title}",
             "select-album": "Select album {title}",
-            "select-track": "Select track {title}",
             "selected-count": "{count} selected",
             "track-count": "{count} tracks",
             "record-label": "Record label",
@@ -76,9 +75,6 @@
             "retry": "Retry"
         },
         "other-video-media-list": {
-            "originals": "Original versions",
-            "select-video": "Select video {title}",
-            "selected-count": "{count} selected",
             "empty": "No original files available."
         },
         "other-video-details": {

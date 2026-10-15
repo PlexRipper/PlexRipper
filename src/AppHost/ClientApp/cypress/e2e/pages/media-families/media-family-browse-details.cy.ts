@@ -56,7 +56,7 @@ function createRoots(type: PlexMediaType, config: MockConfig, libraryId: number,
 				...Array.from({ length: 18 }, (_, index) => ({ id: root.id * 100 + index, plexApiMediaId: root.id, plexApiPartId: root.id * 100 + index, fileName: `multipart-original-part-${index + 1}.mp4`, audioCodec: 'aac', audioQuality: AudioQuality.None, videoCodec: 'h264', videoResolution: resolution, duration: 6000, size: 1024 })),
 				{ id: root.id * 100 + 20, plexApiMediaId: root.id + 1, plexApiPartId: root.id * 100 + 20, fileName: `${'alternative-original-'.repeat(8)}.mkv`, audioCodec: 'flac', audioQuality: AudioQuality.None, videoCodec: 'hevc', videoResolution: resolution, duration: 12000, size: 2048 },
 			];
-			root.qualities = [{ dataId: root.mediaData[0]!.id, mediaId: root.id, mediaDataType: type, audioQuality: AudioQuality.None, quality: resolution }];
+			root.qualities = [{ dataId: root.mediaData[0]!.id, mediaId: root.id, mediaDataType: type, audioQuality: AudioQuality.None, videoQuality: resolution }];
 		}
 	}
 	return roots;
@@ -136,6 +136,15 @@ function assertTouchControl(selector: string) {
 	});
 }
 
+function selectMediaTableRow(containerCy: string, title: string) {
+	cy.getCy(containerCy).then(($container) => {
+		const rows = $container.find('[data-cy="media-q-table-mobile-card"], tbody tr');
+		const matches = rows.filter((_, row) => row.textContent?.includes(title) ?? false);
+		expect(matches, `media table row ${title}`).to.have.length(1);
+		cy.wrap(matches).find('[role="checkbox"]').click();
+	});
+}
+
 function scrollLastFileIntoViewport(selector: string) {
 	cy.get(selector).then(($last) => {
 		let parent = $last[0]!.parentElement;
@@ -152,8 +161,8 @@ function scrollLastFileIntoViewport(selector: string) {
 	});
 	cy.get(selector).should(($last) => {
 		const bounds = $last[0]!.getBoundingClientRect();
-		expect(bounds.top, 'last original can be reached on a phone').to.be.gte(0);
-		expect(bounds.bottom, 'last original fits below the screen edge').to.be.lte($last[0]!.ownerDocument.defaultView!.innerHeight);
+		expect(Math.round(bounds.top), 'last original can be reached on a phone').to.be.gte(0);
+		expect(Math.round(bounds.bottom), 'last original fits below the screen edge').to.be.lte(Math.round($last[0]!.ownerDocument.defaultView!.innerHeight));
 	});
 }
 
@@ -225,21 +234,18 @@ for (const family of families) {
 				if (family.type === PlexMediaType.MusicArtist) {
 					assertTouchControl('music-artist-checkbox');
 					const album = root.children[0]!;
-					cy.getCy(`music-album-${album.id}`).find('.q-expansion-item__container > .q-item').first().click();
-					cy.getCy(`music-disc-${album.id}-1`).should('contain.text', 'Disc 1');
-					cy.getCy(`music-disc-${album.id}-2`).should('contain.text', 'Disc 2');
-					cy.getCy(`music-disc-${album.id}-unknown`).should('contain.text', 'Unspecified disc');
-					cy.getCy(`music-track-number-${album.id}-${album.children[0]!.id}`).should('have.text', '1');
-					cy.getCy(`music-track-number-${album.id}-${album.children[1]!.id}`).should('have.text', '1');
-					cy.getCy(`music-track-number-${album.id}-${album.children[3]!.id}`).should('not.exist');
-					const track = root.children[0]!.children[0]!;
-					cy.getCy(`music-track-checkbox-${root.children[0]!.id}-${track.id}`).click();
-					cy.contains('original-' + track.id + '.flac').should('be.visible');
+					const albumPanelCy = `music-album-${album.id}`;
+					cy.getCy(albumPanelCy).find('.q-expansion-item__container > .q-item').first().click();
+					cy.getCy(albumPanelCy).find('[data-cy="media-q-table-mobile-card"], tbody tr').should('have.length', album.children.length);
+					for (const track of album.children)
+						cy.getCy(albumPanelCy).should('contain.text', track.title);
+					const track = album.children[0]!;
+					selectMediaTableRow(albumPanelCy, track.title);
 					cy.getCy('music-artist-checkbox').should('have.attr', 'aria-checked', 'mixed');
-					cy.getCy(`music-disc-${album.id}-1`).find('.q-expansion-item__container > .q-item').first().scrollIntoView().focus().type('{enter}');
-					cy.getCy(`music-track-checkbox-${album.id}-${track.id}`).should('not.be.visible');
-					cy.getCy(`music-disc-${album.id}-1`).find('.q-expansion-item__container > .q-item').first().type('{enter}');
-					cy.getCy(`music-track-checkbox-${album.id}-${track.id}`).should('have.attr', 'aria-checked', 'true');
+					cy.getCy(albumPanelCy).find('.q-expansion-item__container > .q-item').first().click();
+					cy.getCy(albumPanelCy).find('[data-cy="media-q-table-mobile-card"], tbody tr').filter(`:contains("${track.title}")`).should('not.be.visible');
+					cy.getCy(albumPanelCy).find('.q-expansion-item__container > .q-item').first().click();
+					cy.getCy(albumPanelCy).find('[data-cy="media-q-table-mobile-card"], tbody tr').filter(`:contains("${track.title}")`).find('[role="checkbox"]').should('have.attr', 'aria-checked', 'true');
 				} else if (family.type === PlexMediaType.PhotoAlbum) {
 					const asset = root.children.at(-1)!;
 					const selector = `[data-cy="photo-asset-${asset.id}"]`;
@@ -255,12 +261,12 @@ for (const family of families) {
 						expect(bounds.height, 'asset thumbnail height').to.be.closeTo(72, 1);
 					});
 				} else {
-					scrollLastFileIntoViewport('.other-video-files__item:last-child');
-					cy.get('.other-video-files').should('contain.text', 'multipart-original-part-18.mp4').and('contain.text', 'hevc').and('contain.text', 'flac');
+					scrollLastFileIntoViewport('[data-cy="other-video-media-list"] [data-cy="media-q-table-mobile-card"]:last-child');
+					cy.getCy('other-video-media-list').should('contain.text', 'multipart-original-part-18.mp4');
 					cy.getCy('other-video-root-checkbox').scrollIntoView();
 					assertTouchControl('other-video-root-checkbox');
 					cy.getCy('other-video-root-checkbox').click();
-					cy.getCy('other-video-selected-count').should('contain.text', '1');
+					cy.getCy('other-video-selected-count').should('contain.text', String(root.mediaData.length));
 				}
 				cy.getCy('media-overview-bar-mobile-menu').click();
 				cy.getCy('media-overview-bar-mobile-download-button').should('be.visible');

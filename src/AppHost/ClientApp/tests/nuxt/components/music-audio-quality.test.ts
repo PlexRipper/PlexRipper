@@ -49,11 +49,11 @@ describe('Music audio quality and explicit version selection', () => {
 		// Arrange
 		const first: PlexMediaQualityDTO = {
 			mediaId: 41, dataId: 401, mediaDataType: PlexMediaType.MusicTrack,
-			quality: VideoQuality.None, audioQuality: AudioQuality.FLAC16Bit441KHz,
+			videoQuality: VideoQuality.None, audioQuality: AudioQuality.FLAC16Bit441KHz,
 		};
 		const second: PlexMediaQualityDTO = { ...first, dataId: 402 };
 		const wrapper = await mountSuspended(MediaQuality, {
-			props: { qualities: [first, second], clickable: true },
+			props: { qualities: [first, second], clickable: true, truncated: false },
 			global: {
 				plugins: [createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': messages } })],
 				stubs: { QGlowChip: chip },
@@ -73,7 +73,7 @@ describe('Music audio quality and explicit version selection', () => {
 		// Arrange
 		const repeated: PlexMediaQualityDTO = {
 			mediaId: 41, dataId: -1, mediaDataType,
-			quality: VideoQuality.None, audioQuality: AudioQuality.FLAC16Bit441KHz,
+			videoQuality: VideoQuality.None, audioQuality: AudioQuality.FLAC16Bit441KHz,
 		};
 		const alternate: PlexMediaQualityDTO = {
 			...repeated,
@@ -82,7 +82,7 @@ describe('Music audio quality and explicit version selection', () => {
 
 		// Act
 		const wrapper = await mountSuspended(MediaQuality, {
-			props: { qualities: [repeated, { ...repeated }, alternate] },
+			props: { qualities: [repeated, { ...repeated }, alternate], truncated: false },
 			global: {
 				plugins: [createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': messages } })],
 				stubs: { QGlowChip: chip },
@@ -102,7 +102,7 @@ describe('Music audio quality and explicit version selection', () => {
 			mediaId: 41,
 			dataId: 401,
 			mediaDataType: PlexMediaType.Movie,
-			quality: VideoQuality.FullHD,
+			videoQuality: VideoQuality.FullHD,
 			audioQuality: AudioQuality.None,
 		};
 

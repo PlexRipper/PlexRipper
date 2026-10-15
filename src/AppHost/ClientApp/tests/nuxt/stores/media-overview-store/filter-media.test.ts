@@ -209,7 +209,7 @@ describe('MediaOverviewStore - Filter / Search', () => {
 			config: { seed: 625 },
 			partialData: {
 				id: 11 + index, type: PlexMediaType.OtherVideos, plexLibraryId: 5, plexServerId: 3,
-				qualities: [{ dataId: 100 + index, mediaId: 11 + index, mediaDataType: PlexMediaType.OtherVideos, audioQuality: AudioQuality.None, quality }],
+				qualities: [{ dataId: 100 + index, mediaId: 11 + index, mediaDataType: PlexMediaType.OtherVideos, audioQuality: AudioQuality.None, videoQuality: quality }],
 			},
 		}));
 		mock.onGet('/api/PlexMedia').reply((request) => {
@@ -228,7 +228,7 @@ describe('MediaOverviewStore - Filter / Search', () => {
 
 		// Assert
 		expect(store.getMediaItems.map((item) => item.id)).toEqual([11]);
-		expect(store.getMediaItems[0]?.qualities[0]?.quality).toBe(VideoQuality.FullHD);
+		expect(store.getMediaItems[0]?.qualities[0]?.videoQuality).toBe(VideoQuality.FullHD);
 		expect(store.metadata.comparisonState).toBeNull();
 	});
 });

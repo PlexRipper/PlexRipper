@@ -27,8 +27,8 @@ export function getHighestQuality(item: PlexMediaSlimDTO): VideoQuality {
 	}
 	let best: VideoQuality = VideoQuality.Unknown;
 	for (const q of item.qualities) {
-		if (videoQualityRank[q.quality] > videoQualityRank[best]) {
-			best = q.quality;
+		if (videoQualityRank[q.videoQuality] > videoQualityRank[best]) {
+			best = q.videoQuality;
 		}
 	}
 	return best;

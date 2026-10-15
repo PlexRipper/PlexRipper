@@ -1,5 +1,6 @@
 import type {
 	DownloadTaskDTO, FolderPathDTO,
+	LibrarySyncJobQueueDTO,
 	PlexAccountDTO,
 	PlexLibraryDTO, PlexMediaSlimDTO,
 	PlexServerConnectionDTO,
@@ -12,6 +13,7 @@ export interface IBasePageSetupResult {
 	plexServers: PlexServerDTO[];
 	plexServerConnections: PlexServerConnectionDTO[];
 	plexLibraries: PlexLibraryDTO[];
+	plexLibrarySyncJobStatuses: LibrarySyncJobQueueDTO[];
 	plexAccounts: PlexAccountDTO[];
 	serverDownloadProgress: ServerDownloadProgressDTO[];
 	detailDownloadTasks: DownloadTaskDTO[];

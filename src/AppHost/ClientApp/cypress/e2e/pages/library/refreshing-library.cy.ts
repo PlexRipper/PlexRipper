@@ -243,7 +243,6 @@ describe('Test the refreshing of a PlexLibrary', () => {
 				cy.getCy(`library-media-sync-progress-row-${PlexMediaType.Episode}-count`)
 					.should('contain.text', `0/${episodeCount}`);
 				cy.contains('Updating database with all new data, please wait').should('not.exist');
-
 			}
 			// Stage 2: TvShows complete, Seasons progress from 0% to 100%, Episodes remain queued
 			for (let i = 1; i <= steps; i++) {

@@ -200,7 +200,7 @@ describe('MusicMediaList hierarchy selection', () => {
 		const wrapper = await render(item);
 
 		// Assert
-		const metadata = wrapper.get('[data-cy="music-album-7"] .music-album-row__metadata');
+		const metadata = wrapper.get('[data-cy="music-album-7"] .music-album-row');
 		expect(metadata.text()).toContain('Record label');
 		expect(metadata.text()).toContain('Example Records');
 		expect(metadata.text()).toContain('Release date');

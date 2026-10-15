@@ -50,7 +50,7 @@ describe('PhotoMediaList - owned asset selection', () => {
 					audioQuality: AudioQuality.None, videoResolution: VideoQuality.Unknown, plexApiMediaId: id + 1000, plexApiPartId: id + 2,
 				}],
 				qualities: [{
-					mediaId: id, dataId: id + 100, mediaDataType: PlexMediaType.PhotoImage, audioQuality: AudioQuality.None, quality: VideoQuality.Unknown,
+					mediaId: id, dataId: id + 100, mediaDataType: PlexMediaType.PhotoImage, audioQuality: AudioQuality.None, videoQuality: VideoQuality.Unknown,
 				}],
 			},
 		});
@@ -63,7 +63,7 @@ describe('PhotoMediaList - owned asset selection', () => {
 				id, type: PlexMediaType.PhotoAlbum, plexServerId: 3, plexLibraryId: 4,
 				title: `Album ${id}`, hasThumb: false, childCount: 2, children: [asset(21, id), asset(22, id)],
 				qualities: [{
-					mediaId: 21, dataId: 121, mediaDataType: PlexMediaType.PhotoImage, audioQuality: AudioQuality.None, quality: VideoQuality.Unknown,
+					mediaId: 21, dataId: 121, mediaDataType: PlexMediaType.PhotoImage, audioQuality: AudioQuality.None, videoQuality: VideoQuality.Unknown,
 				}],
 			},
 		});
@@ -243,8 +243,8 @@ describe('PhotoMediaList - owned asset selection', () => {
 		expect(commands[0]).toMatchObject([{
 			type: PlexMediaType.PhotoAlbum, mediaIds: [20], plexLibraryId: 4, plexServerId: 3,
 			qualities: [
-				{ mediaId: 21, dataId: 121, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.Unknown },
-				{ mediaId: 22, dataId: 142, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.Unknown },
+				{ mediaId: 21, dataId: 121, mediaDataType: PlexMediaType.PhotoImage, videoQuality: VideoQuality.Unknown },
+				{ mediaId: 22, dataId: 142, mediaDataType: PlexMediaType.PhotoImage, videoQuality: VideoQuality.Unknown },
 			],
 		}]);
 		expect(commands[0]).toHaveLength(1);
@@ -256,7 +256,7 @@ describe('PhotoMediaList - owned asset selection', () => {
 		// Assert
 		expect(commands[1]).toMatchObject([{
 			type: PlexMediaType.PhotoImage, mediaIds: [22],
-			qualities: [{ mediaId: 22, dataId: 142, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.Unknown }],
+			qualities: [{ mediaId: 22, dataId: 142, mediaDataType: PlexMediaType.PhotoImage, videoQuality: VideoQuality.Unknown }],
 		}]);
 		expect(commands[1]).toHaveLength(1);
 		expect(wrapper.get('[data-cy="photo-album-checkbox"]').attributes('aria-checked')).toBe('mixed');
@@ -276,7 +276,7 @@ describe('PhotoMediaList - owned asset selection', () => {
 		// Assert
 		expect(commands[0]).toMatchObject([{
 			type: PlexMediaType.PhotoImage, mediaIds: [21], plexLibraryId: 4, plexServerId: 3,
-			qualities: [{ mediaId: 21, dataId: 141, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.Unknown }],
+			qualities: [{ mediaId: 21, dataId: 141, mediaDataType: PlexMediaType.PhotoImage, videoQuality: VideoQuality.Unknown }],
 		}]);
 		expect(commands[0]).toHaveLength(1);
 
@@ -331,7 +331,7 @@ describe('PhotoMediaList - owned asset selection', () => {
 		expect(commands[0]).toMatchObject([
 			{
 				type: PlexMediaType.PhotoImage, mediaIds: [21],
-				qualities: [{ mediaId: 21, dataId: 141, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.Unknown }],
+				qualities: [{ mediaId: 21, dataId: 141, mediaDataType: PlexMediaType.PhotoImage, videoQuality: VideoQuality.Unknown }],
 			},
 			{ type: PlexMediaType.PhotoImage, mediaIds: [22], qualities: [] },
 		]);

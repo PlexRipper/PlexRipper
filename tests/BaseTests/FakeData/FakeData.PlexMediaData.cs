@@ -34,18 +34,23 @@ public static partial class FakeData
             .Ignore(x => x.PlexLibraryId)
             .Ignore(x => x.PlexLibrary);
 
-    private static Faker<PlexMovieMediaData> CreatePlexMovieMediaDataFaker(FakeDataConfig config)
+    private static readonly Faker<PlexMovieMediaData> _plexMovieMediaDataFaker = CreatePlexMovieMediaDataFaker();
+
+    private static Faker<PlexMovieMediaData> CreatePlexMovieMediaDataFaker()
     {
         return new Faker<PlexMovieMediaData>()
-            .ApplyBasePlexMediaData(config)
+            .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexMovieId)
             .Ignore(x => x.PlexMovie);
     }
 
-    private static Faker<PlexTvShowEpisodeMediaData> CreatePlexTvShowEpisodeMediaDataFaker(FakeDataConfig config)
+    private static readonly Faker<PlexTvShowEpisodeMediaData> _plexTvShowEpisodeMediaDataFaker =
+        CreatePlexTvShowEpisodeMediaDataFaker();
+
+    private static Faker<PlexTvShowEpisodeMediaData> CreatePlexTvShowEpisodeMediaDataFaker()
     {
         return new Faker<PlexTvShowEpisodeMediaData>()
-            .ApplyBasePlexMediaData(config)
+            .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexTvShowEpisodeId)
             .Ignore(x => x.PlexTvShowEpisode);
     }
@@ -54,7 +59,15 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return CreatePlexMovieMediaDataFaker(config).UseSeed(seed.Next());
+        return _plexMovieMediaDataFaker
+            .RuleFor(
+                x => x.Size,
+                _ =>
+                    config.DownloadFileSizeInMb > 0
+                        ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                        : 50 * 1024L
+            )
+            .UseSeed(seed.Next());
     }
 
     public static Faker<PlexTvShowEpisodeMediaData> GetPlexTvShowEpisodeMediaData(
@@ -64,6 +77,14 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return CreatePlexTvShowEpisodeMediaDataFaker(config).UseSeed(seed.Next());
+        return _plexTvShowEpisodeMediaDataFaker
+            .RuleFor(
+                x => x.Size,
+                _ =>
+                    config.DownloadFileSizeInMb > 0
+                        ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                        : 50 * 1024L
+            )
+            .UseSeed(seed.Next());
     }
 }

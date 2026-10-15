@@ -20,5 +20,7 @@ public static partial class FakeData
             .RuleFor(x => x.MediaSizeRank, _ => 0);
 
     public static Faker<MediaOverviewOtherVideoSnapshot> GetMediaOverviewOtherVideoSnapshots(Seed seed) =>
-        _mediaOverviewOtherVideoSnapshot.Clone().UseSeed(seed.Next());
+        _mediaOverviewOtherVideoSnapshot
+            .Clone() // Clone to isolate per-call random state.
+            .UseSeed(seed.Next());
 }

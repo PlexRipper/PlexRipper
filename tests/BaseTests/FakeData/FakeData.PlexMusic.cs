@@ -44,7 +44,7 @@ public static partial class FakeData
         var albumFaker = GetPlexMusicAlbums(seed, options);
 
         return _plexMusicArtist
-            .Clone()
+            .Clone() // Clone to isolate per-call child rules and seed state.
             .RuleFor(x => x.Albums, _ => albumFaker.Generate(config.MusicAlbumCount))
             .UseSeed(seed.Next());
     }
@@ -96,7 +96,7 @@ public static partial class FakeData
         var trackFaker = GetPlexMusicTracks(seed, options);
 
         return _plexMusicAlbum
-            .Clone()
+            .Clone() // Clone to isolate per-call child rules and seed state.
             .RuleFor(x => x.Tracks, _ => trackFaker.Generate(config.MusicTrackCount))
             .UseSeed(seed.Next());
     }
@@ -137,7 +137,7 @@ public static partial class FakeData
         var mediaDataFaker = GetPlexMusicTrackMediaData(seed, options);
 
         return _plexMusicTrack
-            .Clone()
+            .Clone() // Clone to isolate per-call media-data rules and seed state.
             .RuleFor(x => x.MediaDataList, _ => mediaDataFaker.Generate(1))
             .UseSeed(seed.Next());
     }
@@ -174,9 +174,15 @@ public static partial class FakeData
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        var faker = _plexMusicTrackMediaData.Clone();
-        if (config.DownloadFileSizeInMb > 0)
-            faker.RuleFor(x => x.Size, (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes);
-        return faker.UseSeed(seed.Next());
+        return _plexMusicTrackMediaData
+            .Clone() // Clone to isolate per-call size rules and caller overrides.
+            .RuleFor(
+                x => x.Size,
+                _ =>
+                    config.DownloadFileSizeInMb > 0
+                        ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                        : (long)ByteSize.FromMebiBytes(10).Bytes
+            )
+            .UseSeed(seed.Next());
     }
 }

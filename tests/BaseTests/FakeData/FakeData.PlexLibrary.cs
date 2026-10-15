@@ -2,15 +2,13 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    public static Faker<PlexLibrary> GetPlexLibrary(Seed seed, PlexMediaType libraryType = PlexMediaType.None)
-    {
-        return new Faker<PlexLibrary>()
+    private static readonly Faker<PlexLibrary> _plexLibraryFaker =
+        new Faker<PlexLibrary>()
             .StrictMode(true)
-            .UseSeed(seed.Next())
             .Ignore(x => x.Id)
             .RuleFor(x => x.Key, _ => GetUniqueNumber().ToString())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
-            .RuleFor(x => x.Type, f => libraryType == PlexMediaType.None ? f.Reaparr().LibraryType : libraryType)
+            .RuleFor(x => x.Type, _ => PlexMediaType.None)
             .RuleFor(x => x.PlexServerId, _ => GetUniqueNumber())
             .Ignore(x => x.PlexServer)
             .RuleFor(x => x.CreatedAt, f => f.Date.Past(4))
@@ -56,5 +54,12 @@ public static partial class FakeData
             .Ignore(x => x.GenresAudio)
             .Ignore(x => x.Countries)
             .Ignore(x => x.PlexAccountLibraries);
-    }
+
+    public static Faker<PlexLibrary> GetPlexLibrary(Seed seed, PlexMediaType libraryType = PlexMediaType.None) =>
+        _plexLibraryFaker
+            .RuleFor(
+                x => x.Type,
+                f => libraryType == PlexMediaType.None ? f.Reaparr().LibraryType : libraryType
+            )
+            .UseSeed(seed.Next());
 }

@@ -2,9 +2,8 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static Faker<DownloadTaskTvShowEpisode> CreateDownloadTaskTvShowEpisodeFaker()
-    {
-        return new Faker<DownloadTaskTvShowEpisode>()
+    private static readonly Faker<DownloadTaskTvShowEpisode> _downloadTaskTvShowEpisodeFaker =
+        new Faker<DownloadTaskTvShowEpisode>()
             .ApplyDownloadTaskParentBase(DownloadTaskType.Episode)
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
@@ -22,7 +21,6 @@ public static partial class FakeData
                     }
                 }
             );
-    }
 
     public static Faker<DownloadTaskTvShowEpisode> GetDownloadTaskTvShowEpisode(
         Seed seed,
@@ -31,7 +29,7 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return CreateDownloadTaskTvShowEpisodeFaker()
+        return _downloadTaskTvShowEpisodeFaker
             .UseSeed(seed.Next())
             .RuleFor(
                 x => x.DataTotal,
@@ -46,14 +44,12 @@ public static partial class FakeData
             );
     }
 
-    private static Faker<DownloadTaskTvShowEpisodeFile> CreateDownloadTaskTvShowEpisodeFileFaker()
-    {
-        return new Faker<DownloadTaskTvShowEpisodeFile>()
+    private static readonly Faker<DownloadTaskTvShowEpisodeFile> _downloadTaskTvShowEpisodeFileFaker =
+        new Faker<DownloadTaskTvShowEpisodeFile>()
             .ApplyDownloadTaskFileBase(DownloadTaskType.EpisodeData)
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
             .Ignore(x => x.Logs);
-    }
 
     public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(
         Seed seed,
@@ -62,7 +58,7 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return CreateDownloadTaskTvShowEpisodeFileFaker()
+        return _downloadTaskTvShowEpisodeFileFaker
             .RuleFor(
                 x => x.DataTotal,
                 f =>

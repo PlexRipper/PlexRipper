@@ -2,13 +2,9 @@
 
 public partial class FakeData
 {
-    public static Faker<PlexAccount> GetPlexAccount(int seed) => GetPlexAccount(new Seed(seed));
-
-    public static Faker<PlexAccount> GetPlexAccount(Seed seed)
-    {
-        return new Faker<PlexAccount>()
+    private static readonly Faker<PlexAccount> _plexAccountFaker =
+        new Faker<PlexAccount>()
             .StrictMode(true)
-            .UseSeed(seed.Next())
             .Ignore(x => x.Id)
             .RuleFor(x => x.DisplayName, f => f.Internet.UserName())
             .RuleFor(x => x.Username, f => f.Internet.UserName())
@@ -30,5 +26,10 @@ public partial class FakeData
             .Ignore(x => x.VerificationCode)
             .Ignore(x => x.PlexAccountServers)
             .Ignore(x => x.PlexAccountLibraries);
-    }
+
+    public static Faker<PlexAccount> GetPlexAccount(int seed) => GetPlexAccount(new Seed(seed));
+
+    public static Faker<PlexAccount> GetPlexAccount(Seed seed) =>
+        _plexAccountFaker
+            .UseSeed(seed.Next());
 }

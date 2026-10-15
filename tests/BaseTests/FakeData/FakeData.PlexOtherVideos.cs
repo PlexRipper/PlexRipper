@@ -33,7 +33,7 @@ public static partial class FakeData
     {
         var mediaDataFaker = GetPlexOtherVideoMediaData(seed, options);
         return _plexOtherVideo
-            .Clone()
+            .Clone() // Clone to isolate per-call media-data rules and seed state.
             .RuleFor(x => x.MediaDataList, _ => mediaDataFaker.Generate(1))
             .UseSeed(seed.Next());
     }
@@ -66,9 +66,15 @@ public static partial class FakeData
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        var faker = _plexOtherVideoMediaData.Clone();
-        if (config.DownloadFileSizeInMb > 0)
-            faker.RuleFor(x => x.Size, (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes);
-        return faker.UseSeed(seed.Next());
+        return _plexOtherVideoMediaData
+            .Clone() // Clone to isolate per-call size rules and caller overrides.
+            .RuleFor(
+                x => x.Size,
+                _ =>
+                    config.DownloadFileSizeInMb > 0
+                        ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                        : (long)ByteSize.FromMebiBytes(10).Bytes
+            )
+            .UseSeed(seed.Next());
     }
 }

@@ -90,6 +90,7 @@ public static partial class PlexMediaDataMapper
             VideoResolution = mediaItem.VideoResolution,
             AudioCodec = mediaItem.AudioCodec,
             NeedsGeneratedName = !fileName.IsValidMediaFileName(),
+            Streams = source.ToPlexMovieDataStreams(),
 
             // Ignore the following
             PlexLibraryId = 0,

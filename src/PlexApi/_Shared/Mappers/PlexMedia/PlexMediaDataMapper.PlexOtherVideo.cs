@@ -21,6 +21,7 @@ public static partial class PlexMediaDataMapper
                             PartIndex = partIndex,
                             PlexOtherVideoId = 0,
                             PlexOtherVideo = default,
+                            Streams = part.ToPlexOtherVideoDataStreams(),
                             VideoResolution = x.VideoResolution,
                             VideoQuality = x.VideoResolution,
                             Container = part.Container,

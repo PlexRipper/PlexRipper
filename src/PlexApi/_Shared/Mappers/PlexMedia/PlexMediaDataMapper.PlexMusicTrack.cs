@@ -28,6 +28,7 @@ public static partial class PlexMediaDataMapper
                             PartIndex = partIndex,
                             PlexTrackId = 0,
                             PlexTrack = default,
+                            Streams = part.ToPlexMusicTrackDataStreams(),
                             VideoResolution = VideoQuality.None,
                             VideoQuality = VideoQuality.None,
                             Container = part.Container,

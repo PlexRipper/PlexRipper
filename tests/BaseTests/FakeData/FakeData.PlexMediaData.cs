@@ -41,7 +41,8 @@ public static partial class FakeData
         return new Faker<PlexMovieMediaData>()
             .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexMovieId)
-            .Ignore(x => x.PlexMovie);
+            .Ignore(x => x.PlexMovie)
+            .Ignore(x => x.Streams);
     }
 
     private static readonly Faker<PlexTvShowEpisodeMediaData> _plexTvShowEpisodeMediaDataFaker =
@@ -52,7 +53,8 @@ public static partial class FakeData
         return new Faker<PlexTvShowEpisodeMediaData>()
             .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexTvShowEpisodeId)
-            .Ignore(x => x.PlexTvShowEpisode);
+            .Ignore(x => x.PlexTvShowEpisode)
+            .Ignore(x => x.Streams);
     }
 
     public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed, Action<FakeDataConfig>? options = null)

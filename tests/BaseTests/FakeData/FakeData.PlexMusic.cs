@@ -147,6 +147,7 @@ public static partial class FakeData
             .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexTrackId)
             .Ignore(x => x.PlexTrack)
+            .Ignore(x => x.Streams)
             .RuleFor(x => x.PartIndex, _ => 0)
             .RuleFor(x => x.VideoCodec, _ => string.Empty)
             .RuleFor(x => x.AudioCodec, _ => "flac")

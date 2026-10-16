@@ -43,6 +43,7 @@ public static partial class FakeData
             .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexOtherVideoId)
             .Ignore(x => x.PlexOtherVideo)
+            .Ignore(x => x.Streams)
             .RuleFor(x => x.PartIndex, _ => 0)
             .RuleFor(x => x.Width, _ => 1920)
             .RuleFor(x => x.Height, _ => 1080)

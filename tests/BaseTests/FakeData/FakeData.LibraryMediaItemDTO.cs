@@ -189,9 +189,18 @@ public static partial class FakeData
         var baseFaker = new Faker<LibraryMediaItemStreamDTO>()
             .StrictMode(true)
             .RuleFor(x => x.Id, _ => GetUniqueNumber())
+            .RuleFor(x => x.Key, (_, x) => $"/library/streams/{x.Id}")
+
             .RuleFor(x => x.StreamType, _ => streamType)
             .RuleFor(x => x.Default, f => f.Random.Bool())
             .RuleFor(x => x.Codec, f => GetCodecForStreamType(f, streamType))
+            .RuleFor(x => x.Format, (_, x) => streamType switch
+            {
+                StreamType.Subtitle => "srt",
+                StreamType.Lyrics => "lrc",
+                _ => null,
+            })
+
             .RuleFor(x => x.Index, f => f.Random.Int(0, 10))
             .RuleFor(x => x.Bitrate, f => f.Random.Int(1000, 10000000))
             .RuleFor(x => x.Language, f => f.Address.CountryCode())
@@ -296,6 +305,7 @@ public static partial class FakeData
             StreamType.Video => f.PickRandom("h264", "hevc", "mpeg2video", "vp9", "av1"),
             StreamType.Audio => f.PickRandom("ac3", "dca", "aac", "eac3", "truehd", "flac", "mp3"),
             StreamType.Subtitle => f.PickRandom("srt", "ass", "vtt", "subrip", "pgs"),
+            StreamType.Lyrics => "lrc",
             _ => "unknown",
         };
 
@@ -304,7 +314,7 @@ public static partial class FakeData
         {
             StreamType.Video => $"{stream.Codec} {stream.Width}x{stream.Height}",
             StreamType.Audio => $"{stream.Codec} {stream.AudioChannelLayout}",
-            StreamType.Subtitle => $"{stream.Language} ({stream.Codec})",
+            StreamType.Subtitle or StreamType.Lyrics => $"{stream.Language} ({stream.Codec})",
             _ => stream.Codec,
         };
 
@@ -313,7 +323,7 @@ public static partial class FakeData
         {
             StreamType.Video => $"{stream.Codec} {stream.Width}x{stream.Height} {stream.FrameRate} {stream.Profile}",
             StreamType.Audio => $"{stream.Codec} {stream.AudioChannelLayout} {stream.SamplingRate}Hz",
-            StreamType.Subtitle => $"{stream.Language} ({stream.Codec})",
+            StreamType.Subtitle or StreamType.Lyrics => $"{stream.Language} ({stream.Codec})",
             _ => stream.Codec,
         };
 

@@ -25,12 +25,14 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public DbSet<Notification> Notifications { get; set; }
 
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
+    public DbSet<StreamLanguage> StreamLanguages { get; set; }
 
     public DbSet<PlexMusicArtist> PlexMusicArtists { get; set; }
     public DbSet<MediaOverviewMusicArtistSnapshot> MediaOverviewMusicArtistSnapshots { get; set; }
     public DbSet<PlexMusicAlbum> PlexMusicAlbums { get; set; }
     public DbSet<PlexMusicTrack> PlexMusicTracks { get; set; }
     public DbSet<PlexMusicTrackMediaData> PlexMusicTrackData { get; set; }
+    public DbSet<PlexMusicTrackDataStream> PlexMusicTrackDataStreams { get; set; }
     public DbSet<PlexMusicArtistMediaQuality> PlexMusicArtistMediaQualities { get; set; }
     public DbSet<PlexMusicAlbumMediaQuality> PlexMusicAlbumMediaQualities { get; set; }
 
@@ -43,6 +45,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexOtherVideo> PlexOtherVideos { get; set; }
     public DbSet<PlexOtherVideoMediaData> PlexOtherVideoData { get; set; }
+    public DbSet<PlexOtherVideoDataStream> PlexOtherVideoDataStreams { get; set; }
     public DbSet<MediaOverviewOtherVideoSnapshot> MediaOverviewOtherVideoSnapshots { get; set; }
 
     public DbSet<DownloadTaskMusicArtist> DownloadTaskMusicArtists { get; set; }
@@ -71,6 +74,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public DbSet<PlexMovie> PlexMovies { get; set; }
 
     public DbSet<PlexMovieMediaData> PlexMovieData { get; set; }
+    public DbSet<PlexMovieDataStream> PlexMovieDataStreams { get; set; }
 
     public DbSet<MediaOverviewMovieSnapshot> MediaOverviewMovieSnapshots { get; set; }
 
@@ -87,6 +91,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
 
     public DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; set; }
+    public DbSet<PlexTvShowEpisodeDataStream> PlexTvShowEpisodeDataStreams { get; set; }
 
     public DbSet<PlexServer> PlexServers { get; set; }
 

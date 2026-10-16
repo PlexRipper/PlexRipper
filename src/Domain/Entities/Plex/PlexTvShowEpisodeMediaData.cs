@@ -6,6 +6,8 @@ public class PlexTvShowEpisodeMediaData : BasePlexMediaData
 
     public PlexTvShowEpisode? PlexTvShowEpisode { get; set; }
 
+    public ICollection<PlexTvShowEpisodeDataStream> Streams { get; init; } = [];
+
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Episode;
 }

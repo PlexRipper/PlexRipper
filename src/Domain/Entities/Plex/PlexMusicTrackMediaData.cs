@@ -8,6 +8,8 @@ public class PlexMusicTrackMediaData : BasePlexMediaData
 
     public PlexMusicTrack? PlexTrack { get; set; }
 
+    public ICollection<PlexMusicTrackDataStream> Streams { get; init; } = [];
+
     public required int PartIndex { get; set; }
 
     public string? OriginalFilePath { get; set; }

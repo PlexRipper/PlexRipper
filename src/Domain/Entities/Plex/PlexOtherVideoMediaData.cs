@@ -6,6 +6,8 @@ public class PlexOtherVideoMediaData : BasePlexMediaData
 
     public PlexOtherVideo? PlexOtherVideo { get; set; }
 
+    public ICollection<PlexOtherVideoDataStream> Streams { get; init; } = [];
+
     public required int PartIndex { get; set; }
 
     public string? OriginalFilePath { get; set; }

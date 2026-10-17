@@ -2,7 +2,9 @@
     <PropertyGroup>
         <RootNamespace>Reaparr.BaseTests</RootNamespace>
         <AssemblyName>Reaparr.BaseTests</AssemblyName>
-        <OutputType>Exe</OutputType>
+        <OutputType>Library</OutputType>
+        <IsTestProject>false</IsTestProject>
+        <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Autofac" Version="9.1.0" />

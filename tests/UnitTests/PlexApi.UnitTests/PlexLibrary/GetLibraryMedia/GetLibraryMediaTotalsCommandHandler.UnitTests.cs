@@ -41,7 +41,7 @@ public class GetLibraryMediaTotalsCommandUnitTests : BaseUnitTest<GetLibraryMedi
                             && q.XPlexContainerStart == 0
                             && q.XPlexContainerSize == 0
                             && q.MediaQuery != null
-                            && (long?)q.MediaQuery.Type == mediaType.ToPlexMetadataTypeId()
+                            && q.MediaQuery.Type == mediaType.ToMediaType()
                             && q.MediaQuery.Sort == "titleSort:asc"
                             && q.IncludeOptionalElements == null
                             && q.PmsApiVersion == null

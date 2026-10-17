@@ -76,10 +76,71 @@ public class GetAllMediaByTypeEndpointUnitTests
     }
 
     [Test]
+    [Arguments(PlexMediaType.Movie, "MediaDataList")]
+    [Arguments(PlexMediaType.TvShow, "Qualities")]
+    [Arguments(PlexMediaType.OtherVideos, "MediaDataList")]
+    public async Task ShouldFilterTheCorrectVideoQualityCollection_WhenQualityIsSelected(
+        PlexMediaType mediaType,
+        string collection
+    )
+    {
+        // Arrange
+        var request = new GetAllMediaByTypeRequest
+        {
+            MediaType = mediaType,
+            PlexLibraryId = 17,
+            QualityId = 7,
+        };
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(
+                    It.Is<GetMediaOverviewCommand>(command =>
+                        command.Filter.MediaType == mediaType
+                        && command.Filter.PlexLibraryId == 17
+                        && command.Filter.Parameters.Filter == $"{collection}:any:VideoQuality:eq:FullHD"
+                    ),
+                    CancellationToken
+                )
+            )
+            .ReturnsAsync(Result.Ok(new PagedMediaQueryResult()))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestEndpointHandleAsync(request);
+
+        // Assert
+        result.IsValid.ShouldBeTrue();
+        result.StatusCode.ShouldBe(200);
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
+    [Arguments(PlexMediaType.PhotoAlbum)]
+    [Arguments(PlexMediaType.MusicArtist)]
+    public async Task ShouldRejectVideoQualityFiltersWithoutDispatch_WhenMediaHasNoVideoQuality(
+        PlexMediaType mediaType
+    )
+    {
+        // Arrange
+        var request = new GetAllMediaByTypeRequest { MediaType = mediaType, QualityId = 7 };
+
+        // Act
+        var result = await TestEndpointHandleAsync(request);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.ValidationResult.ShouldNotBeNull()
+            .Errors.Select(x => x.PropertyName)
+            .ShouldBe([nameof(GetAllMediaByTypeRequest.QualityId)]);
+        result.Response.ShouldBeNull();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetMediaOverviewCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+    }
+
+    [Test]
     [Arguments(1, null, null, null, nameof(GetAllMediaByTypeRequest.CountryId))]
     [Arguments(null, 1, null, null, nameof(GetAllMediaByTypeRequest.RoleId))]
     [Arguments(null, null, 1, null, nameof(GetAllMediaByTypeRequest.GenreId))]
-    [Arguments(null, null, null, 1, nameof(GetAllMediaByTypeRequest.QualityId))]
     public void ShouldRejectUnsupportedPhotoAlbumFilters_WhenValidatingRequest(
         int? countryId,
         int? roleId,

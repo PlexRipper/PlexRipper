@@ -39,7 +39,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
                         && q.XPlexContainerStart == 0
                         && q.XPlexContainerSize == 0
                         && q.MediaQuery != null
-                        && (int?)q.MediaQuery.Type == 1
+                        && q.MediaQuery.Type == MediaType.Movie
                         && q.MediaQuery.Sort == "titleSort:asc"
                         && q.IncludeOptionalElements == null
                         && q.PmsApiVersion == null
@@ -292,7 +292,17 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
         requests
             .Select(q => (q["X-Plex-Container-Start"], q["X-Plex-Container-Size"], q.ContainsKey("unwatched")))
             .ShouldBe([("0", "0", false), ("0", "2", false), ("2", "1", false)]);
-        requests.Select(q => q["type"]).ShouldBe(Enumerable.Repeat(mediaType.ToPlexMetadataTypeId().ToString(), 3));
+        var expectedWireType = mediaType switch
+        {
+            PlexMediaType.Movie or PlexMediaType.OtherVideos => 1,
+            PlexMediaType.TvShow => 2,
+            PlexMediaType.Episode => 4,
+            PlexMediaType.MusicTrack => 10,
+            PlexMediaType.MusicArtist => 8,
+            PlexMediaType.PhotoImage => 13,
+            _ => throw new ArgumentOutOfRangeException(nameof(mediaType), mediaType, null),
+        };
+        requests.Select(q => q["type"]).ShouldBe(Enumerable.Repeat(expectedWireType.ToString(), 3));
         requests.Select(q => q["sort"]).ShouldBe(Enumerable.Repeat("titleSort:asc", 3));
         var expectedElements = mediaType is PlexMediaType.Movie or PlexMediaType.Episode or PlexMediaType.MusicTrack or PlexMediaType.OtherVideos
             ? "Stream"

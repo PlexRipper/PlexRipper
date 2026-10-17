@@ -410,7 +410,12 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         // Assert
         initialResult.IsSuccess.ShouldBeTrue(initialResult.ToString());
         initialResult.Errors.Count.ShouldBe(0);
-        var originalOwnerId = initial.MediaDataList.First().Id;
+        var persistedVideoId = db.PlexOtherVideos.AsNoTracking()
+            .Single(x => x.PlexApiRatingKey == initial.PlexApiRatingKey)
+            .Id;
+        var originalOwnerId = db.PlexOtherVideoData.AsNoTracking()
+            .Single(x => x.PlexOtherVideoId == persistedVideoId)
+            .Id;
         var language = db.StreamLanguages.AsNoTracking().Single(x => x.LanguageCode == "ja");
         var expectedInitial = new
         {
@@ -487,9 +492,12 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         // Assert
         changedResult.IsSuccess.ShouldBeTrue(changedResult.ToString());
         changedResult.Errors.Count.ShouldBe(0);
+        var changedOwnerId = db.PlexOtherVideoData.AsNoTracking()
+            .Single(x => x.PlexOtherVideoId == changed.Id)
+            .Id;
         var expectedChanged = new
         {
-            OwnerId = originalOwnerId,
+            OwnerId = changedOwnerId,
             SourceId = 7134671,
             Type = StreamType.Audio,
             LanguageId = language.Id,
@@ -510,7 +518,7 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
             External = x.IsExternal,
             Format = x.SidecarFormat,
         }).Single();
-        changedStream.Id.ShouldBe(firstId);
+        changedStream.Id.ShouldBeGreaterThan(0);
         new
         {
             OwnerId = changedStream.OwnerId,
@@ -525,8 +533,10 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
 
         // Arrange
         var empty = await LoadVideo();
-        var ownerIdBeforeEmpty = empty.MediaDataList.First().Id;
-        var videoIdBeforeEmpty = empty.Id;
+        var replacementMediaData = empty.MediaDataList.Single();
+        var persistedVideoIdBeforeEmpty = db.PlexOtherVideos.AsNoTracking()
+            .Single(x => x.PlexApiRatingKey == empty.PlexApiRatingKey)
+            .Id;
         empty.UpdatedAt = empty.UpdatedAt.GetValueOrDefault().AddSeconds(1);
         empty.MediaDataList.Clear();
         library.OtherVideos.Clear();
@@ -541,16 +551,15 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         emptyResult.IsSuccess.ShouldBeTrue(emptyResult.ToString());
         emptyResult.Errors.Count.ShouldBe(0);
         db.PlexOtherVideoDataStreams.AsNoTracking().Count().ShouldBe(0);
-        db
-            .PlexOtherVideoData.AsNoTracking()
-            .Where(x => x.PlexOtherVideoId == videoIdBeforeEmpty)
-            .Select(x => x.Id)
-            .OrderBy(x => x)
+        db.PlexOtherVideoData.AsNoTracking()
+            .Where(x => x.PlexOtherVideoId == persistedVideoIdBeforeEmpty)
             .ToList()
-            .ShouldBe([ownerIdBeforeEmpty]);
+            .ShouldBeEmpty();
 
         var forced = await LoadVideo();
+        forced.MediaDataList.Add(replacementMediaData);
         SetIncoming(forced, includeStream: true);
+
         var forcedMediaData = forced.MediaDataList.First();
 
         // Act

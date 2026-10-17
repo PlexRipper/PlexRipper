@@ -211,7 +211,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
                     .Select(x =>
                         (
                             x.PlexApiRatingKey,
-                            afterArtists.Single(artist => artist.PlexApiRatingKey == x.PlexArtist!.PlexApiRatingKey).Id
+                            afterArtists.Single(artist => artist.PlexApiRatingKey == x.ParentKey).Id
                         )
                     )
             );
@@ -223,7 +223,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
                     .Select(x =>
                         (
                             x.PlexApiRatingKey,
-                            afterAlbums.Single(album => album.PlexApiRatingKey == x.PlexAlbum!.PlexApiRatingKey).Id
+                            afterAlbums.Single(album => album.PlexApiRatingKey == x.ParentKey).Id
                         )
                     )
             );
@@ -643,7 +643,9 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         // Assert
         initialResult.IsSuccess.ShouldBeTrue(initialResult.ToString());
         initialResult.Errors.Count.ShouldBe(0);
-        var originalOwnerId = initial.Albums.Single().Tracks.Single().MediaDataList.First().Id;
+        var initialTrackKey = initial.Albums.Single().Tracks.Single().PlexApiRatingKey;
+        var persistedTrackId = db.PlexMusicTracks.AsNoTracking().Single(x => x.PlexApiRatingKey == initialTrackKey).Id;
+        var originalOwnerId = db.PlexMusicTrackData.AsNoTracking().Single(x => x.PlexTrackId == persistedTrackId).Id;
         var language = db.StreamLanguages.AsNoTracking().Single(x => x.LanguageCode == "de");
         var expectedInitial = new
         {
@@ -765,8 +767,10 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         var empty = await LoadArtist();
         var emptyAlbum = empty.Albums.Single();
         var emptyTrack = emptyAlbum.Tracks.Single();
-        var ownerIdBeforeEmpty = emptyTrack.MediaDataList.First().Id;
-        var trackIdBeforeEmpty = emptyTrack.Id;
+        var replacementMediaData = emptyTrack.MediaDataList.Single();
+        var persistedTrackIdBeforeEmpty = db.PlexMusicTracks.AsNoTracking()
+            .Single(x => x.PlexApiRatingKey == emptyTrack.PlexApiRatingKey)
+            .Id;
         empty.UpdatedAt = empty.UpdatedAt.GetValueOrDefault().AddSeconds(1);
         emptyAlbum.UpdatedAt = emptyAlbum.UpdatedAt.GetValueOrDefault().AddSeconds(1);
         emptyTrack.UpdatedAt = emptyTrack.UpdatedAt.GetValueOrDefault().AddSeconds(1);
@@ -784,13 +788,13 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         emptyResult.Errors.Count.ShouldBe(0);
         db.PlexMusicTrackDataStreams.AsNoTracking().Count().ShouldBe(0);
         db.PlexMusicTrackData.AsNoTracking()
-            .Where(x => x.PlexTrackId == trackIdBeforeEmpty)
-            .Select(x => x.Id)
-            .OrderBy(x => x)
+            .Where(x => x.PlexTrackId == persistedTrackIdBeforeEmpty)
             .ToList()
-            .ShouldBe([ownerIdBeforeEmpty]);
+            .ShouldBeEmpty();
 
         var forced = await LoadArtist();
+        var forcedTrack = forced.Albums.Single().Tracks.Single();
+        forcedTrack.MediaDataList.Add(replacementMediaData);
         SetIncoming(forced, includeStream: true);
         var forcedMediaData = forced.Albums.Single().Tracks.Single().MediaDataList.First();
 

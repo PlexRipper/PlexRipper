@@ -101,7 +101,7 @@ public class GetMediaByTypeCommandHandlerMusicUnitTests : BaseCommandUnitTest<Ge
                     Page = 2,
                     PageSize = 2,
                     Filter = $"{metadataField}:any:Id:eq:{metadataId}",
-                    Sort = sortByQuality ? "quality:desc,Year:asc,Duration:desc" : "Year:asc,Duration:desc",
+                    Sort = sortByQuality ? "videoQuality:desc,Year:asc,Duration:desc" : "Year:asc,Duration:desc",
                 },
             },
         };
@@ -200,7 +200,7 @@ public class GetMediaByTypeCommandHandlerMusicUnitTests : BaseCommandUnitTest<Ge
     }
 
     [Test]
-    public async Task ShouldUseCanonicalSortIndexAndPaging_WhenOnlyLegacyVideoQualitySortIsRequestedForMusic()
+    public async Task ShouldIgnoreVideoQualitySort_WhenOnlyVideoQualitySortIsRequestedForMusic()
     {
         // Arrange
         await SetupDatabase(73103, config =>
@@ -225,7 +225,7 @@ public class GetMediaByTypeCommandHandlerMusicUnitTests : BaseCommandUnitTest<Ge
                 PlexLibraryId = libraryId,
                 FilterOfflineMedia = false,
                 FilterOwnedMedia = false,
-                Parameters = new FlexQueryParameters { Page = 1, PageSize = 2, Sort = "quality:desc" },
+                Parameters = new FlexQueryParameters { Page = 1, PageSize = 2, Sort = "videoQuality:desc" },
             },
         };
         Mock.Mock<ICommandExecutor>()

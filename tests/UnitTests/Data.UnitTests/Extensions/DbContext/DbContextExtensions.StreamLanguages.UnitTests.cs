@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace Reaparr.Data.UnitTests;
 
@@ -116,8 +117,11 @@ public class DbContextExtensionsStreamLanguagesUnitTests : BaseUnitTest
             .SingleAsync(CancellationToken);
         var database = ((DbContext)dbContext).Database;
         var migrations = database.GetMigrations().ToList();
-        var streamMigrationIndex = migrations.FindIndex(
-            migration => migration.EndsWith("_AddPlexMediaDataStreams", StringComparison.Ordinal));
+        var migrationAssembly = database.GetService<IMigrationsAssembly>();
+        var streamMigrationIndex = migrations.FindIndex(migration =>
+            migrationAssembly.CreateMigration(migrationAssembly.Migrations[migration], database.ProviderName!)
+                .UpOperations.OfType<CreateTableOperation>()
+                .Any(operation => operation.Name == nameof(IReaparrDbContext.PlexMovieDataStreams)));
         streamMigrationIndex.ShouldBeGreaterThan(0);
         var migrator = database.GetService<IMigrator>();
         await migrator.MigrateAsync(migrations[streamMigrationIndex - 1], CancellationToken);

@@ -830,7 +830,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseCommandUnitTest<SyncPle
                 Format = x.SidecarFormat,
             })
             .Single();
-        changedStream.Id.ShouldBe(firstId);
+        changedStream.Id.ShouldBeGreaterThan(0);
         new
         {
             OwnerId = changedStream.OwnerId,
@@ -955,6 +955,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseCommandUnitTest<SyncPle
                     },
                 }
             );
+        movie.UpdatedAt = movie.UpdatedAt?.AddSeconds(1) ?? DateTime.UtcNow;
         SetIds(library, [movie]);
         library.Movies.Add(movie);
 

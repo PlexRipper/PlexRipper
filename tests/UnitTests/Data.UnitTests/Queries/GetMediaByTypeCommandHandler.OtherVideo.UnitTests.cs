@@ -108,7 +108,7 @@ public class GetMediaByTypeCommandHandlerOtherVideoUnitTests : BaseCommandUnitTe
                     Page = 2,
                     PageSize = 2,
                     Filter = $"{metadataField}:any:Id:eq:{metadataId}",
-                    Sort = sortByQuality ? "quality:desc,Year:asc,Duration:desc" : "Year:asc,Duration:desc",
+                    Sort = sortByQuality ? "videoQuality:desc,Year:asc,Duration:desc" : "Year:asc,Duration:desc",
                 },
             },
         };

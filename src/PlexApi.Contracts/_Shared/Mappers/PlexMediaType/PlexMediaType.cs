@@ -1,5 +1,3 @@
-using LukeHagar.PlexAPI.SDK.Models.Components;
-
 namespace Reaparr.PlexApi.Contracts;
 
 public static class PlexMediaTypeMappers
@@ -33,18 +31,4 @@ public static class PlexMediaTypeMappers
         };
     }
 
-    public static MediaType ToPlexApiMediaType(this PlexMediaType source) =>
-        source switch
-        {
-            PlexMediaType.Movie => MediaType.Movie,
-            PlexMediaType.TvShow => MediaType.TvShow,
-            PlexMediaType.Season => MediaType.Season,
-            PlexMediaType.Episode => MediaType.Episode,
-            PlexMediaType.MusicArtist => MediaType.Artist,
-            PlexMediaType.MusicAlbum => MediaType.Album,
-            PlexMediaType.MusicTrack => MediaType.Track,
-            PlexMediaType.PhotoAlbum => MediaType.PhotoAlbum,
-            PlexMediaType.PhotoImage => MediaType.Photo,
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, "Unsupported PlexMediaType"),
-        };
 }

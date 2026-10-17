@@ -19,7 +19,7 @@ internal static class PlexLibraryMediaApi
                 {
                     MediaQuery = new MediaQuery
                     {
-                        Type = (MediaType)mediaType.ToPlexMetadataTypeId(),
+                        Type = mediaType.ToMediaType(),
                         Sort = "titleSort:asc",
                     },
                     XPlexContainerStart = 0,
@@ -55,7 +55,7 @@ internal static class PlexLibraryMediaApi
                 {
                     MediaQuery = new MediaQuery
                     {
-                        Type = (MediaType)mediaType.ToPlexMetadataTypeId(),
+                        Type = mediaType.ToMediaType(),
                         Sort = "titleSort:asc",
                     },
                     XPlexContainerStart = startIndex,

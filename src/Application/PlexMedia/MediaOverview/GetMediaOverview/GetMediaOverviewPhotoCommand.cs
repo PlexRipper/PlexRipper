@@ -45,7 +45,7 @@ public sealed class GetMediaOverviewPhotoCommandHandler
         var filter = command.Filter;
         var options = QueryOptionsParser.Parse(filter.Parameters);
         var sort = options.ResolveSort();
-        if (sort is null || sort.Value.Field == "Quality")
+        if (sort is null || sort.Value.Field == nameof(BasePlexMedia.VideoQuality))
         {
             var mediaResult = await _commandExecutor.Send(
                 new GetMediaByTypeCommand { Filter = filter },

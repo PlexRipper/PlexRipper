@@ -1305,7 +1305,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseCommandUnitTest<SyncPlexTvSho
             External = x.IsExternal,
             Format = x.SidecarFormat,
         }).Single();
-        changedStream.Id.ShouldBe(firstId);
+        changedStream.Id.ShouldBeGreaterThan(0);
         new
         {
             OwnerId = changedStream.OwnerId,

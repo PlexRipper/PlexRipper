@@ -266,7 +266,9 @@ public sealed class GetMediaOverviewTvShowCommandHandler
             nameof(BasePlexMedia.MediaSize) => descending
                 ? query.OrderByDescending(x => x.MediaSizeRank)
                 : query.OrderBy(x => x.MediaSizeRank),
-            "Quality" => descending ? query.OrderByDescending(x => x.QualityRank) : query.OrderBy(x => x.QualityRank),
+            nameof(BasePlexMedia.VideoQuality) => descending
+                ? query.OrderByDescending(x => x.QualityRank)
+                : query.OrderBy(x => x.QualityRank),
             _ => descending ? query.OrderByDescending(x => x.TitleRank) : query.OrderBy(x => x.TitleRank),
         };
 }

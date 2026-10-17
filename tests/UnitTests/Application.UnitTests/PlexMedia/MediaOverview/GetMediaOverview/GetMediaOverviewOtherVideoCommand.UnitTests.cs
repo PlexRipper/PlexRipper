@@ -5,12 +5,12 @@ namespace Reaparr.Application.UnitTests;
 public class GetMediaOverviewOtherVideoCommandUnitTests : BaseCommandUnitTest<GetMediaOverviewOtherVideoCommand>
 {
     [Test]
-    [Arguments("quality:asc", "Actors")]
-    [Arguments("quality:desc", "Actors")]
-    [Arguments("quality:asc", "Countries")]
-    [Arguments("quality:desc", "Countries")]
-    [Arguments("quality:asc", "Genres")]
-    [Arguments("quality:desc", "Genres")]
+    [Arguments("videoQuality:asc", "Actors")]
+    [Arguments("videoQuality:desc", "Actors")]
+    [Arguments("videoQuality:asc", "Countries")]
+    [Arguments("videoQuality:desc", "Countries")]
+    [Arguments("videoQuality:asc", "Genres")]
+    [Arguments("videoQuality:desc", "Genres")]
     public async Task ShouldUsePersistedQualityRankForFilteredPage_WithExactQualitiesAndFullNavigation(
         string sort,
         string metadataField

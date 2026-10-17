@@ -22,20 +22,26 @@ public class MediaNavigationIndexBuilderUnitTests
     }
 
     [Test]
-    public void ShouldBuildYearNavigationIndexes_WhenRowsAreSortedByYear()
+    [Arguments("year")]
+    [Arguments("YEAR")]
+    public void ShouldBuildYearNavigationIndexes_WhenRowsAreSortedByYear(string sortField)
     {
         // Arrange
         var rows = new[] { CreateRow(year: 1999), CreateRow(year: 1999), CreateRow(year: 2001) };
 
         // Act
-        var result = MediaNavigationIndexBuilder.Build(rows, "year");
+        var result = MediaNavigationIndexBuilder.Build(rows, sortField);
 
         // Assert
         result.Select(x => (x.Label, x.Index)).ShouldBe([("1999", 0), ("2001", 2)]);
     }
 
     [Test]
-    public void ShouldBuildQualityNavigationIndexes_WhenRowsAreSortedByQuality()
+    [Arguments(nameof(BasePlexMedia.VideoQuality))]
+    [Arguments("videoQuality")]
+    [Arguments("VIDEOQUALITY")]
+    [Arguments("ViDeOqUaLiTy")]
+    public void ShouldBuildVideoQualityNavigationIndexes_WhenRowsAreSortedByVideoQuality(string sortField)
     {
         // Arrange
         var rows = new[]
@@ -46,7 +52,7 @@ public class MediaNavigationIndexBuilderUnitTests
         };
 
         // Act
-        var result = MediaNavigationIndexBuilder.Build(rows, "quality");
+        var result = MediaNavigationIndexBuilder.Build(rows, sortField);
 
         // Assert
         result.Select(x => (x.Label, x.Index)).ShouldBe([("480", 0), ("1080", 2)]);

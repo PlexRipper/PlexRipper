@@ -1902,7 +1902,10 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     }
 
     [Test]
-    public async Task ShouldSortAllLibraryMoviesBySearchTitle_WhenSortIndexSortIsRequested()
+    [Arguments("sortIndex:asc")]
+    [Arguments("SORTINDEX:asc")]
+    [Arguments("SoRtInDeX:asc")]
+    public async Task ShouldSortAllLibraryMoviesBySearchTitle_WhenSortIndexSortIsRequested(string sort)
     {
         // Arrange
         await SetupDatabase(
@@ -1932,7 +1935,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
                 {
                     Page = null,
                     PageSize = 10,
-                    Sort = "sortIndex:asc",
+                    Sort = sort,
                     Filter = null,
                 },
             },
@@ -1950,7 +1953,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     }
 
     [Test]
-    public async Task ShouldSortMoviesByHighestQuality_WhenLegacyQualitySortFieldIsUsed()
+    public async Task ShouldSortMoviesByVideoQualityAscending_WhenVideoQualitySortFieldIsUsed()
     {
         // Arrange
         await SetupDatabase(
@@ -1959,7 +1962,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             {
                 cfg.PlexServerCount = 1;
                 cfg.PlexMovieLibraryCount = 1;
-                cfg.MovieCount = 3;
+                cfg.MovieCount = 4;
             }
         );
 
@@ -1980,7 +1983,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
                 {
                     Page = null,
                     PageSize = 10,
-                    Sort = "quality:asc",
+                    Sort = "videoQuality:asc,Year:desc",
                     Filter = null,
                 },
             },
@@ -1991,11 +1994,17 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Items.Select(x => x.Title).ShouldBe(["SD Movie", "HD Movie", "4K Movie"]);
+        result.Errors.Count.ShouldBe(0);
+        result.Value.Items.Select(x => x.Title).ShouldBe(["SD Movie (2021)", "SD Movie (2000)", "HD Movie", "4K Movie"]);
+        result.Value.NavigationIndexes.Select(x => new { x.Label, x.Index }).ShouldBe([
+            new { Label = "480", Index = 0 },
+            new { Label = "1080", Index = 2 },
+            new { Label = "2160", Index = 3 },
+        ]);
     }
 
     [Test]
-    public async Task ShouldSortMoviesByHighestQualityDescending_WhenCanonicalHighestQualitySortFieldIsUsed()
+    public async Task ShouldSortMoviesByVideoQualityDescending_WhenVideoQualitySortFieldIsUsed()
     {
         // Arrange
         await SetupDatabase(
@@ -2004,7 +2013,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             {
                 cfg.PlexServerCount = 1;
                 cfg.PlexMovieLibraryCount = 1;
-                cfg.MovieCount = 3;
+                cfg.MovieCount = 4;
             }
         );
 
@@ -2025,7 +2034,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
                 {
                     Page = null,
                     PageSize = 10,
-                    Sort = "quality:desc",
+                    Sort = "videoQuality:desc,Year:asc",
                     Filter = null,
                 },
             },
@@ -2036,11 +2045,17 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Items.Select(x => x.Title).ShouldBe(["4K Movie", "HD Movie", "SD Movie"]);
+        result.Errors.Count.ShouldBe(0);
+        result.Value.Items.Select(x => x.Title).ShouldBe(["4K Movie", "HD Movie", "SD Movie (2000)", "SD Movie (2021)"]);
+        result.Value.NavigationIndexes.Select(x => new { x.Label, x.Index }).ShouldBe([
+            new { Label = "2160", Index = 0 },
+            new { Label = "1080", Index = 1 },
+            new { Label = "480", Index = 2 },
+        ]);
     }
 
     [Test]
-    public async Task ShouldSortTvShowsByHighestQuality_WhenLegacyQualitySortFieldIsUsed()
+    public async Task ShouldSortTvShowsByVideoQualityAscending_WhenVideoQualitySortFieldIsUsed()
     {
         // Arrange
         await SetupDatabase(
@@ -2049,7 +2064,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             {
                 cfg.PlexServerCount = 1;
                 cfg.PlexTvShowLibraryCount = 1;
-                cfg.TvShowCount = 3;
+                cfg.TvShowCount = 4;
             }
         );
 
@@ -2070,7 +2085,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
                 {
                     Page = null,
                     PageSize = 10,
-                    Sort = "quality:asc",
+                    Sort = "videoQuality:asc,Year:desc",
                     Filter = null,
                 },
             },
@@ -2081,7 +2096,64 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Items.Select(x => x.Title).ShouldBe(["SD Show", "HD Show", "4K Show"]);
+        result.Errors.Count.ShouldBe(0);
+        result.Value.Items.Select(x => x.Title).ShouldBe(["SD Show (2021)", "SD Show (2000)", "HD Show", "4K Show"]);
+        result.Value.NavigationIndexes.Select(x => new { x.Label, x.Index }).ShouldBe([
+            new { Label = "480", Index = 0 },
+            new { Label = "1080", Index = 2 },
+            new { Label = "2160", Index = 3 },
+        ]);
+    }
+
+    [Test]
+    public async Task ShouldSortTvShowsByVideoQualityDescending_WhenVideoQualitySortFieldIsUsed()
+    {
+        // Arrange
+        await SetupDatabase(
+            70033,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexTvShowLibraryCount = 1;
+                cfg.TvShowCount = 4;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var tvShowIds = await dbContext.PlexTvShows.OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken);
+
+        await SetTvShowQualitySortTestDataAsync(dbContext, tvShowIds);
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.TvShow,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = 10,
+                    Sort = "videoQuality:desc,Year:asc",
+                    Filter = null,
+                },
+            },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.Items.Select(x => x.Title).ShouldBe(["4K Show", "HD Show", "SD Show (2000)", "SD Show (2021)"]);
+        result.Value.NavigationIndexes.Select(x => new { x.Label, x.Index }).ShouldBe([
+            new { Label = "2160", Index = 0 },
+            new { Label = "1080", Index = 1 },
+            new { Label = "480", Index = 2 },
+        ]);
     }
 
     [Test]
@@ -2448,10 +2520,24 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         var dbContext = IDbContext;
         var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
+        var otherQualityMovie = await dbContext.PlexMovies.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexLibraryId })
+            .Skip(4)
+            .FirstAsync(CancellationToken);
+        dbContext.PlexMovieGenres.Add(
+            new PlexMovieGenres(expectedMovie.GenreId, otherQualityMovie.PlexLibraryId, otherQualityMovie.Id)
+        );
+        dbContext.PlexMovieCountries.Add(
+            new PlexMovieCountries(expectedMovie.CountryId, otherQualityMovie.PlexLibraryId, otherQualityMovie.Id)
+        );
+        dbContext.PlexMovieActors.Add(
+            new PlexMovieActors(expectedMovie.ActorId, otherQualityMovie.PlexLibraryId, otherQualityMovie.Id)
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var filter = string.Join(
             "&",
-            $"MediaDataList:any:Quality:eq:{VideoQuality.FullHD}",
+            $"MediaDataList:any:VideoQuality:eq:{VideoQuality.FullHD}",
             $"Genres:any:Id:eq:{expectedMovie.GenreId}",
             $"Countries:any:Id:eq:{expectedMovie.CountryId}",
             $"Actors:any:Id:eq:{expectedMovie.ActorId}"
@@ -2625,21 +2711,40 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         await dbContext
             .PlexMovies.Where(x => x.Id == movieIds[0])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "SD Movie").SetProperty(y => y.VideoQuality, VideoQuality.SD),
+                x =>
+                    x.SetProperty(y => y.Title, "SD Movie (2000)")
+                        .SetProperty(y => y.Year, 2000)
+                        .SetProperty(y => y.VideoQuality, VideoQuality.SD),
                 CancellationToken
             );
 
         await dbContext
             .PlexMovies.Where(x => x.Id == movieIds[1])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "4K Movie").SetProperty(y => y.VideoQuality, VideoQuality.UHD_4K),
+                x =>
+                    x.SetProperty(y => y.Title, "4K Movie")
+                        .SetProperty(y => y.Year, 2020)
+                        .SetProperty(y => y.VideoQuality, VideoQuality.UHD_4K),
                 CancellationToken
             );
 
         await dbContext
             .PlexMovies.Where(x => x.Id == movieIds[2])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "HD Movie").SetProperty(y => y.VideoQuality, VideoQuality.FullHD),
+                x =>
+                    x.SetProperty(y => y.Title, "HD Movie")
+                        .SetProperty(y => y.Year, 2010)
+                        .SetProperty(y => y.VideoQuality, VideoQuality.FullHD),
+                CancellationToken
+            );
+
+        await dbContext
+            .PlexMovies.Where(x => x.Id == movieIds[3])
+            .ExecuteUpdateAsync(
+                x =>
+                    x.SetProperty(y => y.Title, "SD Movie (2021)")
+                        .SetProperty(y => y.Year, 2021)
+                        .SetProperty(y => y.VideoQuality, VideoQuality.SD),
                 CancellationToken
             );
     }
@@ -2649,21 +2754,40 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         await dbContext
             .PlexTvShows.Where(x => x.Id == tvShowIds[0])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "SD Show").SetProperty(y => y.VideoQuality, VideoQuality.SD),
+                x =>
+                    x.SetProperty(y => y.Title, "SD Show (2000)")
+                        .SetProperty(y => y.Year, 2000)
+                        .SetProperty(y => y.VideoQuality, VideoQuality.SD),
                 CancellationToken
             );
 
         await dbContext
             .PlexTvShows.Where(x => x.Id == tvShowIds[1])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "4K Show").SetProperty(y => y.VideoQuality, VideoQuality.UHD_4K),
+                x =>
+                    x.SetProperty(y => y.Title, "4K Show")
+                        .SetProperty(y => y.Year, 2020)
+                        .SetProperty(y => y.VideoQuality, VideoQuality.UHD_4K),
                 CancellationToken
             );
 
         await dbContext
             .PlexTvShows.Where(x => x.Id == tvShowIds[2])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "HD Show").SetProperty(y => y.VideoQuality, VideoQuality.FullHD),
+                x =>
+                    x.SetProperty(y => y.Title, "HD Show")
+                        .SetProperty(y => y.Year, 2010)
+                        .SetProperty(y => y.VideoQuality, VideoQuality.FullHD),
+                CancellationToken
+            );
+
+        await dbContext
+            .PlexTvShows.Where(x => x.Id == tvShowIds[3])
+            .ExecuteUpdateAsync(
+                x =>
+                    x.SetProperty(y => y.Title, "SD Show (2021)")
+                        .SetProperty(y => y.Year, 2021)
+                        .SetProperty(y => y.VideoQuality, VideoQuality.SD),
                 CancellationToken
             );
     }

@@ -52,227 +52,261 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
         var albums = new List<PlexMusicAlbum>();
         var tracks = new List<PlexMusicTrack>();
         var bulkConfig = new BulkConfig { BatchSize = 500 };
-        var result = await _dbContext.ExecuteTransactionAsync(
-            async (ctx, token) =>
+        var result = await Result.Try(async Task<Result<CrudMusicReport>> () =>
+        {
+            var ctx = _dbContext;
+            var report = new CrudMusicReport();
+            List<PlexMusicArtist> currentArtists;
+            List<PlexMusicAlbum> currentAlbums;
+            List<PlexMusicTrack> currentTracks;
+
+            if (command.ForceMediaRefresh)
             {
-                var currentArtists = await ctx
+                var currentCounts = await ctx
+                    .PlexMusicArtists.AsNoTracking()
+                    .Where(x => x.PlexLibraryId == library.Id)
+                    .Select(x => new
+                    {
+                        AlbumCount = x.Albums.Count,
+                        TrackCount = x.Albums.SelectMany(album => album.Tracks).Count(),
+                    })
+                    .ToListAsync(ct);
+                report.DeletedArtists = currentCounts.Count;
+                report.DeletedAlbums = currentCounts.Sum(x => x.AlbumCount);
+                report.DeletedTracks = currentCounts.Sum(x => x.TrackCount);
+                await ctx.PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(ct);
+                currentArtists = [];
+                currentAlbums = [];
+                currentTracks = [];
+            }
+            else
+            {
+                currentArtists = await ctx
                     .PlexMusicArtists.AsTracking()
                     .Where(x => x.PlexLibraryId == library.Id)
                     .Include(x => x.Albums)
                         .ThenInclude(x => x.Tracks)
                             .ThenInclude(x => x.MediaDataList)
-                    .ToListAsync(token);
-                var currentAlbums = currentArtists.SelectMany(x => x.Albums).ToList();
-                var currentTracks = currentAlbums.SelectMany(x => x.Tracks).ToList();
-                var report = new CrudMusicReport();
-                if (command.ForceMediaRefresh)
+                    .ToListAsync(ct);
+                currentAlbums = currentArtists.SelectMany(x => x.Albums).ToList();
+                currentTracks = currentAlbums.SelectMany(x => x.Tracks).ToList();
+            }
+
+            var artistByKey = currentArtists.ToDictionary(x => x.PlexApiRatingKey);
+            var albumByKey = currentAlbums.ToDictionary(x => x.PlexApiRatingKey);
+            var trackByKey = currentTracks.ToDictionary(x => x.PlexApiRatingKey);
+            var refreshedArtists =
+                new List<(PlexMusicArtist Incoming, PlexMusicArtist Stored, List<PlexMusicAlbum> Albums)>();
+            var refreshedAlbums =
+                new List<(PlexMusicAlbum Incoming, PlexMusicAlbum Stored, List<PlexMusicTrack> Tracks)>();
+            var createdTracks = new List<(PlexMusicTrack Incoming, PlexMusicTrack Stored)>();
+            var refreshedMediaData = new List<PlexMusicTrackMediaData>();
+            var createdMediaData = new List<(PlexMusicTrackMediaData Incoming, PlexMusicTrackMediaData Stored)>();
+            foreach (var incomingArtist in incomingArtists)
+            {
+                artistByKey.TryGetValue(incomingArtist.PlexApiRatingKey, out var artist);
+                if (artist is not null)
+                    incomingArtist.Id = artist.Id;
+                if (artist is not null && incomingArtist.UpdatedAt == artist.UpdatedAt)
                 {
-                    report.DeletedArtists = currentArtists.Count;
-                    report.DeletedAlbums = currentAlbums.Count;
-                    report.DeletedTracks = currentTracks.Count;
-                    await ctx.PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(token);
-                    ctx.ClearChangeTracker();
-                    currentArtists.Clear();
-                    currentAlbums.Clear();
-                    currentTracks.Clear();
+                    artists.Add(artist);
+                    albums.AddRange(artist.Albums);
+                    tracks.AddRange(artist.Albums.SelectMany(x => x.Tracks));
+                    continue;
                 }
 
-                var artistByKey = currentArtists.ToDictionary(x => x.PlexApiRatingKey);
-                var albumByKey = currentAlbums.ToDictionary(x => x.PlexApiRatingKey);
-                var trackByKey = currentTracks.ToDictionary(x => x.PlexApiRatingKey);
-                var refreshedArtists =
-                    new List<(PlexMusicArtist Incoming, PlexMusicArtist Stored, List<PlexMusicAlbum> Albums)>();
-                var refreshedAlbums =
-                    new List<(PlexMusicAlbum Incoming, PlexMusicAlbum Stored, List<PlexMusicTrack> Tracks)>();
-                var createdTracks = new List<(PlexMusicTrack Incoming, PlexMusicTrack Stored)>();
-                foreach (var incomingArtist in incomingArtists)
+                incomingArtist.PlexLibraryId = library.Id;
+                incomingArtist.PlexServerId = library.PlexServerId;
+                if (artist is null)
                 {
-                    artistByKey.TryGetValue(incomingArtist.PlexApiRatingKey, out var artist);
-                    incomingArtist.Id = artist?.Id ?? 0;
-                    if (artist is not null && incomingArtist.UpdatedAt == artist.UpdatedAt)
+                    artist = (PlexMusicArtist)ctx.Entry(incomingArtist).CurrentValues.ToObject();
+                    ctx.Entry(artist).State = EntityState.Added;
+                    report.CreatedArtists++;
+                }
+                else
+                {
+                    ctx.Entry(artist).CurrentValues.SetValues(incomingArtist);
+                    report.UpdatedArtists++;
+                }
+
+                artists.Add(artist);
+                var artistAlbums = new List<PlexMusicAlbum>(incomingArtist.Albums.Count);
+                refreshedArtists.Add((incomingArtist, artist, artistAlbums));
+                foreach (var incomingAlbum in incomingArtist.Albums)
+                {
+                    albumByKey.TryGetValue(incomingAlbum.PlexApiRatingKey, out var album);
+                    if (album is not null)
+                        incomingAlbum.Id = album.Id;
+                    if (album is not null && incomingAlbum.UpdatedAt == album.UpdatedAt)
                     {
-                        artists.Add(artist);
-                        albums.AddRange(artist.Albums);
-                        tracks.AddRange(artist.Albums.SelectMany(x => x.Tracks));
+                        artistAlbums.Add(album);
+                        albums.Add(album);
+                        tracks.AddRange(album.Tracks);
                         continue;
                     }
 
-                    incomingArtist.PlexLibraryId = library.Id;
-                    incomingArtist.PlexServerId = library.PlexServerId;
-                    if (artist is null)
+                    incomingAlbum.PlexArtist = incomingArtist;
+                    incomingAlbum.PlexArtistId = artist.Id;
+                    incomingAlbum.ParentKey = artist.PlexApiRatingKey;
+                    incomingAlbum.PlexLibraryId = library.Id;
+                    incomingAlbum.PlexServerId = library.PlexServerId;
+                    if (album is null)
                     {
-                        artist = (PlexMusicArtist)ctx.Entry(incomingArtist).CurrentValues.ToObject();
-                        ctx.Entry(artist).State = EntityState.Added;
-                        report.CreatedArtists++;
+                        album = (PlexMusicAlbum)ctx.Entry(incomingAlbum).CurrentValues.ToObject();
+                        album.PlexArtist = artist;
+                        ctx.Entry(album).State = EntityState.Added;
+                        report.CreatedAlbums++;
                     }
                     else
                     {
-                        ctx.Entry(artist).CurrentValues.SetValues(incomingArtist);
-                        report.UpdatedArtists++;
+                        ctx.Entry(album).CurrentValues.SetValues(incomingAlbum);
+                        album.PlexArtist = artist;
+                        report.UpdatedAlbums++;
                     }
 
-                    artists.Add(artist);
-                    var artistAlbums = new List<PlexMusicAlbum>(incomingArtist.Albums.Count);
-                    refreshedArtists.Add((incomingArtist, artist, artistAlbums));
-                    foreach (var incomingAlbum in incomingArtist.Albums)
+                    artistAlbums.Add(album);
+                    albums.Add(album);
+                    var albumTracks = new List<PlexMusicTrack>(incomingAlbum.Tracks.Count);
+                    refreshedAlbums.Add((incomingAlbum, album, albumTracks));
+                    foreach (var incomingTrack in incomingAlbum.Tracks)
                     {
-                        albumByKey.TryGetValue(incomingAlbum.PlexApiRatingKey, out var album);
-                        incomingAlbum.Id = album?.Id ?? 0;
-                        if (album is not null && incomingAlbum.UpdatedAt == album.UpdatedAt)
+                        trackByKey.TryGetValue(incomingTrack.PlexApiRatingKey, out var track);
+                        if (track is not null)
+                            incomingTrack.Id = track.Id;
+                        if (track is not null && incomingTrack.UpdatedAt == track.UpdatedAt)
                         {
-                            artistAlbums.Add(album);
-                            albums.Add(album);
-                            tracks.AddRange(album.Tracks);
+                            albumTracks.Add(track);
+                            tracks.Add(track);
                             continue;
                         }
 
-                        incomingAlbum.PlexArtist = incomingArtist;
-                        incomingAlbum.PlexArtistId = artist.Id;
-                        incomingAlbum.ParentKey = artist.PlexApiRatingKey;
-                        incomingAlbum.PlexLibraryId = library.Id;
-                        incomingAlbum.PlexServerId = library.PlexServerId;
-                        if (album is null)
+                        incomingTrack.PlexAlbum = incomingAlbum;
+                        incomingTrack.PlexAlbumId = album.Id;
+                        incomingTrack.ParentKey = album.PlexApiRatingKey;
+                        incomingTrack.PlexLibraryId = library.Id;
+                        incomingTrack.PlexServerId = library.PlexServerId;
+                        if (track is null)
                         {
-                            album = (PlexMusicAlbum)ctx.Entry(incomingAlbum).CurrentValues.ToObject();
-                            album.PlexArtist = artist;
-                            ctx.Entry(album).State = EntityState.Added;
-                            report.CreatedAlbums++;
+                            track = (PlexMusicTrack)ctx.Entry(incomingTrack).CurrentValues.ToObject();
+                            track.PlexAlbum = album;
+                            ctx.Entry(track).State = EntityState.Added;
+                            createdTracks.Add((incomingTrack, track));
+                            report.CreatedTracks++;
                         }
                         else
                         {
-                            ctx.Entry(album).CurrentValues.SetValues(incomingAlbum);
-                            album.PlexArtist = artist;
-                            report.UpdatedAlbums++;
+                            ctx.Entry(track).CurrentValues.SetValues(incomingTrack);
+                            track.PlexAlbum = album;
+                            report.UpdatedTracks++;
                         }
 
-                        artistAlbums.Add(album);
-                        albums.Add(album);
-                        var albumTracks = new List<PlexMusicTrack>(incomingAlbum.Tracks.Count);
-                        refreshedAlbums.Add((incomingAlbum, album, albumTracks));
-                        foreach (var incomingTrack in incomingAlbum.Tracks)
-                        {
-                            trackByKey.TryGetValue(incomingTrack.PlexApiRatingKey, out var track);
-                            incomingTrack.Id = track?.Id ?? 0;
-                            if (track is not null && incomingTrack.UpdatedAt == track.UpdatedAt)
-                            {
-                                albumTracks.Add(track);
-                                tracks.Add(track);
-                                continue;
-                            }
-
-                            incomingTrack.PlexAlbum = incomingAlbum;
-                            incomingTrack.PlexAlbumId = album.Id;
-                            incomingTrack.ParentKey = album.PlexApiRatingKey;
-                            incomingTrack.PlexLibraryId = library.Id;
-                            incomingTrack.PlexServerId = library.PlexServerId;
-                            if (track is null)
-                            {
-                                track = (PlexMusicTrack)ctx.Entry(incomingTrack).CurrentValues.ToObject();
-                                track.PlexAlbum = album;
-                                ctx.Entry(track).State = EntityState.Added;
-                                createdTracks.Add((incomingTrack, track));
-                                report.CreatedTracks++;
-                            }
-                            else
-                            {
-                                ctx.Entry(track).CurrentValues.SetValues(incomingTrack);
-                                track.PlexAlbum = album;
-                                report.UpdatedTracks++;
-                            }
-
-                            ReconcileTrackMedia(ctx, incomingTrack, track, library.Id, library.PlexServerId);
-                            albumTracks.Add(track);
-                            tracks.Add(track);
-                        }
-
-                        album.ChildCount = albumTracks.Count;
-                        album.TrackCount = albumTracks.Count;
-                        album.Duration = albumTracks.Sum(x => x.Duration);
-                        album.MediaSize = albumTracks.Sum(x => x.MediaSize);
+                        ReconcileTrackMedia(
+                            ctx,
+                            incomingTrack,
+                            track,
+                            library.Id,
+                            library.PlexServerId,
+                            refreshedMediaData,
+                            createdMediaData
+                        );
+                        albumTracks.Add(track);
+                        tracks.Add(track);
                     }
 
-                    artist.ChildCount = artistAlbums.Count;
-                    artist.Duration = artistAlbums.Sum(x => x.Duration);
-                    artist.MediaSize = artistAlbums.Sum(x => x.MediaSize);
+                    album.ChildCount = albumTracks.Count;
+                    album.TrackCount = albumTracks.Count;
+                    album.Duration = albumTracks.Sum(x => x.Duration);
+                    album.MediaSize = albumTracks.Sum(x => x.MediaSize);
                 }
 
-                // Resolve moves before severing required relationships, so EF does not delete moved children as orphans.
-                foreach (var (_, stored, children) in refreshedArtists)
-                    stored.Albums = children;
-                foreach (var (_, stored, children) in refreshedAlbums)
-                    stored.Tracks = children;
+                artist.ChildCount = artistAlbums.Count;
+                artist.Duration = artistAlbums.Sum(x => x.Duration);
+                artist.MediaSize = artistAlbums.Sum(x => x.MediaSize);
+            }
 
-                var artistKeys = artists.Select(x => x.PlexApiRatingKey).ToHashSet();
-                var albumKeys = albums.Select(x => x.PlexApiRatingKey).ToHashSet();
-                var trackKeys = tracks.Select(x => x.PlexApiRatingKey).ToHashSet();
-                var deletedTracks = currentTracks.Where(x => !trackKeys.Contains(x.PlexApiRatingKey)).ToList();
-                var deletedAlbums = currentAlbums.Where(x => !albumKeys.Contains(x.PlexApiRatingKey)).ToList();
-                var deletedArtists = currentArtists.Where(x => !artistKeys.Contains(x.PlexApiRatingKey)).ToList();
-                ctx.PlexMusicTracks.RemoveRange(deletedTracks);
-                ctx.PlexMusicAlbums.RemoveRange(deletedAlbums);
-                ctx.PlexMusicArtists.RemoveRange(deletedArtists);
-                report.DeletedTracks += deletedTracks.Count;
-                report.DeletedAlbums += deletedAlbums.Count;
-                report.DeletedArtists += deletedArtists.Count;
-                report.UnchangedArtists = artists.Count - report.CreatedArtists - report.UpdatedArtists;
-                report.UnchangedAlbums = albums.Count - report.CreatedAlbums - report.UpdatedAlbums;
-                report.UnchangedTracks = tracks.Count - report.CreatedTracks - report.UpdatedTracks;
-                await ctx.SaveChangesAsync(token);
+            // Resolve moves before severing required relationships, so EF does not delete moved children as orphans.
+            foreach (var (_, stored, children) in refreshedArtists)
+                stored.Albums = children;
+            foreach (var (_, stored, children) in refreshedAlbums)
+                stored.Tracks = children;
 
-                foreach (var (incoming, stored, _) in refreshedArtists)
-                    incoming.Id = stored.Id;
-                foreach (var (incoming, stored, _) in refreshedAlbums)
-                {
-                    incoming.Id = stored.Id;
-                    incoming.PlexArtistId = stored.PlexArtistId;
-                }
+            var artistKeys = artists.Select(x => x.PlexApiRatingKey).ToHashSet();
+            var albumKeys = albums.Select(x => x.PlexApiRatingKey).ToHashSet();
+            var trackKeys = tracks.Select(x => x.PlexApiRatingKey).ToHashSet();
+            var deletedTracks = currentTracks.Where(x => !trackKeys.Contains(x.PlexApiRatingKey)).ToList();
+            var deletedAlbums = currentAlbums.Where(x => !albumKeys.Contains(x.PlexApiRatingKey)).ToList();
+            var deletedArtists = currentArtists.Where(x => !artistKeys.Contains(x.PlexApiRatingKey)).ToList();
+            ctx.PlexMusicTracks.RemoveRange(deletedTracks);
+            ctx.PlexMusicAlbums.RemoveRange(deletedAlbums);
+            ctx.PlexMusicArtists.RemoveRange(deletedArtists);
+            report.DeletedTracks += deletedTracks.Count;
+            report.DeletedAlbums += deletedAlbums.Count;
+            report.DeletedArtists += deletedArtists.Count;
+            report.UnchangedArtists = artists.Count - report.CreatedArtists - report.UpdatedArtists;
+            report.UnchangedAlbums = albums.Count - report.CreatedAlbums - report.UpdatedAlbums;
+            report.UnchangedTracks = tracks.Count - report.CreatedTracks - report.UpdatedTracks;
+            await ctx.SaveChangesAsync(ct);
 
-                foreach (var (incoming, stored) in createdTracks)
-                {
-                    incoming.Id = stored.Id;
-                    incoming.PlexAlbumId = stored.PlexAlbumId;
-                }
+            foreach (var (incoming, stored, _) in refreshedArtists)
+                incoming.Id = stored.Id;
+            foreach (var (incoming, stored, _) in refreshedAlbums)
+            {
+                incoming.Id = stored.Id;
+                incoming.PlexArtistId = stored.PlexArtistId;
+            }
 
-                if (refreshedArtists.Count > 0)
-                {
-                    var metadataArtists = refreshedArtists.Select(x => x.Incoming).ToList();
-                    await SyncArtistCountries(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, token);
-                    await SyncArtistGenres(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, token);
-                    await SyncArtistActors(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, token);
-                    await SyncAlbumCountries(
-                        ctx,
-                        refreshedAlbums.Select(x => x.Incoming).ToList(),
-                        command.LibraryMetadata,
-                        bulkConfig,
-                        token
-                    );
-                    await PersistMusicAudioQualities(
-                        ctx,
-                        refreshedArtists.Select(x => x.Stored).ToList(),
-                        refreshedAlbums.Select(x => x.Stored).ToList(),
-                        library.Id,
-                        bulkConfig,
-                        token
-                    );
-                }
+            foreach (var (incoming, stored) in createdTracks)
+            {
+                incoming.Id = stored.Id;
+                incoming.PlexAlbumId = stored.PlexAlbumId;
+            }
+            foreach (var (incoming, stored) in createdMediaData)
+            {
+                incoming.Id = stored.Id;
+                incoming.PlexTrackId = stored.PlexTrackId;
+            }
+            if (refreshedMediaData.Count > 0)
+                await ReconcileMusicTrackStreamsAsync(ctx, refreshedMediaData, ct);
 
-                await ctx.SetMusicMediaMetrics(
-                    library.Id,
-                    artists.Count,
-                    albums.Count,
-                    tracks.Count,
-                    tracks.Sum(x => x.MediaSize),
-                    token
+            if (refreshedArtists.Count > 0)
+            {
+                var metadataArtists = refreshedArtists.Select(x => x.Incoming).ToList();
+                await SyncArtistCountries(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, ct);
+                await SyncArtistGenres(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, ct);
+                await SyncArtistActors(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, ct);
+                await SyncAlbumCountries(
+                    ctx,
+                    refreshedAlbums.Select(x => x.Incoming).ToList(),
+                    command.LibraryMetadata,
+                    bulkConfig,
+                    ct
                 );
-                if (report.ChangedItemCount > 0)
-                    await ctx
-                        .PlexLibraries.Where(x => x.Id == library.Id)
-                        .ExecuteUpdateAsync(x => x.SetProperty(y => y.Outdated, true), token);
-                return report;
-            },
-            ct
-        );
-        if (!result.IsSuccess)
+                await PersistMusicAudioQualities(
+                    ctx,
+                    refreshedArtists.Select(x => x.Stored).ToList(),
+                    refreshedAlbums.Select(x => x.Stored).ToList(),
+                    library.Id,
+                    bulkConfig,
+                    ct
+                );
+            }
+
+            await ctx.SetMusicMediaMetrics(
+                library.Id,
+                artists.Count,
+                albums.Count,
+                tracks.Count,
+                tracks.Sum(x => x.MediaSize),
+                ct
+            );
+            if (report.ChangedItemCount > 0)
+                await ctx
+                    .PlexLibraries.Where(x => x.Id == library.Id)
+                    .ExecuteUpdateAsync(x => x.SetProperty(y => y.Outdated, true), ct);
+            return Result.Ok(report);
+        });
+
+        if (result.IsFailed)
             return result.LogIfFailed();
 
         library.Music.AddRange(artists);
@@ -282,12 +316,38 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
         return result;
     }
 
+    private static Task ReconcileMusicTrackStreamsAsync(
+        IReaparrDbContext dbContext,
+        IReadOnlyCollection<PlexMusicTrackMediaData> mediaData,
+        CancellationToken cancellationToken
+    ) =>
+        PlexMediaStreamReconciler.SyncDataStreamsAsync(
+            dbContext,
+            mediaData,
+            static data => data.Streams,
+            context => context.PlexMusicTrackDataStreams,
+            static (sourceStream, ownerId, languageId) =>
+                new PlexMusicTrackDataStream
+                {
+                    Id = 0,
+                    MediaDataId = ownerId,
+                    PlexApiStreamId = sourceStream.PlexApiStreamId,
+                    StreamType = sourceStream.StreamType,
+                    LanguageId = languageId,
+                    IsExternal = sourceStream.IsExternal,
+                    SidecarFormat = sourceStream.SidecarFormat,
+                },
+            cancellationToken
+        );
+
     private static void ReconcileTrackMedia(
         IReaparrDbContext ctx,
         PlexMusicTrack incoming,
         PlexMusicTrack track,
         int libraryId,
-        int serverId
+        int serverId,
+        List<PlexMusicTrackMediaData> refreshedMediaData,
+        List<(PlexMusicTrackMediaData Incoming, PlexMusicTrackMediaData Stored)> createdMediaData
     )
     {
         var remainingRows = track.MediaDataList.ToDictionary(DataKey);
@@ -313,12 +373,13 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
             }
             else
             {
-                row.Id = 0;
-                stored = row;
+                stored = (PlexMusicTrackMediaData)ctx.Entry(row).CurrentValues.ToObject();
                 stored.PlexTrack = track;
                 ctx.Entry(stored).State = EntityState.Added;
+                createdMediaData.Add((row, stored));
             }
 
+            refreshedMediaData.Add(row);
             mediaRows.Add(stored);
         }
 

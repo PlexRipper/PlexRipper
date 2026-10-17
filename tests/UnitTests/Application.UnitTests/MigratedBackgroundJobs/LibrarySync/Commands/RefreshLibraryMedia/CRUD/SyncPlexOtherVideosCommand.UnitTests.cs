@@ -19,9 +19,10 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         });
         var db = IDbContext;
         var library = await db.PlexLibraries.OrderBy(x => x.Id).FirstAsync(CancellationToken);
-        var videos = await db.PlexOtherVideos.Where(x => x.PlexLibraryId == library.Id)
+        var storedVideos = await db.PlexOtherVideos.AsNoTracking().Where(x => x.PlexLibraryId == library.Id)
             .Include(x => x.MediaDataList).OrderBy(x => x.Id).ToListAsync(CancellationToken);
-        var originalIds = videos.Select(x => x.Id).ToArray();
+        var videos = storedVideos.Select(video => ToIncomingVideo(db, video)).ToList();
+        var originalIds = storedVideos.Select(x => x.Id).ToArray();
         var beforeData = await db.PlexOtherVideoData.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.Id).Select(x => new { x.Id, x.PlexOtherVideoId, x.PlexApiPartId, x.Size, x.OriginalFilename }).ToListAsync(CancellationToken);
         var control = await db.PlexOtherVideos.Where(x => x.PlexLibraryId != library.Id)
@@ -41,7 +42,22 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
             videos[0].MediaSize += addedSize;
         }
         if (scenario == "initial")
+        {
+            videos[0].MediaDataList.First().Streams.Add(
+                new PlexOtherVideoDataStream
+                {
+                    Id = 0,
+                    MediaDataId = 0,
+                    PlexApiStreamId = 6252011,
+                    StreamType = StreamType.Audio,
+                    LanguageId = 0,
+                    IsExternal = false,
+                    SidecarFormat = "aac",
+                    Language = new StreamLanguage { Id = 0, LanguageCode = "ja", LanguageTag = "jpn" },
+                }
+            );
             await db.PlexOtherVideos.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(CancellationToken);
+        }
         if (scenario == "unchanged")
         {
             videos[0].MediaSize = 1;
@@ -92,6 +108,41 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         else
             afterData.Select(x => (x.PlexOtherVideoId, x.PlexApiPartId, x.Size, x.OriginalFilename)).OrderBy(x => x.PlexApiPartId)
                 .ShouldBe(videos.SelectMany(v => v.MediaDataList.Select(d => (v.Id, d.PlexApiPartId, d.Size, d.OriginalFilename))).OrderBy(x => x.PlexApiPartId));
+        if (scenario == "initial")
+        {
+            videos.ShouldAllBe(x => x.Id > 0);
+            videos.SelectMany(x => x.MediaDataList).ShouldAllBe(x => x.Id > 0);
+            var createdData = videos[0].MediaDataList.First();
+            var language = db.StreamLanguages.AsNoTracking().Single(x => x.LanguageCode == "ja" && x.LanguageTag == "jpn");
+            var persistedStream = await db
+                .PlexOtherVideoDataStreams.AsNoTracking()
+                .Where(x => x.MediaDataId == createdData.Id)
+                .Select(x => new
+                {
+                    x.MediaDataId,
+                    x.PlexApiStreamId,
+                    x.StreamType,
+                    x.LanguageId,
+                    LanguageCode = x.Language.LanguageCode,
+                    LanguageTag = x.Language.LanguageTag,
+                    x.IsExternal,
+                    x.SidecarFormat,
+                })
+                .SingleAsync(CancellationToken);
+            persistedStream.ShouldBe(
+                new
+                {
+                    MediaDataId = createdData.Id,
+                    PlexApiStreamId = 6252011,
+                    StreamType = StreamType.Audio,
+                    LanguageId = language.Id,
+                    LanguageCode = "ja",
+                    LanguageTag = "jpn",
+                    IsExternal = (bool?)false,
+                    SidecarFormat = (string?)"aac",
+                }
+            );
+        }
         var metrics = await db.PlexLibraries.SingleAsync(x => x.Id == library.Id, CancellationToken);
         metrics.OtherVideoCount.ShouldBe(videos.Count);
         metrics.MediaSize.ShouldBe(expectedSize);
@@ -115,7 +166,7 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         });
         var db = IDbContext;
         var library = await db.PlexLibraries.OrderBy(x => x.Id).FirstAsync(CancellationToken);
-        var videos = await db.PlexOtherVideos.Include(x => x.MediaDataList).OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var videos = await db.PlexOtherVideos.AsNoTracking().Include(x => x.MediaDataList).OrderBy(x => x.Id).ToListAsync(CancellationToken);
         videos.Count.ShouldBe(4);
         var actors = FakeData.GetPlexActors(seed).Generate(2);
         var countries = FakeData.GetPlexCountries(seed).Generate(2);
@@ -124,6 +175,7 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         db.PlexCountries.AddRange(countries);
         db.PlexGenresVideo.AddRange(genres);
         await db.SaveChangesAsync(CancellationToken);
+        var incomingVideos = new List<PlexOtherVideo>();
         foreach (var video in videos)
         {
             db.PlexOtherVideoActors.Add(new PlexOtherVideoActors(actors[0].Id, video.PlexLibraryId, video.Id));
@@ -131,16 +183,17 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
             db.PlexOtherVideoGenres.Add(new PlexOtherVideoGenres(genres[0].Id, video.PlexLibraryId, video.Id));
             if (video.PlexLibraryId == library.Id)
             {
-                library.OtherVideos.Add(video);
                 if (!clearMetadata)
                 {
                     video.Actors.AddRange([actors[1], actors[1]]);
                     video.Countries.AddRange([countries[1], countries[1]]);
                     video.Genres.AddRange([genres[1], genres[1]]);
                 }
+                incomingVideos.Add(ToIncomingVideo(db, video));
             }
         }
         await db.SaveChangesAsync(CancellationToken);
+        library.OtherVideos.AddRange(incomingVideos);
         var metadata = new InsertMediaMetaDataCommandResponse(library)
         {
             PlexActors = actors.ToDictionary(x => x.Key),
@@ -165,5 +218,533 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         (await db.PlexOtherVideoGenres.OrderBy(x => x.PlexOtherVideoId).ToListAsync(CancellationToken))
             .Select(x => (x.PlexLibraryId, x.PlexOtherVideoId, x.GenresId))
             .ShouldBe(expectedVideos.Select(x => (x.PlexLibraryId, x.Id, genres[x.PlexLibraryId == library.Id ? 1 : 0].Id)));
+    }
+    [Test]
+    public async Task ShouldNotRefreshStreamsForUnchangedVideoParts()
+    {
+        // Arrange
+        await SetupDatabase(
+            713463,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexOtherVideoLibraryCount = 1;
+                config.OtherVideoCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var library = db.PlexLibraries.First();
+        var storedVideo = db
+            .PlexOtherVideos.AsNoTracking()
+            .Include(x => x.MediaDataList)
+            .Single();
+        var ownerId = storedVideo.MediaDataList.First().Id;
+        var video = ToIncomingVideo(db, storedVideo);
+        var mediaData = video.MediaDataList.First();
+        var beforeData = db
+            .PlexOtherVideoData.AsNoTracking()
+            .Where(x => x.Id == ownerId)
+            .Select(x => new { x.Id, x.PlexOtherVideoId, x.PlexApiMediaId, x.PlexApiPartId, x.Size })
+            .Single();
+        mediaData.Streams.Add(
+            new PlexOtherVideoDataStream
+            {
+                Id = 0,
+                MediaDataId = 0,
+                PlexApiStreamId = 7134631,
+                StreamType = StreamType.Audio,
+                LanguageId = 0,
+                IsExternal = true,
+                SidecarFormat = null,
+                Language = new StreamLanguage { Id = 0, LanguageCode = "ja", LanguageTag = "jpn" },
+            }
+        );
+        library.OtherVideos.Add(video);
+
+        // Act
+        var result = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.ToString());
+        result.Errors.Count.ShouldBe(0);
+        db.PlexOtherVideoDataStreams.AsNoTracking().Count().ShouldBe(0);
+        db
+            .PlexOtherVideoData.AsNoTracking()
+            .Where(x => x.Id == ownerId)
+            .Select(x => new { x.Id, x.PlexOtherVideoId, x.PlexApiMediaId, x.PlexApiPartId, x.Size })
+            .Single()
+            .ShouldBe(beforeData);
+    }
+    [Test]
+    public async Task ShouldIgnoreVideoTopologyAndStreamsWhenTimestampIsUnchanged()
+    {
+        // Arrange
+        await SetupDatabase(
+            713473,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexOtherVideoLibraryCount = 1;
+                config.OtherVideoCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var library = db.PlexLibraries.First();
+        var storedVideo = db.PlexOtherVideos.AsNoTracking().Include(x => x.MediaDataList).Single();
+        var video = ToIncomingVideo(db, storedVideo);
+        var original = video.MediaDataList.First();
+        var beforeTitle = storedVideo.Title;
+        var beforeData = db
+            .PlexOtherVideoData.AsNoTracking()
+            .Where(x => x.PlexOtherVideoId == storedVideo.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexOtherVideoId, x.PlexApiMediaId, x.PlexApiPartId, x.PartIndex, x.Size })
+            .ToList();
+        var added = FakeData.GetPlexOtherVideoMediaData(new Seed(713474)).Generate();
+        added.UpdateInitProperty(nameof(BasePlexMediaData.PlexApiRatingKey), video.PlexApiRatingKey);
+        added.UpdateInitProperty(nameof(BasePlexMediaData.PlexApiMediaId), original.PlexApiMediaId);
+        added.UpdateInitProperty(nameof(BasePlexMediaData.PlexApiPartId), original.PlexApiPartId + 1);
+        added.PartIndex = original.PartIndex + 1;
+        added.Streams.Add(
+            new PlexOtherVideoDataStream
+            {
+                Id = 0,
+                MediaDataId = 0,
+                PlexApiStreamId = 7134731,
+                StreamType = StreamType.Audio,
+                LanguageId = 0,
+                IsExternal = null,
+                SidecarFormat = null,
+                Language = new StreamLanguage { Id = 0, LanguageCode = "ja", LanguageTag = "jpn" },
+            }
+        );
+        video.MediaDataList.Add(added);
+        video.Title = "Incoming video title";
+        library.OtherVideos.Add(video);
+
+        // Act
+        var result = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.ToString());
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldBe(new CrudOtherVideosReport { UnchangedOtherVideos = 1 });
+        db.PlexOtherVideos.AsNoTracking().Where(x => x.Id == storedVideo.Id).Select(x => x.Title).Single().ShouldBe(beforeTitle);
+        db.PlexOtherVideoDataStreams.AsNoTracking().Count().ShouldBe(0);
+        db
+            .PlexOtherVideoData.AsNoTracking()
+            .Where(x => x.PlexOtherVideoId == storedVideo.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexOtherVideoId, x.PlexApiMediaId, x.PlexApiPartId, x.PartIndex, x.Size })
+            .ToList()
+            .ShouldBe(beforeData);
+    }
+
+    [Test]
+    public async Task ShouldReconcileVideoStreamLifecycleWithoutChurn()
+    {
+        // Arrange
+        await SetupDatabase(
+            713467,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexOtherVideoLibraryCount = 1;
+                config.OtherVideoCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var library = db.PlexLibraries.First();
+
+        async Task<PlexOtherVideo> LoadVideo() =>
+            ToIncomingVideo(
+                db,
+                await db
+                    .PlexOtherVideos.AsNoTracking()
+                    .Include(x => x.MediaDataList)
+                    .SingleAsync(CancellationToken)
+            );
+
+        void SetIncoming(
+            PlexOtherVideo video,
+            bool includeStream,
+            bool changed = false,
+            bool updateTimestamp = false
+        )
+        {
+            if (updateTimestamp)
+                video.UpdatedAt = video.UpdatedAt.GetValueOrDefault().AddSeconds(1);
+
+            var mediaData = video.MediaDataList.First();
+            mediaData.Streams.Clear();
+            if (includeStream)
+                mediaData.Streams.Add(
+                    new PlexOtherVideoDataStream
+                    {
+                        Id = 0,
+                        MediaDataId = 0,
+                        PlexApiStreamId = 7134671,
+                        StreamType = StreamType.Audio,
+                        LanguageId = 0,
+                        IsExternal = changed,
+                        SidecarFormat = null,
+                        Language = new StreamLanguage { Id = 0, LanguageCode = "ja", LanguageTag = "jpn" },
+                    }
+                );
+            library.OtherVideos.Clear();
+            library.OtherVideos.Add(video);
+        }
+
+        var initial = await LoadVideo();
+        SetIncoming(initial, includeStream: true, updateTimestamp: true);
+
+        // Act
+        var initialResult = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        initialResult.IsSuccess.ShouldBeTrue(initialResult.ToString());
+        initialResult.Errors.Count.ShouldBe(0);
+        var originalOwnerId = initial.MediaDataList.First().Id;
+        var language = db.StreamLanguages.AsNoTracking().Single(x => x.LanguageCode == "ja");
+        var expectedInitial = new
+        {
+            OwnerId = originalOwnerId,
+            SourceId = 7134671,
+            Type = StreamType.Audio,
+            LanguageId = language.Id,
+            LanguageCode = "ja",
+            LanguageTag = "jpn",
+            External = (bool?)false,
+            Format = (string?)null,
+        };
+        var firstId = db.PlexOtherVideoDataStreams.AsNoTracking().Select(x => x.Id).Single();
+        db
+            .PlexOtherVideoDataStreams.AsNoTracking()
+            .Select(x => new
+            {
+                OwnerId = x.MediaDataId,
+                SourceId = x.PlexApiStreamId,
+                Type = x.StreamType,
+                x.LanguageId,
+                LanguageCode = x.Language.LanguageCode,
+                LanguageTag = x.Language.LanguageTag,
+                External = x.IsExternal,
+                Format = x.SidecarFormat,
+            })
+            .Single()
+            .ShouldBe(expectedInitial);
+
+        var unchanged = await LoadVideo();
+        SetIncoming(unchanged, includeStream: true, changed: true);
+
+        // Act
+        var unchangedResult = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        unchangedResult.IsSuccess.ShouldBeTrue(unchangedResult.ToString());
+        unchangedResult.Errors.Count.ShouldBe(0);
+        var unchangedStream = db.PlexOtherVideoDataStreams.AsNoTracking().Select(x => new
+        {
+            x.Id,
+            OwnerId = x.MediaDataId,
+            SourceId = x.PlexApiStreamId,
+            Type = x.StreamType,
+            x.LanguageId,
+            LanguageCode = x.Language.LanguageCode,
+            LanguageTag = x.Language.LanguageTag,
+            External = x.IsExternal,
+            Format = x.SidecarFormat,
+        }).Single();
+        unchangedStream.Id.ShouldBe(firstId);
+        new
+        {
+            OwnerId = unchangedStream.OwnerId,
+            SourceId = unchangedStream.SourceId,
+            Type = unchangedStream.Type,
+            unchangedStream.LanguageId,
+            unchangedStream.LanguageCode,
+            unchangedStream.LanguageTag,
+            unchangedStream.External,
+            unchangedStream.Format,
+        }.ShouldBe(expectedInitial);
+
+        var changed = await LoadVideo();
+        SetIncoming(changed, includeStream: true, changed: true, updateTimestamp: true);
+
+        // Act
+        var changedResult = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        changedResult.IsSuccess.ShouldBeTrue(changedResult.ToString());
+        changedResult.Errors.Count.ShouldBe(0);
+        var expectedChanged = new
+        {
+            OwnerId = originalOwnerId,
+            SourceId = 7134671,
+            Type = StreamType.Audio,
+            LanguageId = language.Id,
+            LanguageCode = "ja",
+            LanguageTag = "jpn",
+            External = (bool?)true,
+            Format = (string?)null,
+        };
+        var changedStream = db.PlexOtherVideoDataStreams.AsNoTracking().Select(x => new
+        {
+            x.Id,
+            OwnerId = x.MediaDataId,
+            SourceId = x.PlexApiStreamId,
+            Type = x.StreamType,
+            x.LanguageId,
+            LanguageCode = x.Language.LanguageCode,
+            LanguageTag = x.Language.LanguageTag,
+            External = x.IsExternal,
+            Format = x.SidecarFormat,
+        }).Single();
+        changedStream.Id.ShouldBe(firstId);
+        new
+        {
+            OwnerId = changedStream.OwnerId,
+            SourceId = changedStream.SourceId,
+            Type = changedStream.Type,
+            changedStream.LanguageId,
+            changedStream.LanguageCode,
+            changedStream.LanguageTag,
+            changedStream.External,
+            changedStream.Format,
+        }.ShouldBe(expectedChanged);
+
+        // Arrange
+        var empty = await LoadVideo();
+        var ownerIdBeforeEmpty = empty.MediaDataList.First().Id;
+        var videoIdBeforeEmpty = empty.Id;
+        empty.UpdatedAt = empty.UpdatedAt.GetValueOrDefault().AddSeconds(1);
+        empty.MediaDataList.Clear();
+        library.OtherVideos.Clear();
+        library.OtherVideos.Add(empty);
+
+        // Act
+        var emptyResult = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        emptyResult.IsSuccess.ShouldBeTrue(emptyResult.ToString());
+        emptyResult.Errors.Count.ShouldBe(0);
+        db.PlexOtherVideoDataStreams.AsNoTracking().Count().ShouldBe(0);
+        db
+            .PlexOtherVideoData.AsNoTracking()
+            .Where(x => x.PlexOtherVideoId == videoIdBeforeEmpty)
+            .Select(x => x.Id)
+            .OrderBy(x => x)
+            .ToList()
+            .ShouldBe([ownerIdBeforeEmpty]);
+
+        var forced = await LoadVideo();
+        SetIncoming(forced, includeStream: true);
+        var forcedMediaData = forced.MediaDataList.First();
+
+        // Act
+        var forcedResult = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(
+                new InsertMediaMetaDataCommandResponse(library),
+                ForceMediaRefresh: true
+            )
+        );
+
+        // Assert
+        forcedResult.IsSuccess.ShouldBeTrue(forcedResult.ToString());
+        forcedResult.Errors.Count.ShouldBe(0);
+        var forcedData = db.PlexOtherVideoData.AsNoTracking().Single(x =>
+            x.PlexApiMediaId == forcedMediaData.PlexApiMediaId
+            && x.PlexApiPartId == forcedMediaData.PlexApiPartId
+        );
+        var forcedStream = db.PlexOtherVideoDataStreams.AsNoTracking().Select(x => new
+        {
+            OwnerId = x.MediaDataId,
+            SourceId = x.PlexApiStreamId,
+            Type = x.StreamType,
+            x.LanguageId,
+            LanguageCode = x.Language.LanguageCode,
+            LanguageTag = x.Language.LanguageTag,
+            External = x.IsExternal,
+            Format = x.SidecarFormat,
+        }).Single();
+        new
+        {
+            OwnerId = forcedStream.OwnerId,
+            SourceId = forcedStream.SourceId,
+            Type = forcedStream.Type,
+            forcedStream.LanguageId,
+            forcedStream.LanguageCode,
+            forcedStream.LanguageTag,
+            forcedStream.External,
+            forcedStream.Format,
+        }.ShouldBe(
+            new
+            {
+                OwnerId = forcedData.Id,
+                SourceId = 7134671,
+                Type = StreamType.Audio,
+                LanguageId = language.Id,
+                LanguageCode = "ja",
+                LanguageTag = "jpn",
+                External = (bool?)false,
+                Format = (string?)null,
+            }
+        );
+    }
+
+
+    [Test]
+    public async Task ShouldPreserveOtherVideoStateWhenSynchronizationIsCancelled()
+    {
+        // Arrange
+        await SetupDatabase(
+            713476,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexOtherVideoLibraryCount = 1;
+                config.OtherVideoCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var library = db.PlexLibraries.First();
+        var storedVideo = db.PlexOtherVideos.AsNoTracking().Include(x => x.MediaDataList).Single();
+        var video = ToIncomingVideo(db, storedVideo);
+        video.MediaDataList.First().Streams.Add(
+            new PlexOtherVideoDataStream
+            {
+                Id = 0,
+                MediaDataId = 0,
+                PlexApiStreamId = 7134761,
+                StreamType = StreamType.Audio,
+                LanguageId = 0,
+                IsExternal = null,
+                SidecarFormat = "aac",
+                Language = new StreamLanguage { Id = 0, LanguageCode = "fr", LanguageTag = "fra" },
+            }
+        );
+        library.OtherVideos.Add(video);
+
+        // Act
+        var seeded = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        seeded.IsSuccess.ShouldBeTrue(seeded.ToString());
+        seeded.Errors.Count.ShouldBe(0);
+        var beforeVideo = db.PlexOtherVideos.AsNoTracking().Where(x => x.Id == video.Id).Select(x =>
+            new { x.Id, x.PlexApiRatingKey, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt }
+        ).Single();
+        var beforeData = db.PlexOtherVideoData.AsNoTracking().Where(x => x.PlexOtherVideoId == video.Id).OrderBy(x => x.Id).Select(x =>
+            new { x.Id, x.PlexOtherVideoId, x.PlexLibraryId, x.PlexServerId, x.PlexApiMediaId, x.PlexApiPartId, x.PartIndex, x.Size }
+        ).ToList();
+        var beforeStreams = db.PlexOtherVideoDataStreams.AsNoTracking().Select(x => new
+        {
+            x.Id,
+            OwnerId = x.MediaDataId,
+            SourceId = x.PlexApiStreamId,
+            Type = x.StreamType,
+            x.LanguageId,
+            LanguageCode = x.Language.LanguageCode,
+            LanguageTag = x.Language.LanguageTag,
+            External = x.IsExternal,
+            Format = x.SidecarFormat,
+        }).OrderBy(x => x.Id).ToList();
+        var beforeMetrics = db.PlexLibraries.AsNoTracking().Where(x => x.Id == library.Id).Select(x =>
+            new { x.MediaCount, x.OtherVideoCount, x.MediaSize }
+        ).Single();
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        var cancellationVideo = ToIncomingVideo(
+            db,
+            await db
+                .PlexOtherVideos.AsNoTracking()
+                .Include(x => x.MediaDataList)
+                .SingleAsync(CancellationToken)
+        );
+        library.OtherVideos.Clear();
+        library.OtherVideos.Add(cancellationVideo);
+        var command = new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library));
+        (await new SyncPlexOtherVideosCommandValidator().ValidateAsync(command, CancellationToken)).IsValid.ShouldBeTrue();
+
+        // Act
+        var result = await Mock.Create<SyncPlexOtherVideosCommandHandler>().ExecuteAsync(command, cancellation.Token);
+
+        // Assert
+        result.IsCancelled.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        db.PlexOtherVideos.AsNoTracking().Where(x => x.Id == beforeVideo.Id).Select(x =>
+            new { x.Id, x.PlexApiRatingKey, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt }
+        ).Single().ShouldBe(beforeVideo);
+        db.PlexOtherVideoData.AsNoTracking().Where(x => x.PlexOtherVideoId == beforeVideo.Id).OrderBy(x => x.Id).Select(x =>
+            new { x.Id, x.PlexOtherVideoId, x.PlexLibraryId, x.PlexServerId, x.PlexApiMediaId, x.PlexApiPartId, x.PartIndex, x.Size }
+        ).ToList().ShouldBe(beforeData);
+        db.PlexOtherVideoDataStreams.AsNoTracking().Select(x => new
+        {
+            x.Id,
+            OwnerId = x.MediaDataId,
+            SourceId = x.PlexApiStreamId,
+            Type = x.StreamType,
+            x.LanguageId,
+            LanguageCode = x.Language.LanguageCode,
+            LanguageTag = x.Language.LanguageTag,
+            External = x.IsExternal,
+            Format = x.SidecarFormat,
+        }).OrderBy(x => x.Id).ToList().ShouldBe(beforeStreams);
+        db.PlexLibraries.AsNoTracking().Where(x => x.Id == library.Id).Select(x =>
+            new { x.MediaCount, x.OtherVideoCount, x.MediaSize }
+        ).Single().ShouldBe(beforeMetrics);
+    }
+
+    private static PlexOtherVideo ToIncomingVideo(IReaparrDbContext db, PlexOtherVideo source)
+    {
+        var video = (PlexOtherVideo)db.Entry(source).CurrentValues.ToObject();
+        video.Id = 0;
+        foreach (var mediaData in source.MediaDataList)
+        {
+            var incomingData = (PlexOtherVideoMediaData)db.Entry(mediaData).CurrentValues.ToObject();
+            incomingData.Id = 0;
+            incomingData.PlexOtherVideoId = 0;
+            foreach (var stream in mediaData.Streams)
+                incomingData.Streams.Add(
+                    new PlexOtherVideoDataStream
+                    {
+                        Id = 0,
+                        MediaDataId = 0,
+                        PlexApiStreamId = stream.PlexApiStreamId,
+                        StreamType = stream.StreamType,
+                        LanguageId = 0,
+                        IsExternal = stream.IsExternal,
+                        SidecarFormat = stream.SidecarFormat,
+                        Language = new StreamLanguage
+                        {
+                            Id = 0,
+                            LanguageCode = stream.Language.LanguageCode,
+                            LanguageTag = stream.Language.LanguageTag,
+                        },
+                    }
+                );
+            video.MediaDataList.Add(incomingData);
+        }
+        foreach (var actor in source.Actors)
+            video.Actors.Add(new PlexActor { Name = actor.Name, Key = actor.Key });
+        foreach (var genre in source.Genres)
+            video.Genres.Add(new PlexGenreVideo { Name = genre.Name, Key = genre.Key });
+        foreach (var country in source.Countries)
+            video.Countries.Add(new PlexCountry { Name = country.Name, Key = country.Key });
+        return video;
     }
 }

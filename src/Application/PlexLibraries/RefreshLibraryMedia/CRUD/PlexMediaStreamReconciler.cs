@@ -49,7 +49,7 @@ internal static class PlexMediaStreamReconciler
                         continue;
 
                     var languageId = languageIds[
-                        (stream.Language?.LanguageCode ?? string.Empty, stream.Language?.LanguageTag ?? string.Empty)
+                        (stream.Language.LanguageCode, stream.Language.LanguageTag)
                     ];
                     if (!currentRows.Remove((data.Id, stream.PlexApiStreamId), out var current))
                     {

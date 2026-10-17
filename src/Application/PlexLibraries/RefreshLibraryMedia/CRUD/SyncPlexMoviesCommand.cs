@@ -54,8 +54,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
         var plexServerId = command.LibraryMetadata.PlexLibrary.PlexServerId;
-
-        var libraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId);
+        var libraryName = command.LibraryMetadata.PlexLibrary.Title;
 
         _log.Here()
             .Debug(
@@ -137,109 +136,137 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken cancellationToken
     )
     {
-        var currentMovies = await _dbContext
-            .PlexMovies.AsNoTracking()
-            .Where(x => x.PlexLibraryId == plexLibraryId)
-            .Select(x => new CurrentMovie(x.Id, x.PlexApiRatingKey, x.UpdatedAt, x.MediaSize, x.MediaDataList.Count))
-            .ToListAsync(cancellationToken);
-        _dbContext.PlexMovies.Local.Clear();
-        var currentByKey = currentMovies.ToDictionary(x => x.PlexApiRatingKey);
-        var incomingKeys = incomingMovies.Select(x => x.PlexApiRatingKey).ToHashSet();
-        var created = new List<PlexMovie>();
-        var updated = new List<PlexMovie>();
+        var incomingKeys = incomingMovies.Select(movie => movie.PlexApiRatingKey).ToHashSet();
 
-        incomingMovies.SetRelationshipIds(plexServerId, plexLibraryId);
-        foreach (var movie in incomingMovies)
+        return await Result.Try(async Task () =>
         {
-            if (!currentByKey.TryGetValue(movie.PlexApiRatingKey, out var current))
+            var currentMovies = await _dbContext
+                .PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId)
+                .Select(x => new CurrentMovie(
+                    x.Id,
+                    x.PlexApiRatingKey,
+                    x.UpdatedAt,
+                    x.MediaSize,
+                    x.MediaDataList.Count
+                ))
+                .ToListAsync(cancellationToken);
+            var currentByKey = currentMovies.ToDictionary(x => x.PlexApiRatingKey);
+            var created = new List<PlexMovie>();
+            var updated = new List<PlexMovie>();
+            var deleted = currentMovies.Where(x => !incomingKeys.Contains(x.PlexApiRatingKey)).ToList();
+
+            if (forceMediaRefresh)
             {
-                created.Add(movie);
-                continue;
+                await _dbContext.PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(cancellationToken);
+                created = incomingMovies;
+                deleted = currentMovies;
+                report.CreatedMovies = created.Count;
+                report.UpdatedMovies = 0;
+                report.DeletedMovies = deleted.Count;
+                report.UnchangedMovies = 0;
             }
-
-            movie.Id = current.Id;
-            if (movie.UpdatedAt != current.UpdatedAt)
-                updated.Add(movie);
-        }
-
-        var deleted = currentMovies.Where(x => !incomingKeys.Contains(x.PlexApiRatingKey)).ToList();
-        foreach (var movie in created.Concat(updated))
-            movie.VideoQuality =
-                movie.MediaDataList.Count == 0 ? VideoQuality.Unknown : movie.MediaDataList.Max(x => x.VideoQuality);
-
-        report.CreatedMovies = created.Count;
-        report.UpdatedMovies = updated.Count;
-        report.DeletedMovies = deleted.Count;
-        report.UnchangedMovies = incomingMovies.Count - created.Count - updated.Count;
-
-        var changedMovieKeys = created.Concat(updated).Select(x => x.PlexApiRatingKey).ToHashSet();
-        var mediaSize = 0L;
-        var mediaDataCount = 0;
-        foreach (var movie in incomingMovies)
-        {
-            if (!forceMediaRefresh && !changedMovieKeys.Contains(movie.PlexApiRatingKey))
+            else
             {
-                var current = currentByKey[movie.PlexApiRatingKey];
-                mediaSize += current.MediaSize;
-                mediaDataCount += current.MediaDataCount;
-                continue;
-            }
-
-            mediaSize += movie.MediaSize;
-            mediaDataCount += movie.MediaDataList.Count;
-        }
-
-        return await _dbContext.ExecuteTransactionAsync(
-            async (ctx, txCt) =>
-            {
-                if (forceMediaRefresh)
+                foreach (var movie in incomingMovies)
                 {
-                    await ctx.PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
-                    created = incomingMovies;
-                    updated = [];
-                    deleted = currentMovies;
-                    report.CreatedMovies = created.Count;
-                    report.UpdatedMovies = 0;
-                    report.DeletedMovies = deleted.Count;
-                    report.UnchangedMovies = 0;
+                    if (!currentByKey.TryGetValue(movie.PlexApiRatingKey, out var current))
+                    {
+                        created.Add(movie);
+                        continue;
+                    }
+
+                    movie.Id = current.Id;
+                    if (movie.UpdatedAt != current.UpdatedAt)
+                        updated.Add(movie);
                 }
 
-                var updatedIds = updated.Select(x => x.Id).ToList();
-                await ctx.BulkDeleteByIdsAsync(
-                    updatedIds,
-                    (db, ids) => db.PlexMovieData.Where(x => ids.Contains(x.PlexMovieId)),
-                    txCt
-                );
+                report.CreatedMovies = created.Count;
+                report.UpdatedMovies = updated.Count;
+                report.DeletedMovies = deleted.Count;
+                report.UnchangedMovies = incomingMovies.Count - created.Count - updated.Count;
+            }
+            foreach (var movie in created.Concat(updated))
+                movie.VideoQuality =
+                    movie.MediaDataList.Count == 0
+                        ? VideoQuality.Unknown
+                        : movie.MediaDataList.Max(x => x.VideoQuality);
 
-                var deletedIds = deleted.Select(x => x.Id).ToList();
-                await ctx.BulkDeleteByIdsAsync(
-                    deletedIds,
-                    (db, ids) => db.PlexMovies.Where(x => ids.Contains(x.Id)),
-                    txCt
-                );
+            var changedMovieKeys = created.Concat(updated).Select(x => x.PlexApiRatingKey).ToHashSet();
+            var mediaSize = 0L;
+            var mediaDataCount = 0;
+            foreach (var movie in incomingMovies)
+            {
+                if (!forceMediaRefresh && !changedMovieKeys.Contains(movie.PlexApiRatingKey))
+                {
+                    var current = currentByKey[movie.PlexApiRatingKey];
+                    mediaSize += current.MediaSize;
+                    mediaDataCount += current.MediaDataCount;
+                    continue;
+                }
 
-                if (updated.Count > 0)
-                    await ctx.BulkUpdateAsync(updated, BulkConfigPreset.Default, txCt);
+                mediaSize += movie.MediaSize;
+                mediaDataCount += movie.MediaDataList.Count;
+            }
+            incomingMovies.SetRelationshipIds(plexServerId, plexLibraryId);
 
-                if (created.Count > 0)
-                    await ctx.BulkInsertAsync(created, BulkConfigPreset.Default, txCt);
+            var updatedIds = updated.Select(x => x.Id).ToList();
+            await _dbContext.BulkDeleteByIdsAsync(
+                updatedIds,
+                (db, ids) => db.PlexMovieData.Where(x => ids.Contains(x.PlexMovieId)),
+                cancellationToken
+            );
 
-                var mediaData = created
-                    .Concat(updated)
-                    .SelectMany(movie =>
-                    {
-                        movie.MediaDataList.SetRelationshipIds(movie.PlexServerId, movie.PlexLibraryId, movie.Id);
-                        return movie.MediaDataList;
-                    })
-                    .ToList();
-                if (mediaData.Count > 0)
-                    await ctx.BulkInsertAsync(mediaData, BulkConfigPreset.Default, txCt);
+            var deletedIds = deleted.Select(x => x.Id).ToList();
+            await _dbContext.BulkDeleteByIdsAsync(
+                deletedIds,
+                (db, ids) => db.PlexMovies.Where(x => ids.Contains(x.Id)),
+                cancellationToken
+            );
 
-                await ctx.SetMovieMediaMetrics(plexLibraryId, incomingMovies.Count, mediaDataCount, mediaSize);
-            },
+            if (updated.Count > 0)
+                await _dbContext.BulkUpdateAsync(updated, BulkConfigPreset.Default, cancellationToken);
+
+            if (created.Count > 0)
+                await _dbContext.BulkInsertAsync(created, BulkConfigPreset.Default, cancellationToken);
+
+            var mediaData = created
+                .Concat(updated)
+                .SelectMany(movie =>
+                {
+                    movie.MediaDataList.SetRelationshipIds(movie.PlexServerId, movie.PlexLibraryId, movie.Id);
+                    return movie.MediaDataList;
+                })
+                .ToList();
+            if (mediaData.Count > 0)
+                await _dbContext.BulkInsertAsync(mediaData, BulkConfigPreset.Default, cancellationToken);
+            await ReconcileMovieStreamsAsync(_dbContext, mediaData, cancellationToken);
+
+            await _dbContext.SetMovieMediaMetrics(plexLibraryId, incomingMovies.Count, mediaDataCount, mediaSize);
+        });
+    }
+
+    private static Task ReconcileMovieStreamsAsync(
+        IReaparrDbContext dbContext,
+        IReadOnlyCollection<PlexMovieMediaData> mediaData,
+        CancellationToken cancellationToken
+    ) =>
+        PlexMediaStreamReconciler.SyncDataStreamsAsync(
+            dbContext,
+            mediaData,
+            static data => data.Streams,
+            static context => context.PlexMovieDataStreams,
+            static (sourceStream, ownerId, languageId) =>
+                new PlexMovieDataStream
+                {
+                    MediaDataId = ownerId,
+                    PlexApiStreamId = sourceStream.PlexApiStreamId,
+                    StreamType = sourceStream.StreamType,
+                    LanguageId = languageId,
+                    IsExternal = sourceStream.IsExternal,
+                    SidecarFormat = sourceStream.SidecarFormat,
+                },
             cancellationToken
         );
-    }
 
     private async Task<Result<int>> SyncMovieActors(
         List<PlexMovie> movies,
@@ -274,14 +301,11 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.PlexActorId, x.PlexMovieId }).ToList();
 
-        var insertResult = await _dbContext.ExecuteTransactionAsync(
-            async (ctx, txCt) =>
-            {
-                await ctx.PlexMovieActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
-                await ctx.BulkInsertAsync(list, _config, txCt);
-            },
-            ct
-        );
+        var insertResult = await Result.Try(async Task () =>
+        {
+            await _dbContext.PlexMovieActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(ct);
+            await _dbContext.BulkInsertAsync(list, _config, ct);
+        });
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie actors: {Error}", insertResult.Errors);
@@ -328,14 +352,11 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.GenresId, x.PlexMovieId }).ToList();
 
-        var insertResult = await _dbContext.ExecuteTransactionAsync(
-            async (ctx, txCt) =>
-            {
-                await ctx.PlexMovieGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
-                await ctx.BulkInsertAsync(list, _config, txCt);
-            },
-            ct
-        );
+        var insertResult = await Result.Try(async Task () =>
+        {
+            await _dbContext.PlexMovieGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(ct);
+            await _dbContext.BulkInsertAsync(list, _config, ct);
+        });
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie genres: {Error}", insertResult.Errors);
@@ -382,14 +403,11 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.CountryId, x.PlexMovieId }).ToList();
 
-        var insertResult = await _dbContext.ExecuteTransactionAsync(
-            async (ctx, txCt) =>
-            {
-                await ctx.PlexMovieCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
-                await ctx.BulkInsertAsync(list, _config, txCt);
-            },
-            ct
-        );
+        var insertResult = await Result.Try(async Task () =>
+        {
+            await _dbContext.PlexMovieCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(ct);
+            await _dbContext.BulkInsertAsync(list, _config, ct);
+        });
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie countries: {Error}", insertResult.Errors);

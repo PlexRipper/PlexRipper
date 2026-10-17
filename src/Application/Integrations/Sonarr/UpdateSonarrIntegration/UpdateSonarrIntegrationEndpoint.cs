@@ -95,9 +95,12 @@ public class UpdateSonarrIntegrationEndpoint : Endpoint<UpdateSonarrIntegrationR
             return;
         }
 
+        var connectionIdentityChanged = integration.BaseUrl.Trim().TrimEnd('/') != url
+            || integration.SonarrApiKey.Trim() != apiKey;
+
         if (
-            integration.Category != category
-            && integration.ProvisioningState == IntegrationProvisioningState.Configured
+            integration.ProvisioningState == IntegrationProvisioningState.Configured
+            && (integration.Category != category || connectionIdentityChanged)
         )
             integration.ProvisioningState = IntegrationProvisioningState.ChangesPending;
 

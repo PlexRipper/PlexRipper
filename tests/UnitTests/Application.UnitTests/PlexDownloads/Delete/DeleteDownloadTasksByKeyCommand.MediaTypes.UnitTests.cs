@@ -78,4 +78,35 @@ public class DeleteDownloadTasksByKeyCommandMediaTypesUnitTests : BaseCommandUni
                 It.IsAny<CancellationToken>()),
             Times.Never());
     }
+    [Test]
+    public async Task ShouldDeleteStandalonePhotoImageRootAndNotifyItsKey()
+    {
+        await SetupDatabase(
+            88401,
+            config =>
+            {
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumDownloadTasksCount = 0;
+                config.PhotoImageDownloadTasksCount = 1;
+                config.PhotoImageFileDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var root = (await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).Single();
+        root.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoImage);
+        var key = root.ToKey();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x => x.OnStatusChangedAsync(key, DownloadStatus.Deleted, CancellationToken))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTasksByKeyCommand([key]));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+        (await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).ShouldBeEmpty();
+        (await dbContext.DownloadTaskPhotoImages.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.DownloadTaskPhotoImageFiles.CountAsync(CancellationToken)).ShouldBe(0);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+    }
 }

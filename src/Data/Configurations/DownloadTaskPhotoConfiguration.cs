@@ -24,6 +24,7 @@ public class DownloadTaskPhotoConfiguration : IEntityTypeConfiguration<DownloadT
             .HasMany(x => x.Children)
             .WithOne(x => x.Parent)
             .HasForeignKey(x => x.ParentId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

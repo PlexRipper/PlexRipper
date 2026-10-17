@@ -86,7 +86,7 @@ public class DbContextExtensionsDownloadTaskLogPhotoUnitTests : BaseUnitTest
             Type = type,
             Id = type switch
             {
-                DownloadTaskType.PhotoAlbum => file.Parent!.ParentId,
+                DownloadTaskType.PhotoAlbum => file.Parent!.ParentId!.Value,
                 DownloadTaskType.PhotoImage => file.ParentId,
                 _ => file.Id,
             },
@@ -131,7 +131,7 @@ public class DbContextExtensionsDownloadTaskLogPhotoUnitTests : BaseUnitTest
             Type = type,
             Id = type switch
             {
-                DownloadTaskType.PhotoAlbum => file.Parent!.ParentId,
+                DownloadTaskType.PhotoAlbum => file.Parent!.ParentId!.Value,
                 DownloadTaskType.PhotoImage => file.ParentId,
                 _ => file.Id,
             },
@@ -154,6 +154,7 @@ public class DbContextExtensionsDownloadTaskLogPhotoUnitTests : BaseUnitTest
     [Test]
     public async Task ShouldAggregateAlbumLogsWithoutMixingImageScopes_WhenAlbumHasSeveralImages()
     {
+        // Arrange
         var seed = await SetupDatabase(62314, config => config.PlexPhotoLibraryCount = 1);
         var dbContext = IDbContext;
         var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
@@ -178,20 +179,69 @@ public class DbContextExtensionsDownloadTaskLogPhotoUnitTests : BaseUnitTest
             DownloadStatus.Downloading,
             "second-image"
         );
+        // Act
 
         var albumLogs = await dbContext.GetDownloadTaskLogsAsync(album.ToKey(), null, null, CancellationToken);
         albumLogs.IsSuccess.ShouldBeTrue();
+        // Assert
+        albumLogs.Errors.Count.ShouldBe(0);
         albumLogs.Value.Select(x => x.Message).ShouldBe(["first-image", "second-image"]);
         var imageLogs = await dbContext.GetDownloadTaskLogsAsync(images[0].ToKey(), null, null, CancellationToken);
         imageLogs.IsSuccess.ShouldBeTrue();
+        imageLogs.Errors.Count.ShouldBe(0);
         imageLogs.Value.Select(x => x.Message).ShouldBe(["first-image"]);
 
         var deleted = await dbContext.DeleteDownloadTaskLogsAsync(images[0].ToKey(), CancellationToken);
         deleted.IsSuccess.ShouldBeTrue();
+        deleted.Errors.Count.ShouldBe(0);
         deleted.Value.ShouldBe(1);
         albumLogs = await dbContext.GetDownloadTaskLogsAsync(album.ToKey(), null, null, CancellationToken);
         albumLogs.IsSuccess.ShouldBeTrue();
+        albumLogs.Errors.Count.ShouldBe(0);
         albumLogs.Value.Select(x => x.Message).ShouldBe(["second-image"]);
+    }
+
+    [Test]
+    [Arguments(DownloadTaskType.PhotoImage)]
+    [Arguments(DownloadTaskType.PhotoData)]
+    public async Task ShouldKeepStandaloneLogScopesNullableAndIsolated_WhenOtherPhotoRootsExist(DownloadTaskType scope)
+    {
+        // Arrange
+        await SetupDatabase(62315, config =>
+        {
+            config.PhotoImageDownloadTasksCount = 2;
+            config.PhotoImageFileDownloadTasksCount = 2;
+        });
+        var dbContext = IDbContext;
+        var images = await dbContext.DownloadTaskPhotoImages.Include(x => x.Children).OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        images.Select(x => x.ParentId).ShouldBe(new Guid?[] { null, null });
+        var target = images[0];
+        var file = target.Children.OrderBy(x => x.Id).First();
+        var control = images[1].Children.First();
+        await dbContext.CreateDownloadClientLog(control.ToKey(), NotificationLevel.Information, DownloadStatus.Queued, "control");
+        var key = scope == DownloadTaskType.PhotoImage ? target.ToKey() : file.ToKey();
+
+        // Act
+        await dbContext.CreateDownloadClientLog(file.ToKey(), NotificationLevel.Warning, DownloadStatus.Paused, "standalone");
+        var logs = await dbContext.GetDownloadTaskLogsAsync(key, null, null, CancellationToken);
+
+        // Assert
+        logs.IsSuccess.ShouldBeTrue();
+        logs.Errors.Count.ShouldBe(0);
+        logs.Value.Select(x => (x.Message, x.Status, x.LogLevel)).ShouldBe([
+            ("standalone", DownloadStatus.Paused, NotificationLevel.Warning),
+        ]);
+        var persisted = await dbContext.DownloadTaskPhotoImageFileLogs.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        persisted.Select(x => (x.DownloadTaskFileId, x.DownloadTaskPhotoId, x.DownloadTaskPhotoAlbumId, x.Message)).ShouldBe([
+            (control.Id, images[1].Id, (Guid?)null, "control"),
+            (file.Id, target.Id, (Guid?)null, "standalone"),
+        ]);
+        var deleted = await dbContext.DeleteDownloadTaskLogsAsync(key, CancellationToken);
+        deleted.IsSuccess.ShouldBeTrue();
+        deleted.Errors.Count.ShouldBe(0);
+        deleted.Value.ShouldBe(1);
+        (await dbContext.DownloadTaskPhotoImageFileLogs.Select(x => new { x.DownloadTaskFileId, x.DownloadTaskPhotoId, x.DownloadTaskPhotoAlbumId, x.Message }).SingleAsync(CancellationToken))
+            .ShouldBe(new { DownloadTaskFileId = control.Id, DownloadTaskPhotoId = images[1].Id, DownloadTaskPhotoAlbumId = (Guid?)null, Message = "control" });
     }
 
     private static async Task<DownloadTaskPhotoImageFile> AddPhotoTask(IReaparrDbContext dbContext, int index)

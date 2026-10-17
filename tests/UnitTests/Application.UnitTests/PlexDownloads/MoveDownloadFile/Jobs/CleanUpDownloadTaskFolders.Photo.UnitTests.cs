@@ -517,4 +517,31 @@ public class CleanUpDownloadTaskFoldersPhotoUnitTests : BaseCommandUnitTest<Clea
         Mock.Mock<IDirectory>().Verify(x => x.Delete(target.DownloadDirectory), Times.Once());
         Mock.Mock<IDirectory>().Verify(x => x.Delete(parent), Times.Once());
     }
+    [Test]
+    public async Task ShouldCleanStandalonePhotoImageFolderWithoutAlbum()
+    {
+        await SetupDatabase(88106, config => config.PlexPhotoLibraryCount = 1);
+        var dbContext = IDbContext;
+        var library = await dbContext.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.PhotoAlbum);
+        var image = FakeData.GetDownloadTaskPhotoImage(new Seed(88106)).Generate();
+        image.PlexServerId = library.PlexServerId;
+        image.PlexLibraryId = library.Id;
+        var file = image.Children.Single();
+        file.PlexServerId = library.PlexServerId;
+        file.PlexLibraryId = library.Id;
+        file.DownloadStatus = DownloadStatus.Completed;
+        file.DirectoryMeta.DownloadRootPath = Mock.Container.Resolve<IPathProvider>().DefaultDownloadsDestinationFolder;
+        file.DirectoryMeta.PhotoAlbumFolder = "root-1/folder";
+        dbContext.DownloadTaskPhotoImages.Add(image);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        SetupFileSystem(fs => fs.AddDirectory(file.DownloadDirectory));
+
+        var result = await TestHandlerExecuteAsync(new CleanUpDownloadTaskFoldersCommand(file.ToKey()));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+        Mock.Container.Resolve<IFileSystem>().Directory.Exists(file.DownloadDirectory).ShouldBeFalse();
+        (await dbContext.DownloadTaskPhotoImages.SingleAsync(CancellationToken)).ParentId.ShouldBeNull();
+        (await dbContext.DownloadTaskPhotoImageFiles.SingleAsync(CancellationToken)).Id.ShouldBe(file.Id);
+    }
 }

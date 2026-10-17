@@ -338,7 +338,7 @@ public static partial class DbContextExtensions
                     Status = status,
                     DownloadTaskFileId = downloadTaskKey.Id,
                     DownloadTaskPhotoId = ids?.ImageId ?? Guid.Empty,
-                    DownloadTaskPhotoAlbumId = ids?.AlbumId ?? Guid.Empty,
+                    DownloadTaskPhotoAlbumId = ids?.AlbumId,
                     CreatedAt = DateTime.UtcNow,
                 }
             );

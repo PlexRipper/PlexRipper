@@ -71,4 +71,42 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandMediaTypesUnitTe
                 It.IsAny<CancellationToken>()),
             Times.Never());
     }
+    [Test]
+    public async Task ShouldClearCompletedStandalonePhotoImageRoot()
+    {
+        await SetupDatabase(
+            88411,
+            config =>
+            {
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumDownloadTasksCount = 0;
+                config.PhotoImageDownloadTasksCount = 1;
+                config.PhotoImageFileDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var roots = await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
+        var root = roots.Single();
+        root.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoImage);
+        var key = root.ToKey();
+        foreach (var node in new[] { root }.Flatten(x => x.Children))
+            await dbContext.SetDownloadStatus(node.ToKey(), DownloadStatus.Completed);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(
+                    It.Is<DeleteDownloadTasksByKeyCommand>(c => c.Keys.SequenceEqual(new[] { key })),
+                    CancellationToken
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        var result = await TestHandlerExecuteAsync<int>(
+            new ClearCompletedDownloadTasksByDownloadTaskKeyCommand([key])
+        );
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(1);
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
 }

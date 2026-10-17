@@ -111,7 +111,11 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         );
         await AddCandidatesAsync(_dbContext.DownloadTaskPhotoAlbums.Where(x => rootIds.Contains(x.Id)).ProjectToKey());
         await AddCandidatesAsync(
-            _dbContext.DownloadTaskPhotoImages.Where(x => rootIds.Contains(x.ParentId)).ProjectToKey()
+            _dbContext
+                .DownloadTaskPhotoImages.Where(x =>
+                    rootIds.Contains(x.Id) || (x.ParentId.HasValue && rootIds.Contains(x.ParentId.Value))
+                )
+                .ProjectToKey()
         );
         await AddCandidatesAsync(_dbContext.DownloadTaskMusicArtists.Where(x => rootIds.Contains(x.Id)).ProjectToKey());
         await AddCandidatesAsync(

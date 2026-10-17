@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownloadTaskFilesCommandHandler>
+public class DeleteDownloadTaskFilesCommandUnitTests : BaseCommandUnitTest<DeleteDownloadTaskFilesCommand>
 {
     [Test]
     public async Task ShouldDeletePlainFileFromDownloadDirectory_WhenTaskIsCompleted()
@@ -24,10 +24,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         file.Exists(plainFilePath).ShouldBeFalse();
     }
@@ -54,10 +55,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         SetupFileSystem(fs => fs.AddFile(reapTempPath, new MockFileData([])));
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         file.Exists(reapTempPath).ShouldBeFalse();
     }
@@ -89,10 +91,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         });
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         file.Exists(reapTempPath).ShouldBeFalse();
         file.Exists(plainPath).ShouldBeFalse();
@@ -116,10 +119,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         SetupFileSystem();
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
     }
 
     [Test]
@@ -148,10 +152,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         });
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand(movieFileKeys), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand(movieFileKeys));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         foreach (var path in plainPaths)
             file.Exists(path).ShouldBeFalse();
@@ -178,10 +183,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var directory = Mock.Container.Resolve<IDirectory>();
         directory.Exists(movieFileTask.DownloadDirectory).ShouldBeFalse();
     }
@@ -216,10 +222,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         });
 
         // Act — only delete the task's file; sibling remains
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         file.Exists(pathToDelete).ShouldBeFalse();
         file.Exists(siblingPath).ShouldBeTrue();
@@ -250,10 +257,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([episodeFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([episodeFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         file.Exists(plainFilePath).ShouldBeFalse();
     }
@@ -288,10 +296,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         var directory = Mock.Container.Resolve<IDirectory>();
         file.Exists(plainFilePath).ShouldBeFalse();
@@ -334,10 +343,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
         // Act
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([episodeFileKey]), CancellationToken);
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([episodeFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         var directory = Mock.Container.Resolve<IDirectory>();
         file.Exists(plainFilePath).ShouldBeFalse();
@@ -390,13 +400,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         });
 
         // Act — delete only season 1's episode
-        var result = await Sut.ExecuteAsync(
-            new DeleteDownloadTaskFilesCommand([episodeFileKeys[0]]),
-            CancellationToken
-        );
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([episodeFileKeys[0]]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         var directory = Mock.Container.Resolve<IDirectory>();
         file.Exists(season1PlainPath).ShouldBeFalse(); // season 1 file removed
@@ -450,13 +458,11 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         });
 
         // Act — delete both in one command
-        var result = await Sut.ExecuteAsync(
-            new DeleteDownloadTaskFilesCommand([movieFileKey, episodeFileKey]),
-            CancellationToken
-        );
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey, episodeFileKey]));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var file = Mock.Container.Resolve<IFile>();
         var directory = Mock.Container.Resolve<IDirectory>();
         file.Exists(moviePlainPath).ShouldBeFalse();
@@ -485,6 +491,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         string remainingContent
     )
     {
+        // Arrange
         await SetupDatabase(
             84015,
             config =>
@@ -527,9 +534,12 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
                 fs.AddFile(unrelatedPath, new MockFileData(unrelatedBytes));
         });
 
-        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([target.ToKey()]), CancellationToken);
+        // Act
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([target.ToKey()]));
 
+        // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var fileSystem = Mock.Container.Resolve<IFileSystem>();
         fileSystem.File.Exists(target.DownloadFilePath).ShouldBeFalse();
         fileSystem.File.Exists(plainPath).ShouldBeFalse();
@@ -546,5 +556,39 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         persistedControl.DownloadStatus.ShouldBe(control.DownloadStatus);
         persistedControl.FileName.ShouldBe(control.FileName);
         persistedControl.DirectoryMeta.ShouldBe(control.DirectoryMeta);
+    }
+    [Test]
+    public async Task ShouldDeleteStandalonePhotoFilesWithoutAlbumScope()
+    {
+        // Arrange
+        await SetupDatabase(
+            88115,
+            config =>
+            {
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumDownloadTasksCount = 0;
+                config.PhotoImageDownloadTasksCount = 1;
+                config.PhotoImageFileDownloadTasksCount = 1;
+            }
+        );
+        var fileTask = await IDbContext.DownloadTaskPhotoImageFiles.SingleAsync(CancellationToken);
+        var reapTempPath = fileTask.DownloadFilePath;
+        var plainPath = reapTempPath.RemoveReapTempSuffix();
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(reapTempPath, new MockFileData([]));
+            fs.AddFile(plainPath, new MockFileData([]));
+        });
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTaskFilesCommand([fileTask.ToKey()]));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var file = Mock.Container.Resolve<IFile>();
+        file.Exists(reapTempPath).ShouldBeFalse();
+        file.Exists(plainPath).ShouldBeFalse();
+        (await IDbContext.DownloadTaskPhotoImages.SingleAsync(CancellationToken)).ParentId.ShouldBeNull();
     }
 }

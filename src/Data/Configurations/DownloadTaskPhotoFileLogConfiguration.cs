@@ -36,6 +36,7 @@ public class DownloadTaskPhotoFileLogConfiguration : IEntityTypeConfiguration<Do
             .HasOne(x => x.DownloadTaskPhotoAlbum)
             .WithMany()
             .HasForeignKey(x => x.DownloadTaskPhotoAlbumId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

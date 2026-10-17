@@ -205,12 +205,15 @@ public static partial class DbContextExtensions
                     case DownloadTaskType.PhotoImage:
                     {
                         var imageId = currentParentKey.Id;
-                        parentKey = await dbContext
+                        var albumId = await dbContext
                             .DownloadTaskPhotoImages.Where(x => x.Id == imageId)
-                            .ProjectToParentKey()
+                            .Select(x => x.ParentId)
                             .FirstOrDefaultAsync(cancellationToken);
-                        if (parentKey is null)
+                        if (albumId is null && !await dbContext.DownloadTaskPhotoImages.AnyAsync(x => x.Id == imageId, cancellationToken))
+                        {
+                            parentKey = null;
                             break;
+                        }
 
                         var childStatuses = await dbContext
                             .DownloadTaskPhotoImageFiles.Where(x => x.ParentId == imageId)
@@ -225,6 +228,16 @@ public static partial class DbContextExtensions
                             );
                         if (changedCount > 0)
                             changedKeys.Add(currentParentKey);
+
+                        parentKey = albumId is Guid parentAlbumId
+                            ? new DownloadTaskKey
+                            {
+                                Type = DownloadTaskType.PhotoAlbum,
+                                Id = parentAlbumId,
+                                PlexServerId = serverId,
+                                PlexLibraryId = libraryId,
+                            }
+                            : null;
                         break;
                     }
                     case DownloadTaskType.PhotoData:

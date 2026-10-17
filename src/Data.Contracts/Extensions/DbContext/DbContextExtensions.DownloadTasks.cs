@@ -136,9 +136,8 @@ public static partial class DbContextExtensions
             queries.Add(
                 dbContext
                     .DownloadTaskMovieFile.Where(x =>
-                        byType[DownloadTaskType.MovieData]
-                            .Select(y => y.Id)
-                            .Contains(x.Id) && statuses.Contains(x.DownloadStatus)
+                        byType[DownloadTaskType.MovieData].Select(y => y.Id).Contains(x.Id)
+                        && statuses.Contains(x.DownloadStatus)
                     )
                     .Select(x => x.ToKey())
             );
@@ -177,9 +176,8 @@ public static partial class DbContextExtensions
             queries.Add(
                 dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x =>
-                        byType[DownloadTaskType.EpisodeData]
-                            .Select(y => y.Id)
-                            .Contains(x.Id) && statuses.Contains(x.DownloadStatus)
+                        byType[DownloadTaskType.EpisodeData].Select(y => y.Id).Contains(x.Id)
+                        && statuses.Contains(x.DownloadStatus)
                     )
                     .Select(x => x.ToKey())
             );
@@ -208,9 +206,8 @@ public static partial class DbContextExtensions
             queries.Add(
                 dbContext
                     .DownloadTaskPhotoImageFiles.Where(x =>
-                        byType[DownloadTaskType.PhotoData]
-                            .Select(y => y.Id)
-                            .Contains(x.Id) && statuses.Contains(x.DownloadStatus)
+                        byType[DownloadTaskType.PhotoData].Select(y => y.Id).Contains(x.Id)
+                        && statuses.Contains(x.DownloadStatus)
                     )
                     .Select(x => x.ToKey())
             );
@@ -249,9 +246,8 @@ public static partial class DbContextExtensions
             queries.Add(
                 dbContext
                     .DownloadTaskMusicTrackFiles.Where(x =>
-                        byType[DownloadTaskType.MusicTrackData]
-                            .Select(y => y.Id)
-                            .Contains(x.Id) && statuses.Contains(x.DownloadStatus)
+                        byType[DownloadTaskType.MusicTrackData].Select(y => y.Id).Contains(x.Id)
+                        && statuses.Contains(x.DownloadStatus)
                     )
                     .Select(x => x.ToKey())
             );
@@ -270,9 +266,8 @@ public static partial class DbContextExtensions
             queries.Add(
                 dbContext
                     .DownloadTaskOtherVideoFiles.Where(x =>
-                        byType[DownloadTaskType.OtherVideoData]
-                            .Select(y => y.Id)
-                            .Contains(x.Id) && statuses.Contains(x.DownloadStatus)
+                        byType[DownloadTaskType.OtherVideoData].Select(y => y.Id).Contains(x.Id)
+                        && statuses.Contains(x.DownloadStatus)
                     )
                     .Select(x => x.ToKey())
             );
@@ -876,6 +871,13 @@ public static partial class DbContextExtensions
             .IncludeAll()
             .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
             .ToListAsync(cancellationToken);
+        var downloadTasksPhotoImages = await dbContext
+            .DownloadTaskPhotoImages.AsTracking(
+                asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking
+            )
+            .IncludeAll()
+            .Where(x => x.ParentId == null && (plexServerId <= 0 || x.PlexServerId == plexServerId))
+            .ToListAsync(cancellationToken);
         var downloadTasksOtherVideos = await dbContext
             .DownloadTaskOtherVideos.AsTracking(
                 asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking
@@ -888,6 +890,7 @@ public static partial class DbContextExtensions
         downloadTasks.AddRange(downloadTasksTvShows.Select(x => x.ToGeneric()));
         downloadTasks.AddRange(downloadTasksMusicArtists.Select(x => x.ToGeneric()));
         downloadTasks.AddRange(downloadTasksPhotoAlbums.Select(x => x.ToGeneric()));
+        downloadTasks.AddRange(downloadTasksPhotoImages.Select(x => x.ToGeneric()));
         downloadTasks.AddRange(downloadTasksOtherVideos.Select(x => x.ToGeneric()));
 
         // Sort by CreatedAt
@@ -1946,7 +1949,8 @@ public static partial class DbContextExtensions
 
         totalRowsDeleted += await dbContext
             .DownloadTaskPhotoImages.Where(x =>
-                rootIds.Contains(x.ParentId) && !dbContext.DownloadTaskPhotoImageFiles.Any(y => y.ParentId == x.Id)
+                (x.ParentId.HasValue && rootIds.Contains(x.ParentId.Value) || rootIds.Contains(x.Id))
+                && !dbContext.DownloadTaskPhotoImageFiles.Any(y => y.ParentId == x.Id)
             )
             .ExecuteDeleteAsync(ct);
 
@@ -2054,6 +2058,15 @@ public static partial class DbContextExtensions
                 .ToListAsync(ct);
             rootIds.UnionWith(seasonRootIds);
         }
+
+        var photoImageRoots = await dbContext
+            .DownloadTaskPhotoImages.Where(x =>
+                downloadTaskIds.Contains(x.Id) || x.Children.Any(file => downloadTaskIds.Contains(file.Id))
+            )
+            .Select(x => new { x.Id, x.ParentId })
+            .ToListAsync(ct);
+        foreach (var photoImageRoot in photoImageRoots)
+            rootIds.Add(photoImageRoot.ParentId ?? photoImageRoot.Id);
 
         var photoRootIds = await dbContext
             .DownloadTaskPhotoAlbums.Where(x =>
@@ -2195,21 +2208,50 @@ public static partial class DbContextExtensions
             case DownloadTaskType.PhotoAlbum when integration is null:
                 return key;
             case DownloadTaskType.PhotoImage when integration is null:
-                return await dbContext
+            {
+                var image = await dbContext
                     .DownloadTaskPhotoImages.Where(x => x.Id == key.Id)
-                    .ProjectToParentKey()
-                    .FirstOrDefaultAsync(cancellationToken);
-            case DownloadTaskType.PhotoData when integration is null:
-                return await dbContext
-                    .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
-                    .Select(x => new DownloadTaskKey
+                    .Select(x => new
                     {
-                        Id = x.Parent!.ParentId,
-                        PlexServerId = x.PlexServerId,
-                        PlexLibraryId = x.PlexLibraryId,
-                        Type = DownloadTaskType.PhotoAlbum,
+                        x.ParentId,
+                        x.PlexServerId,
+                        x.PlexLibraryId,
                     })
                     .FirstOrDefaultAsync(cancellationToken);
+                if (image is null)
+                    return null;
+
+                return new DownloadTaskKey
+                {
+                    Id = image.ParentId ?? key.Id,
+                    PlexServerId = image.PlexServerId,
+                    PlexLibraryId = image.PlexLibraryId,
+                    Type = image.ParentId.HasValue ? DownloadTaskType.PhotoAlbum : DownloadTaskType.PhotoImage,
+                };
+            }
+            case DownloadTaskType.PhotoData when integration is null:
+            {
+                var file = await dbContext
+                    .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
+                    .Select(x => new
+                    {
+                        ImageId = x.ParentId,
+                        AlbumId = x.Parent!.ParentId,
+                        x.PlexServerId,
+                        x.PlexLibraryId,
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (file is null)
+                    return null;
+
+                return new DownloadTaskKey
+                {
+                    Id = file.AlbumId ?? file.ImageId,
+                    PlexServerId = file.PlexServerId,
+                    PlexLibraryId = file.PlexLibraryId,
+                    Type = file.AlbumId.HasValue ? DownloadTaskType.PhotoAlbum : DownloadTaskType.PhotoImage,
+                };
+            }
             case DownloadTaskType.MusicArtist when integration is null:
             case DownloadTaskType.OtherVideo when integration is null:
                 return key;

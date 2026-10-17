@@ -5,6 +5,7 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
     [Test]
     public async Task ShouldResolvePhotoKeysAndDetailsThroughAlbum_WhenSelectingAnyLevel()
     {
+        // Arrange
         var seed = await SetupDatabase(62401, config => config.PlexPhotoLibraryCount = 1);
         var dbContext = IDbContext;
         var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
@@ -12,11 +13,13 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
         var image = album.Children.Single();
         var file = image.Children.Single();
         var keys = new[] { album.ToKey(), image.ToKey(), file.ToKey() };
+        // Act
 
         var found = await dbContext.GetDownloadTaskKeysAsync(
             [album.Id, image.Id, file.Id, Guid.Empty],
             CancellationToken
         );
+        // Assert
         found.ShouldBe(keys);
         foreach (var key in keys)
         {
@@ -66,6 +69,7 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
     [Test]
     public async Task ShouldReturnOnlyAlbumRootsWithNestedProgress_WhenFilteringByServer()
     {
+        // Arrange
         var seed = await SetupDatabase(
             62402,
             config =>
@@ -89,10 +93,12 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
         files[1].DownloadStatus = DownloadStatus.Completed;
         await dbContext.SaveChangesAsync(CancellationToken);
 
+        // Act
         var progress = await dbContext.GetDownloadProgressTasksByServerAsync(
             libraries[0].PlexServerId,
             CancellationToken
         );
+        // Assert
         var root = progress.Single();
         root.Id.ShouldBe(album.Id);
         root.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoAlbum);
@@ -117,6 +123,7 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
     [Arguments(DownloadTaskType.PhotoData)]
     public async Task ShouldAggregateFileStatusThroughImageAndAlbum_WithoutChangingOtherAlbums(DownloadTaskType type)
     {
+        // Arrange
         var seed = await SetupDatabase(62403, config => config.PlexPhotoLibraryCount = 1);
         var dbContext = IDbContext;
         var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
@@ -126,8 +133,10 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
         var file = image.Children.Single();
         var key = file.ToKey() with { Type = type };
 
+        // Act
         await dbContext.SetDownloadStatus(key, DownloadStatus.Error);
         var changed = await dbContext.DetermineDownloadStatus(key, CancellationToken);
+        // Assert
 
         changed.ShouldBe([image.ToKey(), album.ToKey()]);
         (await dbContext.GetDownloadStatusAsync(image.ToKey())).ShouldBe(DownloadStatus.Error);
@@ -143,6 +152,7 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
     [Arguments(DownloadTaskType.PhotoData)]
     public async Task ShouldPersistTransferAndResetPhotoProgress_WithoutLosingSourceOrParent(DownloadTaskType type)
     {
+        // Arrange
         var seed = await SetupDatabase(62404, config => config.PlexPhotoLibraryCount = 1);
         var dbContext = IDbContext;
         var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
@@ -158,8 +168,10 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
         file.FileDataTransferred = 500;
         file.CurrentFileTransferBytesOffset = 500;
 
+        // Act
         await dbContext.UpdateDownloadProgress(key, file, cancellationToken: CancellationToken);
         await dbContext.UpdateDownloadFileTransferProgress(key, file, CancellationToken);
+        // Assert
         var persisted = await IDbContext.DownloadTaskPhotoImageFiles.SingleAsync(CancellationToken);
         persisted.DataReceived.ShouldBe(250);
         persisted.DataTotal.ShouldBe(1000);
@@ -176,6 +188,7 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
 
         var reset = await dbContext.ResetDownloadTaskProgress(key, DownloadStatus.Stopped, CancellationToken);
         reset.IsSuccess.ShouldBeTrue();
+        reset.Errors.Count.ShouldBe(0);
         persisted = await IDbContext.DownloadTaskPhotoImageFiles.SingleAsync(CancellationToken);
         persisted.DataReceived.ShouldBe(0);
         persisted.FileDataTransferred.ShouldBe(0);
@@ -192,6 +205,7 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
     [Test]
     public async Task ShouldRemoveOnlyScopedEmptyImagesAndAlbums_WhenCleaningOrphans()
     {
+        // Arrange
         var seed = await SetupDatabase(
             62405,
             config =>
@@ -210,22 +224,19 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
             .DownloadTaskPhotoImageFiles.Where(x => x.ParentId != images[1].Id)
             .ExecuteDeleteAsync(CancellationToken);
 
+        // Act
         (await dbContext.DeleteOrphanedParentTasksByRootIdsAsync([album.Id], CancellationToken)).ShouldBe(1);
-        (
-            await dbContext.DownloadTaskPhotoImages.AnyAsync(x => x.Id == images[0].Id, CancellationToken)
-        ).ShouldBeFalse();
-        (await dbContext.DownloadTaskPhotoImages.AnyAsync(x => x.Id == images[1].Id, CancellationToken)).ShouldBeTrue();
-        (await dbContext.DownloadTaskPhotoAlbums.AnyAsync(x => x.Id == unrelated.Id, CancellationToken)).ShouldBeTrue();
+        // Assert
+        (await dbContext.DownloadTaskPhotoImages.OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken))
+            .ShouldBe(new[] { images[1].Id, unrelated.Children.Single().Id, otherServer.Children.Single().Id }.Order());
+        (await dbContext.DownloadTaskPhotoAlbums.OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken))
+            .ShouldBe(new[] { album.Id, unrelated.Id, otherServer.Id }.Order());
 
         (
             await dbContext.DeleteOrphanedParentTasksByServerIdAsync(libraries[0].PlexServerId, CancellationToken)
         ).ShouldBe(2);
-        (
-            await dbContext.DownloadTaskPhotoAlbums.AnyAsync(x => x.Id == unrelated.Id, CancellationToken)
-        ).ShouldBeFalse();
-        (
-            await dbContext.DownloadTaskPhotoAlbums.AnyAsync(x => x.Id == otherServer.Id, CancellationToken)
-        ).ShouldBeTrue();
+        (await dbContext.DownloadTaskPhotoAlbums.OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken))
+            .ShouldBe(new[] { album.Id, otherServer.Id }.Order());
         (await dbContext.DeleteOrphanedParentTasksAsync(CancellationToken)).ShouldBe(2);
         (await dbContext.DownloadTaskPhotoAlbums.Select(x => x.Id).ToListAsync(CancellationToken)).ShouldBe([album.Id]);
     }
@@ -233,6 +244,7 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
     [Test]
     public async Task ShouldCascadeAlbumDeletionThroughImagesFilesAndLogs_WithoutDeletingOtherAlbums()
     {
+        // Arrange
         var seed = await SetupDatabase(62406, config => config.PlexPhotoLibraryCount = 1);
         var dbContext = IDbContext;
         var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
@@ -248,8 +260,10 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
             );
         }
 
+        // Act
         await dbContext.DownloadTaskPhotoAlbums.Where(x => x.Id == albums[0].Id).ExecuteDeleteAsync(CancellationToken);
 
+        // Assert
         (await dbContext.DownloadTaskPhotoImages.Select(x => x.ParentId).ToListAsync(CancellationToken)).ShouldBe([
             albums[1].Id,
         ]);
@@ -261,6 +275,113 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
         log.DownloadTaskFileId.ShouldBe(remainingFile.Id);
         log.DownloadTaskPhotoId.ShouldBe(remainingFile.ParentId);
         log.DownloadTaskPhotoAlbumId.ShouldBe(albums[1].Id);
+    }
+
+    [Test]
+    public async Task ShouldResolveStandaloneMultipartRootsWithoutPhantomAlbums_WhenSelectingImagesOrFiles()
+    {
+        // Arrange
+        var seed = await SetupDatabase(62407, config =>
+        {
+            config.PhotoImageDownloadTasksCount = 2;
+            config.PhotoImageFileDownloadTasksCount = 2;
+        });
+        var dbContext = IDbContext;
+        var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var images = await dbContext.DownloadTaskPhotoImages.Include(x => x.Children).OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var album = (await AddAlbums(dbContext, library, seed, 1)).Single();
+        var target = images[0];
+        var files = target.Children.OrderBy(x => x.Id).ToList();
+        images.Select(x => x.ParentId).ShouldBe(new Guid?[] { null, null });
+        files.Select(x => x.ParentId).ShouldBe([target.Id, target.Id]);
+
+        // Act
+        var roots = await dbContext.GetAllDownloadTasksByServerAsync(library.PlexServerId, cancellationToken: CancellationToken);
+        var affected = await dbContext.GetAffectedRootDownloadTaskIdsAsync(
+            [target.Id, files[0].Id, files[1].Id, album.Children.Single().Children.Single().Id], CancellationToken);
+
+        // Assert
+        roots.Select(x => x.Id).Order().ShouldBe(new[] { target.Id, images[1].Id, album.Id }.Order());
+        affected.Order().ShouldBe(new[] { target.Id, album.Id }.Order());
+        var detail = roots.Single(x => x.Id == target.Id);
+        detail.ParentId.ShouldBe(Guid.Empty);
+        detail.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoImage);
+        detail.Children.Select(x => (x.Id, x.ParentId, x.IsDownloadable)).OrderBy(x => x.Id)
+            .ShouldBe(files.Select(x => (x.Id, target.Id, true)).OrderBy(x => x.Item1));
+        foreach (var key in files.Select(x => x.ToKey()).Prepend(target.ToKey()))
+        {
+            (await dbContext.GetRootDownloadTaskKeyAsync(key, cancellationToken: CancellationToken)).ShouldBe(target.ToKey());
+            (await dbContext.GetDownloadableChildTaskKeys(key, CancellationToken)).OrderBy(x => x.Id)
+                .ShouldBe((key.Type == DownloadTaskType.PhotoData ? files.Where(x => x.Id == key.Id) : files)
+                    .Select(x => x.ToKey()).OrderBy(x => x.Id));
+        }
+        (await dbContext.DownloadTaskPhotoImages.Where(x => x.Id == target.Id).ProjectToParentKey().ToListAsync(CancellationToken))
+            .ShouldBeEmpty();
+        (await dbContext.DownloadTaskPhotoAlbums.Select(x => x.Id).ToListAsync(CancellationToken)).ShouldBe([album.Id]);
+    }
+
+    [Test]
+    public async Task ShouldAggregateStandaloneFileStatusOnlyIntoImage_WhenAnotherRootExists()
+    {
+        // Arrange
+        await SetupDatabase(62408, config =>
+        {
+            config.PhotoImageDownloadTasksCount = 2;
+            config.PhotoImageFileDownloadTasksCount = 2;
+        });
+        var dbContext = IDbContext;
+        var images = await dbContext.DownloadTaskPhotoImages.Include(x => x.Children).OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var target = images[0];
+        var file = target.Children.OrderBy(x => x.Id).First();
+        images.Select(x => x.DownloadStatus).ShouldBe([DownloadStatus.Queued, DownloadStatus.Queued]);
+
+        // Act
+        await dbContext.SetDownloadStatus(file.ToKey(), DownloadStatus.Error);
+        var changed = await dbContext.DetermineDownloadStatus(file.ToKey(), CancellationToken);
+
+        // Assert
+        changed.ShouldBe([target.ToKey()]);
+        (await dbContext.DownloadTaskPhotoImages.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.ParentId, x.DownloadStatus }).ToListAsync(CancellationToken))
+            .ShouldBe([
+                new { Id = target.Id, ParentId = (Guid?)null, DownloadStatus = DownloadStatus.Error },
+                new { Id = images[1].Id, ParentId = (Guid?)null, DownloadStatus = DownloadStatus.Queued },
+            ]);
+        (await dbContext.DetermineDownloadStatus(file.ToKey(), CancellationToken)).ShouldBeEmpty();
+        (await dbContext.GetRootDownloadTaskKeyAsync(file.ToKey(), cancellationToken: CancellationToken)).ShouldBe(target.ToKey());
+        (await dbContext.DownloadTaskPhotoAlbums.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.DownloadTaskPhotoImageFiles.Where(x => x.ParentId == images[1].Id)
+            .Select(x => x.DownloadStatus).ToListAsync(CancellationToken)).ShouldBe([DownloadStatus.Queued, DownloadStatus.Queued]);
+    }
+
+    [Test]
+    public async Task ShouldDeleteOnlySelectedEmptyStandaloneWrappers_WhenCleaningRootOrphans()
+    {
+        // Arrange
+        var seed = await SetupDatabase(62409, config =>
+        {
+            config.PhotoImageDownloadTasksCount = 2;
+            config.PhotoImageFileDownloadTasksCount = 2;
+        });
+        var dbContext = IDbContext;
+        var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var images = await dbContext.DownloadTaskPhotoImages.Include(x => x.Children).OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var album = (await AddAlbums(dbContext, library, seed, 1)).Single();
+        var target = images[0];
+        await dbContext.DownloadTaskPhotoImageFiles.Where(x => x.ParentId == target.Id).ExecuteDeleteAsync(CancellationToken);
+        (await dbContext.DownloadTaskPhotoImages.OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken))
+            .ShouldBe(new[] { images[0].Id, images[1].Id, album.Children.Single().Id }.Order());
+
+        // Act
+        var deleted = await dbContext.DeleteOrphanedParentTasksByRootIdsAsync([target.Id], CancellationToken);
+
+        // Assert
+        deleted.ShouldBe(1);
+        (await dbContext.DownloadTaskPhotoImages.OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken))
+            .ShouldBe(new[] { images[1].Id, album.Children.Single().Id }.Order());
+        (await dbContext.DownloadTaskPhotoImageFiles.OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken))
+            .ShouldBe(images[1].Children.Concat(album.Children.Single().Children).Select(x => x.Id).Order());
+        (await dbContext.DownloadTaskPhotoAlbums.Select(x => x.Id).ToListAsync(CancellationToken)).ShouldBe([album.Id]);
     }
 
     private async Task<List<DownloadTaskPhotoAlbum>> AddAlbums(

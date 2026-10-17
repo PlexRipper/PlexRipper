@@ -216,4 +216,47 @@ public class ClearCompletedDownloadTasksByServerIdCommandUnitTests
             DownloadStatus.Completed
         );
     }
+    [Test]
+    public async Task ShouldClearCompletedStandalonePhotoRootWithoutTouchingActiveOrOtherServer()
+    {
+        await SetupDatabase(
+            88116,
+            c =>
+            {
+                c.PlexServerCount = 2;
+                c.PlexPhotoLibraryCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.PlexServerId).ToListAsync(CancellationToken);
+        var roots = FakeData.GetDownloadTaskPhotoImage(new Seed(88116)).Generate(3);
+        for (var i = 0; i < roots.Count; i++)
+        {
+            var library = libraries[i == 2 ? 1 : 0];
+            foreach (var node in new DownloadTaskBase[] { roots[i] }.Concat(roots[i].Children))
+            {
+                node.PlexServerId = library.PlexServerId;
+                node.PlexLibraryId = library.Id;
+                node.DownloadStatus = i == 1 ? DownloadStatus.Queued : DownloadStatus.Completed;
+            }
+        }
+        dbContext.DownloadTaskPhotoImages.AddRange(roots);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var result = await TestHandlerExecuteAsync<int>(
+            new ClearCompletedDownloadTasksByServerIdCommand(libraries[0].PlexServerId)
+        );
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(1);
+        (await dbContext.DownloadTaskPhotoImages.Select(x => x.Id).ToListAsync(CancellationToken))
+            .Order()
+            .ShouldBe(new[] { roots[1].Id, roots[2].Id }.Order());
+        (await dbContext.DownloadTaskPhotoImageFiles.Select(x => x.Id).ToListAsync(CancellationToken))
+            .Order()
+            .ShouldBe(new[] { roots[1].Children.Single().Id, roots[2].Children.Single().Id }.Order());
+        (await dbContext.GetAllDownloadTasksByServerAsync(libraries[0].PlexServerId, cancellationToken: CancellationToken))
+            .Select(x => x.Id)
+            .ShouldBe([roots[1].Id]);
+    }
 }

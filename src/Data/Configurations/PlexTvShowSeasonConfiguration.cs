@@ -7,12 +7,8 @@ public class PlexTvShowSeasonConfiguration : IEntityTypeConfiguration<PlexTvShow
         builder.Ignore(x => x.VideoQuality);
 
         builder.HasIndex(x => new { x.PlexLibraryId, x.SortIndex });
-        // GetMediaDetailByIdEndpoint.GetPlexTvShow loads every season with Where(x => x.TvShowId == id);
-        // keeping the foreign-key index explicit prevents that show-detail lookup from scanning all seasons.
-        builder.HasIndex(x => x.TvShowId);
-
-        // SearchTvShowCommandHandler combines a matched show with command.Season;
-        // this index resolves the requested season before its episode candidates are evaluated.
+        // The leading TvShowId also covers the show-detail lookup for all seasons.
+        // SearchTvShowCommandHandler adds SeasonNumber to resolve a specific season.
         builder.HasIndex(x => new { x.TvShowId, x.SeasonNumber });
 
         builder.HasIndex(x => new { x.PlexApiRatingKey, x.PlexServerId });

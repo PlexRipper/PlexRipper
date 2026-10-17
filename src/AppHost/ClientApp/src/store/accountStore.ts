@@ -5,7 +5,7 @@ import { forkJoin, of } from 'rxjs';
 import { concatMap, finalize, map, switchMap, tap } from 'rxjs/operators';
 import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
-import { StoreNames, type ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult, type ResultDTO } from '@interfaces';
 import { plexAccountApi, plexServerApi } from '@api';
 import { useLibraryStore, useServerStore, useSettingsStore, useSignalrStore } from '@store';
 import { cloneDeep } from 'lodash-es';
@@ -97,16 +97,20 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
      * Creates a PlexAccount in the database, returns the new accountId and then also refreshes all the Plex Servers that are accessible
      * @param {PlexAccountDTO} account
      */
-		createPlexAccount(account: CreatePlexAccountEndpointRequest): Observable<PlexAccountDTO> {
+		createPlexAccount(account: CreatePlexAccountEndpointRequest): Observable<ResultDTO<PlexAccountDTO>> {
 			return plexAccountApi.createPlexAccountEndpoint(account).pipe(
-				switchMap((result) =>
-					forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]).pipe(
-						switchMap(() => of(result.value as PlexAccountDTO)),
-					),
-				),
+				switchMap((result) => {
+					if (!result.isSuccess) {
+						return of(result);
+					}
+
+					return forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]).pipe(
+						switchMap(() => of(result)),
+					);
+				}),
 			);
 		},
-		updatePlexAccount(account: PlexAccountDTO) {
+		updatePlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO>> {
 			return plexAccountApi
 				.updatePlexAccountByIdEndpoint(account)
 				.pipe(
@@ -116,7 +120,7 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 						}
 
 						return forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]).pipe(
-							switchMap(() => of(actions.getAccount(account.id))),
+							switchMap(() => of(result)),
 						);
 					}),
 				);

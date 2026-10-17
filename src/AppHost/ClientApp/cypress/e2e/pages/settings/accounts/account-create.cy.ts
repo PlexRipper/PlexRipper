@@ -1,7 +1,7 @@
 import { route } from '@fixtures';
-import { generatePlexAccount, generateResultDTO } from '@mock';
+import { generatePlexAccount, generateFailedResultDTO, generateResultDTO } from '@mock';
 import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
-import { PlexAccountPaths } from '@api-urls';
+import { PlexAccountPaths, PlexLibraryPaths, PlexServerPaths } from '@api-urls';
 
 describe('Add Plex account to Reaparr', () => {
 	beforeEach(() => {
@@ -20,6 +20,70 @@ describe('Add Plex account to Reaparr', () => {
 			// Verify the account card is visible
 			cy.getCy('account-card-id-99').should('be.visible');
 		});
+	});
+
+	it('Should keep the account draft open after a failed save and close after retry succeeds', () => {
+		const account: PlexAccountDTO = generatePlexAccount({
+			id: 99,
+			partialData: {
+				is2Fa: false,
+				isValidated: false,
+			},
+		});
+
+		cy.getCy('account-overview-add-account').click();
+		cy.getCy('account-dialog-form').should('be.visible');
+
+		cy.getCy('account-form-display-name-input').type(account.displayName);
+		cy.getCy('account-form-username-input').type(account.username);
+		cy.getCy('account-form-password-input').type(account.password);
+
+		cy.validatePlexCredentialsEndpoint({
+			partialData: {
+				is2Fa: false,
+				isValidated: true,
+			},
+		}).as('validateCredentials');
+		cy.getCy('account-dialog-validate-button').click();
+		cy.wait('@validateCredentials');
+		cy.getCy('account-dialog-save-button').should('not.be.disabled');
+
+		cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
+			statusCode: 200,
+			body: generateFailedResultDTO({ statusCode: 409 }),
+		}).as('createAccountFailed');
+		cy.getCy('account-dialog-save-button').click();
+		cy.wait('@createAccountFailed');
+
+		cy.getCy('account-dialog-form').should('be.visible');
+		cy.getCy('account-form-display-name-input').should('have.value', account.displayName);
+		cy.getCy('account-dialog-save-button').should('not.have.class', 'q-btn--loading');
+
+		cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
+			statusCode: 200,
+			body: generateResultDTO({ ...account, isValidated: true }),
+		}).as('createAccountRetry');
+		cy.intercept('GET', PlexAccountPaths.getAllPlexAccountsEndpoint(), {
+			statusCode: 200,
+			body: generateResultDTO([{ ...account, isValidated: true }]),
+		}).as('getAccountsAfterRetry');
+		cy.intercept('GET', PlexServerPaths.getAllPlexServersEndpoint(), {
+			statusCode: 200,
+			body: generateResultDTO([]),
+		}).as('getServersAfterRetry');
+		cy.intercept('GET', PlexLibraryPaths.getAllPlexLibrariesEndpoint(), {
+			statusCode: 200,
+			body: generateResultDTO([]),
+		}).as('getLibrariesAfterRetry');
+
+		cy.getCy('account-dialog-save-button').click();
+		cy.wait('@createAccountRetry');
+		cy.wait('@getAccountsAfterRetry');
+		cy.wait('@getServersAfterRetry');
+		cy.wait('@getLibrariesAfterRetry');
+
+		cy.getCy('account-dialog-form').should('not.exist');
+		cy.getCy('account-card-id-99').should('be.visible');
 	});
 
 	it('Should request a verification code, show invalid code error, and allow retry when 2FA is enabled', function () {

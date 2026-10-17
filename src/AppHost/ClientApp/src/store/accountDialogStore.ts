@@ -2,12 +2,12 @@ import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
 import { get } from '@vueuse/core';
-import { tap, catchError, switchMap, finalize } from 'rxjs/operators';
+import { tap, catchError, finalize } from 'rxjs/operators';
 import { type Observable, of } from 'rxjs';
 import { DialogType } from '@enums';
 import { plexAccountApi } from '@api';
 import type { ErrorDTO, PlexAccountDTO } from '@dto';
-import { StoreNames, type IAccountDialog } from '@interfaces';
+import { StoreNames, type IAccountDialog, type ResultDTO } from '@interfaces';
 import { useAccountStore, useDialogStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 
@@ -246,7 +246,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 		generateToken(verificationCode: string = '') {
 			return plexAccountApi.generatePlexTokenEndpoint(state.id, { verificationCode });
 		},
-		saveAccount(): Observable<void> {
+		saveAccount(): Observable<ResultDTO<PlexAccountDTO>> {
 			state.savingLoading = true;
 			if (state.isNewAccount) {
 				const accountData = get(getters.getAccountData);
@@ -267,15 +267,21 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					uuid: accountData.uuid,
 					validatedAt: accountData.validatedAt!,
 				}).pipe(
-					tap(() => dialogStore.closeDialog(DialogType.AccountDialog)),
+					tap((result) => {
+						if (result.isSuccess) {
+							dialogStore.closeDialog(DialogType.AccountDialog);
+						}
+					}),
 					finalize(() => state.savingLoading = false),
-					switchMap(() => of(void 0)),
 				);
 			}
 			return accountStore.updatePlexAccount(get(getters.getAccountData)).pipe(
-				tap(() => dialogStore.closeDialog(DialogType.AccountDialog)),
+				tap((result) => {
+					if (result.isSuccess) {
+						dialogStore.closeDialog(DialogType.AccountDialog);
+					}
+				}),
 				finalize(() => state.savingLoading = false),
-				switchMap(() => of(void 0)),
 			);
 		},
 		switchInputMode(isAuthTokenMode: boolean) {

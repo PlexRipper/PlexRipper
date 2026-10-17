@@ -114,7 +114,7 @@ public class DownloadQueueCheckDownloadQueueForAllServersUnitTests : BaseUnitTes
         enqueueResult.IsSuccess.ShouldBeTrue();
         enqueueResult.Errors.Count.ShouldBe(0);
         schedulerCalls.ShouldBe(2);
-        startedKeys.ToArray().ShouldBe(expectedKeys);
+        startedKeys.ToArray().ShouldBe([expectedKeys[0], expectedKeys[0]]);
         Mock.Mock<IDownloadTaskScheduler>().Verify();
     }
 

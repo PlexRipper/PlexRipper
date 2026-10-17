@@ -196,9 +196,14 @@ public class DownloadQueue : IDownloadQueue
                 nextDownloadTask.FullTitle
             );
 
-        _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + _retryCooldown;
-        await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey(), cancellationToken);
+        var schedulingResult = await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey(), cancellationToken);
+        if (schedulingResult.IsCancelled)
+            return schedulingResult.ToResult<DownloadTaskGeneric>().LogWarning();
 
+        if (schedulingResult.IsFailed)
+            return schedulingResult.ToResult<DownloadTaskGeneric>().LogIfFailed();
+
+        _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + _retryCooldown;
         return Result.Ok(nextDownloadTask);
     }
 

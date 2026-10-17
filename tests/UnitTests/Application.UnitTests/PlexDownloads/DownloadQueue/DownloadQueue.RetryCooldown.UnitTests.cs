@@ -103,4 +103,108 @@ public class DownloadQueueRetryCooldownUnitTests : BaseUnitTest<DownloadQueue>
                 Times.Exactly(2)
             );
     }
+
+    [Test]
+    public async Task ShouldReturnSchedulerFailureAndRetryTask_WhenSchedulingFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            58123,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
+        var expectedTask = downloadTasks[0].Children[0];
+        expectedTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(expectedTask.PlexServerId))
+            .ReturnsAsync([]);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .SetupSequence(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("scheduler failure"))
+            .ReturnsAsync(Result.Ok());
+
+        // Act
+        var firstResult = await Sut.CheckDownloadQueueServer(expectedTask.PlexServerId);
+        var secondResult = await Sut.CheckDownloadQueueServer(expectedTask.PlexServerId);
+
+        // Assert
+        firstResult.IsFailed.ShouldBeTrue();
+        firstResult.IsCancelled.ShouldBeFalse();
+        firstResult.Errors.Count.ShouldBe(1);
+        firstResult.ValueOrDefault.ShouldBeNull();
+        secondResult.IsSuccess.ShouldBeTrue();
+        secondResult.Errors.Count.ShouldBe(0);
+        secondResult.Value.Id.ShouldBe(expectedTask.Id);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(
+                x => x.StartDownloadTaskJob(
+                    It.Is<DownloadTaskKey>(key =>
+                        key.Id == expectedTask.Id
+                        && key.PlexServerId == expectedTask.PlexServerId
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Exactly(2)
+            );
+    }
+
+    [Test]
+    public async Task ShouldReturnSchedulerCancellationAndRetryTask_WhenSchedulingIsCancelled()
+    {
+        // Arrange
+        await SetupDatabase(
+            58124,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
+        var expectedTask = downloadTasks[0].Children[0];
+        expectedTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(expectedTask.PlexServerId))
+            .ReturnsAsync([]);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .SetupSequence(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ResultExtensions.TaskIsCancelled(nameof(IDownloadTaskScheduler.StartDownloadTaskJob)))
+            .ReturnsAsync(Result.Ok());
+
+        // Act
+        var firstResult = await Sut.CheckDownloadQueueServer(expectedTask.PlexServerId);
+        var secondResult = await Sut.CheckDownloadQueueServer(expectedTask.PlexServerId);
+
+        // Assert
+        firstResult.IsCancelled.ShouldBeTrue();
+        firstResult.IsFailed.ShouldBeTrue();
+        firstResult.Errors.Count.ShouldBe(1);
+        firstResult.ValueOrDefault.ShouldBeNull();
+        secondResult.IsSuccess.ShouldBeTrue();
+        secondResult.Errors.Count.ShouldBe(0);
+        secondResult.Value.Id.ShouldBe(expectedTask.Id);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(
+                x => x.StartDownloadTaskJob(
+                    It.Is<DownloadTaskKey>(key =>
+                        key.Id == expectedTask.Id
+                        && key.PlexServerId == expectedTask.PlexServerId
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Exactly(2)
+            );
+    }
 }

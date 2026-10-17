@@ -71,6 +71,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var outputSubject = new Subject<string>();
         var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
         DashMpdCliOptions? capturedOptions = null;
+        var terminalWriteEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var terminalWriteRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
@@ -97,7 +99,16 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(Task.CompletedTask)
+            .Returns<DownloadTaskKey, DownloadStatus, CancellationToken>(
+                (_, status, _) =>
+                {
+                    if (status != DownloadStatus.DownloadFinished)
+                        return Task.CompletedTask;
+
+                    terminalWriteEntered.TrySetResult();
+                    return terminalWriteRelease.Task;
+                }
+            )
             .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -124,8 +135,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Returns(Task.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);
-        // Act
-        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+        var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
+        await terminalWriteEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+        startTask.IsCompleted.ShouldBeFalse();
+        terminalWriteRelease.TrySetResult();
+        var result = await startTask;
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -1018,6 +1032,9 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         SetupSpeedLimit(serverMachineIdentifier, 0);
         SetupCommandExecutor();
         var dashStartEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var runnerStopEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var runnerStopRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -1040,7 +1057,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
-        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
         dashWrapperMock
             .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
             .Returns(() =>
@@ -1048,7 +1065,15 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 dashStartEntered.TrySetResult();
                 return new TaskCompletionSource<Result>(TaskCreationOptions.RunContinuationsAsynchronously).Task;
             });
-        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        dashWrapperMock
+            .Setup(x => x.StopAsync())
+            .Returns(async () =>
+            {
+                runnerStopEntered.TrySetResult();
+                await runnerStopRelease.Task;
+                return Result.Ok();
+            })
+            .Verifiable(Times.Once());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         using var cancellationTokenSource = new CancellationTokenSource();
@@ -1058,10 +1083,24 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var startTask = sut.Start(downloadTask.ToKey(), cancellationTokenSource.Token);
         await dashStartEntered.Task.WaitAsync(TimeSpan.FromSeconds(5));
         cancellationTokenSource.Cancel();
+        await runnerStopEntered.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        startTask.IsCompleted.ShouldBeFalse();
+        runnerStopRelease.TrySetResult();
         var result = await startTask.WaitAsync(TimeSpan.FromSeconds(5));
 
         // Assert
         result.IsCancelled.ShouldBeTrue();
         dashWrapperMock.Verify();
+        completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 0, Result.Ok()));
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
     }
 }

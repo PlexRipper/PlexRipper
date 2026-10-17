@@ -23,6 +23,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private DownloadTaskKey? _downloadTaskKey;
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
+    private TaskCompletionSource<bool>? _terminalWorkCompletion;
+    private int _completionObserved;
+    private int _stopRequested;
     private bool _disposed;
     private DownloadTaskProgress _lastProgressUpdate = new();
 
@@ -126,25 +129,36 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         try
         {
             var startResult = await dashStartTask.WaitAsync(cancellationToken);
-            if (startResult.IsCancelled || startResult.IsFailed)
-                return startResult;
+            var terminalResult = await AwaitTerminalWorkAsync();
+            if (terminalResult.IsFailed)
+            {
+                terminalResult.LogError();
+                if (startResult.IsSuccess)
+                    return terminalResult;
+            }
+
+            return startResult;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            var stopResult = await _dashWrapper.StopAsync();
+            var stopResult = await StopRunnerAsync();
+            if (stopResult.IsCancelled)
+                return stopResult;
+
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
             return ResultExtensions.TaskIsCancelled(nameof(DashPlexDownloadClient));
         }
 
-        // Small delay before disposing this client to ensure everything is processing correctly
-        return await Result.Try(async Task () => await Task.Delay(2000, cancellationToken));
     }
 
     public async Task<Result> StopAsync()
     {
-        var stopResult = await _dashWrapper.StopAsync();
+        var stopResult = await StopRunnerAsync();
+        if (stopResult.IsCancelled)
+            return stopResult;
+
         if (stopResult.IsFailed)
             return stopResult.LogIfFailed();
 
@@ -156,6 +170,26 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             return stoppedResult.LogIfFailed();
 
         return Result.Ok();
+    }
+
+    private async Task<Result> StopRunnerAsync()
+    {
+        Interlocked.Exchange(ref _stopRequested, 1);
+
+        var stopResult = await _dashWrapper.StopAsync();
+        if (stopResult.IsCancelled || stopResult.IsFailed)
+            return stopResult;
+
+        return await AwaitTerminalWorkAsync();
+    }
+
+    private async Task<Result> AwaitTerminalWorkAsync()
+    {
+        var terminalWorkCompletion = _terminalWorkCompletion;
+        if (Volatile.Read(ref _completionObserved) == 0 || terminalWorkCompletion is null)
+            return Result.Ok();
+
+        return await Result.Try(async Task () => await terminalWorkCompletion.Task);
     }
 
     private async Task<DashMpdCliOptions> CreateDashOptions(DownloadTaskFileBase downloadTask, string downloadUrl)
@@ -247,6 +281,13 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private void SetupDownloadListeners(DownloadTaskKey key)
     {
+        var terminalWorkCompletion = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+        _terminalWorkCompletion = terminalWorkCompletion;
+        Volatile.Write(ref _completionObserved, 0);
+        Volatile.Write(ref _stopRequested, 0);
+
         _subscriptions.Add(
             _dashWrapper
                 .Progress.TakeUntil(_destroy)
@@ -267,15 +308,25 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         _subscriptions.Add(
             _dashWrapper
-                .DownloadCompleted.TakeUntil(_destroy)
+                .DownloadCompleted.Take(1)
+                .TakeUntil(_destroy)
+                .Do(_ => Volatile.Write(ref _completionObserved, 1))
                 .Select(completed => Observable.FromAsync(async _ => await HandleDownloadCompleted(key, completed)))
                 .Concat()
-                .Subscribe()
+                .Do(_ => terminalWorkCompletion.TrySetResult(true))
+                .Subscribe(
+                    _ => { },
+                    exception => terminalWorkCompletion.TrySetException(exception),
+                    () => terminalWorkCompletion.TrySetResult(true)
+                )
         );
     }
 
     private async Task HandleDownloadCompleted(DownloadTaskKey key, DashDownloadCompletedEventArgs completed)
     {
+        if (Volatile.Read(ref _stopRequested) != 0 || Volatile.Read(ref _disposed))
+            return;
+
         if (completed.Cancelled)
         {
             var stoppedResult = await SetDownloadStatusAsync(DownloadStatus.Stopped, completed.Result);
@@ -315,7 +366,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private async Task<Result> SetDownloadStatusAsync(DownloadStatus status, Result? errorResult = null)
     {
-        if (_downloadTaskKey is null)
+        if (_downloadTaskKey is null || Volatile.Read(ref _disposed))
             return Result.Ok();
 
         if (errorResult is null)
@@ -339,13 +390,21 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (_disposed)
             return;
 
-        _disposed = true;
-        _destroy.OnNext(Unit.Default);
-        _destroy.OnCompleted();
-        _subscriptions.Dispose();
-        _destroy.Dispose();
-
-        await _dashWrapper.StopAsync();
-        _dbContext.Dispose();
+        Volatile.Write(ref _disposed, true);
+        Interlocked.Exchange(ref _stopRequested, 1);
+        try
+        {
+            await _dashWrapper.DisposeAsync();
+            var terminalResult = await AwaitTerminalWorkAsync();
+            terminalResult.LogIfFailed();
+        }
+        finally
+        {
+            _destroy.OnNext(Unit.Default);
+            _destroy.OnCompleted();
+            _subscriptions.Dispose();
+            _destroy.Dispose();
+            _dbContext.Dispose();
+        }
     }
 }

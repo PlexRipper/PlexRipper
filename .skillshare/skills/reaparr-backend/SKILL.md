@@ -117,6 +117,17 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 
 ## Core Backend Patterns
 
+### Validate at boundaries; trust internal contracts
+
+- Validate command/request inputs in their validators. Validate external response data at the ingestion boundary before passing it into application workflows.
+- After validation, handlers and internal helpers consume the established contract. Do not repeat null, range, identity, collection, or scope checks already guaranteed by that contract.
+- Normalize external representations once at the owning boundary. Internal callers use the normalized representation without repeating normalization or adding fallback values for states the contract excludes.
+- Incoming mapped entities have clean generated database IDs. Assign persisted IDs when matching existing rows and assign relationships when writing them; do not reset IDs or repair reused entity graphs defensively.
+- For independent batch records, discard invalid records at ingestion when the operation permits partial acceptance, then process the valid records. Invalid command context still fails validation. A failed or incomplete retrieval must not be treated as an authoritative empty inventory.
+- Keep checks that implement actual behavior: create versus update, timestamp changes, missing stored records, authorization, ownership, concurrency conflicts, and cancellation. These are not duplicate input validation.
+- Add defensive handling only for a reachable failure demonstrated by the contract, current callers, or observed behavior. Hypothetical misuse is not a requirement.
+- When an internal invariant is violated, fix its producer or boundary validation. Do not conceal the violation with silent defaults, skipped work, or graph repair.
+
 ### Endpoints
 
 - Endpoints inherit from the project-local `BaseEndpoint<TRequest, TResponse>`.
@@ -141,6 +152,8 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 - Avoid application-side joins and unbounded queries.
 - Rely on Reaparr's configured no-tracking default for read queries; do not add `.AsNoTracking()` explicitly.
 - Keep query behavior deterministic and testable.
+- Use normal database-operation semantics by default. Add an explicit transaction only when a specified business invariant requires several writes to succeed or fail together; scope it to those writes. Multiple writes alone do not establish an atomicity requirement.
+- Introduce retries only for a demonstrated transient failure with defined replay semantics. Do not add snapshots, ID resets, collection clearing, or tracker clearing merely to make an otherwise single-pass operation replayable.
 
 ### EF Core migrations
 
@@ -189,6 +202,8 @@ Reaparr uses `FluentResults` as the normal error boundary for commands, jobs, se
 ### Prefer `Result.Try` over `try/catch`
 
 Use `Result.Try` before reaching for a manual `try/catch`. It is the standard project mechanism for converting thrown exceptions and cancelled operations into `Result` values.
+
+Use the existing error boundary. Do not wrap every internal helper in another `Result.Try` when the caller already owns exception-to-Result conversion. Result handling is not a reason to add validation, fallback, retry, or transaction machinery.
 
 ```csharp
 var result = await Result.Try(async Task () =>
@@ -343,10 +358,11 @@ Rules:
 4. Identify the owning project and, for tests, the matching test project.
 5. Make the smallest maintainable change that fixes the root cause.
 6. Preserve project boundaries; place shared contracts in `*.Contracts` projects only when cross-project consumption requires it.
-7. Keep behavior deterministic, especially in tests and background jobs.
-8. Before finishing any backend code file creation, check whether a new folder was introduced. If yes, use the root project namespace in the code file and update the owning `.csproj.DotSettings` `NamespaceFoldersToSkip` entry.
-9. Re-read changed files after edits to confirm the intended changes landed.
-10. Use native diagnostics and language-server analysis to find errors that need fixing before claiming completion. Do not run a build as an error-discovery mechanism.
+7. Make test inputs honor the production boundary contract. Use real validators for invalid-input tests. Do not expand production behavior to repair invalid fixtures, reused persisted graphs, or hypothetical inputs outside that contract.
+8. Keep behavior deterministic, especially in tests and background jobs.
+9. Before finishing any backend code file creation, check whether a new folder was introduced. If yes, use the root project namespace in the code file and update the owning `.csproj.DotSettings` `NamespaceFoldersToSkip` entry.
+10. Re-read changed files after edits to confirm the intended changes landed.
+11. Use native diagnostics and language-server analysis to find errors that need fixing before claiming completion. Do not run a build as an error-discovery mechanism.
 
 ## Apply Backend Changes (Native Development)
 

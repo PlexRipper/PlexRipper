@@ -129,11 +129,17 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 - Register modules through the existing AppHost composition path.
 - Prefer existing services and abstractions before introducing new ones.
 
+### Enums and mapping
+
+- Use enums for finite domain values, states, modes, and categories. Always prefer an existing enum over magic string literals; translate external strings at the integration boundary.
+- Keep mappers simple and single-purpose: map source values to target values with direct, predictable assignments.
+- Keep filtering, validation, querying, enrichment, deduplication, logging, side effects, and business rules outside mappers.
+
 ### Persistence
 
 - EF Core access goes through project contexts/factories and existing repository/service patterns.
 - Avoid application-side joins and unbounded queries.
-- Do not add `.AsNoTracking()` to read queries; no-tracking is already the explicit default in Reaparr query configuration.
+- Rely on Reaparr's configured no-tracking default for read queries; do not add `.AsNoTracking()` explicitly.
 - Keep query behavior deterministic and testable.
 
 ### EF Core migrations

@@ -117,6 +117,13 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 
 ## Core Backend Patterns
 
+### Comments
+
+- Preserve existing comments that are still valid, including during refactoring and simplification. Do not remove them merely to shorten the code or diff.
+- Maintain comments alongside their code: move them with the relevant logic and update them when behavior changes. Remove a comment only when it no longer applies.
+- Add useful comments that explain intent, invariants, ordering, cancellation semantics, or other non-obvious behavior.
+- Before finishing, inspect removed comments in the diff and restore any that remain applicable.
+
 ### Validate at boundaries; trust internal contracts
 
 - Validate command/request inputs in their validators. Validate external response data at the ingestion boundary before passing it into application workflows.

@@ -51,7 +51,10 @@ public class DownloadQueue : IDownloadQueue
                         var plexServerId in _plexServersToCheckChannel.Reader.ReadAllAsync(cancellationToken)
                     )
                     {
-                        var queueResult = await CheckDownloadQueueServer(plexServerId, cancellationToken);
+                        var queueResult = await Result.Try(
+                            async Task<Result> () =>
+                                (await CheckDownloadQueueServer(plexServerId, cancellationToken)).ToResult()
+                        );
                         if (queueResult.IsCancelled)
                         {
                             queueResult.LogWarning();

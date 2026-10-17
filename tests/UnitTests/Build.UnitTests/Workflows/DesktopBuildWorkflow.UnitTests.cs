@@ -41,12 +41,57 @@ internal class DesktopBuildWorkflowUnitTests : BaseUnitTest<DesktopRunBuildComma
             .Setup(x => x.Send(It.IsAny<DesktopPackageBuildCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(0))
             .Verifiable(Times.Never());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DesktopLaunchBuildCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(0))
+            .Verifiable(Times.Never());
 
         // Act
         var result = await Sut.ExecuteAsync(new DesktopRunBuildCommand(settings), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldBe(0);
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldNotInvokeLaunchCommand_WhenDryRunPackagesBuild()
+    {
+        // Arrange
+        SetupFileSystem(system =>
+        {
+            system.AddFile("/repo/Reaparr.sln", new MockFileData(string.Empty));
+        });
+
+        var settings = new DesktopCommandSettings
+        {
+            RuntimeIdentifier = "linux-x64",
+            Version = "1.2.3",
+            InformationalVersion = "1.2.3-dev.1",
+            DryRun = true,
+            SkipRestore = true,
+        };
+
+        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DesktopPackageBuildCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(0))
+            .Verifiable(Times.Once());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DesktopLaunchBuildCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(0))
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await Sut.ExecuteAsync(new DesktopRunBuildCommand(settings), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         result.Value.ShouldBe(0);
         Mock.Mock<ICommandExecutor>().Verify();
     }

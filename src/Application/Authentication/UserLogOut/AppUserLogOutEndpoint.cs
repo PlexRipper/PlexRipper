@@ -1,4 +1,3 @@
-using FastEndpoints.Security;
 
 namespace Reaparr.Application;
 
@@ -24,8 +23,6 @@ public class AppUserLogOutEndpoint : EndpointWithoutRequest<string>
     public override async Task HandleAsync(CancellationToken ct)
     {
         await _identitySignInService.SignOutAsync();
-
-        await CookieAuth.SignOutAsync();
 
         var result = Result.Ok("Logout successful");
         await Send.FluentResult(result, x => x, ct);

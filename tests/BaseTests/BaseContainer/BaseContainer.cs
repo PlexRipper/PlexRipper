@@ -26,7 +26,8 @@ public class BaseContainer : IDisposable
         Seed seed,
         string memoryDbName,
         string testFileSystemRootPath,
-        Action<UnitTestDataConfig>? options = null
+        Action<UnitTestDataConfig>? options = null,
+        bool useTestAuthentication = true
     )
     {
         _log = log.ForContext<BaseContainer>();
@@ -35,13 +36,18 @@ public class BaseContainer : IDisposable
 
         _log.Here().Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 
-        _factory = new ReaparrWebApplicationFactory(seed, memoryDbName, options);
+        _factory = new ReaparrWebApplicationFactory(seed, memoryDbName, options, useTestAuthentication);
 
         // Create a separate scope as not to interfere with tests running in parallel
         _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope();
     }
 
-    public static async Task<BaseContainer> Create(ILogger log, Seed seed, Action<UnitTestDataConfig>? options = null)
+    public static async Task<BaseContainer> Create(
+        ILogger log,
+        Seed seed,
+        Action<UnitTestDataConfig>? options = null,
+        bool useTestAuthentication = true
+    )
     {
         var config = UnitTestDataConfig.FromOptions(options);
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
@@ -59,7 +65,7 @@ public class BaseContainer : IDisposable
             .GetMemoryDbContext(log, mockPathProvider, mockAppRuntimeInfo, memoryDbName)
             .Setup(seed, mockPathProvider, mockAppRuntimeInfo, config.DatabaseOptions);
 
-        var container = new BaseContainer(log, seed, memoryDbName, testFileSystemRootPath, options);
+        var container = new BaseContainer(log, seed, memoryDbName, testFileSystemRootPath, options, useTestAuthentication);
 
         if (config.FileSystemOptions is not null)
         {

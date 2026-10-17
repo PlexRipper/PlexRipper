@@ -107,6 +107,24 @@ public class MoveDownloadFileJob : IJob
             if (moveResult.IsFailed)
             {
                 _log.Here().Error("Failed to move all files for {DownloadTaskKey}", downloadTaskKey);
+                // The current key is still executing. A separate one-shot trigger survives this firing
+                // and Quartz's non-concurrency guard holds it until this execution has been released.
+                var retryResult = await Result.Try(async Task () =>
+                {
+                    var jobKey = GetJobKey(downloadTaskKey.Id);
+                    var triggerKey = new TriggerKey($"{jobKey.Name}_Retry_{context.FireInstanceId}", jobKey.Group);
+                    if (await context.Scheduler.CheckExists(triggerKey, ct))
+                        return;
+
+                    var retryTrigger = TriggerBuilder.Create()
+                        .WithIdentity(triggerKey)
+                        .ForJob(jobKey)
+                        .StartAt(DateTimeOffset.UtcNow.AddMinutes(1))
+                        .WithSimpleSchedule(x => x.WithMisfireHandlingInstructionFireNow())
+                        .Build();
+                    await context.Scheduler.ScheduleJob(retryTrigger, ct);
+                });
+                retryResult.LogIfFailed();
                 return moveResult;
             }
 

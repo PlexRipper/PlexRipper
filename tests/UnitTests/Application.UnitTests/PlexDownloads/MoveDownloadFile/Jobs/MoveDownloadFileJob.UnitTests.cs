@@ -15,6 +15,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
         context.SetupGet(x => x.MergedJobDataMap).Returns(jobDetail.Object.JobDataMap);
         context.SetupGet(x => x.CancellationToken).Returns(cancellationToken);
+        context.SetupGet(x => x.FireInstanceId).Returns("move-job-test");
+        context.SetupGet(x => x.Scheduler).Returns(Moq.Mock.Of<IScheduler>());
         context.SetupProperty(x => x.Result);
         return context.Object;
     }
@@ -588,6 +590,11 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<IMoveDownloadFileQueue>().Verify();
         Mock.Mock<IEventPublisher>().Verify();
+        Moq.Mock.Get(context.Scheduler)
+            .Verify(x => x.ScheduleJob(
+                It.Is<ITrigger>(t => t.JobKey.Equals(MoveDownloadFileJob.GetJobKey(key.Id))
+                    && t.Key.Name == $"{MoveDownloadFileJob.GetJobKey(key.Id).Name}_Retry_move-job-test"),
+                token), scenario == "cancelled" ? Times.Never() : Times.Once());
     }
 
     [Test]

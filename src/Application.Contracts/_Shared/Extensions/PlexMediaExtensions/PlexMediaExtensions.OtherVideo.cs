@@ -57,7 +57,7 @@ public static partial class PlexMediaExtensions
             HashId = null,
             FileName = data.GetFileName,
             FileLocationUrl = data.Key,
-            VideoQuality = data.VideoResolution,
+            VideoQuality = data.VideoQuality,
             DirectoryMeta = new DownloadTaskDirectory
             {
                 DownloadRootPath = downloadRootPath,

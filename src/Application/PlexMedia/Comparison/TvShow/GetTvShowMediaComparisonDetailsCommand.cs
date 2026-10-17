@@ -171,7 +171,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                         remoteQuality: episode.VideoQuality != VideoQuality.Unknown
                             ? episode.VideoQuality
                             : episode
-                                .MediaDataList.Select(x => x.VideoResolution)
+                                .MediaDataList.Select(x => x.VideoQuality)
                                 .OrderByDescending(x => x.ToId())
                                 .FirstOrDefault(),
                         ownedQuality: VideoQuality.None,
@@ -202,13 +202,13 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                         remoteQuality: hit.RemoteQuality != VideoQuality.Unknown
                             ? hit.RemoteQuality
                             : episode
-                                .MediaDataList.Select(x => x.VideoResolution)
+                                .MediaDataList.Select(x => x.VideoQuality)
                                 .OrderByDescending(x => x.ToId())
                                 .FirstOrDefault(),
                         ownedQuality: ownedEpisode is null || hit.OwnedQuality != VideoQuality.Unknown
                             ? hit.OwnedQuality
                             : ownedEpisode
-                                .MediaDataList.Select(x => x.VideoResolution)
+                                .MediaDataList.Select(x => x.VideoQuality)
                                 .OrderByDescending(x => x.ToId())
                                 .FirstOrDefault(),
                         remoteLocation: episode

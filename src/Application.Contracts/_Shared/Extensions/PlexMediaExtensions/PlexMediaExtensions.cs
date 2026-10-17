@@ -142,7 +142,7 @@ public static partial class PlexMediaExtensions
             TimeRemaining = 0,
             FileName = plexMediaData.GetFileName,
             FileLocationUrl = plexMediaData.Key,
-            VideoQuality = plexMediaData.VideoResolution,
+            VideoQuality = plexMediaData.VideoQuality,
             DirectoryMeta = new DownloadTaskDirectory
             {
                 DownloadRootPath = downloadRootPath,
@@ -201,7 +201,7 @@ public static partial class PlexMediaExtensions
             TimeRemaining = 0,
             FileName = plexMediaData.GetFileName,
             FileLocationUrl = plexMediaData.Key,
-            VideoQuality = plexMediaData.VideoResolution,
+            VideoQuality = plexMediaData.VideoQuality,
             DirectoryMeta = new DownloadTaskDirectory
             {
                 DownloadRootPath = downloadRootPath,

@@ -10,10 +10,6 @@ public class PlexOtherVideoMediaData : BasePlexMediaData
 
     public required int PartIndex { get; set; }
 
-    public string? OriginalFilePath { get; set; }
-
-    public string? SourceRelativePath { get; set; }
-
     public int? Width { get; set; }
 
     public int? Height { get; set; }

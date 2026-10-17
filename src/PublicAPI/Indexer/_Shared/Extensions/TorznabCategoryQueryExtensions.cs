@@ -23,22 +23,22 @@ public static class TorznabCategoryQueryExtensions
                 known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_SD)
                 && (
                     x.Source == ReleaseSource.DVD
-                    || x.VideoResolution == VideoQuality.SD
-                    || x.VideoResolution == VideoQuality.DVD
+                    || x.VideoQuality == VideoQuality.SD
+                    || x.VideoQuality == VideoQuality.DVD
                 )
             )
             || (
                 known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_UHD)
                 && x.Source != ReleaseSource.DVD
-                && (x.VideoResolution == VideoQuality.UHD_4K || x.VideoResolution == VideoQuality.UHD_8K)
+                && (x.VideoQuality == VideoQuality.UHD_4K || x.VideoQuality == VideoQuality.UHD_8K)
             )
             || (
                 known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_HD)
                 && x.Source != ReleaseSource.DVD
-                && x.VideoResolution != VideoQuality.SD
-                && x.VideoResolution != VideoQuality.DVD
-                && x.VideoResolution != VideoQuality.UHD_4K
-                && x.VideoResolution != VideoQuality.UHD_8K
+                && x.VideoQuality != VideoQuality.SD
+                && x.VideoQuality != VideoQuality.DVD
+                && x.VideoQuality != VideoQuality.UHD_4K
+                && x.VideoQuality != VideoQuality.UHD_8K
             )
             || (
                 known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_BluRay)
@@ -84,22 +84,22 @@ public static class TorznabCategoryQueryExtensions
                 known.AsEnumerable().Contains((int)TorznabCategoryId.TV_SD)
                 && (
                     x.Source == ReleaseSource.DVD
-                    || x.VideoResolution == VideoQuality.SD
-                    || x.VideoResolution == VideoQuality.DVD
+                    || x.VideoQuality == VideoQuality.SD
+                    || x.VideoQuality == VideoQuality.DVD
                 )
             )
             || (
                 known.AsEnumerable().Contains((int)TorznabCategoryId.TV_UHD)
                 && x.Source != ReleaseSource.DVD
-                && (x.VideoResolution == VideoQuality.UHD_4K || x.VideoResolution == VideoQuality.UHD_8K)
+                && (x.VideoQuality == VideoQuality.UHD_4K || x.VideoQuality == VideoQuality.UHD_8K)
             )
             || (
                 known.AsEnumerable().Contains((int)TorznabCategoryId.TV_HD)
                 && x.Source != ReleaseSource.DVD
-                && x.VideoResolution != VideoQuality.SD
-                && x.VideoResolution != VideoQuality.DVD
-                && x.VideoResolution != VideoQuality.UHD_4K
-                && x.VideoResolution != VideoQuality.UHD_8K
+                && x.VideoQuality != VideoQuality.SD
+                && x.VideoQuality != VideoQuality.DVD
+                && x.VideoQuality != VideoQuality.UHD_4K
+                && x.VideoQuality != VideoQuality.UHD_8K
             )
         );
     }

@@ -85,7 +85,6 @@ public static partial class PlexMediaDataMapper
             VideoQuality = mediaItem.VideoResolution,
             Source = mediaItem.DetermineReleaseSource(),
             VideoCodec = mediaItem.VideoCodec,
-            VideoResolution = mediaItem.VideoResolution,
             AudioCodec = mediaItem.AudioCodec,
             NeedsGeneratedName = !fileName.IsValidMediaFileName(),
             Streams = source.ToPlexTvShowEpisodeDataStreams(),

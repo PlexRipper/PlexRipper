@@ -194,17 +194,43 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseCommandUnitTest<SyncPle
         var libraries = IDbContext.PlexLibraries.OrderBy(x => x.Id).ToList();
         var target = libraries[0];
         var other = libraries[1];
-        var otherIds = IDbContext.PlexMovies.Where(x => x.PlexLibraryId == other.Id).Select(x => x.Id).Order().ToList();
+        var otherMovies = IDbContext
+            .PlexMovies.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt })
+            .ToList();
+        var otherData = IDbContext
+            .PlexMovieData.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexMovieId, x.PlexLibraryId, x.PlexServerId, x.PlexApiMediaId, x.PlexApiPartId, x.Size })
+            .ToList();
 
         // Act
-        var result = await Mock.Create<SyncPlexMoviesCommandHandler>()
-            .ExecuteAsync(new SyncPlexMoviesCommand(new InsertMediaMetaDataCommandResponse(target)), CancellationToken);
+        var result = await TestHandlerExecuteAsync<CrudMoviesReport>(
+            new SyncPlexMoviesCommand(new InsertMediaMetaDataCommandResponse(target))
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         result.Value.DeletedMovies.ShouldBe(3);
         IDbContext.PlexMovies.Count(x => x.PlexLibraryId == target.Id).ShouldBe(0);
-        IDbContext.PlexMovies.Where(x => x.PlexLibraryId == other.Id).Select(x => x.Id).Order().ShouldBe(otherIds);
+        IDbContext
+            .PlexMovies.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt })
+            .ToList()
+            .ShouldBe(otherMovies);
+        IDbContext
+            .PlexMovieData.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexMovieId, x.PlexLibraryId, x.PlexServerId, x.PlexApiMediaId, x.PlexApiPartId, x.Size })
+            .ToList()
+            .ShouldBe(otherData);
     }
 
     [Test]
@@ -806,9 +832,9 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseCommandUnitTest<SyncPle
 
         // Arrange
         var empty = await LoadMovie();
-        var emptyMediaData = empty.MediaDataList.First();
+        var replacementMediaData = empty.MediaDataList.Single();
         empty.UpdatedAt = empty.UpdatedAt?.AddSeconds(1) ?? DateTime.UtcNow;
-        emptyMediaData.Streams.Clear();
+        empty.MediaDataList.Clear();
         library.Movies.Clear();
         SetIds(library, [empty]);
         library.Movies.Add(empty);
@@ -821,10 +847,12 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseCommandUnitTest<SyncPle
         // Assert
         emptyResult.IsSuccess.ShouldBeTrue(emptyResult.ToString());
         emptyResult.Errors.Count.ShouldBe(0);
+        emptyResult.Value.UpdatedMovies.ShouldBe(1);
         IDbContext.PlexMovieDataStreams.AsNoTracking().ToList().ShouldBeEmpty();
-        IDbContext.PlexMovieData.AsNoTracking().Count(x => x.PlexMovieId == empty.Id).ShouldBe(1);
+        IDbContext.PlexMovieData.AsNoTracking().Where(x => x.PlexMovieId == empty.Id).ToList().ShouldBeEmpty();
 
         var forced = await LoadMovie();
+        forced.MediaDataList.Add(replacementMediaData);
         SetIncoming(forced, includeStream: true);
         var forcedMediaData = forced.MediaDataList.First();
 

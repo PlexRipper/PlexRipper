@@ -440,22 +440,67 @@ public class SyncPlexTvShowsCommandUnitTests : BaseCommandUnitTest<SyncPlexTvSho
         var libraries = IDbContext.PlexLibraries.OrderBy(x => x.Id).ToList();
         var target = libraries[0];
         var other = libraries[1];
-        var otherShowIds = IDbContext
-            .PlexTvShows.Where(x => x.PlexLibraryId == other.Id)
-            .Select(x => x.Id)
-            .Order()
+        var otherShows = IDbContext
+            .PlexTvShows.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt })
+            .ToList();
+        var otherSeasons = IDbContext
+            .PlexTvShowSeason.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.TvShowId, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt })
+            .ToList();
+        var otherEpisodes = IDbContext
+            .PlexTvShowEpisodes.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.TvShowSeasonId, x.TvShowId, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt })
+            .ToList();
+        var otherData = IDbContext
+            .PlexTvShowEpisodeData.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexTvShowEpisodeId, x.PlexLibraryId, x.PlexServerId, x.PlexApiMediaId, x.PlexApiPartId, x.Size })
             .ToList();
 
         // Act
-        var result = await Mock.Create<SyncPlexTvShowsCommandHandler>().ExecuteAsync(
-            new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(target)),
-            CancellationToken
+        var result = await TestHandlerExecuteAsync<BulkInsertTvShowsRapport>(
+            new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(target))
         );
 
-        // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         IDbContext.PlexTvShows.Count(x => x.PlexLibraryId == target.Id).ShouldBe(0);
-        IDbContext.PlexTvShows.Where(x => x.PlexLibraryId == other.Id).Select(x => x.Id).Order().ShouldBe(otherShowIds);
+        IDbContext
+            .PlexTvShows.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt })
+            .ToList()
+            .ShouldBe(otherShows);
+        IDbContext
+            .PlexTvShowSeason.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.TvShowId, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt })
+            .ToList()
+            .ShouldBe(otherSeasons);
+        IDbContext
+            .PlexTvShowEpisodes.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.TvShowSeasonId, x.TvShowId, x.PlexLibraryId, x.PlexServerId, x.Title, x.MediaSize, x.UpdatedAt })
+            .ToList()
+            .ShouldBe(otherEpisodes);
+        IDbContext
+            .PlexTvShowEpisodeData.AsNoTracking()
+            .Where(x => x.PlexLibraryId == other.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexTvShowEpisodeId, x.PlexLibraryId, x.PlexServerId, x.PlexApiMediaId, x.PlexApiPartId, x.Size })
+            .ToList()
+            .ShouldBe(otherData);
     }
 
     [Test]
@@ -1349,8 +1394,9 @@ public class SyncPlexTvShowsCommandUnitTests : BaseCommandUnitTest<SyncPlexTvSho
         // Arrange
         var empty = await LoadShow();
         var emptyEpisode = empty.Seasons.Single().Episodes.Single();
+        var replacementMediaData = emptyEpisode.MediaDataList.Single();
         emptyEpisode.UpdatedAt = emptyEpisode.UpdatedAt?.AddSeconds(1) ?? DateTime.UtcNow;
-        emptyEpisode.MediaDataList.First().Streams.Clear();
+        emptyEpisode.MediaDataList.Clear();
         library.TvShows.Clear();
         SetIds(library, [empty]);
         library.TvShows.Add(empty);
@@ -1363,12 +1409,15 @@ public class SyncPlexTvShowsCommandUnitTests : BaseCommandUnitTest<SyncPlexTvSho
         // Assert
         emptyResult.IsSuccess.ShouldBeTrue(emptyResult.ToString());
         emptyResult.Errors.Count.ShouldBe(0);
+        emptyResult.Value.UpdatedEpisodes.ShouldBe(1);
         IDbContext.PlexTvShowEpisodeDataStreams.AsNoTracking().ToList().ShouldBeEmpty();
-        IDbContext.PlexTvShowEpisodeData.AsNoTracking().Count(x => x.PlexTvShowEpisodeId == emptyEpisode.Id).ShouldBe(1);
+        IDbContext.PlexTvShowEpisodeData.AsNoTracking().Where(x => x.PlexTvShowEpisodeId == emptyEpisode.Id).ToList().ShouldBeEmpty();
 
         var forced = await LoadShow();
+        var forcedEpisode = forced.Seasons.Single().Episodes.Single();
+        forcedEpisode.MediaDataList.Add(replacementMediaData);
         SetIncoming(forced, includeStream: true);
-        var forcedMediaData = forced.Seasons.Single().Episodes.Single().MediaDataList.First();
+        var forcedMediaData = forcedEpisode.MediaDataList.First();
 
         // Act
         var forcedResult = await TestHandlerExecuteAsync<BulkInsertTvShowsRapport>(

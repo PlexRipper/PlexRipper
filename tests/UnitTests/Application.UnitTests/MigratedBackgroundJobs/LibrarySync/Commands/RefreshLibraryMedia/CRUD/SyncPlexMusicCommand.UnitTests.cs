@@ -1128,7 +1128,8 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
                 .ThenInclude(x => x.Tracks)
                     .ThenInclude(x => x.MediaDataList)
             .SingleAsync(CancellationToken);
-        var storedTrack = storedArtist.Albums.Single().Tracks.Single();
+        var storedAlbum = storedArtist.Albums.Single();
+        var storedTrack = storedAlbum.Tracks.Single();
         var artist = ToIncomingArtist(db, storedArtist);
         var track = artist.Albums.Single().Tracks.Single();
         var beforeArtistTitle = storedArtist.Title;
@@ -1196,14 +1197,26 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         );
         db.PlexMusicArtists.AsNoTracking()
             .Where(x => x.Id == storedArtist.Id)
-            .Select(x => x.Title)
+            .Select(x => new { x.Id, x.Title })
             .Single()
-            .ShouldBe(beforeArtistTitle);
+            .ShouldBe(new { Id = storedArtist.Id, Title = beforeArtistTitle });
+        db.PlexMusicAlbums.AsNoTracking()
+            .Where(x => x.Id == storedAlbum.Id)
+            .Select(x => new { x.Id, x.PlexArtistId })
+            .Single()
+            .ShouldBe(new { Id = storedAlbum.Id, PlexArtistId = storedAlbum.PlexArtistId });
         db.PlexMusicTracks.AsNoTracking()
             .Where(x => x.Id == storedTrack.Id)
-            .Select(x => x.Title)
+            .Select(x => new { x.Id, x.PlexAlbumId, x.Title })
             .Single()
-            .ShouldBe(beforeTrackTitle);
+            .ShouldBe(
+                new
+                {
+                    Id = storedTrack.Id,
+                    PlexAlbumId = storedTrack.PlexAlbumId,
+                    Title = beforeTrackTitle,
+                }
+            );
         db.PlexMusicTrackDataStreams.AsNoTracking().Count().ShouldBe(0);
         db.PlexMusicTrackData.AsNoTracking()
             .Where(x => x.PlexTrackId == storedTrack.Id)

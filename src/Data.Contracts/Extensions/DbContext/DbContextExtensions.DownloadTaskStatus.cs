@@ -183,72 +183,39 @@ public static partial class DbContextExtensions
                             .FirstOrDefaultAsync(cancellationToken);
                         break;
                     }
-                    case DownloadTaskType.PhotoAlbum:
+                    case DownloadTaskType.PhotoFolder:
                     {
-                        var albumId = currentParentKey.Id;
+                        var folderId = currentParentKey.Id;
+                        var folderIds = await GetPhotoFolderDescendantIdsAsync(
+                            dbContext,
+                            [folderId],
+                            cancellationToken
+                        );
                         var childStatuses = await dbContext
-                            .DownloadTaskPhotoImages.Where(x => x.ParentId == albumId)
+                            .DownloadTaskPhotoImageFiles.Where(x => folderIds.Contains(x.ParentId))
                             .Select(x => x.DownloadStatus)
                             .ToListAsync(cancellationToken);
                         var newStatus = DownloadTaskActions.Aggregate(childStatuses);
                         var changedCount = await dbContext
-                            .DownloadTaskPhotoAlbums.Where(x => x.Id == albumId && x.DownloadStatus != newStatus)
+                            .DownloadTaskPhotoFolders.Where(x => x.Id == folderId && x.DownloadStatus != newStatus)
                             .ExecuteUpdateAsync(
                                 p => p.SetProperty(x => x.DownloadStatus, newStatus),
                                 cancellationToken
                             );
                         if (changedCount > 0)
                             changedKeys.Add(currentParentKey);
-                        parentKey = null;
-                        break;
-                    }
-                    case DownloadTaskType.PhotoImage:
-                    {
-                        var imageId = currentParentKey.Id;
-                        var albumId = await dbContext
-                            .DownloadTaskPhotoImages.Where(x => x.Id == imageId)
-                            .Select(x => x.ParentId)
-                            .FirstOrDefaultAsync(cancellationToken);
-                        if (albumId is null && !await dbContext.DownloadTaskPhotoImages.AnyAsync(x => x.Id == imageId, cancellationToken))
-                        {
-                            parentKey = null;
-                            break;
-                        }
-
-                        var childStatuses = await dbContext
-                            .DownloadTaskPhotoImageFiles.Where(x => x.ParentId == imageId)
-                            .Select(x => x.DownloadStatus)
-                            .ToListAsync(cancellationToken);
-                        var newStatus = DownloadTaskActions.Aggregate(childStatuses);
-                        var changedCount = await dbContext
-                            .DownloadTaskPhotoImages.Where(x => x.Id == imageId && x.DownloadStatus != newStatus)
-                            .ExecuteUpdateAsync(
-                                p => p.SetProperty(x => x.DownloadStatus, newStatus),
-                                cancellationToken
-                            );
-                        if (changedCount > 0)
-                            changedKeys.Add(currentParentKey);
-
-                        parentKey = albumId is Guid parentAlbumId
-                            ? new DownloadTaskKey
-                            {
-                                Type = DownloadTaskType.PhotoAlbum,
-                                Id = parentAlbumId,
-                                PlexServerId = serverId,
-                                PlexLibraryId = libraryId,
-                            }
-                            : null;
-                        break;
-                    }
-                    case DownloadTaskType.PhotoData:
-                    {
-                        var fileId = currentParentKey.Id;
                         parentKey = await dbContext
-                            .DownloadTaskPhotoImageFiles.Where(x => x.Id == fileId)
+                            .DownloadTaskPhotoFolders.Where(x => x.Id == folderId)
                             .ProjectToParentKey()
                             .FirstOrDefaultAsync(cancellationToken);
                         break;
                     }
+                    case DownloadTaskType.PhotoImage:
+                        parentKey = await dbContext
+                            .DownloadTaskPhotoImageFiles.Where(x => x.Id == currentParentKey.Id)
+                            .ProjectToParentKey()
+                            .FirstOrDefaultAsync(cancellationToken);
+                        break;
                     case DownloadTaskType.MusicArtist:
                     {
                         var id = currentParentKey.Id;
@@ -416,17 +383,12 @@ public static partial class DbContextExtensions
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
                 break;
-            case DownloadTaskType.PhotoAlbum:
+            case DownloadTaskType.PhotoFolder:
                 await dbContext
-                    .DownloadTaskPhotoAlbums.Where(x => x.Id == key.Id)
+                    .DownloadTaskPhotoFolders.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
                 break;
             case DownloadTaskType.PhotoImage:
-                await dbContext
-                    .DownloadTaskPhotoImages.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
-                break;
-            case DownloadTaskType.PhotoData:
                 await dbContext
                     .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
@@ -503,17 +465,12 @@ public static partial class DbContextExtensions
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
                     .FirstOrDefaultAsync(CancellationToken.None);
-            case DownloadTaskType.PhotoAlbum:
+            case DownloadTaskType.PhotoFolder:
                 return await dbContext
-                    .DownloadTaskPhotoAlbums.Where(x => x.Id == key.Id)
+                    .DownloadTaskPhotoFolders.Where(x => x.Id == key.Id)
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
                     .FirstOrDefaultAsync(CancellationToken.None);
             case DownloadTaskType.PhotoImage:
-                return await dbContext
-                    .DownloadTaskPhotoImages.Where(x => x.Id == key.Id)
-                    .Select(x => (DownloadStatus?)x.DownloadStatus)
-                    .FirstOrDefaultAsync(CancellationToken.None);
-            case DownloadTaskType.PhotoData:
                 return await dbContext
                     .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
                     .Select(x => (DownloadStatus?)x.DownloadStatus)

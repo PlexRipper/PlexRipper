@@ -35,6 +35,7 @@ public partial class PlexMediaTypeMappersUnitTests
     [Arguments("track", PlexMediaType.MusicTrack)]
     [Arguments("photoalbum", PlexMediaType.PhotoAlbum)]
     [Arguments("photo", PlexMediaType.PhotoImage)]
+    [Arguments("clip", PlexMediaType.OtherVideos)]
     public void ShouldConvertPlexApiStrings_WhenValidPlexApiStringProvided(string input, PlexMediaType expected)
     {
         // Act

@@ -6,11 +6,16 @@ public static class MediaContainerMappers
 {
     public static LibraryMediaItemDTO ToMediaItemDTO(this Metadata data)
     {
+        var mediaType = data.Type.ToPlexMediaType();
+        var inferVideoQuality =
+            (mediaType is PlexMediaType.Movie or PlexMediaType.Episode or PlexMediaType.OtherVideos)
+            && data.Subtype != PlexMediaType.PhotoImage.ToPlexApiString();
+
         return new LibraryMediaItemDTO
         {
             RatingKey = int.TryParse(data.RatingKey!, out var ratingKey) ? ratingKey : -1,
             Key = data.Key,
-            Type = data.Type == "clip" ? PlexMediaType.OtherVideos : data.Type.ToPlexMediaType(),
+            Type = mediaType,
             Title = data.Title,
             Summary = data.Summary ?? string.Empty,
             Year = data.Year ?? 0,
@@ -19,9 +24,7 @@ public static class MediaContainerMappers
             SearchTitle = data.Title.ToSearchTitle(),
             OriginalTitle = data.OriginalTitle ?? string.Empty,
             ChildCount = data.ChildCount ?? 0,
-            Media = data.Media?.Select(x => x.ToItemMediaDTO(
-                data.Type is "movie" or "episode" or "clip" && data.Subtype != "photo"
-            )).ToList() ?? [],
+            Media = data.Media?.Select(x => x.ToItemMediaDTO(inferVideoQuality)).ToList() ?? [],
             Genre = data.Genre?.Select(x => x.ToGenreDTO()).ToList() ?? [],
             Country = data.Country?.Select(x => x.ToCountryDTO()).ToList() ?? [],
             Role = data.Role?.Select(x => x.ToRoleDTO()).ToList() ?? [],
@@ -120,15 +123,18 @@ public static class MediaContainerMappers
         new()
         {
             Id = source.Id,
-            StreamType = source.StreamType switch
+            Key = source.Key,
+            StreamType = (int)source.StreamType switch
             {
-                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Video => Domain.StreamType.Video,
-                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Audio => Domain.StreamType.Audio,
-                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Subtitle => Domain.StreamType.Subtitle,
+                (int)LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Video => Domain.StreamType.Video,
+                (int)LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Audio => Domain.StreamType.Audio,
+                (int)LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Subtitle => Domain.StreamType.Subtitle,
+                (int)Domain.StreamType.Lyrics => Domain.StreamType.Lyrics,
                 _ => Domain.StreamType.Unknown,
             },
             Default = source.Default,
             Codec = source.Codec,
+            Format = source.Format,
             Index = source.Index,
             Bitrate = source.Bitrate ?? 0,
             Language = source.Language ?? string.Empty,

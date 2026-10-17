@@ -5,9 +5,20 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
+    private static readonly IEqualityComparer<(string LanguageCode, string LanguageTag)> _streamLanguageKeyComparer =
+        EqualityComparer<(string LanguageCode, string LanguageTag)>.Create(
+            static (left, right) =>
+                StringComparer.OrdinalIgnoreCase.Equals(left.LanguageCode, right.LanguageCode)
+                && StringComparer.OrdinalIgnoreCase.Equals(left.LanguageTag, right.LanguageTag),
+            static language => HashCode.Combine(
+                StringComparer.OrdinalIgnoreCase.GetHashCode(language.LanguageCode),
+                StringComparer.OrdinalIgnoreCase.GetHashCode(language.LanguageTag)
+            )
+        );
+
     /// <summary>
-    /// Inserts normalized language pairs when absent and returns their lookup identities. The unique database index
-    /// arbitrates concurrent inserts; no lookup state survives a transaction retry.
+    /// Inserts normalized language pairs when absent and returns a case-insensitive lookup of their identities.
+    /// The unique database index arbitrates concurrent inserts.
     /// </summary>
     public static async Task<
         Dictionary<(string LanguageCode, string LanguageTag), int>
@@ -22,7 +33,7 @@ public static partial class DbContextExtensions
                 (LanguageCode: x.LanguageCode.ToLowerInvariant(), LanguageTag: x.LanguageTag.ToLowerInvariant())
             )
             .Distinct();
-        var result = new Dictionary<(string LanguageCode, string LanguageTag), int>();
+        var result = new Dictionary<(string LanguageCode, string LanguageTag), int>(_streamLanguageKeyComparer);
 
         // Two parameters per pair: both writes and reads remain below SQLite's conservative 999 limit.
         foreach (var chunk in pairs.Chunk(400))

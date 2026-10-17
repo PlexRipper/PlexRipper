@@ -36,6 +36,7 @@ public static class PlexMediaTypeMappers
             "photo" => PlexMediaType.PhotoImage,
             nameof(PlexMediaType.OtherVideos) => PlexMediaType.OtherVideos,
             nameof(PlexMediaType.Games) => PlexMediaType.Games,
+            "clip" => PlexMediaType.OtherVideos,
             nameof(PlexMediaType.Unknown) => PlexMediaType.Unknown,
             _ => DefaultException(),
         };

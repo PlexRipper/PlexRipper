@@ -38,8 +38,11 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
                         q.SectionId == sectionId
                         && q.XPlexContainerStart == 0
                         && q.XPlexContainerSize == 0
-                        && q.MediaType == 1
-                        && q.Sort == "titleSort:asc"
+                        && q.MediaQuery != null
+                        && (int?)q.MediaQuery.Type == 1
+                        && q.MediaQuery.Sort == "titleSort:asc"
+                        && q.IncludeOptionalElements == null
+                        && q.PmsApiVersion == null
                     )
                 )
             )
@@ -181,6 +184,10 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
     [Arguments(PlexMediaType.Movie)]
     [Arguments(PlexMediaType.OtherVideos)]
     [Arguments(PlexMediaType.MusicTrack)]
+    [Arguments(PlexMediaType.Episode)]
+    [Arguments(PlexMediaType.TvShow)]
+    [Arguments(PlexMediaType.MusicArtist)]
+    [Arguments(PlexMediaType.PhotoImage)]
     public async Task ShouldRetrieveMediaAcrossAllPages_WhenUsingRealSdk(PlexMediaType mediaType)
     {
         // Arrange
@@ -197,9 +204,10 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
         );
         var dbContext = IDbContext;
         var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-        var itemType = mediaType == PlexMediaType.MusicTrack ? "track" : "movie";
+        var itemType = mediaType == PlexMediaType.OtherVideos ? "movie" : mediaType.ToPlexApiString();
         var items = new[] { CreateItem(1, itemType), CreateItem(2, itemType), CreateItem(3, itemType) };
         var requests = new List<IDictionary<string, string>>();
+        var apiVersions = new List<string?>();
         var transport = new Mock<IPlexApiClient>(MockBehavior.Strict);
         var sdk = new PlexAPI(client: transport.Object, serverUrl: "http://plex.test", token: "test-token");
 
@@ -228,6 +236,9 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
                 {
                     var query = request.ParseQueryToDictionary();
                     requests.Add(query);
+                    apiVersions.Add(request.Headers.TryGetValues("X-Plex-Pms-Api-Version", out var versions)
+                        ? versions.Single()
+                        : null);
                     var start = int.Parse(query["X-Plex-Container-Start"]);
                     var size = int.Parse(query["X-Plex-Container-Size"]);
                     var available = query.ContainsKey("unwatched") ? [] : items;
@@ -282,6 +293,15 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
             .Select(q => (q["X-Plex-Container-Start"], q["X-Plex-Container-Size"], q.ContainsKey("unwatched")))
             .ShouldBe([("0", "0", false), ("0", "2", false), ("2", "1", false)]);
         requests.Select(q => q["type"]).ShouldBe(Enumerable.Repeat(mediaType.ToPlexMetadataTypeId().ToString(), 3));
+        requests.Select(q => q["sort"]).ShouldBe(Enumerable.Repeat("titleSort:asc", 3));
+        var expectedElements = mediaType is PlexMediaType.Movie or PlexMediaType.Episode or PlexMediaType.MusicTrack or PlexMediaType.OtherVideos
+            ? "Stream"
+            : null;
+        var expectedVersion = expectedElements is null ? null : "1.0";
+        requests.Select(q => q.TryGetValue("includeOptionalElements", out var elements) ? elements : null)
+            .ShouldBe([null, expectedElements, expectedElements]);
+        apiVersions.ShouldBe([null, expectedVersion, expectedVersion]);
+        requests.Any(q => q.ContainsKey("includeElements")).ShouldBeFalse();
         transport.Verify();
         Mock.Mock<IPlexApiClientFactory>().Verify();
         Mock.Mock<ILibrarySyncProgressStore>().Verify();

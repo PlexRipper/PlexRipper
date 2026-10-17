@@ -17,13 +17,16 @@ internal static class PlexLibraryMediaApi
             .Content.ListContentAsync(
                 new ListContentRequest
                 {
-                    MediaType = mediaType.ToPlexMetadataTypeId(),
+                    MediaQuery = new MediaQuery
+                    {
+                        Type = (MediaType)mediaType.ToPlexMetadataTypeId(),
+                        Sort = "titleSort:asc",
+                    },
                     XPlexContainerStart = 0,
                     XPlexContainerSize = 0,
                     SectionId = libraryKey,
                     // The SDK's default False adds a watched-state filter; null includes all media.
                     Unwatched = null,
-                    Sort = "titleSort:asc",
                 }
             )
             .ToResponse(cancellationToken);
@@ -44,18 +47,25 @@ internal static class PlexLibraryMediaApi
         CancellationToken cancellationToken
     )
     {
+        var includeStreams = pageSize > 0
+            && mediaType is PlexMediaType.Movie or PlexMediaType.Episode or PlexMediaType.MusicTrack or PlexMediaType.OtherVideos;
         var response = await client
             .Content.ListContentAsync(
                 new ListContentRequest
                 {
-                    MediaType = mediaType.ToPlexMetadataTypeId(),
+                    MediaQuery = new MediaQuery
+                    {
+                        Type = (MediaType)mediaType.ToPlexMetadataTypeId(),
+                        Sort = "titleSort:asc",
+                    },
                     XPlexContainerStart = startIndex,
                     XPlexContainerSize = pageSize,
                     SectionId = libraryKey,
                     Unwatched = null,
                     IncludeGuids = BoolInt.True,
                     IncludeMeta = BoolInt.True,
-                    Sort = "titleSort:asc",
+                    IncludeOptionalElements = includeStreams ? "Stream" : null,
+                    PmsApiVersion = includeStreams ? "1.0" : null,
                 }
             )
             .ToResponse(cancellationToken);

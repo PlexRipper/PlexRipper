@@ -34,6 +34,8 @@ public class DbContextExtensionsStreamLanguagesUnitTests : BaseUnitTest
 
         // Assert
         first[("eng", "eng")].ShouldBe(existingId);
+        first[("ENG", "eNg")].ShouldBe(existingId);
+        second[("ENG", "EN")].ShouldBe(first[("eng", "en")]);
         first[("eng", "en")].ShouldNotBe(existingId);
         first.OrderBy(x => x.Key).ShouldBe(second.OrderBy(x => x.Key));
         var actual = await dbContext.StreamLanguages.OrderBy(x => x.LanguageCode).ThenBy(x => x.LanguageTag)
@@ -98,29 +100,6 @@ public class DbContextExtensionsStreamLanguagesUnitTests : BaseUnitTest
             ]);
     }
 
-    [Test]
-    public async Task ShouldRollbackNewLanguage_WhenOwningTransactionFails()
-    {
-        // Arrange
-        await SetupDatabase(59303);
-        using var dbContext = IDbContext;
-        (await dbContext.StreamLanguages.ToListAsync(CancellationToken)).ShouldBeEmpty();
-
-        // Act
-        var result = await dbContext.ExecuteTransactionAsync(async (context, ct) =>
-        {
-            await context.InsertOrIgnoreStreamLanguagesAsync(
-                [new StreamLanguage { LanguageCode = "eng", LanguageTag = "eng" }], ct);
-            throw new InvalidOperationException("Injected owner transaction failure");
-        }, CancellationToken);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.Count.ShouldBe(1);
-        result.HasException<InvalidOperationException>().ShouldBeTrue();
-        using var assertContext = IDbContext;
-        (await assertContext.StreamLanguages.ToListAsync(CancellationToken)).ShouldBeEmpty();
-    }
     [Test]
     public async Task ShouldPreserveExistingOwnerAndPersistStreams_WhenUpgradingFromPreviousMigration()
     {

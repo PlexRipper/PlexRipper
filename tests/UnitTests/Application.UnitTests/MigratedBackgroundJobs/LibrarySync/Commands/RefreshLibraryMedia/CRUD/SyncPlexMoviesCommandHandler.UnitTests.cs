@@ -315,45 +315,6 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseCommandUnitTest<SyncPle
         replacedMovies.Select(x => x.Id).ShouldAllBe(id => !originalIds.Contains(id));
     }
 
-    [Test]
-    public async Task ShouldSynchronizeRelationshipsForCompleteIncomingMovieList_WhenMoviesAreUnchanged()
-    {
-        // Arrange
-        var seed = await SetupDatabase(
-            713458,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.PlexMovieLibraryCount = 1;
-                config.MovieCount = 2;
-            }
-        );
-        var library = IDbContext.PlexLibraries.First();
-        var movies = IDbContext.PlexMovies.AsNoTracking().Include(x => x.MediaDataList).OrderBy(x => x.Id).ToList();
-        var actor = FakeData.GetPlexActors(seed).Generate();
-        await IDbContext.BulkInsertAsync([actor], cancellationToken: CancellationToken);
-        actor.Id = IDbContext.PlexActors.AsNoTracking().Single(x => x.Key == actor.Key).Id;
-        foreach (var movie in movies)
-            movie.Actors.Add(actor);
-        SetIds(library, movies);
-        library.Movies.AddRange(movies);
-        var metadata = new InsertMediaMetaDataCommandResponse(library)
-        {
-            PlexActors = new Dictionary<string, PlexActor> { [actor.Key] = actor },
-        };
-
-        // Act
-        var result = await Mock.Create<SyncPlexMoviesCommandHandler>()
-            .ExecuteAsync(new SyncPlexMoviesCommand(metadata), CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.UpdatedMovies.ShouldBe(0);
-        var relations = IDbContext.PlexMovieActors.Where(x => x.PlexLibraryId == library.Id).ToList();
-        relations.Count.ShouldBe(2);
-        relations.Select(x => x.PlexMovieId).Order().ShouldBe(movies.Select(x => x.Id).Order());
-        relations.ShouldAllBe(x => x.PlexActorId == actor.Id);
-    }
 
     [Test]
     public async Task ShouldDeleteTwentyMovies_WhenSomeExist()

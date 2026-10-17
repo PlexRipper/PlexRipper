@@ -10,16 +10,19 @@ public static class BasePlexMediaDataMapper
     /// <summary>
     /// Adds the missing stream data to the <see cref="BasePlexMediaData"/> which allows it to be complete for Torznab indexing. It also generates a <see cref="BasePlexMediaData.GeneratedFilename"/> as Sonarr/Radarr require specific name to contain the media specs.
     /// </summary>
-    public static void UpdateStreamMetadata(
+    /// <returns><see langword="true"/> when metadata was generated and applied; otherwise <see langword="false"/> when a video stream was unavailable.</returns>
+    public static bool UpdateStreamMetadata(
         this BasePlexMediaData mediaDataDb,
         LibraryMediaItemDTO metaDataItem,
         LibraryMediaItemMediaDTO mediaItem,
         LibraryMediaItemPartDTO partItem
     )
     {
-        // Extract video stream info
-        var videoStreams = partItem.Stream.Where(s => s.StreamType == StreamType.Video).ToList();
-        var videoStream = partItem.Stream.FirstOrDefault(s => s.Default == true) ?? videoStreams.FirstOrDefault();
+        // Extract video stream info. Plex may mark an audio stream as default, so only a
+        // default video stream may be selected; otherwise preserve the first-video fallback.
+        var videoStream =
+            partItem.Stream.FirstOrDefault(s => s is { StreamType: StreamType.Video, Default: true })
+            ?? partItem.Stream.FirstOrDefault(s => s.StreamType == StreamType.Video);
         if (videoStream is null)
         {
             _log.Here()
@@ -28,7 +31,7 @@ public static class BasePlexMediaDataMapper
                     mediaDataDb.Id,
                     mediaDataDb.GetFileName
                 );
-            return;
+            return false;
         }
 
         // Map codecs
@@ -54,6 +57,7 @@ public static class BasePlexMediaDataMapper
         // Mark as enriched
         mediaDataDb.NeedsGeneratedName = false;
         mediaDataDb.GeneratedNameSyncedAt = DateTime.UtcNow;
+        return true;
     }
 
     /// <summary>

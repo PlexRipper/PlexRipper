@@ -51,6 +51,24 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
         var artists = new List<PlexMusicArtist>();
         var albums = new List<PlexMusicAlbum>();
         var tracks = new List<PlexMusicTrack>();
+        var retainedArtistKeys = new HashSet<int>();
+        var retainedAlbumKeys = new HashSet<int>();
+        var retainedTrackKeys = new HashSet<int>();
+        void RetainArtist(PlexMusicArtist artist)
+        {
+            if (retainedArtistKeys.Add(artist.PlexApiRatingKey))
+                artists.Add(artist);
+        }
+        void RetainAlbum(PlexMusicAlbum album)
+        {
+            if (retainedAlbumKeys.Add(album.PlexApiRatingKey))
+                albums.Add(album);
+        }
+        void RetainTrack(PlexMusicTrack track)
+        {
+            if (retainedTrackKeys.Add(track.PlexApiRatingKey))
+                tracks.Add(track);
+        }
         var bulkConfig = new BulkConfig { BatchSize = 500 };
         var result = await Result.Try(async Task<Result<CrudMusicReport>> () =>
         {
@@ -95,10 +113,8 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
             var artistByKey = currentArtists.ToDictionary(x => x.PlexApiRatingKey);
             var albumByKey = currentAlbums.ToDictionary(x => x.PlexApiRatingKey);
             var trackByKey = currentTracks.ToDictionary(x => x.PlexApiRatingKey);
-            var refreshedArtists =
-                new List<(PlexMusicArtist Incoming, PlexMusicArtist Stored, List<PlexMusicAlbum> Albums)>();
-            var refreshedAlbums =
-                new List<(PlexMusicAlbum Incoming, PlexMusicAlbum Stored, List<PlexMusicTrack> Tracks)>();
+            var refreshedArtists = new List<(PlexMusicArtist Incoming, PlexMusicArtist Stored)>();
+            var refreshedAlbums = new List<(PlexMusicAlbum Incoming, PlexMusicAlbum Stored)>();
             var createdTracks = new List<(PlexMusicTrack Incoming, PlexMusicTrack Stored)>();
             var refreshedMediaData = new List<PlexMusicTrackMediaData>();
             var createdMediaData = new List<(PlexMusicTrackMediaData Incoming, PlexMusicTrackMediaData Stored)>();
@@ -109,9 +125,11 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     incomingArtist.Id = artist.Id;
                 if (artist is not null && incomingArtist.UpdatedAt == artist.UpdatedAt)
                 {
-                    artists.Add(artist);
-                    albums.AddRange(artist.Albums);
-                    tracks.AddRange(artist.Albums.SelectMany(x => x.Tracks));
+                    RetainArtist(artist);
+                    foreach (var storedAlbum in artist.Albums)
+                        RetainAlbum(storedAlbum);
+                    foreach (var storedTrack in artist.Albums.SelectMany(x => x.Tracks))
+                        RetainTrack(storedTrack);
                     continue;
                 }
 
@@ -129,9 +147,8 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     report.UpdatedArtists++;
                 }
 
-                artists.Add(artist);
-                var artistAlbums = new List<PlexMusicAlbum>(incomingArtist.Albums.Count);
-                refreshedArtists.Add((incomingArtist, artist, artistAlbums));
+                RetainArtist(artist);
+                refreshedArtists.Add((incomingArtist, artist));
                 foreach (var incomingAlbum in incomingArtist.Albums)
                 {
                     albumByKey.TryGetValue(incomingAlbum.PlexApiRatingKey, out var album);
@@ -139,9 +156,9 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                         incomingAlbum.Id = album.Id;
                     if (album is not null && incomingAlbum.UpdatedAt == album.UpdatedAt)
                     {
-                        artistAlbums.Add(album);
-                        albums.Add(album);
-                        tracks.AddRange(album.Tracks);
+                        RetainAlbum(album);
+                        foreach (var storedTrack in album.Tracks)
+                            RetainTrack(storedTrack);
                         continue;
                     }
 
@@ -164,10 +181,8 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                         report.UpdatedAlbums++;
                     }
 
-                    artistAlbums.Add(album);
-                    albums.Add(album);
-                    var albumTracks = new List<PlexMusicTrack>(incomingAlbum.Tracks.Count);
-                    refreshedAlbums.Add((incomingAlbum, album, albumTracks));
+                    RetainAlbum(album);
+                    refreshedAlbums.Add((incomingAlbum, album));
                     foreach (var incomingTrack in incomingAlbum.Tracks)
                     {
                         trackByKey.TryGetValue(incomingTrack.PlexApiRatingKey, out var track);
@@ -175,8 +190,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                             incomingTrack.Id = track.Id;
                         if (track is not null && incomingTrack.UpdatedAt == track.UpdatedAt)
                         {
-                            albumTracks.Add(track);
-                            tracks.Add(track);
+                            RetainTrack(track);
                             continue;
                         }
 
@@ -209,26 +223,33 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                             refreshedMediaData,
                             createdMediaData
                         );
-                        albumTracks.Add(track);
-                        tracks.Add(track);
+                        RetainTrack(track);
                     }
-
-                    album.ChildCount = albumTracks.Count;
-                    album.TrackCount = albumTracks.Count;
-                    album.Duration = albumTracks.Sum(x => x.Duration);
-                    album.MediaSize = albumTracks.Sum(x => x.MediaSize);
                 }
-
-                artist.ChildCount = artistAlbums.Count;
-                artist.Duration = artistAlbums.Sum(x => x.Duration);
-                artist.MediaSize = artistAlbums.Sum(x => x.MediaSize);
             }
 
-            // Resolve moves before severing required relationships, so EF does not delete moved children as orphans.
-            foreach (var (_, stored, children) in refreshedArtists)
-                stored.Albums = children;
-            foreach (var (_, stored, children) in refreshedAlbums)
-                stored.Tracks = children;
+            // Resolve moves before severing required relationships, using each retained child's actual owner.
+            var albumsByArtist = albums
+                .GroupBy(x => x.PlexArtist!)
+                .ToDictionary(x => x.Key, x => x.ToList());
+            var tracksByAlbum = tracks
+                .GroupBy(x => x.PlexAlbum!)
+                .ToDictionary(x => x.Key, x => x.ToList());
+            foreach (var (_, stored) in refreshedAlbums)
+            {
+                stored.Tracks = tracksByAlbum.GetValueOrDefault(stored) ?? [];
+                stored.ChildCount = stored.Tracks.Count;
+                stored.TrackCount = stored.Tracks.Count;
+                stored.Duration = stored.Tracks.Sum(x => x.Duration);
+                stored.MediaSize = stored.Tracks.Sum(x => x.MediaSize);
+            }
+            foreach (var (_, stored) in refreshedArtists)
+            {
+                stored.Albums = albumsByArtist.GetValueOrDefault(stored) ?? [];
+                stored.ChildCount = stored.Albums.Count;
+                stored.Duration = stored.Albums.Sum(x => x.Duration);
+                stored.MediaSize = stored.Albums.Sum(x => x.MediaSize);
+            }
 
             var artistKeys = artists.Select(x => x.PlexApiRatingKey).ToHashSet();
             var albumKeys = albums.Select(x => x.PlexApiRatingKey).ToHashSet();
@@ -247,9 +268,9 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
             report.UnchangedTracks = tracks.Count - report.CreatedTracks - report.UpdatedTracks;
             await ctx.SaveChangesAsync(ct);
 
-            foreach (var (incoming, stored, _) in refreshedArtists)
+            foreach (var (incoming, stored) in refreshedArtists)
                 incoming.Id = stored.Id;
-            foreach (var (incoming, stored, _) in refreshedAlbums)
+            foreach (var (incoming, stored) in refreshedAlbums)
             {
                 incoming.Id = stored.Id;
                 incoming.PlexArtistId = stored.PlexArtistId;
@@ -267,13 +288,14 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
             }
             if (refreshedMediaData.Count > 0)
                 await ReconcileMusicTrackStreamsAsync(ctx, refreshedMediaData, ct);
-
             if (refreshedArtists.Count > 0)
             {
                 var metadataArtists = refreshedArtists.Select(x => x.Incoming).ToList();
                 await SyncArtistCountries(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, ct);
                 await SyncArtistGenres(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, ct);
                 await SyncArtistActors(ctx, metadataArtists, command.LibraryMetadata, bulkConfig, ct);
+            }
+            if (refreshedAlbums.Count > 0)
                 await SyncAlbumCountries(
                     ctx,
                     refreshedAlbums.Select(x => x.Incoming).ToList(),
@@ -281,6 +303,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     bulkConfig,
                     ct
                 );
+            if (refreshedArtists.Count > 0 || refreshedAlbums.Count > 0)
                 await PersistMusicAudioQualities(
                     ctx,
                     refreshedArtists.Select(x => x.Stored).ToList(),
@@ -289,16 +312,16 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     bulkConfig,
                     ct
                 );
-            }
 
-            await ctx.SetMusicMediaMetrics(
-                library.Id,
-                artists.Count,
-                albums.Count,
-                tracks.Count,
-                tracks.Sum(x => x.MediaSize),
-                ct
-            );
+            if (report.ChangedItemCount > 0)
+                await ctx.SetMusicMediaMetrics(
+                    library.Id,
+                    artists.Count,
+                    albums.Count,
+                    tracks.Count,
+                    tracks.Sum(x => x.MediaSize),
+                    ct
+                );
             if (report.ChangedItemCount > 0)
                 await ctx
                     .PlexLibraries.Where(x => x.Id == library.Id)

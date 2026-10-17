@@ -12,10 +12,6 @@ public class PlexMusicTrackMediaData : BasePlexMediaData
 
     public required int PartIndex { get; set; }
 
-    public string? OriginalFilePath { get; set; }
-
-    public string? SourceRelativePath { get; set; }
-
     public int? AudioBitrateKbps { get; set; }
 
     public int? AudioBitDepth { get; set; }

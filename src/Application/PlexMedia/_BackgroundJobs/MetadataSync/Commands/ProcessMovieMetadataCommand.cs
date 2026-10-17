@@ -142,8 +142,10 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
                         continue;
                     }
 
-                    // partToUpdate.UpdateStreamMetadata(metadataItem, mediaItem, partItem);
-                    processedCount++;
+                    if (partToUpdate.UpdateStreamMetadata(metadataItem, mediaItem, partItem))
+                        processedCount++;
+                    else
+                        skippedCount++;
                 }
 
                 await dbContext.SaveChangesAsync(ct);
@@ -163,7 +165,7 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
         {
             _log.Here()
                 .Warning(
-                    "Skipped {SkippedCount} Movie parts due to missing metadata for server {ServerName} ({ServerId})",
+                    "Skipped {SkippedCount} Movie parts due to missing metadata or video streams for server {ServerName} ({ServerId})",
                     skippedCount,
                     command.ServerName,
                     command.ServerId

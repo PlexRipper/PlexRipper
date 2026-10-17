@@ -51,6 +51,7 @@ public class SyncPlexOtherVideosCommandHandler
         var incoming = library.OtherVideos.ToList();
 
         var incomingKeys = incoming.Select(video => video.PlexApiRatingKey).ToHashSet();
+        var changedVideos = new List<PlexOtherVideo>();
         var report = new CrudOtherVideosReport();
 
         var result = await Result.Try(async Task<Result> () =>
@@ -144,7 +145,9 @@ public class SyncPlexOtherVideosCommandHandler
                 await ctx.BulkInsertAsync(mediaData, _bulkConfig, ct);
             if (mediaData.Count > 0)
                 await ReconcileOtherVideoStreamsAsync(ctx, mediaData, ct);
-            await ctx.SetOtherVideoMediaMetrics(library.Id, incoming.Count, mediaSize, ct);
+            changedVideos = created.Concat(updated).ToList();
+            if (report.ChangedItemCount > 0)
+                await ctx.SetOtherVideoMediaMetrics(library.Id, incoming.Count, mediaSize, ct);
             return Result.Ok();
         });
 
@@ -153,16 +156,19 @@ public class SyncPlexOtherVideosCommandHandler
         if (result.IsFailed)
             return result.ToResult<CrudOtherVideosReport>().LogError();
 
-        var metadataResult = Result.Merge(
-            await SyncOtherVideoCountries(incoming, command.LibraryMetadata, ct),
-            await SyncOtherVideoGenres(incoming, command.LibraryMetadata, ct),
-            await SyncOtherVideoActors(incoming, command.LibraryMetadata, ct)
-        );
+        if (changedVideos.Count > 0)
+        {
+            var metadataResult = Result.Merge(
+                await SyncOtherVideoCountries(changedVideos, command.LibraryMetadata, ct),
+                await SyncOtherVideoGenres(changedVideos, command.LibraryMetadata, ct),
+                await SyncOtherVideoActors(changedVideos, command.LibraryMetadata, ct)
+            );
 
-        if (metadataResult.IsCancelled)
-            return metadataResult.ToResult<CrudOtherVideosReport>().LogWarning();
-        if (metadataResult.IsFailed)
-            return metadataResult.ToResult<CrudOtherVideosReport>().LogError();
+            if (metadataResult.IsCancelled)
+                return metadataResult.ToResult<CrudOtherVideosReport>().LogWarning();
+            if (metadataResult.IsFailed)
+                return metadataResult.ToResult<CrudOtherVideosReport>().LogError();
+        }
 
         _log.Here().Information("Synchronized Other Videos library {PlexLibraryId}: {@Report}", library.Id, report);
         return Result.Ok(report);
@@ -198,6 +204,10 @@ public class SyncPlexOtherVideosCommandHandler
         CancellationToken ct
     )
     {
+        if (videos.Count == 0)
+            return Result.Ok();
+
+        var videoIds = videos.Select(video => video.Id).ToList();
         var rows = new List<PlexOtherVideoActors>();
         var keys = new HashSet<(int ActorId, int VideoId)>();
         foreach (var video in videos)
@@ -208,9 +218,10 @@ public class SyncPlexOtherVideosCommandHandler
         return await Result.Try(async Task () =>
         {
             await _dbContext
-                .PlexOtherVideoActors.Where(x => x.PlexLibraryId == metadata.PlexLibraryId)
+                .PlexOtherVideoActors.Where(x => videoIds.Contains(x.PlexOtherVideoId))
                 .ExecuteDeleteAsync(ct);
-            await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
+            if (rows.Count > 0)
+                await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
         });
     }
 
@@ -220,6 +231,10 @@ public class SyncPlexOtherVideosCommandHandler
         CancellationToken ct
     )
     {
+        if (videos.Count == 0)
+            return Result.Ok();
+
+        var videoIds = videos.Select(video => video.Id).ToList();
         var rows = new List<PlexOtherVideoGenres>();
         var keys = new HashSet<(int GenreId, int VideoId)>();
         foreach (var video in videos)
@@ -230,9 +245,10 @@ public class SyncPlexOtherVideosCommandHandler
         return await Result.Try(async Task () =>
         {
             await _dbContext
-                .PlexOtherVideoGenres.Where(x => x.PlexLibraryId == metadata.PlexLibraryId)
+                .PlexOtherVideoGenres.Where(x => videoIds.Contains(x.PlexOtherVideoId))
                 .ExecuteDeleteAsync(ct);
-            await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
+            if (rows.Count > 0)
+                await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
         });
     }
 
@@ -242,6 +258,10 @@ public class SyncPlexOtherVideosCommandHandler
         CancellationToken ct
     )
     {
+        if (videos.Count == 0)
+            return Result.Ok();
+
+        var videoIds = videos.Select(video => video.Id).ToList();
         var rows = new List<PlexOtherVideoCountries>();
         var keys = new HashSet<(int CountryId, int VideoId)>();
         foreach (var video in videos)
@@ -252,9 +272,10 @@ public class SyncPlexOtherVideosCommandHandler
         return await Result.Try(async Task () =>
         {
             await _dbContext
-                .PlexOtherVideoCountries.Where(x => x.PlexLibraryId == metadata.PlexLibraryId)
+                .PlexOtherVideoCountries.Where(x => videoIds.Contains(x.PlexOtherVideoId))
                 .ExecuteDeleteAsync(ct);
-            await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
+            if (rows.Count > 0)
+                await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
         });
     }
 

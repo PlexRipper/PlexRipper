@@ -92,6 +92,52 @@ public class BootUnitTests : BaseUnitTest<Boot>
     }
 
     [Test]
+    public async Task ShouldStopApplicationBeforeStartingBackgroundJobs_WhenLibrarySyncCleanupFails()
+    {
+        // Arrange
+        SetAppRuntimeInfo(x => x.IsIntegrationTestMode = true);
+        var sequence = new MockSequence();
+
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStarted).Returns(CancellationToken.None);
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStopping).Returns(CancellationToken.None);
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStopped).Returns(CancellationToken.None);
+        Mock.Mock<ICommandExecutor>()
+            .InSequence(sequence)
+            .Setup(x => x.Send(It.IsAny<CreateDefaultAppUserCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadQueue>()
+            .InSequence(sequence)
+            .Setup(x => x.Setup(CancellationToken.None))
+            .Returns(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .InSequence(sequence)
+            .Setup(x => x.Send(It.IsAny<RecoverInterruptedDownloadsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .InSequence(sequence)
+            .Setup(x => x.Send(It.IsAny<CleanupLibrarySyncJobQueueCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("cleanup failed"))
+            .Verifiable(Times.Once());
+        Mock.Mock<IHostApplicationLifetime>()
+            .InSequence(sequence)
+            .Setup(x => x.StopApplication())
+            .Verifiable(Times.Once());
+
+        // Act
+        await Sut.StartAsync(CancellationToken);
+
+        // Assert
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IDownloadQueue>().Verify();
+        Mock.Mock<IHostApplicationLifetime>().Verify();
+        Mock.Mock<IBackgroundJobsSetup>()
+            .Verify(x => x.SetupAsync(It.IsAny<CancellationToken>()), Times.Never());
+    }
+
+    [Test]
     public async Task ShouldKickQueuedLibrarySyncsAfterStartingBackgroundJobs()
     {
         // Arrange

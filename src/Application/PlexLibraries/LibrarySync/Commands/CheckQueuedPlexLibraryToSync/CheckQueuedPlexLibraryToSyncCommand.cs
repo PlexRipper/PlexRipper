@@ -148,13 +148,16 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
         if (claimed != 1)
             return;
 
-        var scheduleResult = await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-            jobKey,
-            new LibrarySyncJobPayload(serverId, libraryId, forceMediaRefresh),
-            cancellationToken
+        var scheduleResult = await Result.Try(() =>
+            _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
+                jobKey,
+                new LibrarySyncJobPayload(serverId, libraryId, forceMediaRefresh),
+                cancellationToken
+            )
         );
 
-        if (scheduleResult.IsFailed || scheduleResult.IsCancelled)
+        // ExecuteJob also succeeds without scheduling when the job key already exists.
+        if (scheduleResult.IsCancelledOrFailed || scheduleResult.Value == DateTimeOffset.MinValue)
         {
             await _dbContext.LibrarySyncJobQueues
                 .Where(x =>

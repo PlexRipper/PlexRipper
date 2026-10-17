@@ -56,119 +56,114 @@ public class LibrarySyncJob : IJob
                 _serverId,
                 _libraryId
             );
-        var queueStatus = await _dbContext
-            .LibrarySyncJobQueues.Where(x => x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId)
-            .Select(x => x.Status)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (queueStatus != LibrarySyncJobStatus.Processing)
+        var shouldDispatch = true;
+        var isServerOffline = false;
+        // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
+        // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
+        var result = await Result.Try(async Task<Result> () =>
         {
-            context.SetResult(JobStatus.Cancelled);
-            _log.Here()
-                .Information(
-                    "Skipping library sync job for server {ServerId}, library {LibraryId} because its queue status is {QueueStatus}",
-                    _serverId,
-                    _libraryId,
-                    queueStatus
-                );
-            return;
-        }
+            var queueStatus = await _dbContext
+                .LibrarySyncJobQueues.Where(x => x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId)
+                .Select(x => x.Status)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (queueStatus != LibrarySyncJobStatus.Processing)
+            {
+                shouldDispatch = false;
+                context.SetResult(JobStatus.Cancelled);
+                _log.Here()
+                    .Information(
+                        "Skipping library sync job for server {ServerId}, library {LibraryId} because its queue status is {QueueStatus}",
+                        _serverId,
+                        _libraryId,
+                        queueStatus
+                    );
+                return Result.Ok();
+            }
 
-        // Check if the server is online before starting sync
-        var isServerOnline = await _dbContext.IsServerOnline(_serverId);
-        if (!isServerOnline)
-        {
-            var serverName = await _dbContext.GetPlexServerNameById(_serverId);
-            _log.Here()
-                .Warning(
-                    "Server {ServerName} with id {ServerId} is offline, marking queue item and skipping sync",
-                    serverName,
-                    _serverId
-                );
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, isServerOffline: true);
-        }
-        else
-        {
+            // Check if the server is online before starting sync
+            isServerOffline = !await _dbContext.IsServerOnline(_serverId);
+            if (isServerOffline)
+            {
+                _log.Here().Warning("Server {ServerId} is offline, marking queue item and skipping sync", _serverId);
+                return Result.Ok();
+            }
+
             using var syncLease = await _mediaOverviewRebuildCoordinator.AcquireLibrarySyncLeaseAsync(
                 cancellationToken
             );
             await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing);
 
-            var forceMediaRefresh = payloadResult.Value.ForceMediaRefresh;
-
-            // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
-            // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-
             // Execute the library sync command
-            var result = await Result.Try(() =>
-                _commandExecutor.Send(
-                    new RefreshLibraryMediaCommand(_libraryId, forceMediaRefresh),
-                    context.CancellationToken
-                )
+            var refreshResult = await _commandExecutor.Send(
+                new RefreshLibraryMediaCommand(_libraryId, payloadResult.Value.ForceMediaRefresh),
+                cancellationToken
             );
+            return refreshResult.ToResult();
+        });
 
-            if (result.IsCancelled)
-            {
-                context.SetResult(JobStatus.Cancelled, result);
-                _log.Here()
-                    .Information(
-                        "{LibrarySyncJobName} for server {ServerId}, library {LibraryId} has been cancelled",
-                        nameof(LibrarySyncJob),
-                        _serverId,
-                        _libraryId
-                    );
+        if (!shouldDispatch)
+            return;
 
-                // The Quartz job token is already cancelled, so use a short-lived token
-                // to persist the cancellation and continue processing the queue.
-                using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                var cleanupToken = cleanupTokenSource.Token;
-
-                await UpdateQueueItemAsync(LibrarySyncJobStatus.Cancelled);
-                await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary]);
-                await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken);
-
-                return;
-            }
-            else if (result.IsFailed)
-            {
-                context.SetResult(JobStatus.Failed, result);
-                result.LogError();
-
-                // Check if failure was due to the server being offline (504 Gateway Timeout)
-                // TODO make "Server offline" a generic FluentResult check as this can happen in other places as well and we want to handle it consistently across the app
-                var isServerOffline = result.ToResult().Has504GatewayTimeoutError();
-
-                _log.Here()
-                    .Warning(
-                        "Library sync failed for server {ServerId}, library {LibraryId}. Queue item marked as failed. Server offline: {IsServerOffline}",
-                        _serverId,
-                        _libraryId,
-                        isServerOffline
-                    );
-
-                await UpdateQueueItemAsync(
-                    LibrarySyncJobStatus.Failed,
-                    errorMessage: result.Errors.FirstOrDefault()?.Message,
-                    isServerOffline: isServerOffline
-                );
-            }
-            else
-            {
+        LibrarySyncJobStatus status;
+        if (result.IsCancelled)
+        {
+            result.LogWarning();
+            status = LibrarySyncJobStatus.Cancelled;
+            context.SetResult(JobStatus.Cancelled, result);
+        }
+        else if (result.IsFailed)
+        {
+            result.LogError();
+            status = LibrarySyncJobStatus.Failed;
+            // Check if failure was due to the server being offline (504 Gateway Timeout)
+            // TODO make "Server offline" a generic FluentResult check as this can happen in other places as well and we want to handle it consistently across the app
+            isServerOffline = result.Has504GatewayTimeoutError();
+            context.SetResult(JobStatus.Failed, result);
+        }
+        else
+        {
+            status = isServerOffline ? LibrarySyncJobStatus.Queued : LibrarySyncJobStatus.Completed;
+            context.SetResult(JobStatus.Completed);
+            if (!isServerOffline)
                 _log.Here()
                     .Information(
                         "Successfully synced library {LibraryId} for server {ServerId}",
                         _libraryId,
                         _serverId
                     );
-
-                await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
-            }
         }
 
-        // Send PlexLibrary refresh notification
-        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary]);
+        // Persist the outcome even when cancellation occurred before media synchronization began.
+        // The Quartz job token may already be cancelled, so persist the outcome independently.
+        var persistenceResult = await Result.Try(() =>
+            UpdateQueueItemAsync(
+                status,
+                errorMessage: status == LibrarySyncJobStatus.Failed ? result.Errors.First().Message : null,
+                isServerOffline: isServerOffline
+            )
+        );
+        persistenceResult.LogIfFailed();
+        if (persistenceResult.IsFailed)
+            context.SetResult(JobStatus.Failed, persistenceResult);
+
+        // Use a short-lived token to continue processing the queue after cancellation.
+        using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var cleanupToken = cleanupTokenSource.Token;
 
         // Schedule the next library from the queue
-        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
+        // A failed notification or cancelled job token must not prevent the next library from running.
+        var dispatchResult = await Result.Try(() =>
+            _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken)
+        );
+        dispatchResult.LogIfFailed();
+
+        // Send PlexLibrary refresh notification
+        var notificationResult = await Result.Try(() =>
+            _notificationHubService
+                .SendRefreshNotificationAsync([RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus])
+                .WaitAsync(cleanupToken)
+        );
+        notificationResult.LogIfFailed();
     }
 
     private async Task UpdateQueueItemAsync(
@@ -178,7 +173,7 @@ public class LibrarySyncJob : IJob
     )
     {
         var query = _dbContext.LibrarySyncJobQueues.Where(x =>
-            x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId
+            x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId && x.Status == LibrarySyncJobStatus.Processing
         );
 
         switch (status)
@@ -254,7 +249,5 @@ public class LibrarySyncJob : IJob
                     );
                 break;
         }
-
-        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
     }
 }

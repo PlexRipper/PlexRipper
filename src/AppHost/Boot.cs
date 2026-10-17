@@ -86,7 +86,12 @@ public class Boot : IHostedService
             new CleanupLibrarySyncJobQueueCommand(),
             cancellationToken
         );
-        cleanupLibrarySyncJobQueueResult.LogIfFailed();
+        if (cleanupLibrarySyncJobQueueResult.IsFailed)
+        {
+            cleanupLibrarySyncJobQueueResult.LogIfFailed();
+            TerminateApplication();
+            return;
+        }
 
         var setupResult = await _backgroundJobsSetup.SetupAsync(cancellationToken);
         setupResult.LogIfFailed();

@@ -534,7 +534,6 @@ public class AudioQualityExtensionsUnitTests : BaseUnitTest
             PlexApiPartId = partId,
             PlexTrackId = 1,
             PartIndex = 0,
-            VideoResolution = VideoQuality.None,
             VideoQuality = VideoQuality.None,
             Container = "test",
             Duration = 1,

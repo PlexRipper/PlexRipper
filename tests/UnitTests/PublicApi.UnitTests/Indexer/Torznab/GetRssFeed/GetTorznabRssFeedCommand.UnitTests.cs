@@ -251,13 +251,13 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
             setters =>
                 setters
                     .SetProperty(x => x.Source, ReleaseSource.WebDl)
-                    .SetProperty(x => x.VideoResolution, VideoQuality.SD),
+                    .SetProperty(x => x.VideoQuality, VideoQuality.SD),
             CancellationToken
         );
         await dbContext
             .PlexMovieData.Where(x => x.PlexMovieId == oldestMovieId)
             .ExecuteUpdateAsync(
-                setters => setters.SetProperty(x => x.VideoResolution, VideoQuality.UHD_4K),
+                setters => setters.SetProperty(x => x.VideoQuality, VideoQuality.UHD_4K),
                 CancellationToken
             );
         var expectedTitles = await dbContext
@@ -1149,10 +1149,10 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
 
     private static int GetMovieQualityCategory(PlexMovieMediaData mediaData)
     {
-        if (mediaData.Source == ReleaseSource.DVD || mediaData.VideoResolution is VideoQuality.SD or VideoQuality.DVD)
+        if (mediaData.Source == ReleaseSource.DVD || mediaData.VideoQuality is VideoQuality.SD or VideoQuality.DVD)
             return (int)TorznabCategoryId.Movies_SD;
 
-        return mediaData.VideoResolution is VideoQuality.UHD_4K or VideoQuality.UHD_8K
+        return mediaData.VideoQuality is VideoQuality.UHD_4K or VideoQuality.UHD_8K
             ? (int)TorznabCategoryId.Movies_UHD
             : (int)TorznabCategoryId.Movies_HD;
     }

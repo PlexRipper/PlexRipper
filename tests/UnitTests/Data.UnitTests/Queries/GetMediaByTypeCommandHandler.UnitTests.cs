@@ -2647,18 +2647,14 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         await dbContext
             .PlexMovieData.Where(x => x.PlexMovieId == expectedMovie.Id)
             .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(y => y.VideoQuality, targetQuality)
-                        .SetProperty(y => y.VideoResolution, targetQuality),
+                x => x.SetProperty(y => y.VideoQuality, targetQuality),
                 CancellationToken
             );
 
         await dbContext
             .PlexMovieData.Where(x => x.PlexMovieId != expectedMovie.Id)
             .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(y => y.VideoQuality, VideoQuality.HD)
-                        .SetProperty(y => y.VideoResolution, VideoQuality.HD),
+                x => x.SetProperty(y => y.VideoQuality, VideoQuality.HD),
                 CancellationToken
             );
 

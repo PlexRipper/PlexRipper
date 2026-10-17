@@ -85,7 +85,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
         file.FileName.ShouldBe(data.GetFileName);
         file.FileLocationUrl.ShouldBe(data.Key);
         file.FullTitle.ShouldBe($"{source.FullTitle}/{data.GetFileName}");
-        file.VideoQuality.ShouldBe(data.VideoResolution);
+        file.VideoQuality.ShouldBe(data.VideoQuality);
         file.DataTotal.ShouldBe(data.Size);
         file.DownloadClientType.ShouldBe(PlexDownloadClientType.Direct);
         file.DownloadStatus.ShouldBe(DownloadStatus.Queued);
@@ -142,7 +142,6 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
             .RuleFor(x => x.PlexApiMediaId, _ => original.PlexApiMediaId + 1)
             .RuleFor(x => x.PartIndex, f => f.IndexFaker)
             .RuleFor(x => x.VideoQuality, _ => VideoQuality.UHD_4K)
-            .RuleFor(x => x.VideoResolution, _ => VideoQuality.UHD_4K)
             .RuleFor(x => x.Size, _ => 300)
             .Generate(2);
         parts[0].UpdateInitProperty(nameof(BasePlexMediaData.PlexApiPartId), 71001);
@@ -203,7 +202,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
             )
             .ShouldBe(
                 expected.Select(x =>
-                    (task.Id, x.PlexApiMediaId, x.PlexApiPartId, x.Size, x.GetFileName, x.Key, x.VideoResolution)
+                    (task.Id, x.PlexApiMediaId, x.PlexApiPartId, x.Size, x.GetFileName, x.Key, x.VideoQuality)
                 )
             );
         var logs = await dbContext

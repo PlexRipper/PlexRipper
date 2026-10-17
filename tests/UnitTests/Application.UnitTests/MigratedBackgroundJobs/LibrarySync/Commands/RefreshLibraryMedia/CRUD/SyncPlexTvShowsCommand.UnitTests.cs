@@ -589,11 +589,11 @@ public class SyncPlexTvShowsCommandUnitTests : BaseCommandUnitTest<SyncPlexTvSho
     }
 
     [Test]
-    public async Task ShouldSynchronizeRelationshipsForCompleteIncomingShowTree_WhenShowsAreUnchanged()
+    public async Task ShouldPreserveAncestorQualityIdentities_WhenIncomingHierarchyHasNoChanges()
     {
         // Arrange
-        var seed = await SetupDatabase(
-            11873,
+        await SetupDatabase(
+            11877,
             config =>
             {
                 config.PlexServerCount = 1;
@@ -603,36 +603,63 @@ public class SyncPlexTvShowsCommandUnitTests : BaseCommandUnitTest<SyncPlexTvSho
                 config.TvShowEpisodeCount = 1;
             }
         );
-        var library = IDbContext.PlexLibraries.First();
-        var shows = IDbContext
-            .PlexTvShows.AsNoTracking()
-            .Include(x => x.Seasons)
+        var dbContext = IDbContext;
+        var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var shows = await dbContext
+            .PlexTvShows.Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
+                    .ThenInclude(x => x.MediaDataList)
             .OrderBy(x => x.Id)
-            .ToList();
-        var actor = FakeData.GetPlexActors(seed).Generate();
-        await IDbContext.BulkInsertAsync([actor], cancellationToken: CancellationToken);
-        actor.Id = IDbContext.PlexActors.AsNoTracking().Single(x => x.Key == actor.Key).Id;
-        foreach (var show in shows)
-            show.Actors.Add(actor);
+            .ToListAsync(CancellationToken);
+        var showQualitiesBefore = await dbContext
+            .PlexTvShowMediaQualities.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexTvShowId, x.VideoQuality })
+            .ToListAsync(CancellationToken);
+        var seasonQualitiesBefore = await dbContext
+            .PlexTvShowSeasonMediaQualities.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexTvShowSeasonId, x.VideoQuality })
+            .ToListAsync(CancellationToken);
+        var filesBefore = await dbContext
+            .PlexTvShowEpisodeData.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.PlexTvShowEpisodeId, x.PlexApiPartId, x.Size, x.VideoQuality })
+            .ToListAsync(CancellationToken);
+        showQualitiesBefore.Count.ShouldBe(2);
+        seasonQualitiesBefore.Count.ShouldBe(2);
+        filesBefore.Count.ShouldBe(2);
         SetIds(library, shows);
         library.TvShows.AddRange(shows);
-        var metadata = new InsertMediaMetaDataCommandResponse(library)
-        {
-            PlexActors = new Dictionary<string, PlexActor> { [actor.Key] = actor },
-        };
 
         // Act
-        var result = await Mock.Create<SyncPlexTvShowsCommandHandler>().ExecuteAsync(new SyncPlexTvShowsCommand(metadata), CancellationToken);
+        var result = await TestHandlerExecuteAsync<BulkInsertTvShowsRapport>(
+            new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         result.Value.UpdatedTvShows.ShouldBe(0);
-        var relations = IDbContext.PlexTvShowActors.Where(x => x.PlexLibraryId == library.Id).ToList();
-        relations.Count.ShouldBe(2);
-        relations.Select(x => x.PlexTvShowId).Order().ShouldBe(shows.Select(x => x.Id).Order());
-        relations.ShouldAllBe(x => x.PlexActorId == actor.Id);
+        result.Value.UpdatedSeasons.ShouldBe(0);
+        result.Value.UpdatedEpisodes.ShouldBe(0);
+        result.Value.UnchangedTvShows.ShouldBe(2);
+        result.Value.UnchangedSeasons.ShouldBe(2);
+        result.Value.UnchangedEpisodes.ShouldBe(2);
+        (await dbContext
+                .PlexTvShowMediaQualities.OrderBy(x => x.Id)
+                .Select(x => new { x.Id, x.PlexTvShowId, x.VideoQuality })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(showQualitiesBefore);
+        (await dbContext
+                .PlexTvShowSeasonMediaQualities.OrderBy(x => x.Id)
+                .Select(x => new { x.Id, x.PlexTvShowSeasonId, x.VideoQuality })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(seasonQualitiesBefore);
+        (await dbContext
+                .PlexTvShowEpisodeData.OrderBy(x => x.Id)
+                .Select(x => new { x.Id, x.PlexTvShowEpisodeId, x.PlexApiPartId, x.Size, x.VideoQuality })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(filesBefore);
     }
+
 
     [Test]
     public async Task ShouldUpdateAllTvShows_WhenAllExists()
@@ -1062,6 +1089,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseCommandUnitTest<SyncPlexTvSho
             .OrderBy(x => x.Id)
             .ToList();
 
+        var episodeId = episode.Id;
         oldSeason.Episodes.Remove(episode);
         episode.ParentKey = newSeason.PlexApiRatingKey;
         episode.ParentGuid = newSeason.Guid;
@@ -1079,15 +1107,15 @@ public class SyncPlexTvShowsCommandUnitTests : BaseCommandUnitTest<SyncPlexTvSho
         result.Errors.Count.ShouldBe(0);
         result.Value.UpdatedEpisodes.ShouldBe(0);
         result.Value.UnchangedEpisodes.ShouldBe(4);
-        IDbContext
+        var afterEpisode = IDbContext
             .PlexTvShowEpisodes.AsNoTracking()
-            .Where(x => x.Id == episode.Id)
+            .Where(x => x.Id == episodeId)
             .Select(x => new { x.Id, x.TvShowId, x.TvShowSeasonId, x.ParentKey, x.UpdatedAt })
-            .Single()
-            .ShouldBe(beforeEpisode);
+            .Single();
+        afterEpisode.ShouldBe(beforeEpisode);
         IDbContext
             .PlexTvShowEpisodeData.AsNoTracking()
-            .Where(x => x.PlexTvShowEpisodeId == episode.Id)
+            .Where(x => x.PlexTvShowEpisodeId == episodeId)
             .Select(x => new
             {
                 x.Id,

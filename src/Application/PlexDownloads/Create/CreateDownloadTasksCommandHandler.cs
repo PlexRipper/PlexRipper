@@ -11,6 +11,13 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
             {
                 RuleFor(x => x.Request.DownloadMedias).NotEmpty();
                 RuleForEach(x => x.Request.DownloadMedias).NotNull().SetValidator(new DownloadMediaDTOValidator());
+                RuleForEach(x => x.Request.DownloadMedias)
+                    .Must(x =>
+                        x is null
+                        || x.Type is not (PlexMediaType.PhotoAlbum or PlexMediaType.PhotoImage)
+                        || x.Qualities is { Count: 0 }
+                    )
+                    .WithMessage("Photo selections must not include quality or part selectors.");
             });
     }
 }
@@ -116,18 +123,7 @@ public class CreateDownloadTasksCommandHandler
             report += result.Value;
         }
 
-        if (downloadMedias.Any(x => x.Type == PlexMediaType.PhotoAlbum))
-        {
-            var result = await _commandExecutor.Send(
-                new GenerateDownloadTaskPhotoAlbumsCommand(request),
-                cancellationToken
-            );
-            if (result.IsFailed)
-                return result.LogIfFailed();
-            report += result.Value;
-        }
-
-        if (downloadMedias.Any(x => x.Type == PlexMediaType.PhotoImage))
+        if (downloadMedias.Any(x => x.Type is PlexMediaType.PhotoAlbum or PlexMediaType.PhotoImage))
         {
             var result = await _commandExecutor.Send(
                 new GenerateDownloadTaskPhotoImagesCommand(request),

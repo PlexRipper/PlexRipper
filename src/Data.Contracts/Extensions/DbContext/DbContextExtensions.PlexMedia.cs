@@ -97,7 +97,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.PhotoImage:
             {
                 var id = await dbContext
-                    .PlexPhotoImages.Where(x =>
+                    .PlexPhotoMediaData.Where(x =>
                         x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId
                     )
                     .Select(x => x.Id)

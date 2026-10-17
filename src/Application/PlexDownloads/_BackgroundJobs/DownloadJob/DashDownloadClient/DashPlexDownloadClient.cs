@@ -259,7 +259,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                         cancellationToken
                     );
                 break;
-            case DownloadTaskType.PhotoData:
+            case DownloadTaskType.PhotoImage:
                 await _dbContext
                     .DownloadTaskPhotoImageFiles.Where(x => x.Id == downloadTask.Id)
                     .ExecuteUpdateAsync(

@@ -1,6 +1,6 @@
 namespace Reaparr.Data;
 
-public class DownloadTaskPhotoFileLogConfiguration : IEntityTypeConfiguration<DownloadTaskPhotoImageFileLog>
+public sealed class DownloadTaskPhotoFileLogConfiguration : IEntityTypeConfiguration<DownloadTaskPhotoImageFileLog>
 {
     public void Configure(EntityTypeBuilder<DownloadTaskPhotoImageFileLog> builder)
     {
@@ -25,18 +25,5 @@ public class DownloadTaskPhotoFileLogConfiguration : IEntityTypeConfiguration<Do
             .WithMany(x => x.Logs)
             .HasForeignKey(x => x.DownloadTaskFileId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder
-            .HasOne(x => x.DownloadTaskPhoto)
-            .WithMany()
-            .HasForeignKey(x => x.DownloadTaskPhotoId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(x => x.DownloadTaskPhotoAlbum)
-            .WithMany()
-            .HasForeignKey(x => x.DownloadTaskPhotoAlbumId)
-            .IsRequired(false)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 }

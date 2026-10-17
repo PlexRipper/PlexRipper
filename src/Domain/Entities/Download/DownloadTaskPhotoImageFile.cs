@@ -4,7 +4,9 @@ public class DownloadTaskPhotoImageFile : DownloadTaskFileBase
 {
     public required Guid ParentId { get; init; }
 
-    public DownloadTaskPhotoImage? Parent { get; init; }
+    public DownloadTaskPhotoFolder? Parent { get; init; }
+
+    public PhotoAssetKind AssetKind { get; init; } = PhotoAssetKind.Image;
 
     public List<DownloadTaskPhotoImageFileLog> Logs { get; init; } = [];
 
@@ -12,7 +14,7 @@ public class DownloadTaskPhotoImageFile : DownloadTaskFileBase
     public override PlexMediaType MediaType => PlexMediaType.PhotoImage;
 
     [NotMapped]
-    public override DownloadTaskType DownloadTaskType => DownloadTaskType.PhotoData;
+    public override DownloadTaskType DownloadTaskType => DownloadTaskType.PhotoImage;
 
     [NotMapped]
     public override bool IsDownloadable => true;
@@ -23,7 +25,7 @@ public class DownloadTaskPhotoImageFile : DownloadTaskFileBase
     public override DownloadTaskKey ToParentKey() =>
         new()
         {
-            Type = DownloadTaskType.PhotoImage,
+            Type = DownloadTaskType.PhotoFolder,
             Id = ParentId,
             PlexServerId = PlexServerId,
             PlexLibraryId = PlexLibraryId,

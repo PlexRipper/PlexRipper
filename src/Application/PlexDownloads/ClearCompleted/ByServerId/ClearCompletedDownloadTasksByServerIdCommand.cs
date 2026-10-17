@@ -64,12 +64,7 @@ public class ClearCompletedDownloadTasksByServerIdCommandHandler
             .ExecuteDeleteAsync(ct);
 
         totalRowsDeleted += await _dbContext
-            .DownloadTaskPhotoAlbums.Where(x =>
-                x.DownloadStatus == DownloadStatus.Completed && x.PlexServerId == plexServerId
-            )
-            .ExecuteDeleteAsync(ct);
-        totalRowsDeleted += await _dbContext
-            .DownloadTaskPhotoImages.Where(x =>
+            .DownloadTaskPhotoFolders.Where(x =>
                 x.DownloadStatus == DownloadStatus.Completed && x.PlexServerId == plexServerId
             )
             .ExecuteDeleteAsync(ct);

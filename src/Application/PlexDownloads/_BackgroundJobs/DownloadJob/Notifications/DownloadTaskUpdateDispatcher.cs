@@ -793,15 +793,11 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                 .Select(x => x.FileName)
                 .FirstOrDefaultAsync(cancellationToken),
-            DownloadTaskType.PhotoAlbum => await dbContext
-                .DownloadTaskPhotoAlbums.Where(x => x.Id == key.Id)
+            DownloadTaskType.PhotoFolder => await dbContext
+                .DownloadTaskPhotoFolders.Where(x => x.Id == key.Id)
                 .Select(x => x.Title)
                 .FirstOrDefaultAsync(cancellationToken),
             DownloadTaskType.PhotoImage => await dbContext
-                .DownloadTaskPhotoImages.Where(x => x.Id == key.Id)
-                .Select(x => x.Title)
-                .FirstOrDefaultAsync(cancellationToken),
-            DownloadTaskType.PhotoData => await dbContext
                 .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
                 .Select(x => x.FileName)
                 .FirstOrDefaultAsync(cancellationToken),
@@ -848,11 +844,12 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             .Select(x => x.Id)
             .Distinct()
             .ToList();
-        var photoAlbumRootIds = rootKeys
-            .Where(x => x.Type == DownloadTaskType.PhotoAlbum)
+        var photoFolderRootIds = rootKeys
+            .Where(x => x.Type == DownloadTaskType.PhotoFolder)
             .Select(x => x.Id)
             .Distinct()
             .ToList();
+
         var musicArtistRootIds = rootKeys
             .Where(x => x.Type == DownloadTaskType.MusicArtist)
             .Select(x => x.Id)
@@ -867,7 +864,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         var rootTasks = new List<DownloadTaskGeneric>(
             movieRootIds.Count
                 + tvShowRootIds.Count
-                + photoAlbumRootIds.Count
+                + photoFolderRootIds.Count
                 + musicArtistRootIds.Count
                 + otherVideoRootIds.Count
         );
@@ -908,20 +905,14 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
         }
 
-        if (photoAlbumRootIds.Count > 0)
+        foreach (var rootKey in rootKeys.Where(x => x.Type == DownloadTaskType.PhotoFolder).DistinctBy(x => x.Id))
         {
-            var photoRoots = await dbContext
-                .DownloadTaskPhotoAlbums.AsSplitQuery()
-                .Where(x => photoAlbumRootIds.Contains(x.Id))
-                .Include(x => x.Children)
-                    .ThenInclude(x => x.Children)
-                .ToListAsync(cancellationToken);
-            foreach (var album in photoRoots)
-            {
-                var generic = album.ToGeneric();
-                generic.Calculate();
-                rootTasks.Add(generic);
-            }
+            var generic = await dbContext.GetDownloadTaskAsync(rootKey, cancellationToken);
+            if (generic is null)
+                continue;
+
+            generic.Calculate();
+            rootTasks.Add(generic);
         }
         if (musicArtistRootIds.Count > 0)
         {

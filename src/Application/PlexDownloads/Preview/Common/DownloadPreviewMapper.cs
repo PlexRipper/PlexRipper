@@ -81,7 +81,6 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             ArtistId = default,
             AlbumId = default,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = source
                 .MediaDataList.SortByQuality()
@@ -115,7 +114,6 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             ArtistId = default,
             AlbumId = default,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = source
                 .Qualities.SortByQuality()
@@ -148,7 +146,6 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             ArtistId = default,
             AlbumId = default,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = source
                 .Qualities.SortByQuality()
@@ -181,7 +178,6 @@ public static class DownloadPreviewMapper
             SeasonId = source.TvShowSeasonId,
             ArtistId = default,
             AlbumId = default,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = source
                 .MediaDataList.SortByQuality()
@@ -226,7 +222,6 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             ArtistId = default,
             AlbumId = default,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = [],
         };
@@ -250,7 +245,6 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             ArtistId = source.PlexArtistId,
             AlbumId = default,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = [],
         };
@@ -281,7 +275,6 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             ArtistId = source.PlexAlbum!.PlexArtistId,
             AlbumId = source.PlexAlbumId,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = groups
                 .OrderBy(group => group.Key)
@@ -325,7 +318,6 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             ArtistId = default,
             AlbumId = default,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = groups
                 .Select(group => new PlexMediaQuality
@@ -350,14 +342,13 @@ public static class DownloadPreviewMapper
         {
             Id = source.Id,
             Title = source.Title,
-            Size = source.MediaSize,
-            ChildCount = source.ChildCount,
+            Size = 0,
+            ChildCount = 0,
             MediaType = source.Type,
             TvShowId = default,
             SeasonId = default,
             ArtistId = default,
             AlbumId = default,
-            PhotoAlbumId = default,
             Children = [],
             Qualities = [],
         };
@@ -367,35 +358,25 @@ public static class DownloadPreviewMapper
 
     #endregion
 
-    #region PlexPhotoImage
+    #region PlexPhotoMediaData
 
-    private static DownloadPreview ProjectToDownloadPreviewMapper(this PlexPhotoImage source) =>
+    private static DownloadPreview ProjectToDownloadPreviewMapper(this PlexPhotoMediaData source) =>
         new()
         {
             Id = source.Id,
-            Title = source.Title,
-            Size = source.MediaDataList.Sum(x => x.Size),
-            ChildCount = source.MediaDataList.Count,
-            MediaType = source.Type,
+            Title = source.OriginalFilename.GetFileName(),
+            Size = source.Size,
+            ChildCount = 0,
+            MediaType = PlexMediaType.PhotoImage,
             TvShowId = default,
             SeasonId = default,
             ArtistId = default,
             AlbumId = default,
-            PhotoAlbumId = source.PlexPhotoAlbumId,
             Children = [],
-            Qualities = source
-                .MediaDataList.GroupBy(x => x.PlexApiMediaId)
-                .Select(group => new PlexMediaQuality
-                {
-                    VideoQuality = VideoQuality.Unknown,
-                    MediaDataType = PlexMediaType.PhotoImage,
-                    DataId = group.Min(x => x.Id),
-                    MediaId = source.Id,
-                })
-                .ToList(),
+            Qualities = [],
         };
 
-    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexPhotoImage> source) =>
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexPhotoMediaData> source) =>
         source.Select(x => ProjectToDownloadPreviewMapper(x));
 
     #endregion

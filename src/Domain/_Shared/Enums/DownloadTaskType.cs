@@ -3,7 +3,7 @@
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DownloadTaskType
 {
-    // NOTE: Keep these values contiguous. The TypeScript DTO translator depends on the ordering.
+    // NOTE: Keep existing numeric identities stable; value 13 was removed without renumbering later values.
     [JsonStringEnumMemberName(nameof(None))]
     None = 0,
 
@@ -44,14 +44,11 @@ public enum DownloadTaskType
     [JsonStringEnumMemberName(nameof(MusicTrackData))]
     MusicTrackData = 10,
 
-    [JsonStringEnumMemberName(nameof(PhotoAlbum))]
-    PhotoAlbum = 11,
+    [JsonStringEnumMemberName(nameof(PhotoFolder))]
+    PhotoFolder = 11,
 
-    [JsonStringEnumMemberName(nameof(PhotoImage))]
+    [JsonStringEnumMemberName(nameof(PhotoImage))] // TODO Rename to PhotoAsset as it can be an image or video file.
     PhotoImage = 12,
-
-    [JsonStringEnumMemberName(nameof(PhotoData))]
-    PhotoData = 13,
 
     [JsonStringEnumMemberName(nameof(OtherVideo))]
     OtherVideo = 14,

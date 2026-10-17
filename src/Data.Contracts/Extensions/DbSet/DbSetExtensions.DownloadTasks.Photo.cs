@@ -2,7 +2,7 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbSetExtensions
 {
-    public static IQueryable<DownloadTaskPhotoAlbum> IncludeAll(this IQueryable<DownloadTaskPhotoAlbum> tasks) =>
+    public static IQueryable<DownloadTaskPhotoFolder> IncludeAll(this IQueryable<DownloadTaskPhotoFolder> tasks) =>
         tasks
             .Include(x => x.PlexServer)
             .Include(x => x.PlexLibrary)
@@ -11,18 +11,13 @@ public static partial class DbSetExtensions
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
                 .ThenInclude(x => x.PlexLibrary)
             .Include(x => x.Children)
-                .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                .ThenInclude(x => x.Files.OrderBy(y => y.CreatedAt))
                     .ThenInclude(x => x.PlexServer)
             .Include(x => x.Children)
-                .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-                    .ThenInclude(x => x.PlexLibrary);
-
-    public static IQueryable<DownloadTaskPhotoImage> IncludeAll(this IQueryable<DownloadTaskPhotoImage> tasks) =>
-        tasks
-            .Include(x => x.PlexServer)
-            .Include(x => x.PlexLibrary)
-            .Include(x => x.Children.OrderBy(y => y.CreatedAt))
+                .ThenInclude(x => x.Files.OrderBy(y => y.CreatedAt))
+                    .ThenInclude(x => x.PlexLibrary)
+            .Include(x => x.Files.OrderBy(y => y.CreatedAt))
                 .ThenInclude(x => x.PlexServer)
-            .Include(x => x.Children.OrderBy(y => y.CreatedAt))
+            .Include(x => x.Files.OrderBy(y => y.CreatedAt))
                 .ThenInclude(x => x.PlexLibrary);
 }

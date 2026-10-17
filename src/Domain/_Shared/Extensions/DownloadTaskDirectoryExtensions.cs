@@ -45,11 +45,8 @@ public static class DownloadTaskDirectoryExtensions
             or DownloadTaskType.MusicAlbum
             or DownloadTaskType.MusicTrack
             or DownloadTaskType.MusicTrackData => IPathProvider.DefaultMusicFolderName,
-            DownloadTaskType.PhotoAlbum
-            or DownloadTaskType.PhotoImage
-            or DownloadTaskType.PhotoData => IPathProvider.DefaultPhotosFolderName,
-            DownloadTaskType.OtherVideo
-            or DownloadTaskType.OtherVideoData => IPathProvider.DefaultOtherFolderName,
+            DownloadTaskType.PhotoFolder or DownloadTaskType.PhotoImage => IPathProvider.DefaultPhotosFolderName,
+            DownloadTaskType.OtherVideo or DownloadTaskType.OtherVideoData => IPathProvider.DefaultOtherFolderName,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported download task type."),
         };
 
@@ -68,11 +65,8 @@ public static class DownloadTaskDirectoryExtensions
                 directory.MusicArtistFolder,
                 directory.MusicAlbumFolder
             ),
-            DownloadTaskType.PhotoAlbum
-            or DownloadTaskType.PhotoImage
-            or DownloadTaskType.PhotoData => directory.PhotoAlbumFolder,
-            DownloadTaskType.OtherVideo
-            or DownloadTaskType.OtherVideoData => directory.OtherVideoFolder,
+            DownloadTaskType.PhotoFolder or DownloadTaskType.PhotoImage => directory.PhotoFolder,
+            DownloadTaskType.OtherVideo or DownloadTaskType.OtherVideoData => directory.OtherVideoFolder,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported download task type."),
         };
 

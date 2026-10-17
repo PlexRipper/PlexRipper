@@ -110,7 +110,7 @@ export function setupMockPlexMediaEndpoints(
 			countries: [],
 			episodeCount: requestedMediaType === PlexMediaType.TvShow ? pagedMediaList.reduce((acc, x) => acc + x.grandChildCount, 0) : 0,
 			genres: [],
-			mediaCount: pagedMediaList.length,
+			mediaCount: allLibraryMedia.length,
 			mediaList: pagedMediaList,
 			mediaSize: pagedMediaList.reduce((acc, x) => acc + x.mediaSize, 0),
 			movieCount: requestedMediaType === PlexMediaType.Movie ? pagedMediaList.length : 0,

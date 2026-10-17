@@ -336,6 +336,11 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		first.page = 1;
 		second.page = 2;
 		third.page = 3;
+		for (const page of [first, second, third]) {
+			page.pageSize = 100;
+			page.mediaCount = 250;
+			page.totalCount = 250;
+		}
 		mock.onGet(new RegExp('/api/PlexMedia'))
 			.replyOnce(200, generateResultDTO(first))
 			.onGet(new RegExp('/api/PlexMedia'))
@@ -350,6 +355,8 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		// Assert
 		expect(mock.history.get.filter((x) => x.url === '/api/PlexMedia')).toHaveLength(3);
 		expect(result.getLastValue()).toHaveLength(3);
+		expect(store.itemsLength).toBe(3);
+		expect(store.totalCount).toBe(250);
 	});
 
 	test('Should request only pages missing from the range when some pages are already cached', async () => {
@@ -359,6 +366,12 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		const missing = createMediaStatistics(1, 'range-query');
 		cached.page = 1;
 		missing.page = 2;
+		cached.pageSize = 100;
+		missing.pageSize = 100;
+		cached.mediaCount = 250;
+		missing.mediaCount = 250;
+		cached.totalCount = 250;
+		missing.totalCount = 250;
 		store.addMediaPage(cached);
 		mock.onGet(new RegExp('/api/PlexMedia')).reply(200, generateResultDTO(missing));
 

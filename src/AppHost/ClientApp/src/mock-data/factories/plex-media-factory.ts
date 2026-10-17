@@ -19,7 +19,7 @@ export function generatePlexMediaStatisticsDTO(mediaList: PlexMediaSlimDTO[]): P
 		qualities: [],
 		queryHash: '',
 		roles: [],
-		totalCount: 0,
+		totalCount: mediaList.length,
 		mediaList: mediaList,
 		mediaCount: mediaList.length,
 		movieCount: mediaList.filter((x) => x.type === PlexMediaType.Movie).length,

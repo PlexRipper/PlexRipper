@@ -21,13 +21,14 @@ describe('MediaOverviewStore - Selection', () => {
 		setActivePinia(createPinia());
 	});
 
-	async function loadMovies(store: ReturnType<typeof useMediaOverviewStore>, count = 10) {
+	async function loadMovies(store: ReturnType<typeof useMediaOverviewStore>, count = 10, totalCount = count) {
 		const type = PlexMediaType.Movie;
 		const movies = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
 			config: { movieCount: count },
 			partialData: { plexServerId: 1, plexLibraryId: 0, type },
 		}));
-
+		movies.mediaCount = totalCount;
+		movies.totalCount = totalCount;
 		mock.onGet(new RegExp(`/api/PlexMedia`)).reply(200, generateResultDTO(movies));
 		mock.onGet(new RegExp(`/api/PlexLibrary/0/metadata`)).reply(200, generateResultDTO({
 			episodeCount: 0,
@@ -83,6 +84,21 @@ describe('MediaOverviewStore - Selection', () => {
 
 		// Assert
 		expect(store.isRootSelected).toBeNull();
+	});
+
+	test('isRootSelected should reflect all loaded items when backend total exceeds the loaded cache', async () => {
+		// Arrange
+		const store = useMediaOverviewStore();
+		await loadMovies(store, 100, 250);
+
+		// Act
+		store.setRootSelected(true);
+
+		// Assert
+		expect(store.totalCount).toBe(250);
+		expect(store.itemsLength).toBe(100);
+		expect(store.isRootSelected).toBe(true);
+		expect(store.selection.keys).toHaveLength(100);
 	});
 
 	test('isRootSelected should be true when all items are selected', async () => {

@@ -79,7 +79,8 @@ describe('MediaOverviewStore.setMedia()', () => {
 		expect(store.allSeasonCount).toBe(movies.seasonCount);
 		expect(store.allEpisodeCount).toBe(movies.episodeCount);
 		expect(store.allFileSize).toBe(movies.mediaSize);
-		expect(store.itemsLength).toBe(movies.mediaCount);
+		expect(store.itemsLength).toBe(movies.mediaList.length);
+		expect(store.totalCount).toBe(movies.mediaCount);
 	});
 
 	test('Should set all counts to zero when API returns null data (isSuccess: false)', async () => {
@@ -126,7 +127,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		expect(store.getMediaItems).toEqual([]);
 	});
 
-	test('Should use API mediaCount for itemsLength when media is set', async () => {
+	test('Should use API mediaCount as total count while keeping loaded item count', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		const type = PlexMediaType.TvShow;
@@ -134,6 +135,8 @@ describe('MediaOverviewStore.setMedia()', () => {
 			config: { tvShowCount: 3, seasonCount: 1, episodeCount: 1 },
 			partialData: { plexServerId: 1, plexLibraryId: 23, type },
 		}));
+		tvShows.mediaCount = 100;
+		tvShows.totalCount = 100;
 		tvShows.tvShowCount = tvShows.mediaCount;
 		setupMocks(tvShows);
 
@@ -143,7 +146,8 @@ describe('MediaOverviewStore.setMedia()', () => {
 
 		// Assert
 		expect(store.getMediaItems.length).toBe(3);
-		expect(store.itemsLength).toBe(tvShows.mediaCount);
+		expect(store.itemsLength).toBe(3);
+		expect(store.totalCount).toBe(100);
 	});
 
 	test('Should keep loaded page count separate from backend totalCount', async () => {
@@ -156,7 +160,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 			partialData: { plexServerId: 1, plexLibraryId: 0, type },
 		}));
 		movies.mediaList = movies.mediaList.slice(0, 10);
-		movies.mediaCount = movies.mediaList.length;
+		movies.mediaCount = 100;
 		movies.movieCount = 100;
 		movies.totalMovieCount = 100;
 		movies.totalCount = 100;
@@ -170,6 +174,43 @@ describe('MediaOverviewStore.setMedia()', () => {
 		expect(store.getMediaItems.length).toBe(10);
 		expect(store.itemsLength).toBe(10);
 		expect(store.totalCount).toBe(100);
+	});
+
+	test('Should preserve the backend total while caching and replacing partial pages', () => {
+		// Arrange
+		const store = useMediaOverviewStore();
+		const createPage = (page: number, count: number) => {
+			const mediaList = generatePlexMediaSlims({
+				config: { seed: 700 + page, movieCount: count },
+				partialData: { plexServerId: 1, plexLibraryId: 0, type: PlexMediaType.Movie },
+			});
+			const statistics = generatePlexMediaStatisticsDTO(mediaList);
+			statistics.page = page;
+			statistics.pageSize = 100;
+			statistics.queryHash = 'total-query';
+			statistics.mediaCount = 250;
+			statistics.totalCount = 250;
+			return statistics;
+		};
+		const firstPage = createPage(1, 100);
+		const secondPage = createPage(2, 100);
+		const thirdPage = createPage(3, 50);
+		store.addMediaPage(firstPage);
+		store.addMediaPage(secondPage);
+		store.addMediaPage(thirdPage);
+
+		// Act
+		const replacementPage = createPage(2, 80);
+		store.addMediaPage(replacementPage);
+
+		// Assert
+		expect(store.totalCount).toBe(250);
+		expect(store.itemsLength).toBe(230);
+		expect(store.getMediaItems).toEqual([
+			...firstPage.mediaList,
+			...replacementPage.mediaList,
+			...thirdPage.mediaList,
+		]);
 	});
 
 	test('Should correctly set TV show counts from statistics DTO', async () => {

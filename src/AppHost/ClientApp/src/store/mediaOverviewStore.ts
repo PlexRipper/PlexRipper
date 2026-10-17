@@ -377,12 +377,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			const mediaList = Array.isArray(data.mediaList) ? data.mediaList : [];
 			const previousMediaCount = mediaPages.get(data.page)?.length ?? 0;
-			const mediaCount = data.mediaCount ?? mediaList.length;
 			mediaPages.set(data.page, markRaw(mediaList));
 			state.mediaPagesVersion++;
 			state.queryHash = data.queryHash ?? '';
-			state.itemsLength += mediaCount - previousMediaCount;
-			state.totalCount = data.totalCount ?? state.totalCount;
+			state.itemsLength += mediaList.length - previousMediaCount;
+			state.totalCount = data.mediaCount ?? data.totalCount ?? state.totalCount;
 
 			state.allMovieCount = data.totalMovieCount;
 			state.allTvShowCount = data.totalTvShowCount;

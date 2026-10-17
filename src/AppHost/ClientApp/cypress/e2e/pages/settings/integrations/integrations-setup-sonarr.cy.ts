@@ -85,6 +85,109 @@ const setupStages = [
 ] as const;
 
 describe('Sonarr integrations', () => {
+	it('invalidates a tested URL while allowing an unvalidated configuration to be saved', () => {
+		// Arrange
+		const invalidUrl = 'not-a-valid-url';
+		let currentDetail: SonarrIntegrationDTO = {
+			...unconfiguredDetail,
+			downloadFolderId: 1,
+			provisioningState: IntegrationProvisioningState.Configured,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestedAt: testedAt,
+		};
+		let currentSummary: IntegrationSummary = {
+			...unconfiguredSummary,
+			downloadFolderId: 1,
+			provisioningState: IntegrationProvisioningState.Configured,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestedAt: testedAt,
+		};
+		let updateCallCount = 0;
+		cy.basePageSetup({ plexAccountCount: 0, plexServerCount: 0 });
+		cy.intercept('GET', IntegrationPaths.getIntegrationsEndpoint(), (request) => {
+			request.reply({ statusCode: 200, body: generateResultDTO([currentSummary]) });
+		}).as('getIntegrations');
+		cy.intercept('GET', IntegrationPaths.getSonarrIntegrationEndpoint(integrationId), (request) => {
+			request.reply({ statusCode: 200, body: generateResultDTO(currentDetail) });
+		}).as('getSonarr');
+		cy.intercept({ method: 'GET', pathname: IntegrationPaths.testConnectionToSonarrEndpoint() }, {
+			statusCode: 200,
+			body: generateResultDTO({
+				result: TestConnectionStatus.Success,
+				errorMessage: null,
+				httpStatusCode: 200,
+				testedAt,
+			}),
+		}).as('testSonarrConnection');
+		cy.intercept('PUT', IntegrationPaths.updateSonarrIntegrationEndpoint(integrationId), (request) => {
+			updateCallCount++;
+			currentDetail = {
+				...currentDetail,
+				url: request.body.url,
+				provisioningState: IntegrationProvisioningState.ChangesPending,
+				lastConnectionTestStatus: TestConnectionStatus.Unknown,
+				lastConnectionTestHttpStatusCode: null,
+				lastConnectionTestErrorMessage: null,
+				lastConnectionTestedAt: null,
+			};
+			currentSummary = {
+				...currentSummary,
+				baseUrl: currentDetail.url,
+				provisioningState: currentDetail.provisioningState,
+				lastConnectionTestStatus: currentDetail.lastConnectionTestStatus,
+				lastConnectionTestHttpStatusCode: null,
+				lastConnectionTestErrorMessage: null,
+				lastConnectionTestedAt: null,
+			};
+			request.reply({ statusCode: 200, body: generateResultDTO(currentDetail) });
+		}).as('updateSonarr');
+
+		// Act
+		cy.visit(route('/settings/integrations'));
+		cy.wait('@getIntegrations');
+		cy.getCy('integration-card').should('contain.text', 'Connected').click();
+		cy.wait('@getSonarr');
+		cy.getCy('integration-test').click();
+		cy.wait('@testSonarrConnection').its('request.query').should('deep.include', {
+			url: integrationUrl,
+			apiKey: integrationApiKey,
+			integrationId,
+		});
+		cy.getCy('integration-dialog').should('contain.text', 'Connection successful');
+		cy.getCy('integration-base-url').clear().type(invalidUrl).blur();
+
+		// Assert
+		cy.getCy('integration-dialog').should('not.contain.text', 'Connection successful');
+		cy.getCy('integration-save').should('not.be.disabled');
+		cy.getCy('integration-setup').should('be.disabled');
+		cy.then(() => expect(updateCallCount).to.equal(0));
+		cy.getCy('integration-save').click();
+		cy.wait('@updateSonarr').then(({ request, response }) => {
+			expect(request.body).to.deep.equal({
+				name: integrationName,
+				url: invalidUrl,
+				apiKey: integrationApiKey,
+				category: integrationCategory,
+				downloadFolderId: 1,
+			});
+			expect(response?.body.value.lastConnectionTestStatus).to.equal(TestConnectionStatus.Unknown);
+		});
+		cy.wait('@getIntegrations');
+		cy.then(() => expect(updateCallCount).to.equal(1));
+		cy.getCy('integration-card')
+			.should('contain.text', invalidUrl)
+			.and('contain.text', 'Unconnected')
+			.and('contain.text', IntegrationProvisioningState.ChangesPending);
+		cy.getCy('integration-card').click();
+		cy.wait('@getSonarr');
+		cy.getCy('integration-base-url').should('have.value', invalidUrl);
+		cy.getCy('integration-dialog').should('not.contain.text', 'Connection successful');
+	});
+
 	it('checks and saves a new Sonarr integration as explicit separate actions', () => {
 		let integrations: IntegrationSummary[] = [];
 		let saveCallCount = 0;

@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, toRefs } from 'vue';
+import { computed, reactive, toRefs, watch } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
@@ -73,6 +73,21 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 	};
 
 	const state = reactive<IIntegrationStoreState>(cloneDeep(defaultState));
+	let observedDraftUrl = state.draft.url.trim().replace(/\/+$/, '');
+	let observedDraftApiKey = state.draft.apiKey.trim();
+	watch(
+		() => [state.draft.url, state.draft.apiKey] as const,
+		([url, apiKey]) => {
+			const normalizedUrl = url.trim().replace(/\/+$/, '');
+			const normalizedApiKey = apiKey.trim();
+			const identityChanged = normalizedUrl !== observedDraftUrl
+				|| normalizedApiKey !== observedDraftApiKey;
+			observedDraftUrl = normalizedUrl;
+			observedDraftApiKey = normalizedApiKey;
+			if (identityChanged && !state.isTesting) state.testResult = null;
+		},
+		{ flush: 'sync' },
+	);
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -90,7 +105,8 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 				tap((result) => {
 					if (result.isSuccess) {
 						state.items = result.value ?? [];
-						if (testResult) updateSummaryConnectionStatus(testResult);
+						if (testResult && state.testResult === testResult)
+							updateSummaryConnectionStatus(testResult);
 					}
 				}),
 			);

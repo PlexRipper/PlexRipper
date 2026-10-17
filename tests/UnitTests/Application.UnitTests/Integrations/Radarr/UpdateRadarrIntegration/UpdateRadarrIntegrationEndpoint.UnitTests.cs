@@ -58,6 +58,211 @@ public class UpdateRadarrIntegrationEndpointUnitTests
     }
 
     [Test]
+    public async Task ShouldMarkChangesPendingAndClearConnectionEvidence_WhenApiKeyChanges()
+    {
+        // Arrange
+        await SetupDatabase(55305);
+        var dbContext = IDbContext;
+        var integration = new RadarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000055305"),
+            DisplayName = "Radarr",
+            BaseUrl = "https://radarr.example.com",
+            RadarrApiKey = "old-key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.ConnectionFailed,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status503ServiceUnavailable,
+            LastConnectionTestErrorMessage = "Connection failed",
+            LastConnectionTestedAt = new DateTime(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc),
+        };
+        dbContext.RadarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateRadarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Radarr",
+            Url = "radarr-instance",
+            ApiKey = "new-key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var updated = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.Response!.IsSuccess.ShouldBeTrue();
+        endpointResult.Response!.Errors.Count.ShouldBe(0);
+        updated.BaseUrl.ShouldBe("radarr-instance");
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.ChangesPending);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Unknown);
+        updated.LastConnectionTestHttpStatusCode.ShouldBeNull();
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ShouldRemainConfiguredAndPreserveConnectionEvidence_WhenOnlyNameChanges()
+    {
+        // Arrange
+        await SetupDatabase(55306);
+        var dbContext = IDbContext;
+        var testedAt = new DateTime(2026, 10, 3, 12, 0, 0, DateTimeKind.Utc);
+        var integration = new RadarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000055306"),
+            DisplayName = "Radarr",
+            BaseUrl = "https://radarr.example.com",
+            RadarrApiKey = "key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.Success,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
+            LastConnectionTestErrorMessage = null,
+            LastConnectionTestedAt = testedAt,
+        };
+        dbContext.RadarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateRadarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Renamed Radarr",
+            Url = "https://radarr.example.com",
+            ApiKey = "key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var updated = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.Response!.IsSuccess.ShouldBeTrue();
+        endpointResult.Response!.Errors.Count.ShouldBe(0);
+        updated.DisplayName.ShouldBe("Renamed Radarr");
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.Configured);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Success);
+        updated.LastConnectionTestHttpStatusCode.ShouldBe(StatusCodes.Status200OK);
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBe(testedAt);
+    }
+
+    [Test]
+    public async Task ShouldPreserveConnectionEvidence_WhenUrlOnlyAddsTrailingSlash()
+    {
+        // Arrange
+        await SetupDatabase(55307);
+        var dbContext = IDbContext;
+        var testedAt = new DateTime(2026, 10, 4, 12, 0, 0, DateTimeKind.Utc);
+        var integration = new RadarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000055307"),
+            DisplayName = "Radarr",
+            BaseUrl = "https://radarr.example.com/",
+            RadarrApiKey = "key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.Success,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
+            LastConnectionTestErrorMessage = null,
+            LastConnectionTestedAt = testedAt,
+        };
+        dbContext.RadarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateRadarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Radarr",
+            Url = "https://radarr.example.com///",
+            ApiKey = "key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var updated = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.Response!.IsSuccess.ShouldBeTrue();
+        endpointResult.Response!.Errors.Count.ShouldBe(0);
+        updated.BaseUrl.ShouldBe("https://radarr.example.com");
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.Configured);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Success);
+        updated.LastConnectionTestHttpStatusCode.ShouldBe(StatusCodes.Status200OK);
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBe(testedAt);
+    }
+
+    [Test]
+    public async Task ShouldRemainUnconfiguredAndClearConnectionEvidence_WhenConnectionIdentityChangesBeforeSetup()
+    {
+        // Arrange
+        await SetupDatabase(55308);
+        var dbContext = IDbContext;
+        var integration = new RadarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000055308"),
+            DisplayName = "Radarr",
+            BaseUrl = "https://radarr.example.com",
+            RadarrApiKey = "old-key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Unconfigured,
+            LastConnectionTestStatus = TestConnectionStatus.Success,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
+            LastConnectionTestErrorMessage = null,
+            LastConnectionTestedAt = new DateTime(2026, 10, 5, 12, 0, 0, DateTimeKind.Utc),
+        };
+        dbContext.RadarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateRadarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Radarr",
+            Url = "https://new-radarr.example.com",
+            ApiKey = "new-key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var updated = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.Response!.IsSuccess.ShouldBeTrue();
+        endpointResult.Response!.Errors.Count.ShouldBe(0);
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.Unconfigured);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Unknown);
+        updated.LastConnectionTestHttpStatusCode.ShouldBeNull();
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBeNull();
+    }
+
+    [Test]
     public async Task ShouldReturnNotFound_WhenIntegrationDoesNotExist()
     {
         // Arrange

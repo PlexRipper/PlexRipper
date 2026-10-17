@@ -87,11 +87,22 @@ public class UpdateRadarrIntegrationEndpoint : Endpoint<UpdateRadarrIntegrationR
             return;
         }
 
+        var connectionIdentityChanged = integration.BaseUrl.Trim().TrimEnd('/') != url
+            || integration.RadarrApiKey.Trim() != apiKey;
+
         if (
             integration.ProvisioningState == IntegrationProvisioningState.Configured
-            && (integration.Category != category || integration.BaseUrl != url || integration.RadarrApiKey != apiKey)
+            && (integration.Category != category || connectionIdentityChanged)
         )
             integration.ProvisioningState = IntegrationProvisioningState.ChangesPending;
+
+        if (connectionIdentityChanged)
+        {
+            integration.LastConnectionTestStatus = TestConnectionStatus.Unknown;
+            integration.LastConnectionTestHttpStatusCode = null;
+            integration.LastConnectionTestErrorMessage = null;
+            integration.LastConnectionTestedAt = null;
+        }
 
         integration.DisplayName = name;
         integration.BaseUrl = url;

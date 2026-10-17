@@ -322,13 +322,6 @@ const integrationHelp = computed(() => {
 	};
 });
 
-watch(
-	() => [store.draft.url, store.draft.apiKey],
-	() => {
-		if (!store.isTesting) store.testResult = null;
-	},
-);
-
 function open(event: unknown): void {
 	const integration = event as IntegrationSummary | null;
 	set(isEditMode, Boolean(integration));

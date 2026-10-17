@@ -58,9 +58,12 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             [new AddOrUpdatePlexLibrariesValidator()]);
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(
-                It.Is<InvalidateLibraryComparisonJobsCommand>(c => c.PlexLibraryIds.Count == 0), CancellationToken))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+                It.IsAny<InvalidateLibraryComparisonJobsCommand>(), CancellationToken))
+            .Returns((ICommand<Result> command, CancellationToken token) =>
+                new ValidationPipeline<InvalidateLibraryComparisonJobsCommand, Result>(
+                    [new InvalidateLibraryComparisonJobsCommandValidator()])
+                    .ExecuteAsync((InvalidateLibraryComparisonJobsCommand)command, () => Task.FromResult(Result.Ok()), token))
+            .Verifiable(Times.Never());
 
         // Act
         var result = await pipeline.ExecuteAsync(request, () => Sut.ExecuteAsync(request, CancellationToken), CancellationToken);
@@ -174,6 +177,8 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
                     ),
                 Times.Once
             );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<InvalidateLibraryComparisonJobsCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Test]

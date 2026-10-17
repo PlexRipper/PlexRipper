@@ -239,12 +239,15 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             .Where(x => !newLibraryIds.Contains(x))
             .Distinct()
             .ToList();
-        var invalidationResult = await _commandExecutor.Send(
-            new InvalidateLibraryComparisonJobsCommand(affectedLibraryIds),
-            cancellationToken
-        );
-        if (invalidationResult.IsFailed)
-            return invalidationResult.ToResult<List<PlexLibraryAccessRapport>>().LogError();
+        if (affectedLibraryIds.Count > 0)
+        {
+            var invalidationResult = await _commandExecutor.Send(
+                new InvalidateLibraryComparisonJobsCommand(affectedLibraryIds),
+                cancellationToken
+            );
+            if (invalidationResult.IsFailed)
+                return invalidationResult.ToResult<List<PlexLibraryAccessRapport>>().LogError();
+        }
 
         foreach (var libraryId in affectedLibraryIds)
         {

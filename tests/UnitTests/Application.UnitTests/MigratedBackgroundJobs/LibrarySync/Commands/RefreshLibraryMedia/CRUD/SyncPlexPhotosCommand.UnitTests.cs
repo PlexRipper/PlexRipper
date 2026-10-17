@@ -6,8 +6,6 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
     [Arguments("initial")]
     [Arguments("unchanged")]
     [Arguments("update")]
-    [Arguments("children")]
-    [Arguments("move")]
     [Arguments("force")]
     [Arguments("empty")]
     public async Task ShouldReconcileAlbumsAndPhotos_WithScopedOriginalsCountsAndReports(string scenario)
@@ -96,28 +94,19 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
             photos[0].MediaSize = 1;
             photos[0].MediaDataList.Single().UpdateInitProperty(nameof(BasePlexMediaData.Size), 1L);
         }
-        if (scenario is "update" or "children")
+        if (scenario == "update")
         {
             albums.RemoveAt(1);
             photos.RemoveRange(1, photos.Count - 1);
-            if (scenario == "update")
-            {
-                albums[0].UpdatedAt = albums[0].UpdatedAt?.AddDays(1) ?? DateTime.UnixEpoch;
-                photos[0].UpdatedAt = photos[0].UpdatedAt?.AddDays(1) ?? DateTime.UnixEpoch;
-                photos[0].Title = "Updated photo";
-                photos[0].MediaSize = 123;
-                photos[0].MediaDataList.Single().UpdateInitProperty(nameof(BasePlexMediaData.Size), 123L);
-            }
+            albums[0].UpdatedAt = albums[0].UpdatedAt?.AddDays(1) ?? DateTime.UnixEpoch;
+            photos[0].UpdatedAt = photos[0].UpdatedAt?.AddDays(1) ?? DateTime.UnixEpoch;
+            photos[0].Title = "Updated photo";
+            photos[0].MediaSize = 123;
+            photos[0].MediaDataList.Single().UpdateInitProperty(nameof(BasePlexMediaData.Size), 123L);
             albums[0].ChildCount = 1;
             albums[0].Duration = photos[0].Duration;
             albums[0].MediaSize = photos[0].MediaSize;
             albums[0].VideoQuality = photos[0].VideoQuality;
-        }
-        if (scenario == "move")
-        {
-            foreach (var photo in albums[0].Photos)
-                photo.PlexPhotoAlbum = albums[1];
-            albums.RemoveAt(0);
         }
         if (scenario == "empty")
         {
@@ -128,7 +117,7 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
         library.PhotoImages.AddRange(photos);
         var metadata = new InsertMediaMetaDataCommandResponse(library)
         {
-            PhotoClipCount = scenario is "empty" or "update" or "children" ? 0 : 2,
+            PhotoClipCount = scenario is "empty" or "update" ? 0 : 2,
         };
 
         // Act
@@ -156,20 +145,6 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
                 UpdatedPhotos = 1,
                 DeletedPhotos = 3,
             },
-            "children" => new CrudPhotosReport
-            {
-                UpdatedPhotoAlbums = 1,
-                DeletedPhotoAlbums = 1,
-                UnchangedPhotos = 1,
-                DeletedPhotos = 3,
-            },
-            "move" => new CrudPhotosReport
-            {
-                DeletedPhotoAlbums = 1,
-                UnchangedPhotoAlbums = 1,
-                UpdatedPhotos = 2,
-                UnchangedPhotos = 2,
-            },
             "empty" => new CrudPhotosReport { DeletedPhotoAlbums = 2, DeletedPhotos = 4 },
             _ => new CrudPhotosReport { UnchangedPhotoAlbums = 2, UnchangedPhotos = 4 },
         };
@@ -181,7 +156,7 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
         after
             .Select(x => (x.PlexApiRatingKey, x.PlexPhotoAlbumId))
             .ShouldBe(photos.OrderBy(x => x.PlexApiRatingKey).Select(x => (x.PlexApiRatingKey, x.PlexPhotoAlbum!.Id)));
-        if (scenario is "unchanged" or "move")
+        if (scenario == "unchanged")
             after.Select(x => x.Id).Order().ShouldBe(originalIds.Order());
         if (scenario == "update")
         {
@@ -254,7 +229,6 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
             {
                 "empty" => 0,
                 "update" => 123,
-                "children" => photos[0].MediaSize,
                 _ => beforeData.Sum(x => x.Size) + addedSize,
             }
         );

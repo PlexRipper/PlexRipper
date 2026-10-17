@@ -4,9 +4,8 @@ namespace Reaparr.Application;
 
 /// <summary>
 /// Command to synchronize Plex library media metadata (actors, genres, countries) for a
-/// specific Plex library. The synchronization is a destructive replace: all existing
-/// relations for the target library are removed and then recreated from the provided
-/// <paramref name="LibraryMetadata"/> collections.
+/// specific Plex library. Changed relation sets are replaced from the provided
+/// <paramref name="LibraryMetadata"/> collections; identical sets are left untouched.
 /// </summary>
 /// <param name="LibraryMetadata">Aggregated metadata for the target Plex library.</param>
 /// <returns>Returns the result of the operation.</returns>
@@ -93,15 +92,22 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var genresCount = syncGenresVideoResult.ValueOrDefault + syncGenresAudioResult.ValueOrDefault;
         var countriesCount = syncCountriesResult.ValueOrDefault;
 
-        _log.Here()
-            .Debug(
-                "[SyncMetaData] Calling SetLibraryMetaData: actors={ActorCount}, genres={GenreCount}, countries={CountryCount}",
-                actorsCount,
-                genresCount,
-                countriesCount
-            );
-        await _dbContext.SetLibraryMetaData(libraryId, actorsCount, genresCount, countriesCount);
-        _log.Here().Debug("[SyncMetaData] SetLibraryMetaData done");
+        if (
+            library.ActorsCount != actorsCount
+            || library.GenresCount != genresCount
+            || library.CountriesCount != countriesCount
+        )
+        {
+            _log.Here()
+                .Debug(
+                    "[SyncMetaData] Calling SetLibraryMetaData: actors={ActorCount}, genres={GenreCount}, countries={CountryCount}",
+                    actorsCount,
+                    genresCount,
+                    countriesCount
+                );
+            await _dbContext.SetLibraryMetaData(libraryId, actorsCount, genresCount, countriesCount);
+            _log.Here().Debug("[SyncMetaData] SetLibraryMetaData done");
+        }
 
         return Result.Merge(
                 syncGenresVideoResult,
@@ -122,6 +128,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var stopWatch = Stopwatch.StartNew();
 
         _log.Here().Debug("Started syncing {Count} roles for library {LibraryName}", sourceDict.Count, libraryName);
+
+        var currentIds = await _dbContext.PlexLibraryActors
+            .Where(x => x.PlexLibraryId == libraryId).Select(x => x.PlexActorId).ToListAsync(ct);
+        if (sourceDict.Values.Select(x => x.Id).ToHashSet().SetEquals(currentIds))
+            return Result.Ok(sourceDict.Count);
 
         if (!sourceDict.Any())
         {
@@ -200,6 +211,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var stopWatch = Stopwatch.StartNew();
         _log.Here().Debug("Started syncing {Count} video genres for library {LibraryName}", sourceDict.Count, libraryName);
 
+        var currentIds = await _dbContext.PlexLibraryGenresVideo
+            .Where(x => x.PlexLibraryId == libraryId).Select(x => x.PlexGenreId).ToListAsync(ct);
+        if (sourceDict.Values.Select(x => x.Id).ToHashSet().SetEquals(currentIds))
+            return Result.Ok(sourceDict.Count);
+
         var newGenres = sourceDict
             .Select(x => new PlexLibraryGenresVideo(libraryId, x.Value.Id))
             .ToList();
@@ -242,6 +258,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     {
         var stopWatch = Stopwatch.StartNew();
         _log.Here().Debug("Started syncing {Count} audio genres for library {LibraryName}", sourceDict.Count, libraryName);
+
+        var currentIds = await _dbContext.PlexLibraryGenresAudio
+            .Where(x => x.PlexLibraryId == libraryId).Select(x => x.PlexGenreId).ToListAsync(ct);
+        if (sourceDict.Values.Select(x => x.Id).ToHashSet().SetEquals(currentIds))
+            return Result.Ok(sourceDict.Count);
 
         var newGenres = sourceDict
             .Select(x => new PlexLibraryGenresAudio(libraryId, x.Value.Id))
@@ -286,6 +307,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var stopWatch = Stopwatch.StartNew();
 
         _log.Here().Debug("Started syncing {Count} countries for library {LibraryName}", sourceDict.Count, libraryName);
+
+        var currentIds = await _dbContext.PlexLibraryCountries
+            .Where(x => x.PlexLibraryId == libraryId).Select(x => x.PlexCountryId).ToListAsync(ct);
+        if (sourceDict.Values.Select(x => x.Id).ToHashSet().SetEquals(currentIds))
+            return Result.Ok(sourceDict.Count);
 
         if (!sourceDict.Any())
         {

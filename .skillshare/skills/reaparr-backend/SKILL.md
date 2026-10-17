@@ -130,7 +130,12 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 - After validation, handlers and internal helpers consume the established contract. Do not repeat null, range, identity, collection, or scope checks already guaranteed by that contract.
 - Normalize external representations once at the owning boundary. Internal callers use the normalized representation without repeating normalization or adding fallback values for states the contract excludes.
 - Incoming mapped entities have clean generated database IDs. Assign persisted IDs when matching existing rows and assign relationships when writing them; do not reset IDs or repair reused entity graphs defensively.
-- For independent batch records, discard invalid records at ingestion when the operation permits partial acceptance, then process the valid records. Invalid command context still fails validation. A failed or incomplete retrieval must not be treated as an authoritative empty inventory.
+- For independent batch records, discard invalid records at ingestion when the operation permits partial acceptance, then process the valid records. Invalid command context still fails validation.
+
+### Plex API authority
+
+- A fresh Plex API response that completed successfully and passed boundary validation is always authoritative. Treat it as the source of truth exactly as received, including an empty collection: if Plex reports that everything is gone, reconcile persistence accordingly and remove stale records. Never second-guess a valid response by comparing it with stored data, issuing a confirmatory request, or retaining stale records because the change seems surprising.
+- A failed, cancelled, malformed, or explicitly incomplete retrieval is not an authoritative snapshot. Never convert it to an empty inventory or use it for destructive reconciliation; preserve existing data and follow the normal failure handling.
 - Keep checks that implement actual behavior: create versus update, timestamp changes, missing stored records, authorization, ownership, concurrency conflicts, and cancellation. These are not duplicate input validation.
 - Add defensive handling only for a reachable failure demonstrated by the contract, current callers, or observed behavior. Hypothetical misuse is not a requirement.
 - When an internal invariant is violated, fix its producer or boundary validation. Do not conceal the violation with silent defaults, skipped work, or graph repair.
@@ -228,76 +233,35 @@ Use a manual `try/catch` only when `Result.Try` cannot express the required beha
 
 Never add a broad `catch (Exception)` merely to return `Result.Fail`; use `Result.Try`. If a framework boundary must catch broadly, log the exception and ensure it cannot escape that boundary.
 
-### Handle cancellation before failure
+### Handle cancelled and failed results together
 
-When a called method can be cancelled, always check `IsCancelled` before checking `IsFailed`. Cancellation may also satisfy failure predicates, but expected cancellation must not be handled or logged as an ordinary error.
-
-Always call `LogWarning()` on a cancelled result and return that result:
+Always use `IsCancelledOrFailed` with `LogIfFailed()` when a cancelled or failed result must stop the current operation:
 
 ```csharp
-var result = await RunOperation(cancellationToken);
-if (result.IsCancelled)
-    return result.LogWarning();
-
-if (result.IsFailed)
-    return result.LogError();
-
-return result;
+if (insertResult.IsCancelledOrFailed)
+    return insertResult.LogIfFailed();
 ```
 
-Do **not** use `cancellationToken.ThrowIfCancellationRequested()` to propagate a cancelled `Result`. Check `result.IsCancelled`, call `LogWarning()`, and return the cancelled result instead. This preserves FluentResults cancellation semantics and avoids turning a handled cancellation back into exception control flow.
+`LogIfFailed()` logs cancellation as a warning and other failures as errors, while preserving the original result and its errors. Use the same combined guard for generic and merged results; do not expand it into separate `IsCancelled`/`LogWarning()` and `IsFailed`/`LogError()` guards.
 
-For methods that return `Result<T>`, follow the same rule and return the original cancelled generic result whenever the signature permits. If a framework callback cannot return `Result`, inspect and warning-log the cancelled result, then exit the callback cleanly.
-
-### Always log failed results
-
-Every failed, non-cancelled result must pass through `LogError()` at the handling or return boundary:
+When converting a generic result to the enclosing method's non-generic `Result` return type, append `.ToResult()` without a type parameter:
 
 ```csharp
-if (result.IsCancelled)
-    return result.LogWarning();
-
-if (result.IsFailed)
-    return result.LogError();
+if (insertResult.IsCancelledOrFailed)
+    return insertResult.LogIfFailed().ToResult();
 ```
 
-Apply this to generic results and merged results as well. Inspect and log the result before reading `.Value`. Never silently discard a failed command, event publication, scheduler operation, notification, database operation, or cleanup result.
-
-Avoid these patterns:
-
-```csharp
-// Wrong: cancellation is treated as an ordinary error.
-if (result.IsFailed)
-    return result.LogError();
-
-// Wrong: cancellation is converted back into exception control flow.
-if (result.IsCancelled)
-    cancellationToken.ThrowIfCancellationRequested();
-
-// Wrong: a failed result is propagated without logging.
-return result;
-
-// Wrong: Result.Try should own this exception boundary.
-try
-{
-    await DoWorkAsync(cancellationToken);
-}
-catch (Exception ex)
-{
-    return Result.Fail(ex.Message);
-}
-```
+Read `.Value` only after the guard establishes success. Propagate handled cancellation as a result rather than calling `cancellationToken.ThrowIfCancellationRequested()`. At framework callbacks that cannot return a `Result`, log with `LogIfFailed()` and exit cleanly.
 
 ### Result composition and propagation
 
 - Return the original failed or cancelled result when signatures are compatible; this preserves error types and metadata.
 - Use `ToResult()` only when converting `Result<T>` to non-generic `Result` is required.
-- Use `Result.Merge(...)` for independent result-producing operations, then apply the same cancellation-first and failure-logging checks to the merged result.
+- Use `Result.Merge(...)` for independent result-producing operations, then apply the same `IsCancelledOrFailed`/`LogIfFailed()` guard to the merged result.
 - Never read `.Value` until success is established.
 - Do not replace structured errors with only `error.Message`; retain `ExceptionalError`, HTTP/status metadata, and domain error types.
 - Use existing `ResultExtensions` helpers for validation, not-found, conflict, timeout, and other expected failures so API metadata remains intact.
-- `LogIfFailed()` already logs cancelled results at warning level, failed results at error level, and returns the original result unchanged. Use it when the boundary only needs to record a result and continue with its existing control flow, especially for best-effort post-commit queue or rebuild requests.
-- Branch manually on `IsCancelled` and `IsFailed` only when those states require different control flow, result mapping, response handling, or safe access to `.Value`. Do not replace a logging-only `result.LogIfFailed()` call with equivalent manual branches.
+- For best-effort work that intentionally continues after failure or cancellation, call `result.LogIfFailed()` without introducing an early return.
 - Avoid duplicate logging at every stack frame. Log at the boundary that handles or returns the result, and always log results consumed locally rather than propagated.
 - When using `Result.Try`, inspect its returned result. Do not assume wrapping an operation is sufficient by itself.
 

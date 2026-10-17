@@ -1098,6 +1098,20 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
+        var signedInClaims = new List<Claim>();
+        var signedInRoles = new List<string>();
+        Mock.Mock<IIdentitySignInService>()
+            .Setup(x => x.SignInAsync(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IEnumerable<string>>()))
+            .Callback<IEnumerable<Claim>, IEnumerable<string>>(
+                (claims, roles) =>
+                {
+                    signedInClaims.AddRange(claims);
+                    signedInRoles.AddRange(roles);
+                }
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
         // Act
         var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
@@ -1107,6 +1121,19 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
         Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
         Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
+        context.User.Identity.ShouldNotBeNull();
+        context.User.Identity.IsAuthenticated.ShouldBeTrue();
+        context.User.Identity.Name.ShouldBe(TEST_USERNAME);
+        context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value.ShouldBe(TEST_USER_ID);
+        context.User.FindFirst("HeaderAuth")?.Value.ShouldBe("true");
+        context.User.FindFirst(ClaimTypes.Email)?.Value.ShouldBe(TEST_EMAIL);
+        context.User.IsInRole("User").ShouldBeTrue();
+        context.User.IsInRole("Admin").ShouldBeTrue();
+        signedInClaims.Select(x => (x.Type, x.Value)).ShouldBe(
+            context.User.Claims.Select(x => (x.Type, x.Value))
+        );
+        signedInRoles.ShouldBe(["User", "Admin"]);
+        Mock.Mock<IIdentitySignInService>().Verify();
     }
 
     [Test]

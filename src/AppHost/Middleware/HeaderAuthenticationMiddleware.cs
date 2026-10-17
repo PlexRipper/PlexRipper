@@ -1,5 +1,6 @@
 using System.Net;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
 
@@ -137,8 +138,16 @@ public class HeaderAuthenticationMiddleware
 
         // Allow sign-in
         var claims = await CreateUserClaims(user);
-
         await _signInService.SignInAsync(claims, claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value));
+
+        context.User = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                ClaimTypes.Name,
+                ClaimTypes.Role
+            )
+        );
 
         if (_headerAuthentication.EnableLogging)
             _log.Here()

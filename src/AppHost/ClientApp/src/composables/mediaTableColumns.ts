@@ -19,6 +19,7 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 		{
 			label: t('components.media-list.columns.quality'),
 			field: 'quality',
+			sortField: MediaSortField.Quality,
 			align: 'center',
 			sortable: false,
 		},

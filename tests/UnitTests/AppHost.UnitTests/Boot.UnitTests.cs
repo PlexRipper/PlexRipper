@@ -1,6 +1,9 @@
+using Autofac;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
+using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.AppHost.UnitTests;
 
@@ -89,6 +92,11 @@ public class BootUnitTests : BaseUnitTest<Boot>
         Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<IDownloadQueue>().Verify();
         Mock.Mock<IBackgroundJobsSetup>().Verify();
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .Verify(
+                x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()),
+                Times.Never
+            );
     }
 
     [Test]
@@ -175,6 +183,11 @@ public class BootUnitTests : BaseUnitTest<Boot>
             .InSequence(sequence)
             .Setup(x => x.CheckDownloadQueueForAllServers(It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .InSequence(sequence)
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         await Sut.StartAsync(CancellationToken);
@@ -187,6 +200,112 @@ public class BootUnitTests : BaseUnitTest<Boot>
             );
         Mock.Mock<IDownloadQueue>()
             .Verify(x => x.CheckDownloadQueueForAllServers(It.IsAny<CancellationToken>()), Times.Once);
+        Mock.Mock<IMoveDownloadFileQueue>().Verify();
+    }
+
+    [Test]
+    [Arguments(DownloadStatus.DownloadFinished)]
+    [Arguments(DownloadStatus.MoveError)]
+    public async Task ShouldReconcileReadyToMoveFilesAfterBackgroundJobsAreReady_OnNormalStartup(
+        DownloadStatus readyStatus
+    )
+    {
+        // Arrange
+        SetAppRuntimeInfo(x => x.IsIntegrationTestMode = false);
+        await SetupDatabase(
+            58123,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 3;
+                config.MovieDownloadTasksCount = 3;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var files = await dbContext
+            .DownloadTaskMovieFile.AsTracking()
+            .OrderBy(x => x.Id)
+            .Take(3)
+            .ToListAsync(CancellationToken);
+        files.SetDownloadStatus(DownloadStatus.DownloadFinished);
+        files[0].DownloadStatus = readyStatus;
+        files[1].DownloadStatus = DownloadStatus.Completed;
+        files[2].DownloadStatus = DownloadStatus.Paused;
+        files.Count.ShouldBe(3);
+        files.Select(x => x.DownloadStatus).ShouldBe(
+            [readyStatus, DownloadStatus.Completed, DownloadStatus.Paused]
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var expectedKey = files[0].ToKey();
+        var startupToken = CancellationToken;
+        var sequence = new MockSequence();
+
+        SetupDependencies(builder =>
+            builder.RegisterType<MoveDownloadFileJobQueue>().As<IMoveDownloadFileQueue>().SingleInstance()
+        );
+
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStarted).Returns(CancellationToken.None);
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStopping).Returns(CancellationToken.None);
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStopped).Returns(CancellationToken.None);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CreateDefaultAppUserCommand>(), startupToken))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<RecoverInterruptedDownloadsCommand>(), startupToken))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CleanupLibrarySyncJobQueueCommand>(), startupToken))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), startupToken))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadQueue>()
+            .Setup(x => x.Setup(CancellationToken.None))
+            .Returns(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadQueue>()
+            .Setup(x => x.CheckDownloadQueueForAllServers(startupToken))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<IBackgroundJobsSetup>()
+            .InSequence(sequence)
+            .Setup(x => x.SetupAsync(startupToken))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .InSequence(sequence)
+            .Setup(x =>
+                x.StartMoveDownloadFileJob(
+                    It.Is<DownloadTaskKey>(key => key == expectedKey),
+                    startupToken
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        await Sut.StartAsync(startupToken);
+
+        // Assert
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify();
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(
+                x =>
+                    x.StartMoveDownloadFileJob(
+                        It.Is<DownloadTaskKey>(key => key != expectedKey),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IDownloadQueue>().Verify();
+        Mock.Mock<IBackgroundJobsSetup>().Verify();
     }
 
     [Test]

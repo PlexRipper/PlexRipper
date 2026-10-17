@@ -17,6 +17,7 @@ public class Boot : IHostedService
     private readonly IScheduler _scheduler;
     private readonly IBackgroundJobsSetup _backgroundJobsSetup;
     private readonly IDownloadQueue _downloadQueue;
+    private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
 
     #endregion
 
@@ -32,7 +33,8 @@ public class Boot : IHostedService
         IHostApplicationLifetime appLifetime,
         IScheduler scheduler,
         IBackgroundJobsSetup backgroundJobsSetup,
-        IDownloadQueue downloadQueue
+        IDownloadQueue downloadQueue,
+        IMoveDownloadFileQueue moveDownloadFileQueue
     )
     {
         _log = log.ForContext<Boot>();
@@ -42,7 +44,7 @@ public class Boot : IHostedService
         _scheduler = scheduler;
         _backgroundJobsSetup = backgroundJobsSetup;
         _downloadQueue = downloadQueue;
-
+        _moveDownloadFileQueue = moveDownloadFileQueue;
         appLifetime.ApplicationStarted.Register(OnStarted);
         appLifetime.ApplicationStopping.Register(OnStopping);
         appLifetime.ApplicationStopped.Register(OnStopped);
@@ -111,6 +113,9 @@ public class Boot : IHostedService
 
             var bootQueueKickResult = await _downloadQueue.CheckDownloadQueueForAllServers(cancellationToken);
             bootQueueKickResult.LogIfFailed();
+
+            var moveQueueKickResult = await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(cancellationToken);
+            moveQueueKickResult.LogIfFailed();
         }
 
         _log.Here().Information("Finished Initiating boot process");

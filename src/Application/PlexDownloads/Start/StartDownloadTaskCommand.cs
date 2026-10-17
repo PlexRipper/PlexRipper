@@ -82,7 +82,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                 or DownloadTaskType.Season
                 or DownloadTaskType.MusicArtist
                 or DownloadTaskType.MusicAlbum
-                or DownloadTaskType.PhotoAlbum
+                or DownloadTaskType.PhotoFolder
         )
         {
             DownloadStatus[] statusesToQueue = nextDownloadTask.DownloadStatus switch

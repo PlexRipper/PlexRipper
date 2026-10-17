@@ -64,7 +64,7 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 x.Id,
                 x.PlexServerId,
                 x.PlexLibraryId,
-                Type = DownloadTaskType.PhotoData,
+                Type = DownloadTaskType.PhotoImage,
                 x.CreatedAt,
             });
 

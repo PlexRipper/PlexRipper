@@ -135,8 +135,28 @@ public static class PlexMediaSlimDTOMapper
     public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexMusicTrack source) =>
         Map(source, source.PlexAlbumId, 0, []);
 
-    public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexPhotoImage source) =>
-        Map(source, source.PlexPhotoAlbumId, 0, []);
+    public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexPhotoMediaData source) =>
+        new()
+        {
+            Id = source.Id,
+            Title = source.Title,
+            SearchTitle = source.SearchTitle,
+            SortIndex = 0,
+            Year = 0,
+            Duration = source.Duration ?? 0,
+            MediaSize = source.Size,
+            ChildCount = 0,
+            GrandChildCount = 0,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = PlexMediaType.PhotoImage,
+            HasThumb = source.HasThumb,
+            PlexApiRatingKey = source.PlexApiRatingKey,
+            PlexApiMetaDataKey = source.PlexApiMetaDataKey,
+            Qualities = [],
+        };
 
     public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexOtherVideo source) =>
         Map(
@@ -155,7 +175,51 @@ public static class PlexMediaSlimDTOMapper
                 .ToList()
         );
 
-    public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexPhotoAlbum source) => Map(source, null, 0, []);
+    public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexPhotoAlbum source) =>
+        new()
+        {
+            Id = source.Id,
+            Title = source.Title,
+            SearchTitle = source.SearchTitle,
+            SortIndex = 0,
+            Year = 0,
+            Duration = source.Memberships.Sum(x => x.PlexPhotoMediaData?.Duration ?? 0),
+            MediaSize = source.Memberships.Sum(x => x.PlexPhotoMediaData?.Size ?? 0),
+            ChildCount = source.Memberships.Count,
+            GrandChildCount = 0,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = PlexMediaType.PhotoAlbum,
+            HasThumb = source.HasThumb,
+            PlexApiRatingKey = source.PlexApiRatingKey,
+            PlexApiMetaDataKey = source.PlexApiMetaDataKey,
+            Qualities = [],
+        };
+
+    public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexPhotoAlbum> source) =>
+        source.Select(x => new PlexMediaSlimDTO
+        {
+            Id = x.Id,
+            Title = x.Title,
+            SearchTitle = x.SearchTitle,
+            SortIndex = 0,
+            Year = 0,
+            Duration = x.Memberships.Sum(edge => edge.PlexPhotoMediaData!.Duration ?? 0),
+            MediaSize = x.Memberships.Sum(edge => edge.PlexPhotoMediaData!.Size),
+            ChildCount = x.Memberships.Count,
+            GrandChildCount = 0,
+            AddedAt = x.AddedAt,
+            UpdatedAt = x.UpdatedAt,
+            PlexLibraryId = x.PlexLibraryId,
+            PlexServerId = x.PlexServerId,
+            Type = PlexMediaType.PhotoAlbum,
+            HasThumb = x.HasThumb,
+            PlexApiRatingKey = x.PlexApiRatingKey,
+            PlexApiMetaDataKey = x.PlexApiMetaDataKey,
+            Qualities = new List<PlexMediaQualityDTO>(),
+        });
 
     private static PlexMediaSlimDTO Map(
         BasePlexMedia source,

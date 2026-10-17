@@ -52,11 +52,7 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     zombie.DownloadStatus,
                     resetStatus
                 );
-            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                zombie.ToKey(),
-                resetStatus,
-                cancellationToken
-            );
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(zombie.ToKey(), resetStatus, cancellationToken);
             totalReset++;
         }
 

@@ -12,83 +12,75 @@ public static partial class PlexMediaDTOMapper
             MediaData = [],
             Title = source.Title,
             SearchTitle = source.SearchTitle,
-            SortIndex = source.SortIndex,
-            Year = source.Year,
-            Duration = source.Duration,
-            MediaSize = source.MediaSize,
-            ChildCount = source.ChildCount,
+            SortIndex = 0,
+            Year = 0,
+            Duration = source.Memberships.Sum(x => x.PlexPhotoMediaData?.Duration ?? 0),
+            MediaSize = source.Memberships.Sum(x => x.PlexPhotoMediaData?.Size ?? 0),
+            ChildCount = source.Memberships.Count,
             GrandChildCount = 0,
             AddedAt = source.AddedAt,
             UpdatedAt = source.UpdatedAt,
             PlexLibraryId = source.PlexLibraryId,
             PlexServerId = source.PlexServerId,
-            Type = source.Type,
+            Type = PlexMediaType.PhotoAlbum,
             HasThumb = source.HasThumb,
             Qualities = [],
-            ComparisonId = source.ComparisonState.ToComparisonId(),
+            ComparisonId = PlexMediaComparisonState.NotCompared.ToComparisonId(),
             PlexApiRatingKey = source.PlexApiRatingKey,
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
-            HasArt = source.HasArt,
-            HasTheme = source.HasTheme,
-            Studio = source.Studio,
-            Summary = source.Summary,
-            ContentRating = source.ContentRating,
-            Rating = source.Rating,
-            OriginallyAvailableAt = source.OriginallyAvailableAt,
+            HasArt = false,
+            HasTheme = false,
+            Studio = string.Empty,
+            Summary = source.Summary ?? string.Empty,
+            ContentRating = null,
+            Rating = 0,
+            OriginallyAvailableAt = null,
             RecordLabel = null,
             ReleaseDate = null,
             Genres = [],
-            Children = source.Photos.OrderBy(x => x.SortIndex).Select(x => x.ToDTO()).ToList(),
+            Children = source.Memberships
+                .Select(x => x.PlexPhotoMediaData)
+                .OfType<PlexPhotoMediaData>()
+                .OrderBy(x => x.Id)
+                .OrderByNatural(x => x.Title)
+                .Select(x => x.ToPhotoDTO())
+                .ToList(),
             DiscNumber = null,
             TrackNumber = null,
         };
 
-    public static PlexMediaDTO ToDTO(this PlexPhotoImage source) =>
+    public static PlexMediaDTO ToPhotoDTO(this PlexPhotoMediaData source) =>
         new()
         {
             Id = source.Id,
-            ParentId = source.PlexPhotoAlbumId,
+            ParentId = null,
             TvShowId = default,
             TvShowSeasonId = default,
-            MediaData = source.MediaDataList.ToDTO(),
+            MediaData = [],
             Title = source.Title,
             SearchTitle = source.SearchTitle,
-            SortIndex = source.SortIndex,
-            Year = source.Year,
-            Duration = source.Duration,
-            MediaSize = source.MediaSize,
-            ChildCount = source.ChildCount,
+            SortIndex = 0,
+            Year = 0,
+            Duration = source.Duration ?? 0,
+            MediaSize = source.Size,
+            ChildCount = 0,
             GrandChildCount = 0,
             AddedAt = source.AddedAt,
             UpdatedAt = source.UpdatedAt,
             PlexLibraryId = source.PlexLibraryId,
             PlexServerId = source.PlexServerId,
-            Type = source.Type,
+            Type = PlexMediaType.PhotoImage,
             HasThumb = source.HasThumb,
-            Qualities = source
-                .MediaDataList.GroupBy(x => x.PlexApiMediaId)
-                .Select(group =>
-                    group
-                        .OrderBy(x => x.Id)
-                        .Select(x => new PlexMediaQualityDTO
-                        {
-                            VideoQuality = VideoQuality.Unknown,
-                            MediaDataType = PlexMediaType.PhotoImage,
-                            DataId = x.Id,
-                            MediaId = source.Id,
-                        })
-                        .First()
-                )
-                .ToList(),
-            ComparisonId = source.ComparisonState.ToComparisonId(),
+            Qualities = [],
+            ComparisonId = PlexMediaComparisonState.NotCompared.ToComparisonId(),
             PlexApiRatingKey = source.PlexApiRatingKey,
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
-            HasArt = source.HasArt,
-            HasTheme = source.HasTheme,
-            Studio = source.Studio,
-            Summary = source.Summary,
-            ContentRating = source.ContentRating,
-            Rating = source.Rating,
+            HasArt = false,
+            HasTheme = false,
+            Studio = string.Empty,
+            Summary = source.Summary ?? string.Empty,
+            ContentRating = null,
+            Rating = 0,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
             RecordLabel = null,
             ReleaseDate = null,
@@ -98,21 +90,4 @@ public static partial class PlexMediaDTOMapper
             TrackNumber = null,
         };
 
-    public static List<PlexMediaDataDTO> ToDTO(this ICollection<PlexPhotoMediaData> source) =>
-        source.Select(x => x.ToDTO()).ToList();
-
-    public static PlexMediaDataDTO ToDTO(this PlexPhotoMediaData source) =>
-        new()
-        {
-            Id = source.Id,
-            PlexApiMediaId = source.PlexApiMediaId,
-            PlexApiPartId = source.PlexApiPartId,
-            FileName = source.GetFileName,
-            Duration = source.Duration,
-            Size = source.Size,
-            VideoQuality = source.VideoQuality,
-            VideoCodec = source.VideoCodec,
-            AudioCodec = source.AudioCodec,
-            AudioQuality = AudioQuality.None,
-        };
 }

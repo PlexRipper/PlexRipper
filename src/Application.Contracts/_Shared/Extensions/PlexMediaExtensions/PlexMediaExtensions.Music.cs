@@ -131,7 +131,7 @@ public static partial class PlexMediaExtensions
                 SeasonFolder = string.Empty,
                 MusicArtistFolder = artist.Title.SanitizeFolderName(),
                 MusicAlbumFolder = album.Title.SanitizeFolderName(),
-                PhotoAlbumFolder = string.Empty,
+                PhotoFolder = string.Empty,
                 OtherVideoFolder = string.Empty,
                 KeepCompletedInDownloadFolder = keepCompletedInDownloadFolder,
             },

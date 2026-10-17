@@ -198,7 +198,9 @@ public class PlexLibrary : BaseEntity
 
     public ICollection<PlexPhotoAlbum> PhotoAlbums { get; private set; } = [];
 
-    public ICollection<PlexPhotoImage> PhotoImages { get; private set; } = [];
+    public ICollection<PlexPhotoMediaData> PhotoMediaData { get; private set; } = [];
+
+    public ICollection<PlexPhotoFolder> PhotoFolders { get; private set; } = [];
 
     public ICollection<PlexOtherVideo> OtherVideos { get; private set; } = [];
 

@@ -22,7 +22,9 @@ public class DownloadQueueCheckDownloadQueueForAllServersUnitTests : BaseUnitTes
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnOk();
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
 
         Sut.Setup(CancellationToken);
 
@@ -84,6 +86,9 @@ public class DownloadQueueCheckDownloadQueueForAllServersUnitTests : BaseUnitTes
                 return Task.FromResult(Result.Ok());
             })
             .Verifiable(Times.Exactly(2));
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
 
         var setupResult = Sut.Setup(workerToken);
         setupResult.IsSuccess.ShouldBeTrue();

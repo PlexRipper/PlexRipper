@@ -163,10 +163,8 @@ public class DownloadQueue : IDownloadQueue
             cancellationToken: cancellationToken
         );
 
-        var hasDownloadingTask = downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading);
-
-        // Avoid a race where the persisted task still says downloading while its Quartz job is finishing.
-        if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
+        var activeDownloadTaskKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(plexServerId);
+        if (HasActivePreDownloadTask(downloadTasks, activeDownloadTaskKeys))
         {
             return Result
                 .Fail("Cannot select the next download task because server is already downloading one")
@@ -202,6 +200,48 @@ public class DownloadQueue : IDownloadQueue
         await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey(), cancellationToken);
 
         return Result.Ok(nextDownloadTask);
+    }
+
+    private static bool HasActivePreDownloadTask(
+        ICollection<DownloadTaskGeneric> downloadTasks,
+        IReadOnlyCollection<DownloadTaskKey> activeDownloadTaskKeys
+    )
+    {
+        if (activeDownloadTaskKeys.Count == 0)
+            return false;
+
+        var activeDownloadTaskIds = activeDownloadTaskKeys.Select(x => x.Id).ToHashSet();
+        var matchedTaskIds = new HashSet<Guid>();
+        foreach (var downloadTask in downloadTasks)
+        {
+            if (HasActivePreDownloadTask(downloadTask, activeDownloadTaskIds, matchedTaskIds))
+                return true;
+        }
+
+        // An active Quartz job without a corresponding persisted task cannot be identified as cleanup.
+        return matchedTaskIds.Count != activeDownloadTaskIds.Count;
+    }
+
+    private static bool HasActivePreDownloadTask(
+        DownloadTaskGeneric downloadTask,
+        HashSet<Guid> activeDownloadTaskIds,
+        HashSet<Guid> matchedTaskIds
+    )
+    {
+        if (activeDownloadTaskIds.Contains(downloadTask.Id))
+        {
+            matchedTaskIds.Add(downloadTask.Id);
+            if (downloadTask.DownloadStatus != DownloadStatus.DownloadFinished)
+                return true;
+        }
+
+        foreach (var child in downloadTask.Children)
+        {
+            if (HasActivePreDownloadTask(child, activeDownloadTaskIds, matchedTaskIds))
+                return true;
+        }
+
+        return false;
     }
 
     private bool IsInRetryCooldown(DownloadTaskGeneric task)

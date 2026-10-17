@@ -40,7 +40,7 @@ Use this skill when:
 - wiring command-to-command dispatch with `ICommandExecutor`
 - updating existing handlers to follow Reaparr Result/logging conventions
 
-Do not use this for endpoint classes (`BaseEndpoint<,>`) or frontend code.
+For endpoint inheritance and organization, use `reaparr-backend`; for frontend work, use the matching frontend skill.
 
 ## Required Structure
 

@@ -215,7 +215,11 @@ public static partial class QuartzExtensions
         if (!keys.Any())
             return Result.Ok();
 
-        return await Result.Try(async Task () => await scheduler.DeleteJobs(keys.ToList(), cancellationToken));
+        var result = await Result.Try(() => scheduler.DeleteJobs(keys.ToList(), cancellationToken));
+        if (result.IsFailed)
+            return result.ToResult();
+
+        return result.Value ? Result.Ok() : Result.Fail("Failed to delete all requested Quartz jobs");
     }
 
     /// <summary>

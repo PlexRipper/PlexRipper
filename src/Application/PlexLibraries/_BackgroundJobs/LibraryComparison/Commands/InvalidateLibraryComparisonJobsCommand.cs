@@ -67,6 +67,8 @@ public class InvalidateLibraryComparisonJobsCommandHandler
         }
 
         var result = await _scheduler.DeleteBatchJobs(jobKeysToDelete, cancellationToken);
+        if (result.IsFailed || result.IsCancelled)
+            return result.LogIfFailed();
 
         var comparisonResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, ct) =>

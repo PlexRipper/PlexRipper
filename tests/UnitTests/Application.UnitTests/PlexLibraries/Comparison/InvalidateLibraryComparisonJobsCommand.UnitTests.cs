@@ -185,6 +185,73 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
         );
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ShouldPreserveComparisonResults_WhenSchedulerDeletionFails(bool throws)
+    {
+        // Arrange
+        await SetupDatabase(
+            91117,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        var remoteMovie = await GetLibraryMovieAsync(remoteLibrary.Id);
+        var ownedMovie = await GetLibraryMovieAsync(ownedLibrary.Id);
+        await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.Movie);
+        dbContext.PlexMovieComparisons.Add(
+            CreateMovieComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteMovie.Id,
+                ownedMovie.Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var scheduler = Mock.Mock<IScheduler>();
+        var jobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id);
+        ConfigureAffectedJob(
+            scheduler,
+            jobKey,
+            new PlexLibraryComparisonJobPayload(ownedLibrary.Id, remoteLibrary.Id),
+            () => false,
+            static () => { },
+            interruptSucceeds: true
+        );
+        var deletion = scheduler.Setup(x =>
+            x.DeleteJobs(It.IsAny<IReadOnlyCollection<JobKey>>(), CancellationToken)
+        );
+        if (throws)
+            deletion.ThrowsAsync(new InvalidOperationException("Scheduler deletion unavailable"));
+        else
+            deletion.ReturnsAsync(false);
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new InvalidateLibraryComparisonJobsCommand([ownedLibrary.Id]),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        (await dbContext.PlexMovieComparisons.CountAsync(CancellationToken)).ShouldBe(1);
+        (await dbContext.PlexComparisonScopes.CountAsync(CancellationToken)).ShouldBe(1);
+        scheduler.Verify(
+            x => x.DeleteJobs(It.Is<IReadOnlyCollection<JobKey>>(keys => keys.Count == 1 && keys.Contains(jobKey)), CancellationToken),
+            Times.Once
+        );
+    }
+
     private static void ConfigureAffectedJob(
         Mock<IScheduler> scheduler,
         JobKey jobKey,

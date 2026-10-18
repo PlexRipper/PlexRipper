@@ -94,7 +94,12 @@ function setupFamily(family: (typeof families)[number]) {
 			let rows = roots.filter((root) => Number(request.query.plexLibraryId ?? library.id) === library.id && String(request.query.mediaType ?? family.type) === root.type);
 			const query = String(request.query.q ?? '').toLowerCase();
 			const sort = String(request.query.sort ?? 'Title:Asc');
-			if (family.type !== PlexMediaType.OtherVideos && (request.query.qualityId || sort.toLowerCase().startsWith('quality:'))) rows = [];
+			if (
+				family.type !== PlexMediaType.OtherVideos
+				&& (request.query.qualityId || sort.toLowerCase().startsWith('videoquality:'))
+			) {
+				rows = [];
+			}
 			if (request.query.comparisonState) rows = [];
 			if (request.query.genreId) rows = rows.filter((root) => root.id === (Number(request.query.genreId) === 7 ? 100 : 200));
 			if (request.query.qualityId) rows = rows.filter((root) => root.id === (Number(request.query.qualityId) === 1080 ? 100 : 200));

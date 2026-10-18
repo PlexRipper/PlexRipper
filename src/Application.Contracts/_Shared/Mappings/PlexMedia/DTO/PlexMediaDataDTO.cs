@@ -14,12 +14,11 @@ public record PlexMediaDataDTO
 
     public required long Size { get; init; }
 
-    public required VideoQuality VideoResolution { get; init; }
+    public required VideoQuality VideoQuality { get; init; }
 
     public required string VideoCodec { get; init; }
 
     public required string AudioCodec { get; init; }
 
     public required AudioQuality AudioQuality { get; init; } = AudioQuality.None;
-
 }

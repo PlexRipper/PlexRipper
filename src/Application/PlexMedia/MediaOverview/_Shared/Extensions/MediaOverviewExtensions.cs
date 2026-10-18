@@ -24,7 +24,7 @@ internal static class MediaOverviewExtensions
             "updatedat" => (nameof(BasePlexMedia.UpdatedAt), sort.Descending),
             "duration" => (nameof(BasePlexMedia.Duration), sort.Descending),
             "mediasize" => (nameof(BasePlexMedia.MediaSize), sort.Descending),
-            "quality" => ("Quality", sort.Descending),
+            "videoquality" => (nameof(BasePlexMedia.VideoQuality), sort.Descending),
             _ => null,
         };
     }

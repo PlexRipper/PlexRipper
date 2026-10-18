@@ -6,4 +6,5 @@ public enum StreamType
     Video = 1,
     Audio = 2,
     Subtitle = 3,
+    Lyrics = 4,
 }

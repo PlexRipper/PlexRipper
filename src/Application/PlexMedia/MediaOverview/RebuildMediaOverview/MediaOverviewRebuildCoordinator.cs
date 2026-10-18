@@ -21,7 +21,6 @@ public sealed class MediaOverviewRebuildCoordinator : IMediaOverviewRebuildCoord
     private static readonly TimeSpan _rebuildCooldown = TimeSpan.FromMinutes(15);
     private TaskCompletionSource _stateChanged = CreateSignal();
     private int _activeSyncCount;
-    private int _waitingRebuildCount;
     private bool _rebuildActive;
     private bool _rebuildTriggerPending;
     private bool _rebuildJobActive;
@@ -35,7 +34,9 @@ public sealed class MediaOverviewRebuildCoordinator : IMediaOverviewRebuildCoord
             Task waitTask;
             lock (_sync)
             {
-                if (_waitingRebuildCount == 0 && !_rebuildActive)
+                // A waiting rebuild must not stall unrelated servers behind a long-running sync.
+                // Only an active rebuild excludes library synchronization.
+                if (!_rebuildActive)
                 {
                     _activeSyncCount++;
                     return new Lease(ReleaseLibrarySync);
@@ -50,38 +51,21 @@ public sealed class MediaOverviewRebuildCoordinator : IMediaOverviewRebuildCoord
 
     public async Task<IDisposable> AcquireRebuildLeaseAsync(CancellationToken cancellationToken)
     {
-        lock (_sync)
-            _waitingRebuildCount++;
-
-        try
+        while (true)
         {
-            while (true)
-            {
-                Task waitTask;
-                lock (_sync)
-                {
-                    if (!_rebuildActive && _activeSyncCount == 0)
-                    {
-                        _waitingRebuildCount--;
-                        _rebuildActive = true;
-                        return new Lease(ReleaseRebuild);
-                    }
-
-                    waitTask = _stateChanged.Task;
-                }
-
-                await waitTask.WaitAsync(cancellationToken);
-            }
-        }
-        catch
-        {
+            Task waitTask;
             lock (_sync)
             {
-                _waitingRebuildCount--;
-                SignalStateChanged();
+                if (!_rebuildActive && _activeSyncCount == 0)
+                {
+                    _rebuildActive = true;
+                    return new Lease(ReleaseRebuild);
+                }
+
+                waitTask = _stateChanged.Task;
             }
 
-            throw;
+            await waitTask.WaitAsync(cancellationToken);
         }
     }
 

@@ -5,7 +5,7 @@ export enum MediaSortField {
 	UpdatedAt = 'updatedAt',
 	Duration = 'duration',
 	MediaSize = 'mediaSize',
-	Quality = 'quality',
+	Quality = 'videoQuality',
 }
 
 export enum SortDirection {

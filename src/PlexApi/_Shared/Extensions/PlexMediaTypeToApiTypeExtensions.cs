@@ -76,7 +76,7 @@ public static class PlexMediaTypeToApiTypeExtensions
     {
         return value switch
         {
-            PlexMediaType.Movie => MediaType.Movie,
+            PlexMediaType.Movie or PlexMediaType.OtherVideos => MediaType.Movie,
             PlexMediaType.TvShow => MediaType.TvShow,
             PlexMediaType.Season => MediaType.Season,
             PlexMediaType.Episode => MediaType.Episode,

@@ -11,8 +11,7 @@ public static partial class FakeData
             .RuleFor(x => x.PlexApiPartId, _ => GetUniqueNumber())
             .RuleFor(x => x.VideoCodec, f => f.System.FileType())
             .RuleFor(x => x.AudioCodec, _ => "dca")
-            .RuleFor(x => x.VideoResolution, f => f.PickRandom(VideoQuality.SD, VideoQuality.HD, VideoQuality.FullHD))
-            .RuleFor(x => x.VideoQuality, (_, x) => x.VideoResolution)
+            .RuleFor(x => x.VideoQuality, f => f.PickRandom(VideoQuality.SD, VideoQuality.HD, VideoQuality.FullHD))
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
             .RuleFor(x => x.Container, f => f.System.FileType())
             .RuleFor(x => x.Source, _ => ReleaseSource.WebDl)
@@ -41,7 +40,8 @@ public static partial class FakeData
         return new Faker<PlexMovieMediaData>()
             .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexMovieId)
-            .Ignore(x => x.PlexMovie);
+            .Ignore(x => x.PlexMovie)
+            .Ignore(x => x.Streams);
     }
 
     private static readonly Faker<PlexTvShowEpisodeMediaData> _plexTvShowEpisodeMediaDataFaker =
@@ -52,7 +52,8 @@ public static partial class FakeData
         return new Faker<PlexTvShowEpisodeMediaData>()
             .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexTvShowEpisodeId)
-            .Ignore(x => x.PlexTvShowEpisode);
+            .Ignore(x => x.PlexTvShowEpisode)
+            .Ignore(x => x.Streams);
     }
 
     public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed, Action<FakeDataConfig>? options = null)

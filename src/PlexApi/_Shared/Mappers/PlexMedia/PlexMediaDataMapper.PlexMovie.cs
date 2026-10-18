@@ -87,9 +87,9 @@ public static partial class PlexMediaDataMapper
             PlexApiRatingKey = root.RatingKey,
             VideoQuality = mediaItem.VideoResolution,
             VideoCodec = mediaItem.VideoCodec,
-            VideoResolution = mediaItem.VideoResolution,
             AudioCodec = mediaItem.AudioCodec,
             NeedsGeneratedName = !fileName.IsValidMediaFileName(),
+            Streams = source.ToPlexMovieDataStreams(),
 
             // Ignore the following
             PlexLibraryId = 0,

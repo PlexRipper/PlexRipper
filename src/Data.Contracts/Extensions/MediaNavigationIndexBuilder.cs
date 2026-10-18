@@ -11,7 +11,7 @@ public static class MediaNavigationIndexBuilder
     {
         var result = new List<MediaNavigationIndexDTO>();
         var seenLabels = new HashSet<string>(StringComparer.Ordinal);
-        var field = string.IsNullOrWhiteSpace(sortField) ? nameof(BasePlexMedia.SortIndex) : sortField.Trim();
+        var field = string.IsNullOrWhiteSpace(sortField) ? "sortindex" : sortField.Trim().ToLowerInvariant();
 
         var index = 0;
         foreach (var row in rows)
@@ -29,19 +29,13 @@ public static class MediaNavigationIndexBuilder
     private static string GetLabel(MediaNavigationIndexRow row, string sortField) =>
         sortField switch
         {
-            nameof(BasePlexMedia.SortIndex) or "sortIndex" or nameof(BasePlexMedia.Title) or "title" => GetTitleLabel(
-                row.SearchTitle
-            ),
-            nameof(BasePlexMedia.Year) or "year" => row.Year?.ToString(CultureInfo.InvariantCulture) ?? UNKNOWN_LABEL,
-            nameof(BasePlexMedia.VideoQuality) or "quality" => row.QualityValue?.ToString(CultureInfo.InvariantCulture) ?? UNKNOWN_LABEL,
-            nameof(BasePlexMedia.Duration) or "duration" => row.Duration.HasValue
-                ? GetDurationLabel(row.Duration.Value)
-                : UNKNOWN_LABEL,
-            nameof(BasePlexMedia.AddedAt) or "addedAt" => GetMonthLabel(row.AddedAt),
-            nameof(BasePlexMedia.UpdatedAt) or "updatedAt" => row.UpdatedAt is null
-                ? UNKNOWN_LABEL
-                : GetMonthLabel(row.UpdatedAt.Value),
-            nameof(BasePlexMedia.MediaSize) or "mediaSize" => GetMediaSizeLabel(row.MediaSize),
+            "sortindex" or "title" => GetTitleLabel(row.SearchTitle),
+            "year" => row.Year?.ToString(CultureInfo.InvariantCulture) ?? UNKNOWN_LABEL,
+            "videoquality" => row.QualityValue?.ToString(CultureInfo.InvariantCulture) ?? UNKNOWN_LABEL,
+            "duration" => row.Duration.HasValue ? GetDurationLabel(row.Duration.Value) : UNKNOWN_LABEL,
+            "addedat" => GetMonthLabel(row.AddedAt),
+            "updatedat" => row.UpdatedAt is null ? UNKNOWN_LABEL : GetMonthLabel(row.UpdatedAt.Value),
+            "mediasize" => GetMediaSizeLabel(row.MediaSize),
             _ => GetTitleLabel(row.SearchTitle),
         };
 

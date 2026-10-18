@@ -30,6 +30,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
             foreach (var ep in eps)
             {
                 ep.ParentGuid = season.Guid;
+                ep.ParentKey = season.PlexApiRatingKey;
                 ep.MediaSize = 150_000_000;
                 ep.Duration = 1800;
             }
@@ -289,9 +290,11 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         var validSeason = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
         validSeason.ParentGuid = testLibrary.TvShows.First().Guid;
+        validSeason.ParentKey = testLibrary.TvShows.First().PlexApiRatingKey;
 
         var invalidSeason = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
         invalidSeason.ParentGuid = null; // should be filtered out
+        invalidSeason.ParentKey = -1;
 
         SetupCommandExecutorForMedia([validSeason, invalidSeason], validSeason.Episodes.ToList());
 
@@ -333,11 +336,13 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
         season.ParentGuid = testLibrary.TvShows.First().Guid;
+        season.ParentKey = testLibrary.TvShows.First().PlexApiRatingKey;
         season.SeasonNumber = -1;
         var episodes = FakeData.GetPlexTvShowEpisode(seed).Generate(2);
         foreach (var episode in episodes)
         {
             episode.ParentGuid = season.Guid;
+            episode.ParentKey = season.PlexApiRatingKey;
             episode.ExpectedSeasonNumber = 4;
         }
 
@@ -376,11 +381,14 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
         season.ParentGuid = testLibrary.TvShows.First().Guid;
+        season.ParentKey = testLibrary.TvShows.First().PlexApiRatingKey;
         season.SeasonNumber = -1;
         var episodes = FakeData.GetPlexTvShowEpisode(seed).Generate(2);
         episodes[0].ParentGuid = season.Guid;
+        episodes[0].ParentKey = season.PlexApiRatingKey;
         episodes[0].ExpectedSeasonNumber = 4;
         episodes[1].ParentGuid = season.Guid;
+        episodes[1].ParentKey = season.PlexApiRatingKey;
         episodes[1].ExpectedSeasonNumber = 5;
 
         SetupCommandExecutorForMedia([season], episodes);
@@ -419,12 +427,15 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
         season.ParentGuid = testLibrary.TvShows.First().Guid;
+        season.ParentKey = testLibrary.TvShows.First().PlexApiRatingKey;
 
         var validEpisode = FakeData.GetPlexTvShowEpisode(seed).Generate(1).First();
         validEpisode.ParentGuid = season.Guid;
+        validEpisode.ParentKey = season.PlexApiRatingKey;
 
         var invalidEpisode = FakeData.GetPlexTvShowEpisode(seed).Generate(1).First();
         invalidEpisode.ParentGuid = null; // should be filtered out
+        invalidEpisode.ParentKey = -1;
 
         SetupCommandExecutorForMedia([season], [validEpisode, invalidEpisode]);
 
@@ -470,6 +481,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Season whose ParentGuid does not match any TV show in the library
         var orphanedSeason = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
         orphanedSeason.ParentGuid = "plex://show/orphaned-guid-that-matches-nothing";
+        orphanedSeason.ParentKey = -1;
 
         SetupCommandExecutorForMedia([orphanedSeason], []);
 
@@ -512,6 +524,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
         season.ParentGuid = testLibrary.TvShows.First().Guid;
+        season.ParentKey = testLibrary.TvShows.First().PlexApiRatingKey;
         season.Episodes.Clear();
 
         const long episodeSize = 100_000_000L;
@@ -519,11 +532,13 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         var ep1 = FakeData.GetPlexTvShowEpisode(seed).Generate(1).First();
         ep1.ParentGuid = season.Guid;
+        ep1.ParentKey = season.PlexApiRatingKey;
         ep1.MediaSize = episodeSize;
         ep1.Duration = episodeDuration;
 
         var ep2 = FakeData.GetPlexTvShowEpisode(seed).Generate(1).First();
         ep2.ParentGuid = season.Guid;
+        ep2.ParentKey = season.PlexApiRatingKey;
         ep2.MediaSize = episodeSize;
         ep2.Duration = episodeDuration;
 

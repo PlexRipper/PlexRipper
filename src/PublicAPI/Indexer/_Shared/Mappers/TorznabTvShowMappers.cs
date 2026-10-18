@@ -21,7 +21,7 @@ public static class TorznabTvShowMappers
             AddedAt = x.PlexTvShowEpisode!.AddedAt,
             Size = x.Size,
             Quality = x.VideoQuality,
-            VideoResolution = x.VideoResolution,
+            VideoResolution = x.VideoQuality,
             Source = x.Source,
             VideoCodec = x.VideoCodec,
             AudioCodec = x.AudioCodec,

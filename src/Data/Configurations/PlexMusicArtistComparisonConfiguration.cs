@@ -5,7 +5,6 @@ public class PlexMusicArtistComparisonConfiguration : IEntityTypeConfiguration<P
     public void Configure(EntityTypeBuilder<PlexMusicArtistComparison> builder)
     {
         builder.HasIndex(x => new { x.OwnedPlexLibraryId, x.OwnedPlexMediaId });
-        builder.HasIndex(x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId });
         builder.HasIndex(x => new
         {
             x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.RemotePlexMediaId, x.OwnedPlexMediaId,

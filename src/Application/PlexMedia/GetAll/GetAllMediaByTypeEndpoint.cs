@@ -76,7 +76,9 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
         RuleFor(x => x.CountryId).Null().When(x => x.MediaType == PlexMediaType.PhotoAlbum);
         RuleFor(x => x.RoleId).Null().When(x => x.MediaType == PlexMediaType.PhotoAlbum);
         RuleFor(x => x.GenreId).Null().When(x => x.MediaType == PlexMediaType.PhotoAlbum);
-        RuleFor(x => x.QualityId).Null().When(x => x.MediaType == PlexMediaType.PhotoAlbum);
+        RuleFor(x => x.QualityId)
+            .Null()
+            .When(x => x.MediaType is PlexMediaType.PhotoAlbum or PlexMediaType.MusicArtist);
         RuleFor(x => x.ComparisonState).IsInEnum().When(x => x.ComparisonState.HasValue);
         RuleFor(x => x.ComparisonState).Null().When(x => !x.MediaType.SupportsComparison());
         RuleFor(x => x.ComparisonState)
@@ -172,7 +174,14 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
             filters.Add($"Genres:any:Id:eq:{req.GenreId}");
 
         if (req.QualityId is > 0)
-            filters.Add($"MediaDataList:any:Quality:eq:{req.QualityId.Value.ToVideoQuality()}");
+        {
+            var collection = req.MediaType == PlexMediaType.TvShow
+                ? nameof(PlexTvShow.Qualities)
+                : nameof(PlexMovie.MediaDataList);
+            filters.Add(
+                $"{collection}:any:{nameof(BasePlexMediaQuality.VideoQuality)}:eq:{req.QualityId.Value.ToVideoQuality()}"
+            );
+        }
 
         return filters.Count == 0 ? string.Empty : string.Join('&', filters);
     }

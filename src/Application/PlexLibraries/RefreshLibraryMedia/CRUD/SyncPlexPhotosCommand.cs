@@ -54,25 +54,11 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
         var photos = library.PhotoImages.ToList();
         var currentAlbums = await _dbContext
             .PlexPhotoAlbums.Where(x => x.PlexLibraryId == library.Id)
-            .Select(x => new CurrentAlbum(
-                x.Id,
-                x.PlexApiRatingKey,
-                x.UpdatedAt,
-                x.ChildCount,
-                x.Duration,
-                x.MediaSize,
-                x.VideoQuality
-            ))
+            .Select(x => new CurrentAlbum(x.Id, x.PlexApiRatingKey, x.UpdatedAt))
             .ToListAsync(ct);
         var currentPhotos = await _dbContext
             .PlexPhotoImages.Where(x => x.PlexLibraryId == library.Id)
-            .Select(x => new CurrentPhoto(
-                x.Id,
-                x.PlexApiRatingKey,
-                x.UpdatedAt,
-                x.PlexPhotoAlbum!.PlexApiRatingKey,
-                x.MediaSize
-            ))
+            .Select(x => new CurrentPhoto(x.Id, x.PlexApiRatingKey, x.UpdatedAt, x.MediaSize))
             .ToListAsync(ct);
         var albumByKey = currentAlbums.ToDictionary(x => x.PlexApiRatingKey);
         var photoByKey = currentPhotos.ToDictionary(x => x.PlexApiRatingKey);
@@ -90,13 +76,7 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
             else
             {
                 album.Id = existing.Id;
-                if (
-                    album.UpdatedAt != existing.UpdatedAt
-                    || album.ChildCount != existing.ChildCount
-                    || album.Duration != existing.Duration
-                    || album.MediaSize != existing.MediaSize
-                    || album.VideoQuality != existing.VideoQuality
-                )
+                if (album.UpdatedAt != existing.UpdatedAt)
                     updatedAlbums.Add(album);
             }
         }
@@ -121,7 +101,7 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
             else
             {
                 photo.Id = existing.Id;
-                changed = photo.UpdatedAt != existing.UpdatedAt || photo.ParentKey != existing.ParentKey;
+                changed = photo.UpdatedAt != existing.UpdatedAt;
                 if (changed)
                     updatedPhotos.Add(photo);
             }
@@ -208,14 +188,15 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
                     (db, ids) => db.PlexPhotoAlbums.Where(x => ids.Contains(x.Id)),
                     txCt
                 );
-                await ctx.SetPhotoMediaMetrics(
-                    library.Id,
-                    albums.Count,
-                    photos.Count - command.LibraryMetadata.PhotoClipCount,
-                    command.LibraryMetadata.PhotoClipCount,
-                    mediaSize,
-                    txCt
-                );
+                if (report.ChangedItemCount > 0)
+                    await ctx.SetPhotoMediaMetrics(
+                        library.Id,
+                        albums.Count,
+                        photos.Count - command.LibraryMetadata.PhotoClipCount,
+                        command.LibraryMetadata.PhotoClipCount,
+                        mediaSize,
+                        txCt
+                    );
             },
             ct
         );
@@ -225,23 +206,9 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
         return Result.Ok(report);
     }
 
-    private sealed record CurrentAlbum(
-        int Id,
-        int PlexApiRatingKey,
-        DateTime? UpdatedAt,
-        int ChildCount,
-        int Duration,
-        long MediaSize,
-        VideoQuality VideoQuality
-    );
+    private sealed record CurrentAlbum(int Id, int PlexApiRatingKey, DateTime? UpdatedAt);
 
-    private sealed record CurrentPhoto(
-        int Id,
-        int PlexApiRatingKey,
-        DateTime? UpdatedAt,
-        int ParentKey,
-        long MediaSize
-    );
+    private sealed record CurrentPhoto(int Id, int PlexApiRatingKey, DateTime? UpdatedAt, long MediaSize);
 }
 
 public record CrudPhotosReport

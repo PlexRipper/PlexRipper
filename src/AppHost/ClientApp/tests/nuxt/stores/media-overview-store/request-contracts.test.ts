@@ -1,5 +1,8 @@
 import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import { get, set } from '@vueuse/core';
+import { useRouteQuery } from '@vueuse/router';
+import { flushPromises } from '@vue/test-utils';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import {
 	generatePlexMediaSlims,
@@ -163,6 +166,26 @@ describe('MediaOverviewStore - Request Contracts', () => {
 
 		// Assert
 		expect(lastMediaRequest().params.sort).toBe('year:desc');
+	});
+
+	test('Should send the videoQuality sort token when quality sorting is selected and restored from the route', async () => {
+		// Arrange
+		const sortQuery = useRouteQuery<string>('sort', '');
+		set(sortQuery, 'videoQuality:desc');
+		const store = useMediaOverviewStore();
+		store.applyRouteQueryState();
+		const restoredSort = { ...store.sortedState };
+		mockMediaResponse();
+
+		// Act
+		store.toggleSortMedia(MediaSortField.Quality);
+		await flushPromises();
+
+		// Assert
+		expect(restoredSort).toEqual({ field: MediaSortField.Quality, sort: SortDirection.Desc });
+		expect(store.sortedState).toEqual({ field: MediaSortField.Quality, sort: SortDirection.Asc });
+		expect(lastMediaRequest().params.sort).toBe('videoQuality:asc');
+		expect(get(sortQuery)).toBe('videoQuality:asc');
 	});
 
 	test('Should preserve load failure state when media response fails', async () => {

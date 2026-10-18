@@ -20,6 +20,7 @@ public interface IReaparrDbContext : IDisposable
     DbSet<Notification> Notifications { get; }
 
     DbSet<PlexLibrary> PlexLibraries { get; }
+    DbSet<StreamLanguage> StreamLanguages { get; }
 
     DbSet<PlexPhotoAlbum> PlexPhotoAlbums { get; }
     DbSet<PlexPhotoImage> PlexPhotoImages { get; }
@@ -28,6 +29,7 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<PlexOtherVideo> PlexOtherVideos { get; }
     DbSet<PlexOtherVideoMediaData> PlexOtherVideoData { get; }
+    DbSet<PlexOtherVideoDataStream> PlexOtherVideoDataStreams { get; }
     DbSet<MediaOverviewOtherVideoSnapshot> MediaOverviewOtherVideoSnapshots { get; }
 
     DbSet<DownloadTaskMusicArtist> DownloadTaskMusicArtists { get; }
@@ -63,6 +65,8 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<PlexMovieMediaData> PlexMovieData { get; }
 
+    DbSet<PlexMovieDataStream> PlexMovieDataStreams { get; }
+
     DbSet<MediaOverviewMovieSnapshot> MediaOverviewMovieSnapshots { get; }
 
     #endregion
@@ -80,6 +84,7 @@ public interface IReaparrDbContext : IDisposable
     DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; }
 
     DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; }
+    DbSet<PlexTvShowEpisodeDataStream> PlexTvShowEpisodeDataStreams { get; }
 
     DbSet<MediaOverviewTvShowSnapshot> MediaOverviewTvShowSnapshots { get; }
 
@@ -96,6 +101,7 @@ public interface IReaparrDbContext : IDisposable
     DbSet<PlexMusicTrack> PlexMusicTracks { get; }
 
     DbSet<PlexMusicTrackMediaData> PlexMusicTrackData { get; }
+    DbSet<PlexMusicTrackDataStream> PlexMusicTrackDataStreams { get; }
 
     DbSet<PlexMusicArtistMediaQuality> PlexMusicArtistMediaQualities { get; }
 

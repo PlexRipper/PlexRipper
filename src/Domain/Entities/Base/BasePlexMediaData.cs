@@ -30,13 +30,6 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
     public required int PlexApiPartId { get; init; }
 
     /// <summary>
-    /// Normalized resolution derived from video height.
-    /// Stored as an integer for efficient sorting and comparison.
-    /// </summary>
-    [Column(Order = 4)]
-    public required VideoQuality VideoResolution { get; init; }
-
-    /// <summary>
     /// The original filename of the media file as reported by Plex.
     /// </summary>
     [Column(Order = 5)]
@@ -75,8 +68,8 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
     public required string Key { get; init; }
 
     /// <summary>
-    /// Derived release source (WEB-DL, Blu-ray, REMUX).
-    /// Determined heuristically from file/container/bitrate.
+    /// Release source inferred from explicit disc or broadcast container hints.
+    /// None means the source could not be established; streaming optimization does not prove a WEB release source.
     /// </summary>
     [Column(Order = 11)]
     public required ReleaseSource Source { get; init; }

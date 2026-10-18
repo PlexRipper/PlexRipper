@@ -49,117 +49,165 @@ public class SyncPlexOtherVideosCommandHandler
 
         var library = command.LibraryMetadata.PlexLibrary;
         var incoming = library.OtherVideos.ToList();
-        var current = await _dbContext
-            .PlexOtherVideos.Where(x => x.PlexLibraryId == library.Id)
-            .Select(x => new CurrentVideo(x.Id, x.PlexApiRatingKey, x.UpdatedAt, x.MediaSize))
-            .ToListAsync(ct);
-        var currentByKey = current.ToDictionary(x => x.PlexApiRatingKey);
-        var incomingKeys = incoming.Select(x => x.PlexApiRatingKey).ToHashSet();
-        var created = new List<PlexOtherVideo>();
-        var updated = new List<PlexOtherVideo>();
-        var mediaSize = 0L;
-        foreach (var video in incoming)
+
+        var incomingKeys = incoming.Select(video => video.PlexApiRatingKey).ToHashSet();
+        var changedVideos = new List<PlexOtherVideo>();
+        var report = new CrudOtherVideosReport();
+
+        var result = await Result.Try(async Task<Result> () =>
         {
-            video.PlexLibraryId = library.Id;
-            video.PlexServerId = library.PlexServerId;
-            if (!currentByKey.TryGetValue(video.PlexApiRatingKey, out var existing))
+            var ctx = _dbContext;
+            var current = await ctx
+                .PlexOtherVideos.Where(x => x.PlexLibraryId == library.Id)
+                .Select(x => new CurrentVideo(x.Id, x.PlexApiRatingKey, x.UpdatedAt, x.MediaSize))
+                .ToListAsync(ct);
+            var currentByKey = current.ToDictionary(x => x.PlexApiRatingKey);
+            var created = new List<PlexOtherVideo>();
+            var updated = new List<PlexOtherVideo>();
+            List<CurrentVideo> deleted;
+            var mediaSize = 0L;
+
+            foreach (var video in incoming)
             {
-                video.Id = 0;
-                created.Add(video);
+                video.PlexLibraryId = library.Id;
+                video.PlexServerId = library.PlexServerId;
+            }
+
+            if (command.ForceMediaRefresh)
+            {
+                mediaSize = incoming.Sum(video => video.MediaSize);
+                await ctx.PlexOtherVideos.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(ct);
+                created = incoming;
+                deleted = current;
+                report.CreatedOtherVideos = created.Count;
+                report.UpdatedOtherVideos = 0;
+                report.DeletedOtherVideos = deleted.Count;
+                report.UnchangedOtherVideos = 0;
             }
             else
             {
-                video.Id = existing.Id;
-                if (video.UpdatedAt != existing.UpdatedAt)
-                    updated.Add(video);
-            }
-            mediaSize +=
-                !command.ForceMediaRefresh && existing is not null && video.UpdatedAt == existing.UpdatedAt
-                    ? existing.MediaSize
-                    : video.MediaSize;
-        }
-        var deleted = current.Where(x => !incomingKeys.Contains(x.PlexApiRatingKey)).ToList();
-        var report = new CrudOtherVideosReport
-        {
-            CreatedOtherVideos = created.Count,
-            UpdatedOtherVideos = updated.Count,
-            DeletedOtherVideos = deleted.Count,
-            UnchangedOtherVideos = incoming.Count - created.Count - updated.Count,
-        };
-
-        var result = await _dbContext.ExecuteTransactionAsync(
-            async (ctx, txCt) =>
-            {
-                if (command.ForceMediaRefresh)
+                foreach (var video in incoming)
                 {
-                    await ctx.PlexOtherVideos.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(txCt);
-                    created = incoming;
-                    updated = [];
-                    deleted = current;
-                    foreach (var video in created)
-                        video.Id = 0;
-                    report.CreatedOtherVideos = created.Count;
-                    report.UpdatedOtherVideos = 0;
-                    report.DeletedOtherVideos = deleted.Count;
-                    report.UnchangedOtherVideos = 0;
+                    if (!currentByKey.TryGetValue(video.PlexApiRatingKey, out var existing))
+                    {
+                        created.Add(video);
+                    }
+                    else
+                    {
+                        video.Id = existing.Id;
+                        if (video.UpdatedAt != existing.UpdatedAt)
+                            updated.Add(video);
+                    }
+
+                    mediaSize +=
+                        existing is not null && video.UpdatedAt == existing.UpdatedAt
+                            ? existing.MediaSize
+                            : video.MediaSize;
                 }
+
+                deleted = current.Where(x => !incomingKeys.Contains(x.PlexApiRatingKey)).ToList();
+                report.CreatedOtherVideos = created.Count;
+                report.UpdatedOtherVideos = updated.Count;
+                report.DeletedOtherVideos = deleted.Count;
+                report.UnchangedOtherVideos = incoming.Count - created.Count - updated.Count;
+            }
+
+            if (updated.Count > 0)
                 await ctx.BulkDeleteByIdsAsync(
                     updated.Select(x => x.Id).ToList(),
                     (db, ids) => db.PlexOtherVideoData.Where(x => ids.Contains(x.PlexOtherVideoId)),
-                    txCt
+                    ct
                 );
+            if (!command.ForceMediaRefresh)
                 await ctx.BulkDeleteByIdsAsync(
                     deleted.Select(x => x.Id).ToList(),
                     (db, ids) => db.PlexOtherVideos.Where(x => ids.Contains(x.Id)),
-                    txCt
+                    ct
                 );
-                if (updated.Count > 0)
-                    await ctx.BulkUpdateAsync(updated, _bulkConfig, txCt);
-                if (created.Count > 0)
-                    await ctx.BulkInsertAsync(created, _bulkConfig, txCt);
-                var mediaData = created
-                    .Concat(updated)
-                    .SelectMany(video =>
+            if (updated.Count > 0)
+                await ctx.BulkUpdateAsync(updated, _bulkConfig, ct);
+            if (created.Count > 0)
+                await ctx.BulkInsertAsync(created, _bulkConfig, ct);
+            var mediaData = created
+                .Concat(updated)
+                .SelectMany(video =>
+                {
+                    foreach (var data in video.MediaDataList)
                     {
-                        foreach (var data in video.MediaDataList)
-                        {
-                            data.Id = 0;
-                            data.PlexOtherVideoId = video.Id;
-                            data.PlexLibraryId = library.Id;
-                            data.PlexServerId = library.PlexServerId;
-                        }
-                        return video.MediaDataList;
-                    })
-                    .ToList();
-                if (mediaData.Count > 0)
-                    await ctx.BulkInsertAsync(mediaData, _bulkConfig, txCt);
-                await ctx.SetOtherVideoMediaMetrics(library.Id, incoming.Count, mediaSize, txCt);
-            },
-            ct
-        );
+                        data.PlexOtherVideoId = video.Id;
+                        data.PlexLibraryId = library.Id;
+                        data.PlexServerId = library.PlexServerId;
+                    }
+                    return video.MediaDataList;
+                })
+                .ToList();
+            if (mediaData.Count > 0)
+                await ctx.BulkInsertAsync(mediaData, _bulkConfig, ct);
+            if (mediaData.Count > 0)
+                await ReconcileOtherVideoStreamsAsync(ctx, mediaData, ct);
+            changedVideos = created.Concat(updated).ToList();
+            // Refresh library metrics for every completed authoritative snapshot, including empty no-op snapshots.
+            await ctx.SetOtherVideoMediaMetrics(library.Id, incoming.Count, mediaSize, ct);
+            return Result.Ok();
+        });
 
+        if (result.IsCancelled)
+            return result.ToResult<CrudOtherVideosReport>().LogWarning();
         if (result.IsFailed)
-            return result.LogIfFailed();
+            return result.ToResult<CrudOtherVideosReport>().LogError();
 
-        var metadataResult = Result.Merge(
-            await SyncOtherVideoCountries(incoming, command.LibraryMetadata, ct),
-            await SyncOtherVideoGenres(incoming, command.LibraryMetadata, ct),
-            await SyncOtherVideoActors(incoming, command.LibraryMetadata, ct)
-        );
+        if (changedVideos.Count > 0)
+        {
+            var metadataResult = Result.Merge(
+                await SyncOtherVideoCountries(changedVideos, command.LibraryMetadata, ct),
+                await SyncOtherVideoGenres(changedVideos, command.LibraryMetadata, ct),
+                await SyncOtherVideoActors(changedVideos, command.LibraryMetadata, ct)
+            );
 
-        if (metadataResult.IsFailed)
-            return metadataResult.LogIfFailed();
+            if (metadataResult.IsCancelled)
+                return metadataResult.ToResult<CrudOtherVideosReport>().LogWarning();
+            if (metadataResult.IsFailed)
+                return metadataResult.ToResult<CrudOtherVideosReport>().LogError();
+        }
 
         _log.Here().Information("Synchronized Other Videos library {PlexLibraryId}: {@Report}", library.Id, report);
         return Result.Ok(report);
     }
 
-    private Task<Result> SyncOtherVideoActors(
+    private static Task ReconcileOtherVideoStreamsAsync(
+        IReaparrDbContext dbContext,
+        IReadOnlyCollection<PlexOtherVideoMediaData> mediaData,
+        CancellationToken cancellationToken
+    ) =>
+        PlexMediaStreamReconciler.SyncDataStreamsAsync(
+            dbContext,
+            mediaData,
+            static data => data.Streams,
+            context => context.PlexOtherVideoDataStreams,
+            static (sourceStream, ownerId, languageId) =>
+                new PlexOtherVideoDataStream
+                {
+                    Id = 0,
+                    MediaDataId = ownerId,
+                    PlexApiStreamId = sourceStream.PlexApiStreamId,
+                    StreamType = sourceStream.StreamType,
+                    LanguageId = languageId,
+                    IsExternal = sourceStream.IsExternal,
+                    SidecarFormat = sourceStream.SidecarFormat,
+                },
+            cancellationToken
+        );
+
+    private async Task<Result> SyncOtherVideoActors(
         List<PlexOtherVideo> videos,
         InsertMediaMetaDataCommandResponse metadata,
         CancellationToken ct
     )
     {
+        if (videos.Count == 0)
+            return Result.Ok();
+
+        var videoIds = videos.Select(video => video.Id).ToList();
         var rows = new List<PlexOtherVideoActors>();
         var keys = new HashSet<(int ActorId, int VideoId)>();
         foreach (var video in videos)
@@ -167,24 +215,26 @@ public class SyncPlexOtherVideosCommandHandler
             if (metadata.PlexActors.TryGetValue(actor.Key, out var stored) && keys.Add((stored.Id, video.Id)))
                 rows.Add(new PlexOtherVideoActors(stored.Id, metadata.PlexLibraryId, video.Id));
 
-        return _dbContext.ExecuteTransactionAsync(
-            async (ctx, token) =>
-            {
-                await ctx
-                    .PlexOtherVideoActors.Where(x => x.PlexLibraryId == metadata.PlexLibraryId)
-                    .ExecuteDeleteAsync(token);
-                await ctx.BulkInsertAsync(rows, _bulkConfig, token);
-            },
-            ct
-        );
+        return await Result.Try(async Task () =>
+        {
+            await _dbContext
+                .PlexOtherVideoActors.Where(x => videoIds.Contains(x.PlexOtherVideoId))
+                .ExecuteDeleteAsync(ct);
+            if (rows.Count > 0)
+                await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
+        });
     }
 
-    private Task<Result> SyncOtherVideoGenres(
+    private async Task<Result> SyncOtherVideoGenres(
         List<PlexOtherVideo> videos,
         InsertMediaMetaDataCommandResponse metadata,
         CancellationToken ct
     )
     {
+        if (videos.Count == 0)
+            return Result.Ok();
+
+        var videoIds = videos.Select(video => video.Id).ToList();
         var rows = new List<PlexOtherVideoGenres>();
         var keys = new HashSet<(int GenreId, int VideoId)>();
         foreach (var video in videos)
@@ -192,24 +242,26 @@ public class SyncPlexOtherVideosCommandHandler
             if (metadata.PlexGenresVideo.TryGetValue(genre.Key, out var stored) && keys.Add((stored.Id, video.Id)))
                 rows.Add(new PlexOtherVideoGenres(stored.Id, metadata.PlexLibraryId, video.Id));
 
-        return _dbContext.ExecuteTransactionAsync(
-            async (ctx, token) =>
-            {
-                await ctx
-                    .PlexOtherVideoGenres.Where(x => x.PlexLibraryId == metadata.PlexLibraryId)
-                    .ExecuteDeleteAsync(token);
-                await ctx.BulkInsertAsync(rows, _bulkConfig, token);
-            },
-            ct
-        );
+        return await Result.Try(async Task () =>
+        {
+            await _dbContext
+                .PlexOtherVideoGenres.Where(x => videoIds.Contains(x.PlexOtherVideoId))
+                .ExecuteDeleteAsync(ct);
+            if (rows.Count > 0)
+                await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
+        });
     }
 
-    private Task<Result> SyncOtherVideoCountries(
+    private async Task<Result> SyncOtherVideoCountries(
         List<PlexOtherVideo> videos,
         InsertMediaMetaDataCommandResponse metadata,
         CancellationToken ct
     )
     {
+        if (videos.Count == 0)
+            return Result.Ok();
+
+        var videoIds = videos.Select(video => video.Id).ToList();
         var rows = new List<PlexOtherVideoCountries>();
         var keys = new HashSet<(int CountryId, int VideoId)>();
         foreach (var video in videos)
@@ -217,17 +269,17 @@ public class SyncPlexOtherVideosCommandHandler
             if (metadata.PlexCountries.TryGetValue(country.Key, out var stored) && keys.Add((stored.Id, video.Id)))
                 rows.Add(new PlexOtherVideoCountries(stored.Id, metadata.PlexLibraryId, video.Id));
 
-        return _dbContext.ExecuteTransactionAsync(
-            async (ctx, token) =>
-            {
-                await ctx
-                    .PlexOtherVideoCountries.Where(x => x.PlexLibraryId == metadata.PlexLibraryId)
-                    .ExecuteDeleteAsync(token);
-                await ctx.BulkInsertAsync(rows, _bulkConfig, token);
-            },
-            ct
-        );
+        return await Result.Try(async Task () =>
+        {
+            await _dbContext
+                .PlexOtherVideoCountries.Where(x => videoIds.Contains(x.PlexOtherVideoId))
+                .ExecuteDeleteAsync(ct);
+            if (rows.Count > 0)
+                await _dbContext.BulkInsertAsync(rows, _bulkConfig, ct);
+        });
     }
+
+
 
     private sealed record CurrentVideo(int Id, int PlexApiRatingKey, DateTime? UpdatedAt, long MediaSize);
 }

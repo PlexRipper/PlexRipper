@@ -79,7 +79,7 @@ public class GetMediaByTypeCommandHandlerPhotoAlbumUnitTests : BaseCommandUnitTe
                     Page = 2,
                     PageSize = 2,
                     Filter = "Year:gte:2000",
-                    Sort = sortByQuality ? "quality:desc,Year:asc,Duration:desc" : "Year:asc,Duration:desc",
+                    Sort = sortByQuality ? "videoQuality:desc,Year:asc,Duration:desc" : "Year:asc,Duration:desc",
                 },
             },
         };

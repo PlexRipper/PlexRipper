@@ -110,7 +110,7 @@ public static partial class PlexMediaDTOMapper
             FileName = source.GetFileName,
             Duration = source.Duration,
             Size = source.Size,
-            VideoResolution = source.VideoResolution,
+            VideoQuality = source.VideoQuality,
             VideoCodec = source.VideoCodec,
             AudioCodec = source.AudioCodec,
             AudioQuality = AudioQuality.None,

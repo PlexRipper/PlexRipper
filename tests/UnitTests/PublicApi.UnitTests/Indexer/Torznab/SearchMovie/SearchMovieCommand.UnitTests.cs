@@ -449,7 +449,7 @@ public class SearchMovieCommandUnitTests : BaseCommandUnitTest<SearchMovieComman
             .PlexMovieData.Where(x => x.Id == rows[0].Id)
             .ExecuteUpdateAsync(
                 x =>
-                    x.SetProperty(data => data.VideoResolution, VideoQuality.UHD_4K)
+                    x.SetProperty(data => data.VideoQuality, VideoQuality.UHD_4K)
                         .SetProperty(data => data.GeneratedFilename, "uhd-movie.mkv"),
                 CancellationToken
             );
@@ -457,7 +457,7 @@ public class SearchMovieCommandUnitTests : BaseCommandUnitTest<SearchMovieComman
             .PlexMovieData.Where(x => x.Id == rows[1].Id)
             .ExecuteUpdateAsync(
                 x =>
-                    x.SetProperty(data => data.VideoResolution, VideoQuality.SD)
+                    x.SetProperty(data => data.VideoQuality, VideoQuality.SD)
                         .SetProperty(data => data.GeneratedFilename, "sd-movie.mkv"),
                 CancellationToken
             );

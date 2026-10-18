@@ -147,6 +147,7 @@ public static partial class FakeData
             .ApplyBasePlexMediaData(new FakeDataConfig())
             .Ignore(x => x.PlexTrackId)
             .Ignore(x => x.PlexTrack)
+            .Ignore(x => x.Streams)
             .RuleFor(x => x.PartIndex, _ => 0)
             .RuleFor(x => x.VideoCodec, _ => string.Empty)
             .RuleFor(x => x.AudioCodec, _ => "flac")
@@ -157,15 +158,12 @@ public static partial class FakeData
             .RuleFor(x => x.AudioChannelLayout, _ => "stereo")
             .RuleFor(x => x.AudioProfile, _ => null)
             .RuleFor(x => x.AudioQuality, _ => AudioQuality.FLAC_16Bit_44_1kHz)
-            .RuleFor(x => x.VideoResolution, _ => VideoQuality.None)
             .RuleFor(x => x.VideoQuality, _ => VideoQuality.None)
             .RuleFor(x => x.Duration, f => f.Random.Int(90_000, 600_000))
             .RuleFor(x => x.Container, _ => "flac")
             .RuleFor(x => x.Source, _ => ReleaseSource.None)
             .RuleFor(x => x.OriginalFilename, f => $"{f.Random.Guid():N}.flac")
             .RuleFor(x => x.Key, (_, x) => $"/library/parts/{x.PlexApiPartId}/file.flac")
-            .RuleFor(x => x.OriginalFilePath, (_, x) => $"/music/{x.OriginalFilename}")
-            .RuleFor(x => x.SourceRelativePath, (_, x) => x.OriginalFilename)
             .RuleFor(x => x.GeneratedNameSyncedAt, _ => null);
 
     public static Faker<PlexMusicTrackMediaData> GetPlexMusicTrackMediaData(

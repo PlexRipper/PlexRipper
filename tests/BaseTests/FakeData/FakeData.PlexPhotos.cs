@@ -100,7 +100,7 @@ public static partial class FakeData
             .RuleFor(x => x.Height, _ => 1080)
             .RuleFor(x => x.VideoCodec, _ => "h264")
             .RuleFor(x => x.AudioCodec, _ => "aac")
-            .RuleFor(x => x.VideoResolution, _ => VideoQuality.FullHD)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.FullHD)
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 120000))
             .RuleFor(x => x.Container, _ => "mp4");
 
@@ -113,8 +113,7 @@ public static partial class FakeData
             .RuleFor(x => x.Height, _ => 3000)
             .RuleFor(x => x.VideoCodec, _ => string.Empty)
             .RuleFor(x => x.AudioCodec, _ => string.Empty)
-            .RuleFor(x => x.VideoResolution, _ => VideoQuality.Unknown)
-            .RuleFor(x => x.VideoQuality, (_, x) => x.VideoResolution)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.Unknown)
             .RuleFor(x => x.Duration, _ => 0)
             .RuleFor(x => x.Container, _ => "jpg")
             .RuleFor(x => x.OriginalFilename, (_, x) => $"photo-{x.PlexApiPartId}.{x.Container}")

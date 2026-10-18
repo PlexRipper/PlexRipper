@@ -4,9 +4,8 @@ namespace Reaparr.Application;
 
 /// <summary>
 /// Command to synchronize Plex library media metadata (actors, genres, countries) for a
-/// specific Plex library. The synchronization is a destructive replace: all existing
-/// relations for the target library are removed and then recreated from the provided
-/// <paramref name="LibraryMetadata"/> collections.
+/// specific Plex library. Changed relation sets are replaced from the provided
+/// <paramref name="LibraryMetadata"/> collections; identical sets are left untouched.
 /// </summary>
 /// <param name="LibraryMetadata">Aggregated metadata for the target Plex library.</param>
 /// <returns>Returns the result of the operation.</returns>
@@ -89,27 +88,37 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var syncRolesResult = await SyncRoles(roles, libraryId, libraryName, ct);
         _log.Here().Debug("[SyncMetaData] SyncRoles done. IsFailed={IsFailed}", syncRolesResult.IsFailed);
 
-        var actorsCount = syncRolesResult.ValueOrDefault;
-        var genresCount = syncGenresVideoResult.ValueOrDefault + syncGenresAudioResult.ValueOrDefault;
-        var countriesCount = syncCountriesResult.ValueOrDefault;
+        var syncResult = Result.Merge(
+            syncGenresVideoResult,
+            syncGenresAudioResult,
+            syncCountriesResult,
+            syncRolesResult
+        ).ToResult();
+        if (syncResult.IsCancelledOrFailed)
+            return syncResult.LogIfFailed();
 
-        _log.Here()
-            .Debug(
-                "[SyncMetaData] Calling SetLibraryMetaData: actors={ActorCount}, genres={GenreCount}, countries={CountryCount}",
-                actorsCount,
-                genresCount,
-                countriesCount
-            );
-        await _dbContext.SetLibraryMetaData(libraryId, actorsCount, genresCount, countriesCount);
-        _log.Here().Debug("[SyncMetaData] SetLibraryMetaData done");
+        var actorsCount = syncRolesResult.Value;
+        var genresCount = syncGenresVideoResult.Value + syncGenresAudioResult.Value;
+        var countriesCount = syncCountriesResult.Value;
 
-        return Result.Merge(
-                syncGenresVideoResult,
-                syncGenresAudioResult,
-                syncCountriesResult,
-                syncRolesResult
-            )
-            .ToResult();
+        if (
+            library.ActorsCount != actorsCount
+            || library.GenresCount != genresCount
+            || library.CountriesCount != countriesCount
+        )
+        {
+            _log.Here()
+                .Debug(
+                    "[SyncMetaData] Calling SetLibraryMetaData: actors={ActorCount}, genres={GenreCount}, countries={CountryCount}",
+                    actorsCount,
+                    genresCount,
+                    countriesCount
+                );
+            await _dbContext.SetLibraryMetaData(libraryId, actorsCount, genresCount, countriesCount);
+            _log.Here().Debug("[SyncMetaData] SetLibraryMetaData done");
+        }
+
+        return syncResult;
     }
 
     private async Task<Result<int>> SyncRoles(
@@ -122,6 +131,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var stopWatch = Stopwatch.StartNew();
 
         _log.Here().Debug("Started syncing {Count} roles for library {LibraryName}", sourceDict.Count, libraryName);
+
+        var currentIds = await _dbContext.PlexLibraryActors
+            .Where(x => x.PlexLibraryId == libraryId).Select(x => x.PlexActorId).ToListAsync(ct);
+        if (sourceDict.Values.Select(x => x.Id).ToHashSet().SetEquals(currentIds))
+            return Result.Ok(sourceDict.Count);
 
         if (!sourceDict.Any())
         {
@@ -166,28 +180,18 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         stopWatch.Stop();
 
-        if (insertResult.IsSuccess)
-        {
-            _log.Here()
-                .Debug(
-                    "Finished creating {Count} {NameOfPlexActor} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
-                    newActors.Count,
-                    nameof(PlexActor),
-                    libraryName,
-                    stopWatch.Elapsed.TotalSeconds
-                );
-            return Result.Ok(newActors.Count);
-        }
+        if (insertResult.IsCancelledOrFailed)
+            return insertResult.LogIfFailed();
 
         _log.Here()
-            .Error(
-                "Failed creating {Count} {NameOfPlexActor} relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
+            .Debug(
+                "Finished creating {Count} {NameOfPlexActor} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
                 newActors.Count,
-                libraryName,
                 nameof(PlexActor),
+                libraryName,
                 stopWatch.Elapsed.TotalSeconds
             );
-        return insertResult.LogError();
+        return Result.Ok(newActors.Count);
     }
 
     private async Task<Result<int>> SyncGenresVideo(
@@ -199,6 +203,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     {
         var stopWatch = Stopwatch.StartNew();
         _log.Here().Debug("Started syncing {Count} video genres for library {LibraryName}", sourceDict.Count, libraryName);
+
+        var currentIds = await _dbContext.PlexLibraryGenresVideo
+            .Where(x => x.PlexLibraryId == libraryId).Select(x => x.PlexGenreId).ToListAsync(ct);
+        if (sourceDict.Values.Select(x => x.Id).ToHashSet().SetEquals(currentIds))
+            return Result.Ok(sourceDict.Count);
 
         var newGenres = sourceDict
             .Select(x => new PlexLibraryGenresVideo(libraryId, x.Value.Id))
@@ -213,24 +222,16 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         );
 
         stopWatch.Stop();
-        if (insertResult.IsSuccess)
-        {
-            _log.Here().Debug(
-                "Finished creating {Count} video genre relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
-                newGenres.Count,
-                libraryName,
-                stopWatch.Elapsed.TotalSeconds
-            );
-            return Result.Ok(newGenres.Count);
-        }
+        if (insertResult.IsCancelledOrFailed)
+            return insertResult.LogIfFailed();
 
-        _log.Here().Error(
-            "Failed creating {Count} video genre relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
+        _log.Here().Debug(
+            "Finished creating {Count} video genre relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
             newGenres.Count,
             libraryName,
             stopWatch.Elapsed.TotalSeconds
         );
-        return insertResult.LogError();
+        return Result.Ok(newGenres.Count);
     }
 
     private async Task<Result<int>> SyncGenresAudio(
@@ -242,6 +243,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     {
         var stopWatch = Stopwatch.StartNew();
         _log.Here().Debug("Started syncing {Count} audio genres for library {LibraryName}", sourceDict.Count, libraryName);
+
+        var currentIds = await _dbContext.PlexLibraryGenresAudio
+            .Where(x => x.PlexLibraryId == libraryId).Select(x => x.PlexGenreId).ToListAsync(ct);
+        if (sourceDict.Values.Select(x => x.Id).ToHashSet().SetEquals(currentIds))
+            return Result.Ok(sourceDict.Count);
 
         var newGenres = sourceDict
             .Select(x => new PlexLibraryGenresAudio(libraryId, x.Value.Id))
@@ -256,24 +262,16 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         );
 
         stopWatch.Stop();
-        if (insertResult.IsSuccess)
-        {
-            _log.Here().Debug(
-                "Finished creating {Count} audio genre relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
-                newGenres.Count,
-                libraryName,
-                stopWatch.Elapsed.TotalSeconds
-            );
-            return Result.Ok(newGenres.Count);
-        }
+        if (insertResult.IsCancelledOrFailed)
+            return insertResult.LogIfFailed();
 
-        _log.Here().Error(
-            "Failed creating {Count} audio genre relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
+        _log.Here().Debug(
+            "Finished creating {Count} audio genre relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
             newGenres.Count,
             libraryName,
             stopWatch.Elapsed.TotalSeconds
         );
-        return insertResult.LogError();
+        return Result.Ok(newGenres.Count);
     }
 
     private async Task<Result<int>> SyncCountries(
@@ -286,6 +284,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var stopWatch = Stopwatch.StartNew();
 
         _log.Here().Debug("Started syncing {Count} countries for library {LibraryName}", sourceDict.Count, libraryName);
+
+        var currentIds = await _dbContext.PlexLibraryCountries
+            .Where(x => x.PlexLibraryId == libraryId).Select(x => x.PlexCountryId).ToListAsync(ct);
+        if (sourceDict.Values.Select(x => x.Id).ToHashSet().SetEquals(currentIds))
+            return Result.Ok(sourceDict.Count);
 
         if (!sourceDict.Any())
         {
@@ -325,27 +328,17 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         stopWatch.Stop();
 
-        if (insertResult.IsSuccess)
-        {
-            _log.Here()
-                .Debug(
-                    "Finished creating {Count} {NameOfPlexCountry} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
-                    newCountries.Count,
-                    nameof(PlexCountry),
-                    libraryName,
-                    stopWatch.Elapsed.TotalSeconds
-                );
-            return Result.Ok(newCountries.Count);
-        }
+        if (insertResult.IsCancelledOrFailed)
+            return insertResult.LogIfFailed();
 
         _log.Here()
-            .Error(
-                "Failed creating {Count} {NameOfPlexCountry} relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
+            .Debug(
+                "Finished creating {Count} {NameOfPlexCountry} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
                 newCountries.Count,
-                libraryName,
                 nameof(PlexCountry),
+                libraryName,
                 stopWatch.Elapsed.TotalSeconds
             );
-        return insertResult.LogError();
+        return Result.Ok(newCountries.Count);
     }
 }

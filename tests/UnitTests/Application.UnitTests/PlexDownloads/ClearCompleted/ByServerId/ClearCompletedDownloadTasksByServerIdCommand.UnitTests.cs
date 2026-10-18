@@ -100,6 +100,7 @@ public class ClearCompletedDownloadTasksByServerIdCommandUnitTests
         DownloadTaskFileBase idle = isMusic ? musicFiles[1] : otherVideoFiles[1];
         DownloadTaskFileBase otherServer = isMusic ? musicFiles[2] : otherVideoFiles[2];
         var retainedServer = FakeData.GetPlexServer(new Seed(88261)).Generate();
+        retainedServer.MachineIdentifier = "clear-completed-retained-server";
         dbContext.PlexServers.Add(retainedServer);
         await dbContext.SaveChangesAsync(CancellationToken);
         var retainedLibrary = FakeData

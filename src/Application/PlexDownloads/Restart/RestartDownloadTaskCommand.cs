@@ -201,7 +201,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileName = x.GetFileName,
                 FileLocationUrl = x.Key,
                 HashId = downloadTask.HashId,
-                VideoQuality = x.VideoResolution,
+                VideoQuality = x.VideoQuality,
                 DirectoryMeta = new DownloadTaskDirectory
                 {
                     DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,
@@ -294,7 +294,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileName = x.GetFileName,
                 FileLocationUrl = x.Key,
                 HashId = downloadTask.HashId,
-                VideoQuality = x.VideoResolution,
+                VideoQuality = x.VideoQuality,
                 DirectoryMeta = new DownloadTaskDirectory
                 {
                     DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,
@@ -465,7 +465,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FullTitle = x.PlexTrack!.FullTitle,
                 x.Key,
                 x.Size,
-                Quality = x.VideoResolution,
+                Quality = x.VideoQuality,
                 x.AudioQuality,
                 MusicArtistFolder = x.PlexTrack.PlexAlbum!.PlexArtist!.Title.SanitizeFolderName(),
                 MusicAlbumFolder = x.PlexTrack.PlexAlbum.Title.SanitizeFolderName(),
@@ -560,7 +560,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FullTitle = x.PlexOtherVideo!.FullTitle,
                 x.Key,
                 x.Size,
-                Quality = x.VideoResolution,
+                Quality = x.VideoQuality,
                 OtherVideoFolder = x.PlexOtherVideo.Title.SanitizeFolderName(),
             })
             .FirstOrDefaultAsync(cancellationToken);

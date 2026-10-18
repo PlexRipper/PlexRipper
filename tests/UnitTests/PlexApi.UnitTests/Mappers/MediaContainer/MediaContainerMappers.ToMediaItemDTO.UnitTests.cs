@@ -345,7 +345,7 @@ namespace Reaparr.PlexApi.UnitTests
             // Act
             var result = sourceData.ToMediaItemDTO();
 
-            // Assert
+            result.Type.ShouldBe(PlexMediaType.OtherVideos);
             result.Media.Single().VideoResolution.ShouldBe(VideoQuality.FullHD);
         }
 
@@ -369,7 +369,7 @@ namespace Reaparr.PlexApi.UnitTests
             result.Media.Single().VideoResolution.ShouldBe(VideoQuality.Unknown);
         }
         [Test]
-        public void ShouldPreserveEnrichedAudioAndLyricsStreams_WhenTrackResponseContainsOptionalStreams()
+        public void ShouldPreserveEnrichedAudioAndSubtitleStreams_WhenTrackResponseContainsOptionalStreams()
         {
             // Arrange
             var source = new Metadata
@@ -441,6 +441,117 @@ namespace Reaparr.PlexApi.UnitTests
                 audio.Default
             ).ShouldBe(("flac", 737, 16, 44100, 2, "stereo", true, true));
         }
+        [Test]
+        public void ShouldMapNumericFourToLyrics_WhilePreservingRawLocatorAndFormat()
+        {
+            // Arrange
+            var source = new Metadata
+            {
+                RatingKey = "78659",
+                Key = "/library/metadata/78659",
+                Type = "track",
+                Title = "Lyrics track",
+                Media =
+                [
+                    new Media
+                    {
+                        Id = 9002,
+                        Part =
+                        [
+                            new Part
+                            {
+                                Id = 9102,
+                                Key = "/library/parts/9102/file.flac",
+                                Stream =
+                                [
+                                    new Stream
+                                    {
+                                        Id = 4,
+                                        Key = null!,
+                                        Format = "  LRC ",
+                                        StreamType = (LukeHagar.PlexAPI.SDK.Models.Components.StreamType)4,
+                                        Codec = "lrc",
+                                        LanguageCode = null,
+                                        LanguageTag = "ENG",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            };
+
+            // Act
+            var result = source.ToMediaItemDTO();
+
+            // Assert
+            var stream = result.Media.ShouldHaveSingleItem().Parts.ShouldHaveSingleItem().Stream.ShouldHaveSingleItem();
+            stream.StreamType.ShouldBe(Domain.StreamType.Lyrics);
+            stream.Key.ShouldBeNull();
+            stream.Format.ShouldBe("  LRC ");
+            stream.LanguageCode.ShouldBe(string.Empty);
+            stream.LanguageTag.ShouldBe("ENG");
+        }
+
+        [Test]
+        public void ShouldRetainStreamsForContainersAndPhotoClips_WhileKeepingMediaMetadata()
+        {
+            // Arrange
+            var container = new Metadata
+            {
+                RatingKey = "78660",
+                Key = "/library/metadata/78660",
+                Type = "show",
+                Title = "Container",
+                Media = [CreateMediaWithStream(9003, 9103)],
+            };
+            var photoClip = new Metadata
+            {
+                RatingKey = "78661",
+                Key = "/library/metadata/78661",
+                Type = "clip",
+                Subtype = "photo",
+                Title = "Photo clip",
+                Media = [CreateMediaWithStream(9004, 9104)],
+            };
+
+            // Act
+            var containerResult = container.ToMediaItemDTO();
+            var photoResult = photoClip.ToMediaItemDTO();
+
+            // Assert
+            var containerStream = containerResult.Media.ShouldHaveSingleItem().Parts.ShouldHaveSingleItem().Stream
+                .ShouldHaveSingleItem();
+            var photoStream = photoResult.Media.ShouldHaveSingleItem().Parts.ShouldHaveSingleItem().Stream
+                .ShouldHaveSingleItem();
+            containerStream.StreamType.ShouldBe(Domain.StreamType.Subtitle);
+            photoStream.StreamType.ShouldBe(Domain.StreamType.Subtitle);
+            containerResult.Media.ShouldHaveSingleItem().Id.ShouldBe(9003);
+            photoResult.Media.ShouldHaveSingleItem().Id.ShouldBe(9004);
+        }
+
+        private static Media CreateMediaWithStream(int mediaId, int partId) => new()
+        {
+            Id = mediaId,
+            Part =
+            [
+                new Part
+                {
+                    Id = partId,
+                    Key = $"/library/parts/{partId}",
+                    Stream =
+                    [
+                        new Stream
+                        {
+                            Id = 1,
+                            Key = "/library/streams/1",
+                            StreamType = LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Subtitle,
+                            Codec = "srt",
+                        },
+                    ],
+                },
+            ],
+        };
 
     }
 }

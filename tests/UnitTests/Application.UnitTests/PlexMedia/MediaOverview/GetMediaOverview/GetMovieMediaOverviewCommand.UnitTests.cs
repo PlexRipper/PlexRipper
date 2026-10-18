@@ -212,8 +212,8 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
     [Arguments("duration:desc")]
     [Arguments("mediaSize:asc")]
     [Arguments("mediaSize:desc")]
-    [Arguments("quality:asc")]
-    [Arguments("quality:desc")]
+    [Arguments("videoQuality:asc")]
+    [Arguments("videoQuality:desc")]
     public async Task ShouldReturnNavigationIndexes_ForEverySupportedSort(string sort)
     {
         // Arrange
@@ -230,7 +230,12 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
         var movies = await dbContext.PlexMovies.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var libraryId = movies[0].PlexLibraryId;
         await dbContext.MediaOverviewMovieSnapshots.AddRangeAsync(
-            movies.Select((movie, index) => CreateMovieSnapshot(movie.Id, index, libraryId)),
+            movies.Select((movie, index) =>
+            {
+                var snapshot = CreateMovieSnapshot(movie.Id, index, libraryId);
+                snapshot.QualityRank = movies.Count - index - 1;
+                return snapshot;
+            }),
             CancellationToken
         );
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -257,6 +262,14 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
+        var descending = sort.EndsWith(":desc", StringComparison.Ordinal);
+        var qualitySort = sort.StartsWith("videoQuality:", StringComparison.Ordinal);
+        int expectedFirstId;
+        if (qualitySort)
+            expectedFirstId = descending ? movies[0].Id : movies[^1].Id;
+        else
+            expectedFirstId = descending ? movies[^1].Id : movies[0].Id;
+        result.Value.Items.Select(x => x.Id).ShouldBe([expectedFirstId]);
         result.Value.NavigationIndexes.ShouldNotBeEmpty();
         result.Value.NavigationIndexes[0].Index.ShouldBe(0);
         result.Value.NavigationIndexes.ShouldAllBe(x => x.Index >= 0 && x.Index < result.Value.TotalCount);

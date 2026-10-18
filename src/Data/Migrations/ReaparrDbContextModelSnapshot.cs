@@ -1793,6 +1793,47 @@ namespace Reaparr.Data.Migrations
                     b.ToTable("PlexMovieCountries");
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieDataStream", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<bool?>("IsExternal")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
+
+                    b.Property<int>("MediaDataId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexApiStreamId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("SidecarFormat")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
+
+                    b.Property<int>("StreamType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MediaDataId", "PlexApiStreamId")
+                        .IsUnique();
+
+                    b.HasIndex("LanguageId", "StreamType", "MediaDataId");
+
+                    b.ToTable("PlexMovieDataStreams");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.PlexMovieGenres", b =>
                 {
                     b.Property<int>("GenresId")
@@ -1893,10 +1934,6 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("VideoQuality")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("VideoResolution")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
 
                     b.HasKey("Id");
 
@@ -2084,8 +2121,6 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("RemotePlexMediaId");
 
                     b.HasIndex("OwnedPlexLibraryId", "OwnedPlexMediaId");
-
-                    b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId");
 
                     b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId", "RemotePlexMediaId", "OwnedPlexMediaId")
                         .IsUnique();
@@ -2317,8 +2352,6 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("RemotePlexMediaId");
 
                     b.HasIndex("OwnedPlexLibraryId", "OwnedPlexMediaId");
-
-                    b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId");
 
                     b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId", "RemotePlexMediaId", "OwnedPlexMediaId")
                         .IsUnique();
@@ -2584,12 +2617,51 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("OwnedPlexLibraryId", "OwnedPlexMediaId");
 
-                    b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId");
-
                     b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId", "RemotePlexMediaId", "OwnedPlexMediaId")
                         .IsUnique();
 
                     b.ToTable("PlexMusicTrackComparisons");
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.PlexMusicTrackDataStream", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<bool?>("IsExternal")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
+
+                    b.Property<int>("MediaDataId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexApiStreamId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("SidecarFormat")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
+
+                    b.Property<int>("StreamType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MediaDataId", "PlexApiStreamId")
+                        .IsUnique();
+
+                    b.HasIndex("LanguageId", "StreamType", "MediaDataId");
+
+                    b.ToTable("PlexMusicTrackDataStreams");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexMusicTrackMediaData", b =>
@@ -2651,9 +2723,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(14);
 
-                    b.Property<string>("OriginalFilePath")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("OriginalFilename")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -2690,9 +2759,6 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("Source")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(11);
-
-                    b.Property<string>("SourceRelativePath")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -2886,6 +2952,47 @@ namespace Reaparr.Data.Migrations
                     b.ToTable("PlexOtherVideoCountries");
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.PlexOtherVideoDataStream", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<bool?>("IsExternal")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
+
+                    b.Property<int>("MediaDataId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexApiStreamId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("SidecarFormat")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
+
+                    b.Property<int>("StreamType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MediaDataId", "PlexApiStreamId")
+                        .IsUnique();
+
+                    b.HasIndex("LanguageId", "StreamType", "MediaDataId");
+
+                    b.ToTable("PlexOtherVideoDataStreams");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.PlexOtherVideoGenres", b =>
                 {
                     b.Property<int>("GenresId")
@@ -2948,9 +3055,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(14);
 
-                    b.Property<string>("OriginalFilePath")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("OriginalFilename")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -2988,9 +3092,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(11);
 
-                    b.Property<string>("SourceRelativePath")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("VideoCodec")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -3004,10 +3105,6 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("VideoQuality")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("VideoResolution")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
 
                     b.Property<int?>("Width")
                         .HasColumnType("INTEGER");
@@ -3383,10 +3480,6 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("VideoQuality")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("VideoResolution")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
 
                     b.Property<int?>("Width")
                         .HasColumnType("INTEGER");
@@ -4067,6 +4160,48 @@ namespace Reaparr.Data.Migrations
                     b.ToTable("PlexTvShowEpisodes");
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeDataStream", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<bool?>("IsExternal")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
+
+                    b.Property<int>("MediaDataId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("PlexTvShowEpisodeDataId")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexApiStreamId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("SidecarFormat")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
+
+                    b.Property<int>("StreamType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MediaDataId", "PlexApiStreamId")
+                        .IsUnique();
+
+                    b.HasIndex("LanguageId", "StreamType", "MediaDataId");
+
+                    b.ToTable("PlexTvShowEpisodeDataStreams");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaData", b =>
                 {
                     b.Property<int>("Id")
@@ -4146,10 +4281,6 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("VideoQuality")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("VideoResolution")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
 
                     b.HasKey("Id");
 
@@ -4345,8 +4476,6 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PlexServerId");
-
-                    b.HasIndex("TvShowId");
 
                     b.HasIndex("PlexApiRatingKey", "PlexServerId");
 
@@ -4578,6 +4707,29 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("DownloadFolderId");
 
                     b.ToTable("IntegrationsSonarr", (string)null);
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.StreamLanguage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LanguageTag")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LanguageCode", "LanguageTag")
+                        .IsUnique();
+
+                    b.ToTable("StreamLanguages");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.DownloadTaskFileBase", b =>
@@ -5459,6 +5611,25 @@ namespace Reaparr.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieDataStream", b =>
+                {
+                    b.HasOne("Reaparr.Domain.StreamLanguage", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.PlexMovieMediaData", "PlexMovieMediaData")
+                        .WithMany("Streams")
+                        .HasForeignKey("MediaDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("PlexMovieMediaData");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.PlexMovieGenres", b =>
                 {
                     b.HasOne("Reaparr.Domain.PlexGenreVideo", null)
@@ -5753,6 +5924,25 @@ namespace Reaparr.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.PlexMusicTrackDataStream", b =>
+                {
+                    b.HasOne("Reaparr.Domain.StreamLanguage", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.PlexMusicTrackMediaData", "PlexMusicTrackMediaData")
+                        .WithMany("Streams")
+                        .HasForeignKey("MediaDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("PlexMusicTrackMediaData");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.PlexMusicTrackMediaData", b =>
                 {
                     b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
@@ -5827,6 +6017,25 @@ namespace Reaparr.Data.Migrations
                         .HasForeignKey("PlexOtherVideoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.PlexOtherVideoDataStream", b =>
+                {
+                    b.HasOne("Reaparr.Domain.StreamLanguage", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.PlexOtherVideoMediaData", "PlexOtherVideoMediaData")
+                        .WithMany("Streams")
+                        .HasForeignKey("MediaDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("PlexOtherVideoMediaData");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexOtherVideoGenres", b =>
@@ -6110,6 +6319,25 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("TvShow");
 
                     b.Navigation("TvShowSeason");
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeDataStream", b =>
+                {
+                    b.HasOne("Reaparr.Domain.StreamLanguage", "Language")
+                        .WithMany()
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
+                        .WithMany("Streams")
+                        .HasForeignKey("MediaDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("PlexTvShowEpisodeMediaData");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaData", b =>
@@ -6547,6 +6775,11 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("MediaDataList");
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaData", b =>
+                {
+                    b.Navigation("Streams");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.PlexMusicAlbum", b =>
                 {
                     b.Navigation("Qualities");
@@ -6566,9 +6799,19 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("MediaDataList");
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.PlexMusicTrackMediaData", b =>
+                {
+                    b.Navigation("Streams");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.PlexOtherVideo", b =>
                 {
                     b.Navigation("MediaDataList");
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.PlexOtherVideoMediaData", b =>
+                {
+                    b.Navigation("Streams");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexPhotoAlbum", b =>
@@ -6607,6 +6850,11 @@ namespace Reaparr.Data.Migrations
             modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisode", b =>
                 {
                     b.Navigation("MediaDataList");
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaData", b =>
+                {
+                    b.Navigation("Streams");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexTvShowSeason", b =>

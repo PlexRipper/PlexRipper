@@ -397,10 +397,29 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                 using var pollContext = await factory.CreateAsync();
                 var tasks = await pollContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
                 var targets = tasks.Where(x => x.Id != control.ParentId).Flatten(x => x.Children).ToList();
-                return targets.Count == 21
-                    && targets.All(x => x.DownloadStatus == DownloadStatus.Completed)
-                    && expectedFiles.All(x => fileSystem.File.Exists(x.Destination))
-                    && completions.Count == 16;
+                if (
+                    targets.Count != 21
+                    || targets.Any(x => x.DownloadStatus != DownloadStatus.Completed)
+                    || !expectedFiles.All(x => fileSystem.File.Exists(x.Destination))
+                    || completions.Count != 16
+                )
+                    return false;
+
+                // Aggregate projections can finish before the durable ancestor status updates.
+                foreach (var parent in targets.Where(x => x.Children.Count > 0))
+                {
+                    var key = new DownloadTaskKey
+                    {
+                        Id = parent.Id,
+                        Type = parent.DownloadTaskType,
+                        PlexServerId = parent.PlexServerId,
+                        PlexLibraryId = parent.PlexLibraryId,
+                    };
+                    if (await pollContext.GetDownloadStatusAsync(key) != DownloadStatus.Completed)
+                        return false;
+                }
+
+                return true;
             },
             maxRetries: 120,
             delayMs: 1000

@@ -71,7 +71,10 @@ public static partial class FakeData
                 {
                     var sharedPlexMediaId = GetUniqueNumber();
                     foreach (var mediaData in movie.MediaDataList)
+                    {
                         mediaData.UpdateInitProperty(nameof(PlexMovieMediaData.PlexApiMediaId), sharedPlexMediaId);
+                        mediaData.UpdateInitProperty(nameof(PlexMovieMediaData.PlexApiRatingKey), movie.PlexApiRatingKey);
+                    }
                 }
             );
 
@@ -192,6 +195,8 @@ public static partial class FakeData
                 (_, tvShowEpisode) =>
                 {
                     tvShowEpisode.MediaSize = tvShowEpisode.MediaDataList.Select(x => x.Size).Sum();
+                    foreach (var mediaData in tvShowEpisode.MediaDataList)
+                        mediaData.UpdateInitProperty(nameof(PlexTvShowEpisodeMediaData.PlexApiRatingKey), tvShowEpisode.PlexApiRatingKey);
                 }
             );
 

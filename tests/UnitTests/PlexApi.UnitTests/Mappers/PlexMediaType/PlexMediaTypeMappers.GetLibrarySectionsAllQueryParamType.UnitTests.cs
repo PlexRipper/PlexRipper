@@ -18,7 +18,20 @@ public class PlexMediaTypeMappersToPlexApiMediaTypeUnitTests : BaseUnitTest
     public void ShouldMapPlexMediaTypeToMediaType(PlexMediaType input, MediaType expected)
     {
         // Act
-        input.ToPlexApiMediaType().ShouldBe(expected);
+        input.ToMediaType().ShouldBe(expected);
+    }
+
+    [Test]
+    public void ShouldUseMovieApiType_WhenMediaTypeIsOtherVideos()
+    {
+        // Arrange
+        var mediaType = PlexMediaType.OtherVideos;
+
+        // Act
+        var result = mediaType.ToMediaType();
+
+        // Assert
+        result.ShouldBe(MediaType.Movie);
     }
 
     [Test]

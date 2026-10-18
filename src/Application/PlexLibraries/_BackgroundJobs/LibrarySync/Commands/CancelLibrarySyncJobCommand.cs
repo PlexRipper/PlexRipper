@@ -51,12 +51,7 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
             return Result.Ok();
         }
 
-        if (
-            queueItem.Status
-            is LibrarySyncJobStatus.Completed
-                or LibrarySyncJobStatus.Cancelled
-                or LibrarySyncJobStatus.Failed
-        )
+        if (IsTerminalStatus(queueItem.Status))
         {
             _log.Here()
                 .Warning(
@@ -68,9 +63,11 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
         }
 
         var serverId = queueItem.PlexServerId;
+        var createdAt = queueItem.CreatedAt;
         var jobKey = LibrarySyncJob.GetJobKey(serverId, plexLibraryId);
 
         var wasInterrupted = await _scheduler.Interrupt(jobKey, cancellationToken);
+        var canReconcileProcessing = queueItem.Status == LibrarySyncJobStatus.Processing || wasInterrupted;
         if (wasInterrupted)
         {
             _log.Here()
@@ -79,84 +76,91 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                     serverId,
                     plexLibraryId
                 );
-
-            var completionResult = await _scheduler.AwaitJobCompletion(jobKey, cancellationToken);
-            if (completionResult.IsCancelled || completionResult.IsFailed)
-                return completionResult.LogIfFailed();
         }
         else
         {
             // Deleting a scheduled job does not interrupt an execution that started in the meantime.
             await _scheduler.DeleteJob(jobKey, cancellationToken);
             var interruptedAfterDelete = await _scheduler.Interrupt(jobKey, cancellationToken);
-            var completionResult = await _scheduler.AwaitJobCompletion(jobKey, cancellationToken);
-            if (completionResult.IsCancelledOrFailed)
-                return completionResult.LogIfFailed();
+            canReconcileProcessing |= interruptedAfterDelete;
+        }
 
-            if (interruptedAfterDelete)
-                return Result.Ok();
+        var completionResult = await _scheduler.AwaitJobCompletion(jobKey, cancellationToken);
+        if (completionResult.IsCancelledOrFailed)
+            return completionResult.LogIfFailed();
 
-            var cancelled = await _dbContext
-                .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == plexLibraryId)
-                .Where(x => x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing)
-                .ExecuteUpdateAsync(
-                    s =>
-                        s.SetProperty(x => x.Status, LibrarySyncJobStatus.Cancelled)
-                            .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
-                            .SetProperty(x => x.ErrorMessage, (string?)null)
-                            .SetProperty(x => x.IsServerOffline, false),
-                    cancellationToken: cancellationToken
-                );
-            if (cancelled != 1)
-            {
-                var currentStatus = await _dbContext
-                    .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == plexLibraryId)
-                    .Select(x => x.Status)
-                    .FirstOrDefaultAsync(cancellationToken);
-                if (
-                    currentStatus
-                    is LibrarySyncJobStatus.Completed
-                        or LibrarySyncJobStatus.Cancelled
-                        or LibrarySyncJobStatus.Failed
+        // CreatedAt identifies this queue admission; do not cancel a newer request.
+        // Only reconcile processing work that was already observed or successfully interrupted.
+        // Cancellation has already been accepted; persist and inspect its outcome independently of the request token.
+        var cancelled = await _dbContext
+            .LibrarySyncJobQueues.Where(x =>
+                x.PlexServerId == serverId
+                && x.PlexLibraryId == plexLibraryId
+                && x.CreatedAt == createdAt
+            )
+            .Where(x =>
+                x.Status == LibrarySyncJobStatus.Queued
+                || (canReconcileProcessing && x.Status == LibrarySyncJobStatus.Processing)
+            )
+            .ExecuteUpdateAsync(
+                s =>
+                    s.SetProperty(x => x.Status, LibrarySyncJobStatus.Cancelled)
+                        .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
+                        .SetProperty(x => x.ErrorMessage, (string?)null)
+                        .SetProperty(x => x.IsServerOffline, false),
+                cancellationToken: CancellationToken.None
+            );
+        if (cancelled != 1)
+        {
+            var currentStatus = await _dbContext
+                .LibrarySyncJobQueues.Where(x =>
+                    x.PlexServerId == serverId && x.PlexLibraryId == plexLibraryId
                 )
-                {
-                    _log.Here()
-                        .Information(
-                            "Library sync job for library {PlexLibraryId} changed to terminal status {Status} while cancelling",
-                            plexLibraryId,
-                            currentStatus
-                        );
-                    return Result.Ok();
-                }
-
-                return Result
-                    .Fail("Library sync job for library {PlexLibraryId} changed state while cancelling", plexLibraryId)
-                    .LogError();
+                .Select(x => x.Status)
+                .FirstOrDefaultAsync(CancellationToken.None);
+            if (IsTerminalStatus(currentStatus))
+            {
+                _log.Here()
+                    .Information(
+                        "Library sync job for library {PlexLibraryId} changed to terminal status {Status} while cancelling",
+                        plexLibraryId,
+                        currentStatus
+                    );
+                return Result.Ok();
             }
 
-            _log.Here()
-                .Information(
-                    "Cancelled queued library sync job for server {ServerId}, library {PlexLibraryId}",
-                    serverId,
-                    plexLibraryId
-                );
-
-            var notificationResult = await Result.Try(async Task () =>
-                await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus])
-            );
-            notificationResult.LogIfFailed();
-
-            var dispatchResult = await Result.Try(async Task () =>
-            {
-                var checkQueuedResult = await _commandExecutor.Send(
-                    new CheckQueuedPlexLibraryToSyncCommand(),
-                    cancellationToken
-                );
-                checkQueuedResult.LogIfFailed();
-            });
-            dispatchResult.LogIfFailed();
+            return Result
+                .Fail("Library sync job for library {PlexLibraryId} changed state while cancelling", plexLibraryId)
+                .LogError();
         }
+
+        _log.Here()
+            .Information(
+                "Cancelled library sync job for server {ServerId}, library {PlexLibraryId}",
+                serverId,
+                plexLibraryId
+            );
+
+        using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var cleanupToken = cleanupTokenSource.Token;
+        var dispatchResult = await Result.Try(() =>
+            _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken)
+        );
+        dispatchResult.LogIfFailed();
+
+        var notificationResult = await Result.Try(() =>
+            _notificationHubService
+                .SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus])
+                .WaitAsync(cleanupToken)
+        );
+        notificationResult.LogIfFailed();
 
         return Result.Ok();
     }
+
+    private static bool IsTerminalStatus(LibrarySyncJobStatus status) =>
+        status
+        is LibrarySyncJobStatus.Completed
+            or LibrarySyncJobStatus.Cancelled
+            or LibrarySyncJobStatus.Failed;
 }

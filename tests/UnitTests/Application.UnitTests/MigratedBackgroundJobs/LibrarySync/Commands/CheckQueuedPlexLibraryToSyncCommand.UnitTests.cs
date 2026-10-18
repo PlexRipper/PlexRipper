@@ -297,7 +297,10 @@ public class CheckQueuedPlexLibraryToSyncCommandUnitTests : BaseCommandUnitTest<
     }
 
     [Test]
-    public async Task ShouldReleaseClaim_WhenSchedulingFails()
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    public async Task ShouldReleaseClaim_WhenSchedulingFails(bool failsDuringLookup, bool cancelled)
     {
         // Arrange
         await SetupDatabase(55204, config =>
@@ -323,16 +326,25 @@ public class CheckQueuedPlexLibraryToSyncCommandUnitTests : BaseCommandUnitTest<
         before.ShouldBe(new
             { PlexLibraryId = library.Id, Status = LibrarySyncJobStatus.Queued, StartedAt = (DateTime?)null });
         var jobKey = LibrarySyncJob.GetJobKey(library.PlexServerId, library.Id);
+        var lookupCount = 0;
         Mock.Mock<IScheduler>()
             .Setup(x => x.CheckExists(jobKey, CancellationToken))
-            .ReturnsAsync(false)
+            .Returns(() =>
+            {
+                if (++lookupCount == 2 && failsDuringLookup)
+                    return Task.FromException<bool>(cancelled
+                        ? new OperationCanceledException()
+                        : new InvalidOperationException("Scheduler unavailable"));
+                return Task.FromResult(false);
+            })
             .Verifiable(Times.Exactly(2));
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(
-                It.Is<IJobDetail>(job => job.Key.Equals(jobKey)),
-                It.Is<ITrigger>(trigger => trigger.JobKey.Equals(jobKey)), CancellationToken))
-            .ThrowsAsync(new InvalidOperationException("Scheduler unavailable"))
-            .Verifiable(Times.Once());
+        if (!failsDuringLookup)
+            Mock.Mock<IScheduler>()
+                .Setup(x => x.ScheduleJob(
+                    It.Is<IJobDetail>(job => job.Key.Equals(jobKey)),
+                    It.Is<ITrigger>(trigger => trigger.JobKey.Equals(jobKey)), CancellationToken))
+                .ThrowsAsync(new InvalidOperationException("Scheduler unavailable"))
+                .Verifiable(Times.Once());
 
         // Act
         var result = await TestHandlerExecuteAsync(new CheckQueuedPlexLibraryToSyncCommand());
@@ -343,6 +355,9 @@ public class CheckQueuedPlexLibraryToSyncCommandUnitTests : BaseCommandUnitTest<
         (await dbContext.LibrarySyncJobQueues.Select(x => new { x.PlexLibraryId, x.Status, x.StartedAt })
             .SingleAsync(CancellationToken)).ShouldBe(before);
         Mock.Mock<IScheduler>().Verify();
+        if (failsDuringLookup)
+            Mock.Mock<IScheduler>().Verify(x => x.ScheduleJob(
+                It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Test]
@@ -418,5 +433,55 @@ public class CheckQueuedPlexLibraryToSyncCommandUnitTests : BaseCommandUnitTest<
         Mock.Mock<IScheduler>()
             .Verify(x => x.ScheduleJob(
                 It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()), Times.Never());
+    }
+
+    [Test]
+    public async Task ShouldReleaseClaim_WhenExistingJobPreventsScheduling()
+    {
+        // Arrange
+        await SetupDatabase(55207, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexMovieLibraryCount = 1;
+        });
+        var dbContext = IDbContext;
+        var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var createdAt = new DateTime(2026, 10, 17, 12, 0, 0, DateTimeKind.Utc);
+        dbContext.LibrarySyncJobQueues.Add(new LibrarySyncJobQueue
+        {
+            PlexServerId = library.PlexServerId,
+            PlexLibraryId = library.Id,
+            Priority = 1,
+            Status = LibrarySyncJobStatus.Queued,
+            CreatedAt = createdAt,
+            ForceMediaRefresh = true,
+        });
+        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.PlexServerStatuses.ExecuteUpdateAsync(
+            setters => setters.SetProperty(x => x.IsSuccessful, true), CancellationToken);
+        var jobKey = LibrarySyncJob.GetJobKey(library.PlexServerId, library.Id);
+        var lookupCount = 0;
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.CheckExists(jobKey, CancellationToken))
+            .ReturnsAsync(() => ++lookupCount == 2)
+            .Verifiable(Times.Exactly(2));
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new CheckQueuedPlexLibraryToSyncCommand());
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var after = await dbContext.LibrarySyncJobQueues.SingleAsync(CancellationToken);
+        after.PlexLibraryId.ShouldBe(library.Id);
+        after.PlexServerId.ShouldBe(library.PlexServerId);
+        after.Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        after.StartedAt.ShouldBeNull();
+        after.CompletedAt.ShouldBeNull();
+        after.CreatedAt.ShouldBe(createdAt);
+        after.ForceMediaRefresh.ShouldBeTrue();
+        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IScheduler>().Verify(x => x.ScheduleJob(
+            It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 }

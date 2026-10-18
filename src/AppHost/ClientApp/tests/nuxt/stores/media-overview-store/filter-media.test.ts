@@ -173,7 +173,7 @@ describe('MediaOverviewStore - Filter / Search', () => {
 					request.params.qualityId
 					|| [PlexMediaComparisonState.HigherQuality, PlexMediaComparisonState.PartialAndHigherQuality].includes(request.params.comparisonState)
 					|| (type === PlexMediaType.PhotoAlbum && request.params.comparisonState)
-					|| request.params.sort.startsWith('quality:')
+					|| request.params.sort.startsWith('videoQuality:')
 				);
 				const item = generatePlexMedia({
 					config: { seed: 625 }, partialData: { id: 100, type, plexLibraryId: 4, plexServerId: 3, title: 'Root item' },
@@ -205,11 +205,11 @@ describe('MediaOverviewStore - Filter / Search', () => {
 		// Arrange
 		useSettingsStore().displaySettings.allOverviewViewMode = PlexMediaType.OtherVideos;
 		const store = useMediaOverviewStore();
-		const videos = [VideoQuality.FullHD, VideoQuality.HD].map((quality, index) => generatePlexMedia({
+		const videos = [VideoQuality.FullHD, VideoQuality.HD].map((videoQuality, index) => generatePlexMedia({
 			config: { seed: 625 },
 			partialData: {
 				id: 11 + index, type: PlexMediaType.OtherVideos, plexLibraryId: 5, plexServerId: 3,
-				qualities: [{ dataId: 100 + index, mediaId: 11 + index, mediaDataType: PlexMediaType.OtherVideos, audioQuality: AudioQuality.None, videoQuality: quality }],
+				qualities: [{ dataId: 100 + index, mediaId: 11 + index, mediaDataType: PlexMediaType.OtherVideos, audioQuality: AudioQuality.None, videoQuality }],
 			},
 		}));
 		mock.onGet('/api/PlexMedia').reply((request) => {

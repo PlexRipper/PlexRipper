@@ -1,4 +1,4 @@
-﻿namespace Reaparr.Data.Configurations;
+﻿namespace Reaparr.Data;
 
 public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
 {

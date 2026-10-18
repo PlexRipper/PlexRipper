@@ -20,7 +20,6 @@ public static partial class PlexMediaDataMapper
                             PlexApiPartId = part.Id,
                             PlexPhotoId = 0,
                             PlexPhoto = default,
-                            VideoResolution = x.VideoResolution,
                             VideoQuality = x.VideoResolution,
                             Container = part.Container,
                             VideoCodec = x.VideoCodec,

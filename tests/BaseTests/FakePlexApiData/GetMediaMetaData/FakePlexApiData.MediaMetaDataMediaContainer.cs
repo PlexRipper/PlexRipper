@@ -187,7 +187,7 @@ public partial class FakePlexApiData
         .RuleFor(x => x.ColorSpace, f => f.PickRandom("bt709", "bt601", "bt2020"))
         .RuleFor(x => x.ColorTrc, f => f.PickRandom("smpte2084", "arib-std-b67"))
         .RuleFor(x => x.FrameRate, f => f.Random.Float(23.976f, 60f))
-        .RuleFor(x => x.Key, f => f.Random.Guid().ToString())
+        .RuleFor(x => x.Key, (_, x) => $"/library/streams/{x.Id}")
         .RuleFor(x => x.Height, f => f.Random.Int(240, 2160))
         .RuleFor(x => x.Level, f => f.Random.Int(1, 10))
         .RuleFor(x => x.Original, f => f.Random.Bool())
@@ -230,4 +230,12 @@ public partial class FakePlexApiData
         .Ignore(x => x.UserID)
         .Ignore(x => x.VisualImpaired)
         .Ignore(x => x.AdditionalProperties);
+    public static Stream GetMediaMetaDataLyricsStream(Seed seed) =>
+        _getMediaMetaDataStreamFaker
+            .Clone()
+            .RuleFor(x => x.StreamType, _ => (StreamType)4)
+            .RuleFor(x => x.Format, _ => "lrc")
+            .RuleFor(x => x.Codec, _ => "lrc")
+            .UseSeed(seed.Next())
+            .Generate();
 }

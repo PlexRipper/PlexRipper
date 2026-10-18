@@ -68,8 +68,11 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 				username: usernameChanged ? state.username : null,
 				password: passwordChanged ? state.password : null,
 			}).pipe(
-				tap((res) => Log.info('User credentials updated', res)),
-				switchMap(() => actions.refreshCredentials()),
+				switchMap((result) => {
+					if (!result.isSuccess) return of(result);
+					Log.info('User credentials updated', result);
+					return actions.refreshCredentials();
+				}),
 				catchError((err) => {
 					Log.error('User credentials update failed', err);
 					return of(err);

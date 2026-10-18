@@ -181,7 +181,11 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         var newDownloadTask = await _dbContext
             .PlexMovieData.Include(x => x.PlexMovie)
             .Where(x =>
-                x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId
+                x.PlexApiMediaId == downloadTask.PlexApiMediaId
+                && x.PlexApiPartId == downloadTask.PlexApiPartId
+                && x.PlexMovie!.PlexServerId == downloadTask.PlexServerId
+                && x.PlexMovie.PlexLibraryId == downloadTask.PlexLibraryId
+                && x.PlexMovie.PlexApiRatingKey == downloadTask.PlexApiRatingKey
             )
             .Select(x => new DownloadTaskMovieFile
             {
@@ -274,7 +278,11 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 .ThenInclude(x => x!.TvShowSeason)
                     .ThenInclude(x => x!.TvShow)
             .Where(x =>
-                x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId
+                x.PlexApiMediaId == downloadTask.PlexApiMediaId
+                && x.PlexApiPartId == downloadTask.PlexApiPartId
+                && x.PlexTvShowEpisode!.PlexServerId == downloadTask.PlexServerId
+                && x.PlexTvShowEpisode.PlexLibraryId == downloadTask.PlexLibraryId
+                && x.PlexTvShowEpisode.PlexApiRatingKey == downloadTask.PlexApiRatingKey
             )
             .Select(x => new DownloadTaskTvShowEpisodeFile
             {

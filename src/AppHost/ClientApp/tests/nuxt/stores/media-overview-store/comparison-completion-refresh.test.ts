@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import {
@@ -8,8 +8,10 @@ import {
 	generateResultDTO,
 	Seed,
 } from '@mock';
-import { useLibraryStore, useMediaOverviewStore } from '@store';
-import { type LibraryComparisonCompletedDTO, type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
+import { useBackgroundJobsStore, useLibraryStore, useMediaOverviewStore } from '@store';
+import { JobStatus, JobTypes, type LibraryComparisonCompletedDTO, type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
+import { generateJobStatusUpdate } from '@factories';
+import { flushPromises } from '@vue/test-utils';
 
 describe('MediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted()', () => {
 	let { mock } = baseVars();
@@ -43,7 +45,7 @@ describe('MediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted()', 
 		return pageData;
 	}
 
-	test.each([PlexMediaType.TvShow, PlexMediaType.MusicArtist])('Should re-request cached %s pages when current library is affected', async (type) => {
+	test.each([PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.MusicArtist])('Should refresh cached %s pages only after successful affected comparison completion', async (type) => {
 		// Arrange
 		const libraryId = 17;
 		const mediaOverviewStore = useMediaOverviewStore();
@@ -75,13 +77,29 @@ describe('MediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted()', 
 			mediaType: type,
 			completedAt: new Date().toISOString(),
 		};
+		const backgroundJobsStore = useBackgroundJobsStore();
+		await subscribeSpyTo(backgroundJobsStore.setup()).onComplete();
 
 		// Act
-		const result = subscribeSpyTo(mediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted(notification));
-		await result.onComplete();
+		for (const jobStatus of [JobStatus.Started, JobStatus.Failed, JobStatus.Cancelled]) {
+			backgroundJobsStore.setStatusJobUpdate(generateJobStatusUpdate({
+				jobType: JobTypes.LibraryComparisonJob, jobStatus, data: notification,
+			}));
+		}
+		backgroundJobsStore.setStatusJobUpdate(generateJobStatusUpdate({
+			jobType: JobTypes.LibraryComparisonJob,
+			jobStatus: JobStatus.Completed,
+			data: { ...notification, affectedLibraryIds: [214, 18] },
+		}));
+		await flushPromises();
+		expect(mediaOverviewStore.queryHash).toBe('initial-query-hash');
+		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(1);
+		backgroundJobsStore.setStatusJobUpdate(generateJobStatusUpdate({
+			jobType: JobTypes.LibraryComparisonJob, jobStatus: JobStatus.Completed, data: notification,
+		}));
+		await vi.waitFor(() => expect(mediaOverviewStore.queryHash).toBe('refreshed-query-hash'));
 
 		// Assert
-		expect(result.receivedComplete()).toEqual(true);
 		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(2);
 		expect(mediaOverviewStore.queryHash).toBe('refreshed-query-hash');
 		expect(mediaOverviewStore.getMediaItems).toEqual(refreshedPage.mediaList);

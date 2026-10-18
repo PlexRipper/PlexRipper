@@ -60,7 +60,7 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 				.pipe(switchMap(() => connectionStore.refreshPlexServerConnections()))
 				.subscribe();
 
-			getters.getLibraryComparisonJobUpdate().pipe(switchMap((value) => mediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted(value.data))).subscribe();
+			getters.getLibraryComparisonJobUpdate(JobStatus.Completed).pipe(switchMap((value) => mediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted(value.data))).subscribe();
 
 			return backgroundJobsApi.getAllBackgroundJobsEndpoint().pipe(
 				tap((response) => {

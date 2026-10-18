@@ -3,7 +3,7 @@ import { PlexMediaType } from '@dto';
 import { generatePlexMediaStatisticsDTO, generateResultDTO } from '@mock';
 
 describe('Display media collection on the Library detail page', () => {
-	it('Should preserve query totals across pages and render the current search results', () => {
+	it('Should preserve query totals and keep search cleared after reloading', () => {
 		// Arrange
 		cy.basePageSetup({
 			seed: 47019,
@@ -61,6 +61,23 @@ describe('Display media collection on the Library detail page', () => {
 			cy.getCy('media-table')
 				.should('contain.text', currentSearchMovie.title)
 				.and('not.contain.text', firstSearchMovie.title);
+
+			cy.location('search').should('include', 'q=current-query');
+			cy.get('button[aria-label="Clear media search"]').filter(':visible').first().click();
+			cy.wait('@movie-page-1').then(({ request, response }) => {
+				expect(request.query.q ?? '').to.equal('');
+				expect(response?.body.value.totalCount).to.equal(250);
+			});
+			cy.location('search').should('not.contain', 'q=');
+			cy.get('input[aria-label="Search media"]').filter(':visible').first().should('have.value', '');
+			cy.getCy('media-table').should('not.contain.text', currentSearchMovie.title);
+
+			cy.reload();
+			cy.wait('@movie-page-1').then(({ request }) => {
+				expect(request.query.q ?? '').to.equal('');
+			});
+			cy.location('search').should('not.contain', 'q=');
+			cy.get('input[aria-label="Search media"]').filter(':visible').first().should('have.value', '');
 		});
 	});
 

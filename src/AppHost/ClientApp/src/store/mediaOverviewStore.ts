@@ -565,8 +565,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return actions.refreshMediaData();
 		},
 		clearFilter(): Observable<PlexMediaStatisticsDTO | null> {
-			state.filterQuery = '';
-			return actions.refreshMediaData();
+			return actions.setFilterQuery('');
 		},
 		toggleSortMedia(field: MediaSortField) {
 			if (state.sortedState.field === field) {

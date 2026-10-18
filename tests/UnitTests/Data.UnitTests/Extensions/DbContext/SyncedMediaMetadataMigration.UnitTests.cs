@@ -108,6 +108,6 @@ public class SyncedMediaMetadataMigrationUnitTests : BaseUnitTest
         // Assert
         Convert.ToInt64(obsoleteSchemaObjects).ShouldBe(0);
         (await database.GetAppliedMigrationsAsync(CancellationToken)).Last()
-            .ShouldEndWith("_RepairSyncedMediaMetadata");
+            .ShouldBe("20261017225840_TEMP4");
     }
 }

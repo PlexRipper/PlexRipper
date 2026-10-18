@@ -666,4 +666,103 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
         result.Value.Rows.ShouldBeEmpty();
     }
 
+    [Test]
+    [Arguments(false, 3, true, false, false, PlexMediaComparisonState.HigherQuality)]
+    [Arguments(true, 3, true, false, false, PlexMediaComparisonState.HigherQuality)]
+    [Arguments(false, 0, true, false, false, PlexMediaComparisonState.HigherQuality)]
+    [Arguments(true, 0, true, false, false, PlexMediaComparisonState.HigherQuality)]
+    [Arguments(false, 3, false, true, false, PlexMediaComparisonState.Partial)]
+    [Arguments(true, 3, false, true, false, PlexMediaComparisonState.Partial)]
+    [Arguments(false, 3, false, true, true, PlexMediaComparisonState.PartialAndHigherQuality)]
+    [Arguments(true, 3, false, true, true, PlexMediaComparisonState.PartialAndHigherQuality)]
+    [Arguments(false, 3, true, true, false, PlexMediaComparisonState.PartialAndHigherQuality)]
+    [Arguments(true, 3, true, true, false, PlexMediaComparisonState.PartialAndHigherQuality)]
+    public async Task ShouldPreserveShowAndHiddenEpisodeMatches_WhenSummarizingActionableDetails(
+        bool isOwned,
+        int episodeCount,
+        bool showUpgrade,
+        bool missingEpisode,
+        bool episodeUpgrade,
+        PlexMediaComparisonState expectedState
+    )
+    {
+        // Arrange
+        await SetupDatabase(
+            63581,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexAccountCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = episodeCount;
+            }
+        );
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
+        await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
+        var remoteShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
+        var ownedShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
+        var remoteEpisodes = await GetLibraryEpisodesAsync(remoteLibrary.Id);
+        var ownedEpisodes = await GetLibraryEpisodesAsync(ownedLibrary.Id);
+        await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.TvShow);
+        dbContext.PlexTvShowComparisons.Add(
+            CreateTvShowComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteShow.Id,
+                ownedShow.Id,
+                showUpgrade ? PlexMediaComparisonHitState.HigherQuality : PlexMediaComparisonHitState.Matched
+            )
+        );
+        for (var i = 0; i < remoteEpisodes.Count; i++)
+        {
+            if (missingEpisode && i == remoteEpisodes.Count - 1)
+                continue;
+            dbContext.PlexEpisodeComparisons.Add(
+                CreateEpisodeComparison(
+                    remoteLibrary.Id,
+                    ownedLibrary.Id,
+                    remoteEpisodes[i].Id,
+                    ownedEpisodes[i].Id,
+                    episodeUpgrade && i == 0
+                        ? PlexMediaComparisonHitState.HigherQuality
+                        : PlexMediaComparisonHitState.Matched
+                )
+            );
+        }
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await TestHandlerExecuteAsync<PlexMediaComparisonDetailsDTO>(
+            new GetTvShowMediaComparisonDetailsCommand(isOwned ? ownedShow.Id : remoteShow.Id)
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.State.ShouldBe(expectedState);
+        var expectedIds = new List<int>();
+        if (missingEpisode)
+            expectedIds.Add(remoteEpisodes[^1].Id);
+        if (episodeUpgrade)
+            expectedIds.Add(remoteEpisodes[0].Id);
+        result.Value.Rows.SelectMany(x => x.Children).Select(x => x.PlexMediaId).Order()
+            .ShouldBe(expectedIds.Order());
+        if (missingEpisode)
+        {
+            var season = result.Value.Rows.Single();
+            season.State.ShouldBe(
+                episodeUpgrade ? PlexMediaComparisonState.PartialAndHigherQuality : PlexMediaComparisonState.Partial
+            );
+            season.Children.Single(x => x.PlexMediaId == remoteEpisodes[^1].Id)
+                .State.ShouldBe(PlexMediaComparisonState.Missing);
+        }
+        else
+            result.Value.Rows.ShouldBeEmpty();
+    }
+
 }

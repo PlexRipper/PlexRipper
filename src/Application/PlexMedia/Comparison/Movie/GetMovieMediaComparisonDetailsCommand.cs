@@ -15,11 +15,13 @@ public class GetMovieMediaComparisonDetailsCommandHandler
     : ICommandHandler<GetMovieMediaComparisonDetailsCommand, Result<PlexMediaComparisonDetailsDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
+    private readonly IScheduler _scheduler;
     private int _rowId;
 
-    public GetMovieMediaComparisonDetailsCommandHandler(IReaparrDbContext dbContext)
+    public GetMovieMediaComparisonDetailsCommandHandler(IReaparrDbContext dbContext, IScheduler scheduler)
     {
         _dbContext = dbContext;
+        _scheduler = scheduler;
     }
 
     public async Task<Result<PlexMediaComparisonDetailsDTO>> ExecuteAsync(
@@ -34,28 +36,38 @@ public class GetMovieMediaComparisonDetailsCommandHandler
             return ResultExtensions.EntityNotFound(nameof(PlexMovie), command.PlexMediaId).LogError();
 
         var isOwned = await _dbContext.PlexLibraries.WhereIsOwned().AnyAsync(x => x.Id == movie.PlexLibraryId, ct);
-        var rows = isOwned ? await GetOwnedMovieRowsAsync(movie, ct) : await GetRemoteMovieRowsAsync(movie, ct);
+        var currentLibraryIds = isOwned
+            ? await _dbContext.GetCurrentRemoteLibraryIds(movie.PlexLibraryId, PlexMediaType.Movie, ct)
+            : await _dbContext.GetCurrentOwnedLibraryIds(movie.PlexLibraryId, PlexMediaType.Movie, ct);
+        var rows = new List<ComparisonDetailsRow>();
+        PlexMediaComparisonState state;
+        if (currentLibraryIds.Count == 0)
+            state = await GetUncomparedStateAsync(movie.PlexLibraryId, isOwned, ct);
+        else
+        {
+            rows = isOwned
+                ? await GetOwnedMovieRowsAsync(movie, currentLibraryIds, ct)
+                : await GetRemoteMovieRowsAsync(movie, currentLibraryIds, ct);
+            state = PlexMediaComparisonDetailsMapper.ToParentState(rows);
+        }
 
         return Result.Ok(
             new PlexMediaComparisonDetailsDTO
             {
                 PlexMediaId = movie.Id,
                 Type = PlexMediaType.Movie,
-                State = PlexMediaComparisonDetailsMapper.ToParentState(rows),
+                State = state,
                 Rows = PlexMediaComparisonDetailsMapper.ToDtoRows(rows),
             }
         );
     }
 
-    private async Task<List<ComparisonDetailsRow>> GetRemoteMovieRowsAsync(PlexMovie movie, CancellationToken ct)
+    private async Task<List<ComparisonDetailsRow>> GetRemoteMovieRowsAsync(
+        PlexMovie movie,
+        HashSet<int> currentOwnedLibraryIds,
+        CancellationToken ct
+    )
     {
-        var currentOwnedLibraryIds = await _dbContext.GetCurrentOwnedLibraryIds(
-            movie.PlexLibraryId,
-            PlexMediaType.Movie,
-            ct
-        );
-        if (currentOwnedLibraryIds.Count == 0)
-            return [];
 
         var hits = await _dbContext
             .PlexMovieComparisons.Where(x =>
@@ -132,15 +144,12 @@ public class GetMovieMediaComparisonDetailsCommandHandler
             .ToList();
     }
 
-    private async Task<List<ComparisonDetailsRow>> GetOwnedMovieRowsAsync(PlexMovie movie, CancellationToken ct)
+    private async Task<List<ComparisonDetailsRow>> GetOwnedMovieRowsAsync(
+        PlexMovie movie,
+        HashSet<int> currentRemoteLibraryIds,
+        CancellationToken ct
+    )
     {
-        var currentRemoteLibraryIds = await _dbContext.GetCurrentRemoteLibraryIds(
-            movie.PlexLibraryId,
-            PlexMediaType.Movie,
-            ct
-        );
-        if (currentRemoteLibraryIds.Count == 0)
-            return [];
 
         var upgradeHits = await _dbContext
             .PlexMovieComparisons.Where(x =>
@@ -185,6 +194,24 @@ public class GetMovieMediaComparisonDetailsCommandHandler
                 );
             })
             .ToList();
+    }
+
+    private async Task<PlexMediaComparisonState> GetUncomparedStateAsync(int libraryId, bool isOwned, CancellationToken ct)
+    {
+        if (await _dbContext.PlexLibraries.AnyAsync(x => x.Id == libraryId && x.Outdated, ct))
+            return PlexMediaComparisonState.NotCompared;
+
+        var candidates = isOwned ? _dbContext.PlexLibraries.WhereIsNotOwned() : _dbContext.PlexLibraries.WhereIsOwned();
+        var libraryIds = await candidates
+            .Where(x => x.Type == PlexMediaType.Movie && !x.Outdated)
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+        var keys = libraryIds.Select(x => isOwned
+            ? PlexLibraryComparisonJob.GetJobKey(libraryId, x)
+            : PlexLibraryComparisonJob.GetJobKey(x, libraryId));
+        return await _scheduler.HasActiveJobs(keys, ct)
+            ? PlexMediaComparisonState.Pending
+            : PlexMediaComparisonState.NotCompared;
     }
 
     private static string FirstFileNameOrEmpty(PlexMovie? movie) =>

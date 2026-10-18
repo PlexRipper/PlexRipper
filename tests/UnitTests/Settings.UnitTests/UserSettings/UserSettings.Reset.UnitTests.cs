@@ -1,9 +1,40 @@
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;
 
 public class UserSettingsResetUnitTests : BaseUnitTest
 {
+    [Test]
+    public async Task ShouldPublishCurrentModuleChanges_WhenSettingsChangeAfterReset()
+    {
+        // Arrange
+        var sut = new UserSettings();
+        var language = sut.LanguageSettings;
+        var oldApiKey = sut.IntegrationsSettings.ReaparrApiKey;
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(10));
+        // Resume outside the producer callback before sending the next throttled change.
+        var resetNotification = sut.SettingsUpdated.ObserveOn(TaskPoolScheduler.Default).Take(1).ToTask(timeout.Token);
+
+        // Act
+        sut.Reset();
+        await resetNotification;
+        var changedNotification = sut.SettingsUpdated
+            .Select(x => x.ToDTO()).Take(1).ToTask(timeout.Token);
+        language.Language = "fr-FR";
+        var published = await changedNotification;
+
+        // Assert
+        published.LanguageSettings.Language.ShouldBe("fr-FR");
+        sut.LanguageSettings.Language.ShouldBe("fr-FR");
+        sut.LanguageSettings.ShouldBeSameAs(language);
+        sut.IntegrationsSettings.ReaparrApiKey.ShouldNotBe(oldApiKey);
+        Guid.TryParse(sut.IntegrationsSettings.ReaparrApiKey, out _).ShouldBeTrue();
+    }
+
     [Test]
     public void ShouldHaveDefaultSettingsValues_WhenResetHasBeenCalled()
     {

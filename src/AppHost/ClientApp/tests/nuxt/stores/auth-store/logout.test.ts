@@ -22,7 +22,7 @@ describe('AuthenticationStore.logout()', () => {
 		const authenticationStore = useAuthenticationStore();
 		authenticationStore.isLoggedIn = true;
 		const globalStore = useGlobalStore();
-		const resetSpy = vi.spyOn(globalStore, '$reset');
+		const resetSpy = vi.spyOn(globalStore, 'resetSession');
 
 		mock.onPost(AuthenticationPaths.appUserLogOutEndpoint()).reply(200, generateResultDTO('ok'));
 
@@ -33,5 +33,28 @@ describe('AuthenticationStore.logout()', () => {
 		// Assert
 		expect(authenticationStore.isLoggedIn).toEqual(false);
 		expect(resetSpy).toHaveBeenCalledOnce();
+	});
+	test('Should wait for live connection teardown before logout completes', async () => {
+		// Arrange
+		const authenticationStore = useAuthenticationStore();
+		authenticationStore.isLoggedIn = true;
+		const globalStore = useGlobalStore();
+		let finishReset!: () => void;
+		const resetting = new Promise<void>((resolve) => {
+			finishReset = resolve;
+		});
+		vi.spyOn(globalStore, 'resetSession').mockReturnValue(resetting);
+		mock.onPost(AuthenticationPaths.appUserLogOutEndpoint()).reply(200, generateResultDTO('ok'));
+
+		// Act
+		const result = subscribeSpyTo(authenticationStore.logout());
+		await vi.waitFor(() => expect(globalStore.resetSession).toHaveBeenCalledOnce());
+
+		// Assert
+		expect(result.receivedComplete()).toBe(false);
+		expect(authenticationStore.isLoggedIn).toBe(true);
+		finishReset();
+		await result.onComplete();
+		expect(authenticationStore.isLoggedIn).toBe(false);
 	});
 });

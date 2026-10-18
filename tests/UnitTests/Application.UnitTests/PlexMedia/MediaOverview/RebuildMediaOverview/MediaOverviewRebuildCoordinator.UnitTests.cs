@@ -22,6 +22,36 @@ public class MediaOverviewRebuildCoordinatorUnitTests
     }
 
     [Test]
+    public async Task ShouldAllowIndependentSync_WhenRebuildIsWaitingForAnotherSync()
+    {
+        // Arrange
+        var coordinator = new MediaOverviewRebuildCoordinator();
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var firstSyncLease = await coordinator.AcquireLibrarySyncLeaseAsync(cancellation.Token);
+        var rebuildTask = coordinator.AcquireRebuildLeaseAsync(cancellation.Token);
+        rebuildTask.IsCompleted.ShouldBeFalse();
+
+        // Act
+        var secondSyncTask = coordinator.AcquireLibrarySyncLeaseAsync(cancellation.Token);
+
+        // Assert
+        secondSyncTask.IsCompletedSuccessfully.ShouldBeTrue();
+        using var secondSyncLease = await secondSyncTask;
+        rebuildTask.IsCompleted.ShouldBeFalse();
+        // ReSharper disable once DisposeOnUsingVariable
+        firstSyncLease.Dispose();
+        rebuildTask.IsCompleted.ShouldBeFalse();
+        // ReSharper disable once DisposeOnUsingVariable
+        secondSyncLease.Dispose();
+        using var rebuildLease = await rebuildTask.WaitAsync(cancellation.Token);
+        var nextSyncTask = coordinator.AcquireLibrarySyncLeaseAsync(cancellation.Token);
+        nextSyncTask.IsCompleted.ShouldBeFalse();
+        // ReSharper disable once DisposeOnUsingVariable
+        rebuildLease.Dispose();
+        using var nextSyncLease = await nextSyncTask.WaitAsync(cancellation.Token);
+    }
+
+    [Test]
     public async Task ShouldBlockNewSyncUntilRebuildLeaseIsReleased()
     {
         // Arrange

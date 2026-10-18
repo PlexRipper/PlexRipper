@@ -27,6 +27,9 @@ public class CustomContractResolver : DefaultContractResolver
         // Disable the required constraint so missing properties won't throw.
         property.Required = Required.Default;
 
+        // Omit absent optional fields even when SDK union attributes explicitly include nulls.
+        property.NullValueHandling = NullValueHandling.Ignore;
+
         // Wrap the property's ValueProvider to intercept null assignments.
         if (property.Writable)
         {

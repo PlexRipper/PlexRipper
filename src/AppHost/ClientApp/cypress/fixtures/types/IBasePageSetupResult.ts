@@ -2,7 +2,7 @@ import type {
 	DownloadTaskDTO, FolderPathDTO,
 	LibrarySyncJobQueueDTO,
 	PlexAccountDTO,
-	PlexLibraryDTO, LibrarySyncJobQueueDTO, PlexMediaSlimDTO,
+	PlexLibraryDTO, PlexMediaSlimDTO,
 	PlexServerConnectionDTO,
 	PlexServerDTO,
 	ServerDownloadProgressDTO, SettingsModelDTO,

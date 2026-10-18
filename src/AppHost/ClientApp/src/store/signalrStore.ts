@@ -27,8 +27,9 @@ import type {
 	ServerDownloadProgressMessagePackDTO,
 	LiveLogEventDTO,
 	IntegrationSetupProgressDTO,
+	RefreshDataType,
 } from '@dto';
-import { RefreshDataType, MessageTypes } from '@dto';
+import { MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import {
 	useDownloadStore,
@@ -183,9 +184,6 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 
 		notificationHubConnection?.on(MessageTypes.RefreshNotification, (data: RefreshDataType) => {
-			if (data === RefreshDataType.DownloadTasks) {
-				downloadStore.fetchDownloadList().subscribe();
-			}
 			state.refreshDataNotificationSubject.next(data);
 		});
 		notificationHubConnection?.onreconnected?.(() => {

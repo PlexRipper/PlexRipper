@@ -1,11 +1,13 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { HubConnectionState } from '@microsoft/signalr';
+import { flushPromises } from '@vue/test-utils';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
+import { generateResultDTO } from '@mock';
 import { MessageTypes, RefreshDataType } from '@dto';
 import { useDownloadStore, useSignalrStore } from '@store';
 
-type HubName = 'progress' | 'download' | 'notifications';
+type HubName = 'progress' | 'download' | 'notifications' | 'logs';
 
 interface MockHub {
 	state: HubConnectionState;
@@ -44,24 +46,39 @@ describe('SignalrStore refresh notifications', () => {
 		hubConnections.set('progress', createHub());
 		hubConnections.set('download', createHub());
 		hubConnections.set('notifications', createHub());
+		hubConnections.set('logs', createHub());
 	});
 
 	afterEach(() => {
 		vi.useRealTimers();
 	});
 
-	test('Should request download list when RefreshNotification message is DownloadTasks', async () => {
+	test('Should refresh downloads once through the initialized download store listener', async () => {
 		// Arrange
+		const downloads = [{
+			id: 7,
+			downloadableTasksCount: 1,
+			downloads: [],
+		}];
+		mock.resetHandlers();
+		mock.onGet('/api/Download')
+			.replyOnce(200, generateResultDTO([]))
+			.onGet('/api/Download')
+			.reply(200, generateResultDTO(downloads));
 		const signalrStore = useSignalrStore();
 		const downloadStore = useDownloadStore();
-		const fetchDownloadListSpy = vi.spyOn(downloadStore, 'fetchDownloadList');
 
 		// Act
 		await subscribeSpyTo(signalrStore.setup()).onComplete();
+		await subscribeSpyTo(downloadStore.setup()).onComplete();
+		mock.resetHistory();
 		emitHubMessage('notifications', MessageTypes.RefreshNotification, RefreshDataType.DownloadTasks);
+		await vi.advanceTimersByTimeAsync(250);
+		await flushPromises();
 
 		// Assert
-		expect(fetchDownloadListSpy).toHaveBeenCalledTimes(1);
+		expect(mock.history.get.filter((request) => request.url === '/api/Download')).toHaveLength(1);
+		expect(downloadStore.serverDownloads).toEqual(downloads);
 	});
 
 	test('Should not request download list when RefreshNotification message is not DownloadTasks', async () => {

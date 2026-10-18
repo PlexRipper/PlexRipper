@@ -89,39 +89,54 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             var movedInDownloadsExists =
                 !string.IsNullOrWhiteSpace(movedInDownloadsPath) && _file.Exists(movedInDownloadsPath);
 
-            if (movedInDownloadsExists)
+            if (movedInDownloadsExists && ShouldKeepInDownloads(downloadTask))
             {
-                if (ShouldKeepInDownloads(downloadTask))
+                var movedInDownloadsSizeResult = GetFileLength(movedInDownloadsPath!);
+                if (movedInDownloadsSizeResult.IsFailed)
+                    return await ErrorDownloadTask(key, movedInDownloadsSizeResult.ToResult());
+
+                if (movedInDownloadsSizeResult.Value != downloadTask.DataTotal)
                 {
-                    _log.Here()
-                        .Warning(
-                            "Source file was missing for {DownloadTaskId}, but renamed file exists in downloads and keep-in-downloads is set. Treating move as finished",
-                            key.Id
-                        );
-
-                    downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
-                    downloadTask.FileDataTransferred = downloadTask.DataTotal;
-                    downloadTask.TimeRemaining = 0;
-                    await _dbContext.UpdateDownloadFileTransferProgress(
-                        key,
-                        downloadTask.ToFileTransferProgress(),
-                        CancellationToken.None
+                    var result = Result.Fail(
+                        "Renamed download file has an unexpected size. Expected {ExpectedBytes} bytes but found {ActualBytes} bytes at '{Path}'",
+                        downloadTask.DataTotal,
+                        movedInDownloadsSizeResult.Value,
+                        movedInDownloadsPath!
                     );
-                    moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
-
-                    await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                        key,
-                        DownloadStatus.MoveFinished,
-                        CancellationToken.None
-                    );
-                    _log.Here()
-                        .Debug(
-                            "Move marked finished via renamed downloads file (keep-in-downloads) for {DownloadTaskId}",
-                            key.Id
-                        );
-                    return Result.Ok();
+                    return await ErrorDownloadTask(key, result);
                 }
 
+                _log.Here()
+                    .Warning(
+                        "Source file was missing for {DownloadTaskId}, but renamed file exists in downloads and keep-in-downloads is set. Treating move as finished",
+                        key.Id
+                    );
+
+                downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
+                downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                downloadTask.TimeRemaining = 0;
+                await _dbContext.UpdateDownloadFileTransferProgress(
+                    key,
+                    downloadTask.ToFileTransferProgress(),
+                    CancellationToken.None
+                );
+                moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
+
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    key,
+                    DownloadStatus.MoveFinished,
+                    CancellationToken.None
+                );
+                _log.Here()
+                    .Debug(
+                        "Move marked finished via renamed downloads file (keep-in-downloads) for {DownloadTaskId}",
+                        key.Id
+                    );
+                return Result.Ok();
+            }
+
+            if (movedInDownloadsExists)
+            {
                 // The .reaptemp rename already happened but the file was not moved to the destination yet.
                 // Resume the move using the renamed file as the source.
                 _log.Here()
@@ -133,6 +148,21 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             }
             else if (destinationExists)
             {
+                var destinationSizeResult = GetFileLength(destinationPath!);
+                if (destinationSizeResult.IsFailed)
+                    return await ErrorDownloadTask(key, destinationSizeResult.ToResult());
+
+                if (destinationSizeResult.Value != downloadTask.DataTotal)
+                {
+                    var result = Result.Fail(
+                        "Existing destination file has an unexpected size. Expected {ExpectedBytes} bytes but found {ActualBytes} bytes at '{Path}'",
+                        downloadTask.DataTotal,
+                        destinationSizeResult.Value,
+                        destinationPath
+                    );
+                    return await ErrorDownloadTask(key, result);
+                }
+
                 _log.Here()
                     .Warning(
                         "Source file was missing for {DownloadTaskId}, but a completed file already exists at destination. Treating move as finished",
@@ -516,6 +546,9 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
         return result.LogError();
     }
+
+    private Result<long> GetFileLength(string path) =>
+        Result.Try(() => _file.FileSystem.FileInfo.New(path).Length);
 
     private bool ShouldKeepInDownloads(DownloadTaskFileBase downloadTask) =>
         downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder

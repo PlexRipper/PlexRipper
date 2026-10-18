@@ -181,6 +181,9 @@ public static partial class FakeData
     private static readonly Faker<LibraryMediaItemStreamDTO> _subtitleStreamFaker =
         CreateLibraryMediaItemStreamDTOFaker(StreamType.Subtitle);
 
+    private static readonly Faker<LibraryMediaItemStreamDTO> _lyricsStreamFaker =
+        CreateLibraryMediaItemStreamDTOFaker(StreamType.Lyrics);
+
     private static readonly Faker<LibraryMediaItemStreamDTO> _unknownStreamFaker =
         CreateLibraryMediaItemStreamDTOFaker(StreamType.Unknown);
 
@@ -333,6 +336,7 @@ public static partial class FakeData
             StreamType.Video => _videoStreamFaker,
             StreamType.Audio => _audioStreamFaker,
             StreamType.Subtitle => _subtitleStreamFaker,
+            StreamType.Lyrics => _lyricsStreamFaker,
             StreamType.Unknown => _unknownStreamFaker,
             _ => throw new ArgumentOutOfRangeException(nameof(streamType), streamType, null),
         })

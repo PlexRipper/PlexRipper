@@ -58,10 +58,10 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 				.pipe(concatMap(() => actions.refreshLibrarySyncStatus()))
 				.subscribe();
 
-			// Listen for library sync job status updates
-			backgroundJobsStore.getLibrarySyncJobUpdate().subscribe((update) => {
-				actions.updateSyncQueue(update.data);
-			});
+			// Job payloads identify work; the queue endpoint owns its current status.
+			backgroundJobsStore.getLibrarySyncJobUpdate()
+				.pipe(concatMap(() => actions.refreshLibrarySyncStatus()))
+				.subscribe();
 
 			return forkJoin([actions.refreshLibraries(), actions.refreshLibrarySyncStatus()]).pipe(switchMap(() => of({
 				name: StoreNames.LibraryStore, isSuccess: true,

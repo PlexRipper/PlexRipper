@@ -1,13 +1,15 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { LibrarySyncJobStatus, PlexConnectionTypes, type PlexServerConnectionDTO, type PlexServerStatusDTO } from '@dto';
+import { JobStatus, JobTypes, LibrarySyncJobStatus, PlexConnectionTypes, type PlexServerConnectionDTO, type PlexServerStatusDTO } from '@dto';
 import { LibrarySyncWaitingReason } from '@enums';
 import { PlexLibraryPaths } from '@api/api-paths';
 import { generateFailedResultDTO, generateLibrarySyncJobQueue, generateResultDTO } from '@mock';
-import { useLibraryStore, useServerConnectionStore } from '@store';
+import { useBackgroundJobsStore, useLibraryStore, useServerConnectionStore } from '@store';
 import { plexLibraryApi } from '@api';
 import { throwError } from 'rxjs';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
+import { generateJobStatusUpdate } from '@factories';
+import { flushPromises } from '@vue/test-utils';
 
 describe('LibraryStore queue state', () => {
 	let { mock } = baseVars();
@@ -215,6 +217,58 @@ describe('LibraryStore queue state', () => {
 		expect(result.getFirstValue()?.isSuccess).toBe(false);
 		expect(libraryStore.syncQueues).toEqual([existingQueue]);
 		expect(mock.history.get.filter((request) => request.url === PlexLibraryPaths.getLibrarySyncStatusEndpoint())).toHaveLength(0);
+	});
+	test('Should load real queue rows after lifecycle events and preserve them through a failed refresh', async () => {
+		// Arrange
+		const libraryStore = useLibraryStore();
+		const jobs = useBackgroundJobsStore();
+		const queued = generateLibrarySyncJobQueue({ plexLibraryId: 11, plexServerId: 1, status: LibrarySyncJobStatus.Queued });
+		const processing = { ...queued, status: LibrarySyncJobStatus.Processing };
+		const completed = { ...queued, status: LibrarySyncJobStatus.Completed, completedAt: '2026-10-19T00:00:00Z' };
+		const path = PlexLibraryPaths.getLibrarySyncStatusEndpoint();
+		let snapshot = [queued];
+		let failSnapshot = false;
+		mock.onGet(PlexLibraryPaths.getAllPlexLibrariesEndpoint()).reply(200, generateResultDTO([]));
+		mock.onGet(path).reply(() => failSnapshot
+			? [500, generateFailedResultDTO()]
+			: [200, generateResultDTO(snapshot)]);
+		await subscribeSpyTo(jobs.setup()).onComplete();
+		await subscribeSpyTo(libraryStore.setup()).onComplete();
+		const payload = { serverId: 1, libraryId: 11, forceMediaRefresh: false };
+
+		// Act
+		failSnapshot = true;
+		jobs.setStatusJobUpdate(generateJobStatusUpdate({
+			jobType: JobTypes.LibrarySyncJob, jobStatus: JobStatus.Started, data: payload,
+		}));
+		await vi.waitFor(() => expect(mock.history.get.filter((request) => request.url === path)).toHaveLength(2));
+		await flushPromises();
+
+		// Assert
+		expect(libraryStore.syncQueues).toEqual([queued]);
+
+		// Act
+		failSnapshot = false;
+		snapshot = [processing];
+		jobs.setStatusJobUpdate(generateJobStatusUpdate({
+			jobType: JobTypes.LibrarySyncJob, jobStatus: JobStatus.Started, data: payload,
+		}));
+		await vi.waitFor(() => expect(libraryStore.getLibrarySyncQueue(11)).toEqual(processing));
+
+		// Assert
+		expect(libraryStore.syncQueues).toEqual([processing]);
+		expect(libraryStore.getIsLibrarySyncing(11)).toBe(true);
+
+		// Act
+		snapshot = [completed];
+		jobs.setStatusJobUpdate(generateJobStatusUpdate({
+			jobType: JobTypes.LibrarySyncJob, jobStatus: JobStatus.Completed, data: payload,
+		}));
+		await vi.waitFor(() => expect(libraryStore.getLibrarySyncQueue(11)).toEqual(completed));
+
+		// Assert
+		expect(libraryStore.syncQueues).toEqual([completed]);
+		expect(libraryStore.getIsLibrarySyncing(11)).toBe(false);
 	});
 });
 

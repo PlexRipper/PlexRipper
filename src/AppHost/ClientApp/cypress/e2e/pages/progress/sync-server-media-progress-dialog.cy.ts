@@ -19,7 +19,7 @@ describe('SyncServerMediaDialog', () => {
 			plexServerCount: SERVER_COUNT,
 		});
 
-		// Override sync status endpoint to return empty - we'll populate via SignalR
+		// Initial queue is empty; job events will request authoritative snapshots.
 		cy.intercept('GET', PlexLibraryPaths.getLibrarySyncStatusEndpoint(), {
 			statusCode: 200,
 			body: generateResultDTO([]),
@@ -39,17 +39,24 @@ describe('SyncServerMediaDialog', () => {
 				.filter(({ library }) => library !== undefined);
 
 			// === PHASE 1: Start sync jobs for all servers ===
+			let queues: LibrarySyncJobQueueDTO[] = librariesToSync.map(({ server, library }) =>
+				generateLibrarySyncJobQueue({
+					plexLibraryId: library.id,
+					plexServerId: server.id,
+					status: LibrarySyncJobStatus.Processing,
+				}),
+			);
+			cy.intercept('GET', PlexLibraryPaths.getLibrarySyncStatusEndpoint(), (request) => {
+				request.reply({ statusCode: 200, body: generateResultDTO(queues) });
+			}).as('syncSnapshot');
 			librariesToSync.forEach(({ server, library }) => {
-				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-					JobTypes.LibrarySyncJob,
-					JobStatus.Started,
-					generateLibrarySyncJobQueue({
-						plexLibraryId: library.id,
-						plexServerId: server.id,
-						status: LibrarySyncJobStatus.Processing,
-					}),
-				);
+				cy.hubPublishJobStatusUpdate(JobTypes.LibrarySyncJob, JobStatus.Started, {
+					serverId: server.id,
+					libraryId: library.id,
+					forceMediaRefresh: false,
+				});
 			});
+			cy.wait('@syncSnapshot');
 
 			// Open the sync dialog
 			cy.getCy('background-activity-button').click();
@@ -107,19 +114,22 @@ describe('SyncServerMediaDialog', () => {
 			});
 
 			// === PHASE 4: Complete all sync jobs ===
-			cy.wait(300);
-			librariesToSync.forEach(({ server, library }) => {
-				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-					JobTypes.LibrarySyncJob,
-					JobStatus.Completed,
-					generateLibrarySyncJobQueue({
-						plexLibraryId: library.id,
-						plexServerId: server.id,
-						status: LibrarySyncJobStatus.Completed,
-						completedAt: new Date().toISOString(),
-					}),
-				);
+			cy.then(() => {
+				queues = queues.map((queue) => ({
+					...queue,
+					status: LibrarySyncJobStatus.Completed,
+					completedAt: new Date().toISOString(),
+				}));
 			});
+			librariesToSync.forEach(({ server, library }) => {
+				cy.hubPublishJobStatusUpdate(JobTypes.LibrarySyncJob, JobStatus.Completed, {
+					serverId: server.id,
+					libraryId: library.id,
+					forceMediaRefresh: false,
+				});
+			});
+			cy.getCy('sync-server-media-dialog-library-status').should('have.length', SERVER_COUNT)
+				.each(($status) => cy.wrap($status).should('contain.text', 'Completed'));
 
 			// === PHASE 5: Close dialog ===
 			cy.getCy('sync-server-media-dialog-hide-btn').click();

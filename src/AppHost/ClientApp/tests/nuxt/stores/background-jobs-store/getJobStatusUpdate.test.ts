@@ -5,8 +5,6 @@ import {
 	type InspectPlexServerJobUpdateDTO,
 	JobStatus,
 	JobTypes,
-	type LibrarySyncJobQueueDTO,
-	LibrarySyncJobStatus,
 } from '@dto';
 import { generateJobStatusUpdate } from '@factories';
 import { useBackgroundJobsStore } from '@store';
@@ -55,15 +53,10 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 			jobType: JobTypes.LibrarySyncJob,
 			jobStatus: JobStatus.Started,
 			data: {
-				completedAt: new Date().toISOString(),
-				createdAt: '',
-				errorMessage: '',
-				plexLibraryId: 1,
-				plexServerId: 1,
-				priority: 1,
-				startedAt: new Date().toISOString(),
-				status: LibrarySyncJobStatus.Queued,
-			} as LibrarySyncJobQueueDTO,
+				serverId: 1,
+				libraryId: 1,
+				forceMediaRefresh: false,
+			},
 		});
 
 		mock.onGet(BackgroundJobsPaths.getAllBackgroundJobsEndpoint()).reply(200, generateResultDTO([]));

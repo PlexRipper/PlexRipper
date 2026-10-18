@@ -75,7 +75,13 @@ public class MoveDownloadFileJob : IJob
 
             if (
                 currentTask.DownloadStatus
-                is not (DownloadStatus.DownloadFinished or DownloadStatus.MoveError or DownloadStatus.MoveFinished)
+                is not (
+                    DownloadStatus.DownloadFinished
+                    or DownloadStatus.MovePaused
+                    or DownloadStatus.AutoMovePaused
+                    or DownloadStatus.MoveError
+                    or DownloadStatus.MoveFinished
+                )
             )
             {
                 _log.Here()

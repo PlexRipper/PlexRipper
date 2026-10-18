@@ -72,16 +72,6 @@ public class PauseDownloadTaskCommandTvShowUnitTests : BaseUnitTest<PauseDownloa
     public async Task ShouldPauseDownloadingAndMovingTasks_WhenMultipleChildrenAreActive()
     {
         // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
         await SetupDatabase(
             45112,
             config =>
@@ -124,16 +114,9 @@ public class PauseDownloadTaskCommandTvShowUnitTests : BaseUnitTest<PauseDownloa
                 CancellationToken
             );
 
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Exactly(3));
+        SetupDependencies(builder =>
+            builder.RegisterType<DownloadTaskUpdateDispatcher>().As<IDownloadTaskUpdateDispatcher>()
+        );
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x =>
@@ -180,6 +163,7 @@ public class PauseDownloadTaskCommandTvShowUnitTests : BaseUnitTest<PauseDownloa
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
         Mock.Mock<IMoveDownloadFileScheduler>()
@@ -187,34 +171,11 @@ public class PauseDownloadTaskCommandTvShowUnitTests : BaseUnitTest<PauseDownloa
                 x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
                 Times.Once
             );
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Verify(
-                x =>
-                    x.OnStatusChangedAsync(
-                        It.Is<DownloadTaskKey>(k => k.Id == downloadingKey.Id),
-                        DownloadStatus.Paused,
-                        It.IsAny<CancellationToken>()
-                    ),
-                Times.Once
-            );
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Verify(
-                x =>
-                    x.OnStatusChangedAsync(
-                        It.Is<DownloadTaskKey>(k => k.Id == inactiveKey.Id),
-                        DownloadStatus.Paused,
-                        It.IsAny<CancellationToken>()
-                    ),
-                Times.Once
-            );
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Verify(x => x.OnStatusChangedAsync(
-                movingKey, DownloadStatus.MovePaused, CancellationToken), Times.Once());
 
         var downloadingTask = await IDbContext.GetDownloadTaskFileAsync(downloadingKey, CancellationToken);
         downloadingTask.ShouldNotBeNull();
-        downloadingTask.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-        downloadingTask.DownloadSpeed.ShouldBe(1234);
+        downloadingTask.DownloadStatus.ShouldBe(DownloadStatus.Paused);
+        downloadingTask.DownloadSpeed.ShouldBe(0);
 
         var movingTask = await IDbContext.GetDownloadTaskFileAsync(movingKey, CancellationToken);
         movingTask.ShouldNotBeNull();
@@ -223,6 +184,6 @@ public class PauseDownloadTaskCommandTvShowUnitTests : BaseUnitTest<PauseDownloa
 
         var inactiveTask = await IDbContext.GetDownloadTaskFileAsync(inactiveKey, CancellationToken);
         inactiveTask.ShouldNotBeNull();
-        inactiveTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+        inactiveTask.DownloadStatus.ShouldBe(DownloadStatus.Paused);
     }
 }

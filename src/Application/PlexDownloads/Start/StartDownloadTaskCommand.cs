@@ -175,17 +175,6 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                 break;
 
             case DownloadTaskPhase.FileTransfer:
-                var previousStatus = nextDownloadTask.DownloadStatus;
-                var wasMovePaused = previousStatus is DownloadStatus.MovePaused or DownloadStatus.AutoMovePaused;
-                if (wasMovePaused)
-                {
-                    await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                        nextDownloadTaskKey,
-                        DownloadStatus.DownloadFinished,
-                        cancellationToken
-                    );
-                }
-
                 // Multiple merging tasks can be processing at the same time.
                 if (!(await _moveDownloadFileScheduler.IsDownloadFileMoving(nextDownloadTaskKey, cancellationToken)))
                 {
@@ -194,18 +183,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                         cancellationToken
                     );
                     if (moveResult.IsFailed)
-                    {
-                        if (wasMovePaused)
-                        {
-                            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                                nextDownloadTaskKey,
-                                previousStatus,
-                                CancellationToken.None
-                            );
-                        }
-
                         return moveResult.LogIfFailed();
-                    }
                 }
 
                 break;

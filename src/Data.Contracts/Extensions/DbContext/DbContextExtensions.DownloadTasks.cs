@@ -1567,7 +1567,9 @@ public static partial class DbContextExtensions
                 await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
-                        p => p.SetProperty(x => x.DownloadSpeed, 0).SetProperty(x => x.TimeRemaining, 0),
+                        p => p.SetProperty(x => x.DownloadSpeed, 0)
+                            .SetProperty(x => x.FileTransferSpeed, 0)
+                            .SetProperty(x => x.TimeRemaining, 0),
                         cancellationToken
                     );
                 break;
@@ -1575,7 +1577,9 @@ public static partial class DbContextExtensions
                 await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
-                        p => p.SetProperty(x => x.DownloadSpeed, 0).SetProperty(x => x.TimeRemaining, 0),
+                        p => p.SetProperty(x => x.DownloadSpeed, 0)
+                            .SetProperty(x => x.FileTransferSpeed, 0)
+                            .SetProperty(x => x.TimeRemaining, 0),
                         cancellationToken
                     );
                 break;
@@ -1583,7 +1587,9 @@ public static partial class DbContextExtensions
                 await dbContext
                     .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
-                        p => p.SetProperty(x => x.DownloadSpeed, 0).SetProperty(x => x.TimeRemaining, 0),
+                        p => p.SetProperty(x => x.DownloadSpeed, 0)
+                            .SetProperty(x => x.FileTransferSpeed, 0)
+                            .SetProperty(x => x.TimeRemaining, 0),
                         cancellationToken
                     );
                 break;
@@ -1591,7 +1597,9 @@ public static partial class DbContextExtensions
                 await dbContext
                     .DownloadTaskMusicTrackFiles.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
-                        p => p.SetProperty(x => x.DownloadSpeed, 0).SetProperty(x => x.TimeRemaining, 0),
+                        p => p.SetProperty(x => x.DownloadSpeed, 0)
+                            .SetProperty(x => x.FileTransferSpeed, 0)
+                            .SetProperty(x => x.TimeRemaining, 0),
                         cancellationToken
                     );
                 break;
@@ -1599,7 +1607,9 @@ public static partial class DbContextExtensions
                 await dbContext
                     .DownloadTaskOtherVideoFiles.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
-                        p => p.SetProperty(x => x.DownloadSpeed, 0).SetProperty(x => x.TimeRemaining, 0),
+                        p => p.SetProperty(x => x.DownloadSpeed, 0)
+                            .SetProperty(x => x.FileTransferSpeed, 0)
+                            .SetProperty(x => x.TimeRemaining, 0),
                         cancellationToken
                     );
                 break;

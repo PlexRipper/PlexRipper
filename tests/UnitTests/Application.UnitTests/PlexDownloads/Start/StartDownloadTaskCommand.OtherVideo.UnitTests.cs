@@ -159,7 +159,7 @@ public class StartDownloadTaskCommandOtherVideoUnitTests : BaseCommandUnitTest<S
             result.Errors.Single().ShouldBeSameAs(error);
         foreach (var move in moves)
             (await dbContext.GetDownloadTaskFileAsync(move.ToKey(), CancellationToken))!.DownloadStatus.ShouldBe(
-                !failMove && move.Id == nextMove.Id ? DownloadStatus.DownloadFinished : move.DownloadStatus
+                move.DownloadStatus
             );
         (await dbContext.GetDownloadTaskFileAsync(files[3].ToKey(), CancellationToken))!.DownloadStatus.ShouldBe(
             DownloadStatus.Paused

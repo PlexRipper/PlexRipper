@@ -77,6 +77,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                         return stopMoveResult.LogIfFailed();
                 }
 
+                await _dbContext.ClearDownloadSpeed(downloadTaskKey, cancellationToken);
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTaskKey,
                     command.AutoPause ? DownloadStatus.AutoMovePaused : DownloadStatus.MovePaused,
@@ -104,13 +105,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                         return stopMoveResult.LogIfFailed();
                 }
 
-                var resetMoveProgressResult = await _dbContext.ResetDownloadTaskProgress(
-                    downloadTaskKey,
-                    command.AutoPause ? DownloadStatus.AutoMovePaused : DownloadStatus.MovePaused,
-                    cancellationToken
-                );
-                if (resetMoveProgressResult.IsFailed)
-                    return resetMoveProgressResult.LogIfFailed();
+                await _dbContext.ClearDownloadSpeed(downloadTaskKey, cancellationToken);
 
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTaskKey,

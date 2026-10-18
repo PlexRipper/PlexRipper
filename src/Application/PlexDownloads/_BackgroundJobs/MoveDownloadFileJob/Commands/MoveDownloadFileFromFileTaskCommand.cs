@@ -315,9 +315,41 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             if (createDirectoryResult.IsFailed)
                 return await ErrorDownloadTask(key, createDirectoryResult);
 
-            // If destination exists, delete to ensure overwrite semantics and reset resume offset
+            var isResumingMove = downloadTask.DownloadStatus is DownloadStatus.MovePaused or DownloadStatus.AutoMovePaused;
+
+            // Fresh moves intentionally overwrite any stale destination. Paused moves may only resume
+            // when their durable offset is confirmed by the on-disk destination length.
             var destinationAlreadyExists = _file.Exists(destinationPath);
-            if (destinationAlreadyExists)
+            if (isResumingMove)
+            {
+                if (destinationAlreadyExists)
+                {
+                    var destinationSizeResult = GetFileLength(destinationPath!);
+                    if (destinationSizeResult.IsFailed)
+                        return await ErrorDownloadTask(key, destinationSizeResult.ToResult());
+
+                    if (destinationSizeResult.Value != downloadTask.CurrentFileTransferBytesOffset)
+                    {
+                        var result = Result.Fail(
+                            "Paused move cannot resume because destination length {ActualBytes} does not match stored offset {ExpectedBytes} at '{Path}'",
+                            destinationSizeResult.Value,
+                            downloadTask.CurrentFileTransferBytesOffset,
+                            destinationPath
+                        );
+                        return await ErrorDownloadTask(key, result);
+                    }
+                }
+                else if (downloadTask.CurrentFileTransferBytesOffset != 0)
+                {
+                    var result = Result.Fail(
+                        "Paused move cannot resume because destination '{Path}' is missing for stored offset {ExpectedBytes}",
+                        destinationPath,
+                        downloadTask.CurrentFileTransferBytesOffset
+                    );
+                    return await ErrorDownloadTask(key, result);
+                }
+            }
+            else if (destinationAlreadyExists)
             {
                 _log.Here()
                     .Debug(

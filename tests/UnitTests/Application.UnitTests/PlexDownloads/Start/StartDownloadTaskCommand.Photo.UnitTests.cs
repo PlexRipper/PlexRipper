@@ -235,10 +235,6 @@ public class StartDownloadTaskCommandPhotoUnitTests : BaseCommandUnitTest<StartD
             .Select(x => x.ToKey())
             .ToList();
         var attemptedMoves = moveKeys.Take(1).ToList();
-        var successfulMoveIds = attemptedMoves
-            .Where(x => !failMove || x != attemptedMoves.Last())
-            .Select(x => x.Id)
-            .ToHashSet();
         var schedulerError = new Error("Move scheduler rejected selected photo part");
         SetupDependencies(b => b.RegisterType<DownloadTaskUpdateDispatcher>().As<IDownloadTaskUpdateDispatcher>());
         foreach (var moveKey in attemptedMoves)
@@ -284,15 +280,7 @@ public class StartDownloadTaskCommandPhotoUnitTests : BaseCommandUnitTest<StartD
                 x.DownloadStatus,
             })
             .ToListAsync(CancellationToken);
-        after.ShouldBe(
-            before.Select(x => new
-            {
-                x.Id,
-                x.ParentId,
-                DownloadStatus = successfulMoveIds.Contains(x.Id)
-                    ? DownloadStatus.DownloadFinished : x.DownloadStatus,
-            })
-        );
+        after.ShouldBe(before);
         Mock.Mock<IDownloadTaskScheduler>().Verify();
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(

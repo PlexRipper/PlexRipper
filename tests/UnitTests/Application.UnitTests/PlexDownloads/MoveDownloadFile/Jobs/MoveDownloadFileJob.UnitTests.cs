@@ -52,6 +52,16 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
     [Arguments(PlexMediaType.MusicTrack, "already-moved")]
     [Arguments(PlexMediaType.PhotoImage, "already-moved")]
     [Arguments(PlexMediaType.OtherVideos, "already-moved")]
+    [Arguments(PlexMediaType.Movie, "paused")]
+    [Arguments(PlexMediaType.Episode, "paused")]
+    [Arguments(PlexMediaType.MusicTrack, "paused")]
+    [Arguments(PlexMediaType.PhotoImage, "paused")]
+    [Arguments(PlexMediaType.OtherVideos, "paused")]
+    [Arguments(PlexMediaType.Movie, "auto-paused")]
+    [Arguments(PlexMediaType.Episode, "auto-paused")]
+    [Arguments(PlexMediaType.MusicTrack, "auto-paused")]
+    [Arguments(PlexMediaType.PhotoImage, "auto-paused")]
+    [Arguments(PlexMediaType.OtherVideos, "auto-paused")]
     public async Task ShouldMoveOriginalBytesCompleteAndCleanOnlyUnusedFolders_WhenJobFinishes(
         PlexMediaType family,
         string scenario
@@ -145,6 +155,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         target.DataTotal = 4;
         target.DownloadStatus = scenario switch
         {
+            "paused" => DownloadStatus.MovePaused,
+            "auto-paused" => DownloadStatus.AutoMovePaused,
             "retry" => DownloadStatus.MoveError,
             "already-moved" => DownloadStatus.MoveFinished,
             _ => DownloadStatus.DownloadFinished,

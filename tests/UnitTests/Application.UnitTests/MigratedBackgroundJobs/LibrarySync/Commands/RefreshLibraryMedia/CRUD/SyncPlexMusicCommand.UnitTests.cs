@@ -348,6 +348,76 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
     }
 
     [Test]
+    public async Task ShouldRefreshMusicMetrics_WhenStoredAndIncomingLibrariesAreEmpty()
+    {
+        // Arrange
+        await SetupDatabase(
+            625291,
+            config =>
+            {
+                config.PlexMusicLibraryCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var library = await db.PlexLibraries.SingleAsync(CancellationToken);
+        const long staleMediaSize = 66_419_253_194;
+        await db
+            .PlexLibraries.Where(x => x.Id == library.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MediaSize, staleMediaSize), CancellationToken);
+        (
+            await db
+                .PlexLibraries.Where(x => x.Id == library.Id)
+                .Select(x => new
+                {
+                    x.MusicArtistCount,
+                    x.MusicAlbumCount,
+                    x.MusicTrackCount,
+                    x.MediaSize,
+                })
+                .SingleAsync(CancellationToken)
+        ).ShouldBe(
+            new
+            {
+                MusicArtistCount = 0,
+                MusicAlbumCount = 0,
+                MusicTrackCount = 0,
+                MediaSize = staleMediaSize,
+            }
+        );
+        library.Music.ShouldBeEmpty();
+
+        // Act
+        var result = await TestHandlerExecuteAsync<CrudMusicReport>(
+            new SyncPlexMusicCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.ToString());
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldBe(new CrudMusicReport());
+        (
+            await db
+                .PlexLibraries.Where(x => x.Id == library.Id)
+                .Select(x => new
+                {
+                    x.MusicArtistCount,
+                    x.MusicAlbumCount,
+                    x.MusicTrackCount,
+                    x.MediaSize,
+                })
+                .SingleAsync(CancellationToken)
+        ).ShouldBe(
+            new
+            {
+                MusicArtistCount = 0,
+                MusicAlbumCount = 0,
+                MusicTrackCount = 0,
+                MediaSize = 0L,
+            }
+        );
+    }
+
+    [Test]
     [Arguments(false)]
     [Arguments(true)]
     public async Task ShouldReplaceOrClearAlbumCountriesWithoutChangingUnrefreshedAlbumsOrOtherLibraries_WhenAlbumTimestampChanges(

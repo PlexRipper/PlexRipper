@@ -146,8 +146,8 @@ public class SyncPlexOtherVideosCommandHandler
             if (mediaData.Count > 0)
                 await ReconcileOtherVideoStreamsAsync(ctx, mediaData, ct);
             changedVideos = created.Concat(updated).ToList();
-            if (report.ChangedItemCount > 0)
-                await ctx.SetOtherVideoMediaMetrics(library.Id, incoming.Count, mediaSize, ct);
+            // Refresh library metrics for every completed authoritative snapshot, including empty no-op snapshots.
+            await ctx.SetOtherVideoMediaMetrics(library.Id, incoming.Count, mediaSize, ct);
             return Result.Ok();
         });
 

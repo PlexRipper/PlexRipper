@@ -153,6 +153,68 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
     }
 
     [Test]
+    public async Task ShouldRefreshOtherVideoMetrics_WhenStoredAndIncomingLibrariesAreEmpty()
+    {
+        // Arrange
+        await SetupDatabase(
+            625292,
+            config =>
+            {
+                config.PlexOtherVideoLibraryCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var library = await db.PlexLibraries.SingleAsync(CancellationToken);
+        const long staleMediaSize = 43_413_438_912;
+        await db
+            .PlexLibraries.Where(x => x.Id == library.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MediaSize, staleMediaSize), CancellationToken);
+        (
+            await db
+                .PlexLibraries.Where(x => x.Id == library.Id)
+                .Select(x => new
+                {
+                    x.OtherVideoCount,
+                    x.MediaSize,
+                })
+                .SingleAsync(CancellationToken)
+        ).ShouldBe(
+            new
+            {
+                OtherVideoCount = 0,
+                MediaSize = staleMediaSize,
+            }
+        );
+        library.OtherVideos.ShouldBeEmpty();
+
+        // Act
+        var result = await TestHandlerExecuteAsync<CrudOtherVideosReport>(
+            new SyncPlexOtherVideosCommand(new InsertMediaMetaDataCommandResponse(library))
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.ToString());
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldBe(new CrudOtherVideosReport());
+        (
+            await db
+                .PlexLibraries.Where(x => x.Id == library.Id)
+                .Select(x => new
+                {
+                    x.OtherVideoCount,
+                    x.MediaSize,
+                })
+                .SingleAsync(CancellationToken)
+        ).ShouldBe(
+            new
+            {
+                OtherVideoCount = 0,
+                MediaSize = 0L,
+            }
+        );
+    }
+
+    [Test]
     public async Task ShouldNotRefreshStreamsForUnchangedVideoParts()
     {
         // Arrange

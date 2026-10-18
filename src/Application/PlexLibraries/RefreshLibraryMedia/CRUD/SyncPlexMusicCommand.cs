@@ -313,15 +313,15 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     ct
                 );
 
-            if (report.ChangedItemCount > 0)
-                await ctx.SetMusicMediaMetrics(
-                    library.Id,
-                    artists.Count,
-                    albums.Count,
-                    tracks.Count,
-                    tracks.Sum(x => x.MediaSize),
-                    ct
-                );
+            // Refresh library metrics for every completed authoritative snapshot, including empty no-op snapshots.
+            await ctx.SetMusicMediaMetrics(
+                library.Id,
+                artists.Count,
+                albums.Count,
+                tracks.Count,
+                tracks.Sum(x => x.MediaSize),
+                ct
+            );
             if (report.ChangedItemCount > 0)
                 await ctx
                     .PlexLibraries.Where(x => x.Id == library.Id)

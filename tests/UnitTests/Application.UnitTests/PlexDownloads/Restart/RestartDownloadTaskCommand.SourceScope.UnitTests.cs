@@ -3,6 +3,81 @@ namespace Reaparr.Application.UnitTests;
 public class RestartDownloadTaskCommandSourceScopeUnitTests : BaseCommandUnitTest<RestartDownloadTaskCommand>
 {
     [Test]
+    public async Task ShouldKeepDistinctGeneratedPartName_WhenMultipartEpisodeRestarts()
+    {
+        // Arrange
+        var seed = await SetupDatabase(88402, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexMovieLibraryCount = 0;
+            config.PlexTvShowLibraryCount = 1;
+            config.TvShowCount = 1;
+            config.TvShowSeasonCount = 1;
+            config.TvShowEpisodeCount = 1;
+            config.TvShowDownloadTasksCount = 1;
+            config.TvShowSeasonDownloadTasksCount = 1;
+            config.TvShowEpisodeDownloadTasksCount = 1;
+        });
+        var dbContext = IDbContext;
+        var source = await dbContext.PlexTvShowEpisodeData.AsTracking()
+            .Include(x => x.PlexTvShowEpisode).SingleAsync(CancellationToken);
+        var episode = source.PlexTvShowEpisode!;
+        dbContext.Entry(source).CurrentValues.SetValues(new
+        {
+            PlexApiMediaId = 83001, PlexApiPartId = 84001,
+            GeneratedFilename = "Episode.1080p.mkv",
+        });
+        var sibling = FakeData.GetPlexTvShowEpisodeMediaData(seed).Generate();
+        dbContext.Entry(sibling).CurrentValues.SetValues(new
+        {
+            PlexTvShowEpisodeId = episode.Id, episode.PlexServerId, episode.PlexLibraryId,
+            episode.PlexApiRatingKey, PlexApiMediaId = 83001, PlexApiPartId = 84002,
+            GeneratedFilename = "Episode.1080p.mkv",
+        });
+        dbContext.PlexTvShowEpisodeData.Add(sibling);
+        var root = await dbContext.DownloadTaskTvShow.AsTracking().Include(x => x.Children)
+            .ThenInclude(x => x.Children).ThenInclude(x => x.Children).SingleAsync(CancellationToken);
+        var target = root.Children.Single().Children.Single().Children.Single();
+        new List<DownloadTaskBase> { root }.SetRelationshipIds(episode.PlexServerId, episode.PlexLibraryId);
+        dbContext.Entry(target).CurrentValues.SetValues(new
+        {
+            PlexApiRatingKey = episode.PlexApiRatingKey, PlexApiMediaId = 83001, PlexApiPartId = 84001,
+            DownloadStatus = DownloadStatus.Stopped, FileName = "Episode.1080p.part84001.mkv",
+        });
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var key = target.ToKey();
+        var parentKey = target.ToParentKey();
+        dbContext.ClearChangeTracker();
+        SetupDependencies(builder => builder.RegisterType<DownloadTaskUpdateDispatcher>().As<IDownloadTaskUpdateDispatcher>());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.Is<StopDownloadTaskCommand>(c => c.DownloadTaskGuid == key.Id), CancellationToken))
+            .ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.Mock<IEventPublisher>()
+            .Setup(x => x.PublishAsync(It.Is<CheckDownloadQueueEvent>(e =>
+                e.PlexServerIds.SequenceEqual(new[] { key.PlexServerId })), CancellationToken))
+            .Returns(Task.CompletedTask).Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new RestartDownloadTaskCommand(key.Id));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var after = (await dbContext.GetDownloadTaskFileAsync(key, CancellationToken))!;
+        (after.Id, after.PlexApiMediaId, after.PlexApiPartId).ShouldBe((key.Id, 83001, 84001));
+        after.ToParentKey().ShouldBe(parentKey);
+        after.FileName.ShouldBe("Episode.1080p.part84001.mkv");
+        after.FullTitle.ShouldBe($"{episode.FullTitle}/Episode.1080p.part84001.mkv");
+        after.FileLocationUrl.ShouldBe(source.Key);
+        after.DataTotal.ShouldBe(source.Size);
+        after.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+        (await dbContext.PlexTvShowEpisodeData.Where(x => x.Id == sibling.Id)
+            .Select(x => x.GeneratedFilename).SingleAsync(CancellationToken)).ShouldBe("Episode.1080p.mkv");
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IEventPublisher>().Verify();
+    }
+
+    [Test]
     [Arguments(PlexMediaType.Movie, "server", false)]
     [Arguments(PlexMediaType.Movie, "library", false)]
     [Arguments(PlexMediaType.Movie, "media", false)]

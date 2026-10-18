@@ -8,6 +8,103 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
     private readonly DownloadTaskTvShowValidator _validator = new();
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ShouldQueueEverySelectedPartWithDistinctPaths_WhenEpisodeHasMultipleParts(bool generatedNames)
+    {
+        // Arrange
+        var seed = await SetupDatabase(91335, config =>
+        {
+            config.TvShowCount = 1;
+            config.TvShowSeasonCount = 1;
+            config.TvShowEpisodeCount = 2;
+        });
+        var dbContext = IDbContext;
+        var episodes = await dbContext.PlexTvShowEpisodes.AsTracking().Include(x => x.MediaDataList)
+            .OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var episode = episodes[0];
+        var singlePartEpisode = episodes[1];
+        var firstPart = episode.MediaDataList.Single();
+        dbContext.Entry(firstPart).CurrentValues.SetValues(new
+        {
+            PlexApiMediaId = 81001, PlexApiPartId = 82001, Size = 1000L,
+            OriginalFilename = "episode.cd1.mkv",
+            GeneratedFilename = generatedNames ? "Episode.1080p.mkv" : null,
+            Key = "/library/parts/82001/file.mkv",
+        });
+        var secondPart = FakeData.GetPlexTvShowEpisodeMediaData(seed).Generate();
+        dbContext.Entry(secondPart).CurrentValues.SetValues(new
+        {
+            PlexTvShowEpisodeId = episode.Id, episode.PlexServerId, episode.PlexLibraryId,
+            episode.PlexApiRatingKey, PlexApiMediaId = 81001, PlexApiPartId = 82002, Size = 2000L,
+            OriginalFilename = "episode.cd2.mkv",
+            GeneratedFilename = generatedNames ? "Episode.1080p.mkv" : null,
+            Key = "/library/parts/82002/file.mkv",
+        });
+        var otherQuality = FakeData.GetPlexTvShowEpisodeMediaData(seed).Generate();
+        dbContext.Entry(otherQuality).CurrentValues.SetValues(new
+        {
+            PlexTvShowEpisodeId = episode.Id, episode.PlexServerId, episode.PlexLibraryId,
+            episode.PlexApiRatingKey, PlexApiMediaId = 81002, PlexApiPartId = 82003,
+        });
+        dbContext.PlexTvShowEpisodeData.AddRange(secondPart, otherQuality);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var singlePart = singlePartEpisode.MediaDataList.Single();
+        var request = new DownloadMediaDTO
+        {
+            Type = PlexMediaType.Episode,
+            MediaIds = [episode.Id, singlePartEpisode.Id],
+            PlexServerId = episode.PlexServerId,
+            PlexLibraryId = episode.PlexLibraryId,
+            Qualities = [new PlexMediaQualityDTO
+            {
+                MediaDataType = PlexMediaType.Episode, MediaId = episode.Id,
+                DataId = firstPart.Id, VideoQuality = firstPart.VideoQuality,
+            }],
+        };
+        (await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        episode.MediaDataList.Select(x => x.PlexApiPartId).Order().ShouldBe([82001, 82002, 82003]);
+
+        // Act
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(
+            new GenerateDownloadTaskTvShowEpisodesCommand([request]));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.Episodes.ShouldBe(2);
+        var tasks = await dbContext.DownloadTaskTvShowEpisode.Include(x => x.Children)
+            .ToListAsync(CancellationToken);
+        var target = tasks.Single(x => x.PlexApiRatingKey == episode.PlexApiRatingKey);
+        var files = target.Children.OrderBy(x => x.PlexApiPartId).ToArray();
+        files.Select(x => (x.PlexApiMediaId, x.PlexApiPartId, x.FileLocationUrl, x.DataTotal)).ShouldBe([
+            (81001, 82001, "/library/parts/82001/file.mkv", 1000L),
+            (81001, 82002, "/library/parts/82002/file.mkv", 2000L),
+        ]);
+        files.Select(x => x.FileName).ShouldBe(generatedNames
+            ? ["Episode.1080p.part82001.mkv", "Episode.1080p.part82002.mkv"]
+            : ["episode.cd1.mkv", "episode.cd2.mkv"]);
+        files.Select(x => x.DownloadFilePath).Distinct().Count().ShouldBe(2);
+        files.Select(x => x.DestinationFilePath).Distinct().Count().ShouldBe(2);
+        files.Select(x => x.ParentId).ShouldBe([target.Id, target.Id]);
+        target.Calculate().DataTotal.ShouldBe(3000L);
+        files[0].DownloadStatus = DownloadStatus.Completed;
+        target.Calculate();
+        target.DownloadStatus.ShouldNotBe(DownloadStatus.Completed);
+        files[1].DownloadStatus = DownloadStatus.Completed;
+        target.Calculate();
+        target.DownloadStatus.ShouldBe(DownloadStatus.Completed);
+        var control = tasks.Single(x => x.PlexApiRatingKey == singlePartEpisode.PlexApiRatingKey).Children.Single();
+        (control.PlexApiPartId, control.FileName, control.DataTotal)
+            .ShouldBe((singlePart.PlexApiPartId, singlePart.GetFileName, singlePart.Size));
+        (await dbContext.DownloadTaskTvShowEpisodeFile.CountAsync(CancellationToken)).ShouldBe(3);
+        var logs = await dbContext.DownloadTaskTvShowEpisodeFileLogs
+            .Where(x => x.DownloadTaskTvShowEpisodeId == target.Id)
+            .OrderBy(x => x.DownloadTaskFileId).Select(x => x.DownloadTaskFileId).ToListAsync(CancellationToken);
+        logs.ShouldBe(files.Select(x => x.Id).Order().ToList());
+    }
+
+    [Test]
     public void GenerateDownloadTaskTvShowEpisodesCommandValidator_ShouldRejectNullRequest()
     {
         // Arrange

@@ -273,33 +273,32 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
 
-        var newDownloadTask = await _dbContext
-            .PlexTvShowEpisodeData.Include(x => x.PlexTvShowEpisode)
-                .ThenInclude(x => x!.TvShowSeason)
-                    .ThenInclude(x => x!.TvShow)
-            .Where(x =>
-                x.PlexApiMediaId == downloadTask.PlexApiMediaId
-                && x.PlexApiPartId == downloadTask.PlexApiPartId
-                && x.PlexTvShowEpisode!.PlexServerId == downloadTask.PlexServerId
-                && x.PlexTvShowEpisode.PlexLibraryId == downloadTask.PlexLibraryId
-                && x.PlexTvShowEpisode.PlexApiRatingKey == downloadTask.PlexApiRatingKey
-            )
-            .Select(x => new DownloadTaskTvShowEpisodeFile
+        var episode = await _dbContext.PlexTvShowEpisodes
+            .Include(x => x.MediaDataList)
+            .Include(x => x.TvShow)
+            .Include(x => x.TvShowSeason)
+            .FirstOrDefaultAsync(x => x.PlexServerId == downloadTask.PlexServerId
+                && x.PlexLibraryId == downloadTask.PlexLibraryId
+                && x.PlexApiRatingKey == downloadTask.PlexApiRatingKey, CancellationToken.None);
+        var x = episode?.MediaDataList.FirstOrDefault(x =>
+            x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId);
+        var fileName = x?.GetEpisodeDownloadFileName(episode!.MediaDataList);
+        var newDownloadTask = x is null ? null : new DownloadTaskTvShowEpisodeFile
             {
                 Id = downloadTask.Id,
                 Parent = downloadTask.Parent,
                 ParentId = downloadTask.ParentId,
-                Title = x.GetFileName,
+                Title = fileName!,
                 DownloadStatus = DownloadStatus.Queued,
                 CreatedAt = DateTime.UtcNow,
-                FullTitle = $"{x.PlexTvShowEpisode!.FullTitle}/{x.GetFileName}",
+                FullTitle = $"{episode!.FullTitle}/{fileName}",
                 DataTotal = x.Size,
                 PlexServerId = downloadTask.PlexServerId,
                 PlexLibraryId = downloadTask.PlexLibraryId,
                 PlexApiRatingKey = downloadTask.PlexApiRatingKey,
                 PlexApiMediaId = downloadTask.PlexApiMediaId,
                 PlexApiPartId = downloadTask.PlexApiPartId,
-                FileName = x.GetFileName,
+                FileName = fileName!,
                 FileLocationUrl = x.Key,
                 HashId = downloadTask.HashId,
                 VideoQuality = x.VideoQuality,
@@ -308,8 +307,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,
                     DestinationRootPath = downloadTask.DirectoryMeta.DestinationRootPath,
                     MovieFolder = string.Empty,
-                    TvShowFolder = x.PlexTvShowEpisode!.TvShow!.Title.SanitizeFolderName(),
-                    SeasonFolder = x.PlexTvShowEpisode!.TvShowSeason!.Title.SanitizeFolderName(),
+                    TvShowFolder = episode!.TvShow!.Title.SanitizeFolderName(),
+                    SeasonFolder = episode.TvShowSeason!.Title.SanitizeFolderName(),
                     MusicArtistFolder = string.Empty,
                     MusicAlbumFolder = string.Empty,
                     PhotoAlbumFolder = string.Empty,
@@ -326,8 +325,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 DestinationFolderPathId = downloadTask.DestinationFolderPathId,
                 SonarrIntegrationId = downloadTask.SonarrIntegrationId,
                 RadarrIntegrationId = downloadTask.RadarrIntegrationId,
-            })
-            .FirstOrDefaultAsync(CancellationToken.None);
+            };
 
         if (newDownloadTask is null)
         {

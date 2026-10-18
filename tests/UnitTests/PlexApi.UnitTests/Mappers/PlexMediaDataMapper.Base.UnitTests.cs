@@ -5,12 +5,13 @@ namespace Reaparr.PlexApi.UnitTests;
 public class PlexMediaDataMapperBaseUnitTests : BaseUnitTest
 {
     [Test]
-    [Arguments("flac", true)]
-    [Arguments("mkv", true)]
-    [Arguments("mp4", false)]
-    public void ShouldLeaveReleaseSourceUnknown_WhenContainerDoesNotProveProvenance(
+    [Arguments("flac", true, ReleaseSource.WebRip)]
+    [Arguments("mkv", true, ReleaseSource.WebDl)]
+    [Arguments("mp4", false, ReleaseSource.WebRip)]
+    public void ShouldInferWebReleaseSource_FromContainerAndStreamingOptimization(
         string container,
-        bool optimizedForStreaming
+        bool optimizedForStreaming,
+        ReleaseSource expectedSource
     )
     {
         // Arrange
@@ -26,7 +27,7 @@ public class PlexMediaDataMapperBaseUnitTests : BaseUnitTest
         var movie = source.ToPlexMovie();
 
         // Assert
-        movie.MediaDataList.ShouldHaveSingleItem().Source.ShouldBe(ReleaseSource.None);
+        movie.MediaDataList.ShouldHaveSingleItem().Source.ShouldBe(expectedSource);
     }
 
     [Test]

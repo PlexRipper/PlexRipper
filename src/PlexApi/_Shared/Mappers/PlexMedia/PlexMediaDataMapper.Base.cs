@@ -81,32 +81,16 @@ public static partial class PlexMediaDataMapper
     /// <returns>The ParentKey if found and otherwise -1.</returns>
     private static int GetParentKey(this LibraryMediaItemDTO originalSource)
     {
-        var parentKeyString = !string.IsNullOrEmpty(originalSource.ParentRatingKey)
-            ? originalSource.ParentRatingKey
-            : "-1";
-
-        if (int.TryParse(parentKeyString, out var parentKey))
-        {
+        if (int.TryParse(originalSource.ParentRatingKey, out var parentKey))
             return parentKey;
-        }
 
-        var parentGuid = !string.IsNullOrEmpty(originalSource.ParentGuid) ? originalSource.ParentGuid : string.Empty;
-        if (string.IsNullOrEmpty(parentGuid))
-        {
+        var parentGuid = originalSource.ParentGuid;
+        if (string.IsNullOrEmpty(parentGuid) || !parentGuid.Contains("local"))
             return -1;
-        }
 
-        if (parentGuid.Contains("local"))
-        {
-            // Replace all non-numeric characters
-            var result = MyRegex().Replace(originalSource.ParentGuid, "");
-            if (!int.TryParse(result, out parentKey))
-            {
-                parentKey = -1;
-            }
-        }
-
-        return parentKey;
+        // Replace all non-numeric characters
+        var result = MyRegex().Replace(parentGuid, "");
+        return int.TryParse(result, out parentKey) ? parentKey : -1;
     }
 
     private static ReleaseSource DetermineReleaseSource(this LibraryMediaItemMediaDTO mediaData)

@@ -1935,10 +1935,6 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("VideoQuality")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("VideoResolution")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
-
                     b.HasKey("Id");
 
                     b.HasIndex("PlexApiRatingKey");
@@ -2125,8 +2121,6 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("RemotePlexMediaId");
 
                     b.HasIndex("OwnedPlexLibraryId", "OwnedPlexMediaId");
-
-                    b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId");
 
                     b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId", "RemotePlexMediaId", "OwnedPlexMediaId")
                         .IsUnique();
@@ -2358,8 +2352,6 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("RemotePlexMediaId");
 
                     b.HasIndex("OwnedPlexLibraryId", "OwnedPlexMediaId");
-
-                    b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId");
 
                     b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId", "RemotePlexMediaId", "OwnedPlexMediaId")
                         .IsUnique();
@@ -2625,8 +2617,6 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("OwnedPlexLibraryId", "OwnedPlexMediaId");
 
-                    b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId");
-
                     b.HasIndex("RemotePlexLibraryId", "OwnedPlexLibraryId", "RemotePlexMediaId", "OwnedPlexMediaId")
                         .IsUnique();
 
@@ -2733,9 +2723,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(14);
 
-                    b.Property<string>("OriginalFilePath")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("OriginalFilename")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -2772,9 +2759,6 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("Source")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(11);
-
-                    b.Property<string>("SourceRelativePath")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -3071,9 +3055,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(14);
 
-                    b.Property<string>("OriginalFilePath")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("OriginalFilename")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -3111,9 +3092,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(11);
 
-                    b.Property<string>("SourceRelativePath")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("VideoCodec")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -3127,10 +3105,6 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("VideoQuality")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("VideoResolution")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
 
                     b.Property<int?>("Width")
                         .HasColumnType("INTEGER");
@@ -3506,10 +3480,6 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("VideoQuality")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("VideoResolution")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
 
                     b.Property<int?>("Width")
                         .HasColumnType("INTEGER");
@@ -4312,10 +4282,6 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("VideoQuality")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("VideoResolution")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
-
                     b.HasKey("Id");
 
                     b.HasIndex("PlexApiRatingKey");
@@ -4510,8 +4476,6 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PlexServerId");
-
-                    b.HasIndex("TvShowId");
 
                     b.HasIndex("PlexApiRatingKey", "PlexServerId");
 

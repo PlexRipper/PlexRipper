@@ -217,7 +217,12 @@ describe('Queued library refresh visibility', () => {
 				let queues = data.plexLibrarySyncJobStatuses.map((queue) => queue.plexLibraryId === processingLibrary.id
 					? { ...queue, status: LibrarySyncJobStatus.Processing, completedAt: null }
 					: queue);
+				let expectCancelledQueueSnapshot = false;
 				cy.intercept('GET', PlexLibraryPaths.getLibrarySyncStatusEndpoint(), (request) => {
+					if (expectCancelledQueueSnapshot) {
+						expectCancelledQueueSnapshot = false;
+						request.alias = 'cancelledQueueSnapshot';
+					}
 					request.reply(200, generateResultDTO(queues));
 				}).as('queueSnapshot');
 				cy.intercept('GET', PlexServerConnectionPaths.getAllPlexServerConnectionsEndpoint(), {
@@ -267,6 +272,7 @@ describe('Queued library refresh visibility', () => {
 					queues = queues.map((queue) => queue.plexLibraryId === queuedLibrary.id
 						? { ...queue, status: LibrarySyncJobStatus.Cancelled }
 						: queue);
+					expectCancelledQueueSnapshot = true;
 					request.reply(200, generateResultDTO(undefined));
 				}).as('cancelQueuedRefresh');
 
@@ -280,7 +286,11 @@ describe('Queued library refresh visibility', () => {
 				cy.contains('The library media data has not yet been synced').should('not.exist');
 				cy.getCy('cancel-queued-library-sync-button').click();
 				cy.wait('@cancelQueuedRefresh').its('request.method').should('equal', 'DELETE');
-				cy.wait('@queueSnapshot');
+				cy.wait('@cancelledQueueSnapshot').its('response.body.value').should((snapshot: LibrarySyncJobQueueDTO[]) => {
+					const queue = snapshot.find((item) => item.plexLibraryId === queuedLibrary.id);
+					expect(queue?.plexLibraryId).to.equal(queuedLibrary.id);
+					expect(queue?.status).to.equal(LibrarySyncJobStatus.Cancelled);
+				});
 
 				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
 					JobTypes.LibrarySyncJob,

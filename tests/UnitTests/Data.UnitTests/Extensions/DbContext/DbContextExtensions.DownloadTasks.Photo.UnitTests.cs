@@ -172,7 +172,7 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
         persisted = await IDbContext.DownloadTaskPhotoImageFiles.SingleAsync(CancellationToken);
         persisted.DownloadSpeed.ShouldBe(0);
         persisted.TimeRemaining.ShouldBe(0);
-        persisted.FileTransferSpeed.ShouldBe(100);
+        persisted.FileTransferSpeed.ShouldBe(0);
 
         var reset = await dbContext.ResetDownloadTaskProgress(key, DownloadStatus.Stopped, CancellationToken);
         reset.IsSuccess.ShouldBeTrue();

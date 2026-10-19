@@ -405,7 +405,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         var beforeReset = persisted;
         await dbContext.ClearDownloadSpeed(key, CancellationToken);
         persisted = (await dbContext.GetDownloadTaskFileAsync(key, CancellationToken))!;
-        (persisted.DownloadSpeed, persisted.TimeRemaining, persisted.FileTransferSpeed).ShouldBe((0L, 0, 100L));
+        (persisted.DownloadSpeed, persisted.TimeRemaining, persisted.FileTransferSpeed).ShouldBe((0L, 0, 0L));
         var reset = await dbContext.ResetDownloadTaskProgress(key, DownloadStatus.Stopped, CancellationToken);
         reset.IsSuccess.ShouldBeTrue();
         reset.Errors.Count.ShouldBe(0);

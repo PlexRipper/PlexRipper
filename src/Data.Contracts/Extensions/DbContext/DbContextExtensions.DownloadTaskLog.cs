@@ -20,15 +20,14 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.MovieData => await Result.Try(
-                async Task<List<DownloadTaskLogBase>> () =>
-                    await dbContext
-                        .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
-                        .Where(x => sinceId == null || x.Id > sinceId)
-                        .OrderBy(x => x.Id)
-                        .Select(x => (DownloadTaskLogBase)x)
-                        .ApplyTake(take ?? 0)
-                        .ToListAsync(ct)
+            DownloadTaskType.MovieData => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
+                await dbContext
+                    .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                    .Where(x => sinceId == null || x.Id > sinceId)
+                    .OrderBy(x => x.Id)
+                    .Select(x => (DownloadTaskLogBase)x)
+                    .ApplyTake(take ?? 0)
+                    .ToListAsync(ct)
             ),
             DownloadTaskType.TvShow => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
@@ -57,15 +56,14 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.EpisodeData => await Result.Try(
-                async Task<List<DownloadTaskLogBase>> () =>
-                    await dbContext
-                        .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
-                        .ApplyWhere(sinceId != null, x => x.Id > sinceId)
-                        .OrderBy(x => x.Id)
-                        .Select(x => (DownloadTaskLogBase)x)
-                        .ApplyTake(take ?? 0)
-                        .ToListAsync(ct)
+            DownloadTaskType.EpisodeData => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
+                await dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                    .ApplyWhere(sinceId != null, x => x.Id > sinceId)
+                    .OrderBy(x => x.Id)
+                    .Select(x => (DownloadTaskLogBase)x)
+                    .ApplyTake(take ?? 0)
+                    .ToListAsync(ct)
             ),
             DownloadTaskType.MusicArtist => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
@@ -94,43 +92,34 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.MusicTrackData => await Result.Try(
-                async Task<List<DownloadTaskLogBase>> () =>
-                    await dbContext
-                        .DownloadTaskTrackFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
-                        .ApplyWhere(sinceId != null, x => x.Id > sinceId)
-                        .OrderBy(x => x.Id)
-                        .Select(x => (DownloadTaskLogBase)x)
-                        .ApplyTake(take ?? 0)
-                        .ToListAsync(ct)
-            ),
-            DownloadTaskType.PhotoAlbum => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
+            DownloadTaskType.MusicTrackData => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
-                    .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskPhotoAlbumId == downloadTaskKey.Id)
+                    .DownloadTaskTrackFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ApplyWhere(sinceId != null, x => x.Id > sinceId)
                     .OrderBy(x => x.Id)
                     .Select(x => (DownloadTaskLogBase)x)
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
+            DownloadTaskType.PhotoFolder => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
+            {
+                var fileIds = await GetPhotoFolderFileIdsAsync(dbContext, downloadTaskKey.Id, ct);
+                return await dbContext
+                    .DownloadTaskPhotoImageFileLogs.Where(x => fileIds.Contains(x.DownloadTaskFileId))
+                    .ApplyWhere(sinceId != null, x => x.Id > sinceId)
+                    .OrderBy(x => x.Id)
+                    .Select(x => (DownloadTaskLogBase)x)
+                    .ApplyTake(take ?? 0)
+                    .ToListAsync(ct);
+            }),
             DownloadTaskType.PhotoImage => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
-                    .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskPhotoId == downloadTaskKey.Id)
+                    .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ApplyWhere(sinceId != null, x => x.Id > sinceId)
                     .OrderBy(x => x.Id)
                     .Select(x => (DownloadTaskLogBase)x)
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
-            ),
-            DownloadTaskType.PhotoData => await Result.Try(
-                async Task<List<DownloadTaskLogBase>> () =>
-                    await dbContext
-                        .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
-                        .ApplyWhere(sinceId != null, x => x.Id > sinceId)
-                        .OrderBy(x => x.Id)
-                        .Select(x => (DownloadTaskLogBase)x)
-                        .ApplyTake(take ?? 0)
-                        .ToListAsync(ct)
             ),
             DownloadTaskType.OtherVideo => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
@@ -141,15 +130,14 @@ public static partial class DbContextExtensions
                     .ApplyTake(take ?? 0)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.OtherVideoData => await Result.Try(
-                async Task<List<DownloadTaskLogBase>> () =>
-                    await dbContext
-                        .DownloadTaskOtherVideoFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
-                        .ApplyWhere(sinceId != null, x => x.Id > sinceId)
-                        .OrderBy(x => x.Id)
-                        .Select(x => (DownloadTaskLogBase)x)
-                        .ApplyTake(take ?? 0)
-                        .ToListAsync(ct)
+            DownloadTaskType.OtherVideoData => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
+                await dbContext
+                    .DownloadTaskOtherVideoFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                    .ApplyWhere(sinceId != null, x => x.Id > sinceId)
+                    .OrderBy(x => x.Id)
+                    .Select(x => (DownloadTaskLogBase)x)
+                    .ApplyTake(take ?? 0)
+                    .ToListAsync(ct)
             ),
             _ => Result
                 .Fail("DownloadTaskLog of type {DownloadTaskType} not implemented", downloadTaskKey.Type)
@@ -213,17 +201,14 @@ public static partial class DbContextExtensions
                     .DownloadTaskTrackFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
             ),
-            DownloadTaskType.PhotoAlbum => await Result.Try(() =>
-                dbContext
-                    .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskPhotoAlbumId == downloadTaskKey.Id)
-                    .ExecuteDeleteAsync(ct)
-            ),
+            DownloadTaskType.PhotoFolder => await Result.Try(async Task<int> () =>
+            {
+                var fileIds = await GetPhotoFolderFileIdsAsync(dbContext, downloadTaskKey.Id, ct);
+                return await dbContext
+                    .DownloadTaskPhotoImageFileLogs.Where(x => fileIds.Contains(x.DownloadTaskFileId))
+                    .ExecuteDeleteAsync(ct);
+            }),
             DownloadTaskType.PhotoImage => await Result.Try(() =>
-                dbContext
-                    .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskPhotoId == downloadTaskKey.Id)
-                    .ExecuteDeleteAsync(ct)
-            ),
-            DownloadTaskType.PhotoData => await Result.Try(() =>
                 dbContext
                     .DownloadTaskPhotoImageFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
@@ -324,12 +309,8 @@ public static partial class DbContextExtensions
             );
         }
 
-        if (downloadTaskKey.Type is DownloadTaskType.PhotoData)
+        if (downloadTaskKey.Type is DownloadTaskType.PhotoImage)
         {
-            var ids = await dbContext
-                .DownloadTaskPhotoImageFiles.Where(x => x.Id == downloadTaskKey.Id)
-                .Select(x => new { ImageId = x.ParentId, AlbumId = x.Parent!.ParentId })
-                .FirstOrDefaultAsync(CancellationToken.None);
             await dbContext.DownloadTaskPhotoImageFileLogs.AddAsync(
                 new DownloadTaskPhotoImageFileLog
                 {
@@ -337,8 +318,6 @@ public static partial class DbContextExtensions
                     LogLevel = logLevel,
                     Status = status,
                     DownloadTaskFileId = downloadTaskKey.Id,
-                    DownloadTaskPhotoId = ids?.ImageId ?? Guid.Empty,
-                    DownloadTaskPhotoAlbumId = ids?.AlbumId,
                     CreatedAt = DateTime.UtcNow,
                 }
             );
@@ -437,5 +416,49 @@ public static partial class DbContextExtensions
             await dbContext.BulkInsertAsync(photos, cancellationToken: cancellationToken);
         if (videos is not null)
             await dbContext.BulkInsertAsync(videos, cancellationToken: cancellationToken);
+    }
+
+    private static async Task<List<Guid>> GetPhotoFolderFileIdsAsync(
+        IReaparrDbContext dbContext,
+        Guid folderId,
+        CancellationToken cancellationToken
+    )
+    {
+        var scope = await dbContext
+            .DownloadTaskPhotoFolders.Where(x => x.Id == folderId)
+            .Select(x => new { x.PlexServerId, x.PlexLibraryId })
+            .FirstOrDefaultAsync(cancellationToken);
+        if (scope is null)
+            return [];
+
+        var folders = await dbContext
+            .DownloadTaskPhotoFolders.Where(x =>
+                x.PlexServerId == scope.PlexServerId && x.PlexLibraryId == scope.PlexLibraryId
+            )
+            .Select(x => new { x.Id, x.ParentId })
+            .ToListAsync(cancellationToken);
+
+        var childrenByParent = folders
+            .Where(x => x.ParentId.HasValue)
+            .GroupBy(x => x.ParentId!.Value)
+            .ToDictionary(x => x.Key, x => x.Select(y => y.Id).ToList());
+        var folderIds = new HashSet<Guid> { folderId };
+        var pending = new Stack<Guid>();
+        pending.Push(folderId);
+        while (pending.TryPop(out var currentId))
+        {
+            if (!childrenByParent.TryGetValue(currentId, out var children))
+                continue;
+
+            foreach (var childId in children.Where(childId => folderIds.Add(childId)))
+            {
+                pending.Push(childId);
+            }
+        }
+
+        return await dbContext
+            .DownloadTaskPhotoImageFiles.Where(x => folderIds.Contains(x.ParentId))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
     }
 }

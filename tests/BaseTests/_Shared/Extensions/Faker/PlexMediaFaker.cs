@@ -50,9 +50,8 @@ public class PlexMediaDataSet : DataSet
             DownloadTaskType.MusicAlbum => $"Music Album - {_faker.Lorem.Word()}",
             DownloadTaskType.MusicTrack => $"Music Track - {_faker.Lorem.Word()}",
             DownloadTaskType.MusicTrackData => $"MusicTrackData - {_faker.Lorem.Word()}",
-            DownloadTaskType.PhotoAlbum => $"Photo Album - {_faker.Lorem.Word()}",
+            DownloadTaskType.PhotoFolder => $"Photo Folder - {_faker.Lorem.Word()}",
             DownloadTaskType.PhotoImage => $"Photo - {_faker.Lorem.Word()}",
-            DownloadTaskType.PhotoData => $"PhotoData - {_faker.Lorem.Word()}",
             DownloadTaskType.OtherVideo =>
                 $"OtherVideo - {_faker.PickRandomFromDataset(PlexMovieShowTitlesDataset.PlexMovieTitles.Value)}",
             DownloadTaskType.OtherVideoData =>

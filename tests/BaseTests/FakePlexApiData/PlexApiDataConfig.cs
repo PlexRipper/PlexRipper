@@ -33,6 +33,9 @@ public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>
 
     public int PhotoClipsPerAlbumCount { get; set; } = 0;
 
+    /// <summary>When enabled, the first generated file is a member of every generated album.</summary>
+    public bool PhotoAlbumsOverlap { get; set; }
+
     public int OtherVideosPerLibraryCount { get; set; } = 0;
 
     public PlexMediaType FailMediaType { get; set; } = PlexMediaType.None;

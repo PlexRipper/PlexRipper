@@ -187,6 +187,7 @@ public class ScheduledDownloadMembershipUnitTests : BaseUnitTest<DownloadTaskUpd
                 return Result.Ok();
             }).Verifiable(Times.Once());
         wrapper.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        wrapper.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(file.PlexServerId))
             .ReturnsAsync(true).Verifiable(initialStatus == DownloadStatus.Queued ? Times.Once() : Times.Never());
         Mock.Mock<TimeProvider>().Setup(x => x.GetUtcNow())

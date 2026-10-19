@@ -41,14 +41,18 @@ describe('Test the refreshing of a PlexLibrary', () => {
 		cy.getPageData().then((data) => {
 			const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie)!;
 			const server = data.plexServers.find((x) => x.id === movieLibrary.plexServerId)!;
+			let queue = generateLibrarySyncJobQueue({
+				plexLibraryId: movieLibrary.id,
+				plexServerId: server.id,
+				status: LibrarySyncJobStatus.Queued,
+			});
+			cy.intercept('GET', PlexLibraryPaths.getLibrarySyncStatusEndpoint(), (request) => {
+				request.reply(200, generateResultDTO([queue]));
+			});
 
 			cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), {
 				statusCode: 200,
-				body: generateResultDTO(generateLibrarySyncJobQueue({
-					plexLibraryId: movieLibrary.id,
-					plexServerId: server.id,
-					status: LibrarySyncJobStatus.Queued,
-				})),
+				body: generateResultDTO(queue),
 			}).as('refreshMovies');
 
 			// Verify the refresh button is visible before clicking
@@ -61,15 +65,10 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			cy.getCy('refresh-library-container').should('not.exist');
 
 			// === PHASE 1: Start the sync job ===
-			cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-				JobTypes.LibrarySyncJob,
-				JobStatus.Started,
-				generateLibrarySyncJobQueue({
-					plexLibraryId: movieLibrary.id,
-					plexServerId: server.id,
-					status: LibrarySyncJobStatus.Processing,
-				}),
-			);
+			cy.then(() => {
+				queue = { ...queue, status: LibrarySyncJobStatus.Processing };
+				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Started, queue);
+			});
 
 			// Verify the refresh container is now visible and the overview bar is hidden
 			cy.getCy('refresh-library-container').should('be.visible');
@@ -113,16 +112,10 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			}
 
 			// === PHASE 3: Complete the sync job ===
-			cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-				JobTypes.LibrarySyncJob,
-				JobStatus.Completed,
-				generateLibrarySyncJobQueue({
-					plexLibraryId: movieLibrary.id,
-					plexServerId: server.id,
-					status: LibrarySyncJobStatus.Completed,
-					completedAt: new Date().toISOString(),
-				}),
-			);
+			cy.then(() => {
+				queue = { ...queue, status: LibrarySyncJobStatus.Completed, completedAt: new Date().toISOString() };
+				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Completed, queue);
+			});
 
 			// Verify the refresh container is removed and the overview bar is restored
 			cy.getCy('refresh-library-container').should('not.exist');
@@ -155,14 +148,18 @@ describe('Test the refreshing of a PlexLibrary', () => {
 		cy.getPageData().then((data) => {
 			const tvShowLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.TvShow)!;
 			const server = data.plexServers.find((x) => x.id === tvShowLibrary.plexServerId)!;
+			let queue = generateLibrarySyncJobQueue({
+				plexLibraryId: tvShowLibrary.id,
+				plexServerId: server.id,
+				status: LibrarySyncJobStatus.Queued,
+			});
+			cy.intercept('GET', PlexLibraryPaths.getLibrarySyncStatusEndpoint(), (request) => {
+				request.reply(200, generateResultDTO([queue]));
+			});
 
 			cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(tvShowLibrary.id), {
 				statusCode: 200,
-				body: generateResultDTO(generateLibrarySyncJobQueue({
-					plexLibraryId: tvShowLibrary.id,
-					plexServerId: server.id,
-					status: LibrarySyncJobStatus.Queued,
-				})),
+				body: generateResultDTO(queue),
 			}).as('refreshTvShows');
 
 			// Verify the refresh button is visible before clicking
@@ -175,15 +172,10 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			cy.getCy('refresh-library-container').should('not.exist');
 
 			// === PHASE 1: Start the sync job ===
-			cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-				JobTypes.LibrarySyncJob,
-				JobStatus.Started,
-				generateLibrarySyncJobQueue({
-					plexLibraryId: tvShowLibrary.id,
-					plexServerId: server.id,
-					status: LibrarySyncJobStatus.Processing,
-				}),
-			);
+			cy.then(() => {
+				queue = { ...queue, status: LibrarySyncJobStatus.Processing };
+				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Started, queue);
+			});
 
 			// Verify the refresh container is now visible and the overview bar is hidden
 			cy.getCy('refresh-library-container').should('be.visible');
@@ -339,16 +331,10 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			}
 
 			// === PHASE 3: Complete the sync job ===
-			cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-				JobTypes.LibrarySyncJob,
-				JobStatus.Completed,
-				generateLibrarySyncJobQueue({
-					plexLibraryId: tvShowLibrary.id,
-					plexServerId: server.id,
-					status: LibrarySyncJobStatus.Completed,
-					completedAt: new Date().toISOString(),
-				}),
-			);
+			cy.then(() => {
+				queue = { ...queue, status: LibrarySyncJobStatus.Completed, completedAt: new Date().toISOString() };
+				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Completed, queue);
+			});
 
 			// Verify the refresh container is removed and the overview bar is restored
 			cy.getCy('refresh-library-container').should('not.exist');

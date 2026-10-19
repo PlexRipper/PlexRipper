@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { HubConnectionState } from '@microsoft/signalr';
 import { baseSetup, subscribeSpyTo } from '@services-test-base';
@@ -8,8 +8,10 @@ import { type ISetupResult, StoreNames } from '@interfaces';
 interface MockHub {
 	state: HubConnectionState;
 	handlers: Map<string, (data: unknown) => void>;
-	on: ReturnType<typeof vi.fn>;
-	start: ReturnType<typeof vi.fn>;
+	on: Mock<(event: string, callback: (data: unknown) => void) => void>;
+	off: Mock<(event: string) => void>;
+	start: Mock<() => Promise<void>>;
+	stop: Mock<() => Promise<void>>;
 }
 
 const { hubConnections } = vi.hoisted(() => ({
@@ -69,6 +71,10 @@ describe('SignalrStore.setup() failure handling', () => {
 		expect(result.getFirstValue()).toEqual(setupResult);
 		expect(result.receivedComplete()).toEqual(true);
 		expect(result.receivedError()).toEqual(false);
+		for (const hub of hubConnections.values()) {
+			expect(hub.stop).toHaveBeenCalledOnce();
+			expect(hub.handlers.size).toBe(0);
+		}
 	});
 });
 
@@ -81,6 +87,8 @@ function createHub(startError?: Error, state = HubConnectionState.Disconnected):
 		on: vi.fn((event: string, callback: (data: unknown) => void) => {
 			handlers.set(event, callback);
 		}),
+		off: vi.fn((event: string) => { handlers.delete(event); }),
+		stop: vi.fn(async () => Promise.resolve()),
 		start: vi.fn(async () => {
 			if (startError) {
 				throw startError;

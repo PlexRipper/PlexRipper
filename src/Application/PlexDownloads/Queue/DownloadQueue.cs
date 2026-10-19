@@ -51,7 +51,10 @@ public class DownloadQueue : IDownloadQueue
                         var plexServerId in _plexServersToCheckChannel.Reader.ReadAllAsync(cancellationToken)
                     )
                     {
-                        var queueResult = await CheckDownloadQueueServer(plexServerId, cancellationToken);
+                        var queueResult = await Result.Try(
+                            async Task<Result> () =>
+                                (await CheckDownloadQueueServer(plexServerId, cancellationToken)).ToResult()
+                        );
                         if (queueResult.IsCancelled)
                         {
                             queueResult.LogWarning();
@@ -160,10 +163,8 @@ public class DownloadQueue : IDownloadQueue
             cancellationToken: cancellationToken
         );
 
-        var hasDownloadingTask = downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading);
-
-        // Avoid a race where the persisted task still says downloading while its Quartz job is finishing.
-        if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
+        var activeDownloadTaskKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(plexServerId);
+        if (HasActivePreDownloadTask(downloadTasks, activeDownloadTaskKeys))
         {
             return Result
                 .Fail("Cannot select the next download task because server is already downloading one")
@@ -195,10 +196,57 @@ public class DownloadQueue : IDownloadQueue
                 nextDownloadTask.FullTitle
             );
 
-        _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + _retryCooldown;
-        await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey(), cancellationToken);
+        var schedulingResult = await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey(), cancellationToken);
+        if (schedulingResult.IsCancelled)
+            return schedulingResult.ToResult<DownloadTaskGeneric>().LogWarning();
 
+        if (schedulingResult.IsFailed)
+            return schedulingResult.ToResult<DownloadTaskGeneric>().LogIfFailed();
+
+        _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + _retryCooldown;
         return Result.Ok(nextDownloadTask);
+    }
+
+    private static bool HasActivePreDownloadTask(
+        ICollection<DownloadTaskGeneric> downloadTasks,
+        IReadOnlyCollection<DownloadTaskKey> activeDownloadTaskKeys
+    )
+    {
+        if (activeDownloadTaskKeys.Count == 0)
+            return false;
+
+        var activeDownloadTaskIds = activeDownloadTaskKeys.Select(x => x.Id).ToHashSet();
+        var matchedTaskIds = new HashSet<Guid>();
+        foreach (var downloadTask in downloadTasks)
+        {
+            if (HasActivePreDownloadTask(downloadTask, activeDownloadTaskIds, matchedTaskIds))
+                return true;
+        }
+
+        // An active Quartz job without a corresponding persisted task cannot be identified as cleanup.
+        return matchedTaskIds.Count != activeDownloadTaskIds.Count;
+    }
+
+    private static bool HasActivePreDownloadTask(
+        DownloadTaskGeneric downloadTask,
+        HashSet<Guid> activeDownloadTaskIds,
+        HashSet<Guid> matchedTaskIds
+    )
+    {
+        if (activeDownloadTaskIds.Contains(downloadTask.Id))
+        {
+            matchedTaskIds.Add(downloadTask.Id);
+            if (downloadTask.DownloadStatus != DownloadStatus.DownloadFinished)
+                return true;
+        }
+
+        foreach (var child in downloadTask.Children)
+        {
+            if (HasActivePreDownloadTask(child, activeDownloadTaskIds, matchedTaskIds))
+                return true;
+        }
+
+        return false;
     }
 
     private bool IsInRetryCooldown(DownloadTaskGeneric task)

@@ -1,12 +1,56 @@
 import { cloneDeep } from 'lodash-es';
 import prettyBytes from 'pretty-bytes';
 import { route } from '@fixtures';
-import { DownloadStatus, MessageTypes } from '@dto';
+import { DownloadStatus, MessageTypes, RefreshDataType } from '@dto';
 import { generateResultDTO } from '@mock';
 
 const getVisibleCy = (selector: string) => cy.getCy(selector).filter(':visible').first();
 
 describe('Downloads page', () => {
+	beforeEach(() => {
+		cy.hubClear();
+		// Publish to the current document after Cypress navigation or another spec's reload.
+		Cypress.Commands.overwrite('hubPublish', (_original, hubName, messageType, payload) =>
+			cy.window().then((autWindow) => {
+				const hub = autWindow['cypress-signalr-mock']?.mocks.find((mock) => mock.name === hubName);
+				if (!hub) {
+					throw new Error(`SignalR mock hub ${hubName} is not ready in the current page`);
+				}
+				hub.publish(messageType, payload);
+			}),
+		);
+	});
+
+	it('Should refresh downloads once and display the new status after a refresh notification', () => {
+		cy.basePageSetup({
+			seed: 47020,
+			plexAccountCount: 1,
+			plexServerCount: 1,
+			plexMovieLibraryCount: 1,
+			movieDownloadTask: 1,
+			isLoggedIn: true,
+		}).then((data) => {
+			const initialTask = data.serverDownloadProgress[0]!.downloads[0]!;
+			const refreshedDownloads = cloneDeep(data.serverDownloadProgress);
+			const refreshedStatus = initialTask.status === DownloadStatus.Completed ? DownloadStatus.Paused : DownloadStatus.Completed;
+			refreshedDownloads[0]!.downloads[0]!.status = refreshedStatus;
+			cy.visit(route('/downloads'));
+			getVisibleCy(`column-status-${initialTask.id}`).should('have.text', initialTask.status);
+			let refreshRequests = 0;
+			cy.intercept({ method: 'GET', pathname: '/api/Download' }, (request) => {
+				refreshRequests++;
+				request.reply({ statusCode: 200, body: generateResultDTO(refreshedDownloads) });
+			}).as('refreshDownloads');
+
+			cy.clock();
+			cy.hubPublish('notifications', MessageTypes.RefreshNotification, RefreshDataType.DownloadTasks);
+			cy.tick(251);
+			cy.wait('@refreshDownloads');
+			getVisibleCy(`column-status-${initialTask.id}`).should('have.text', refreshedStatus);
+			cy.then(() => expect(refreshRequests).to.equal(1));
+		});
+	});
+
 	it('Should update the download task row when the download process is updated', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,

@@ -180,6 +180,8 @@ public static partial class PlexMediaExtensions
             throw new NullReferenceException("PlexTvShowEpisode.TvShow or PlexTvShowEpisode.TvShowSeason is null");
         }
 
+        var fileName = plexMediaData.GetEpisodeDownloadFileName(plexTvShowEpisode.MediaDataList);
+
         return new DownloadTaskTvShowEpisodeFile
         {
             Id = Guid.Empty,
@@ -199,7 +201,7 @@ public static partial class PlexMediaExtensions
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
             TimeRemaining = 0,
-            FileName = plexMediaData.GetFileName,
+            FileName = fileName,
             FileLocationUrl = plexMediaData.Key,
             VideoQuality = plexMediaData.VideoQuality,
             DirectoryMeta = new DownloadTaskDirectory
@@ -218,12 +220,28 @@ public static partial class PlexMediaExtensions
             Parent = null,
             ParentId = Guid.Empty,
             DestinationFolderPathId = request.DestinationFolderPathId,
-            FullTitle = $"{plexTvShowEpisode.FullTitle}/{plexMediaData.GetFileName}",
-            Title = plexMediaData.GetFileName,
+            FullTitle = $"{plexTvShowEpisode.FullTitle}/{fileName}",
+            Title = fileName,
             DirectDownloadSnapshot = null,
             DownloadClientType = PlexDownloadClientType.Direct,
             SonarrIntegrationId = request.Integration?.Type == IntegrationType.Sonarr ? request.Integration.Id : null,
             RadarrIntegrationId = request.Integration?.Type == IntegrationType.Radarr ? request.Integration.Id : null,
         };
+    }
+
+    public static string GetEpisodeDownloadFileName(
+        this PlexTvShowEpisodeMediaData mediaData,
+        ICollection<PlexTvShowEpisodeMediaData> episodeParts
+    )
+    {
+        var fileName = mediaData.GetFileName;
+        if (string.IsNullOrEmpty(mediaData.GeneratedFilename)
+            || !episodeParts.Any(x => x.PlexApiMediaId == mediaData.PlexApiMediaId
+                && x.PlexApiPartId != mediaData.PlexApiPartId
+                && string.Equals(x.GetFileName, fileName, StringComparison.OrdinalIgnoreCase)))
+            return fileName;
+
+        // Part IDs keep generated names stable even when Plex returns parts in a different order.
+        return $"{Path.GetFileNameWithoutExtension(fileName)}.part{mediaData.PlexApiPartId}{Path.GetExtension(fileName)}";
     }
 }

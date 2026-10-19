@@ -118,7 +118,11 @@ public sealed record TorznabFeedItemProjection
         AddOptionalAttribute(item, "tmdbid", TmdbId);
 
         if (!string.IsNullOrEmpty(ImdbId))
-            item.Attributes.Add(new TorznabAttr("imdb", ImdbId));
+        {
+            // Arr's Torznab parsers expect digits here; storage and search inputs keep their tt prefix.
+            var imdbValue = ImdbId.StartsWith("tt", StringComparison.OrdinalIgnoreCase) ? ImdbId[2..] : ImdbId;
+            item.Attributes.Add(new TorznabAttr("imdb", imdbValue));
+        }
 
         if (includeDebugAttributes)
         {

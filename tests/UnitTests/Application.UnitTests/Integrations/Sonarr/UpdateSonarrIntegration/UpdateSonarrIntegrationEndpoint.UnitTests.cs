@@ -58,6 +58,262 @@ public class UpdateSonarrIntegrationEndpointUnitTests
     }
 
     [Test]
+    public async Task ShouldMarkChangesPendingAndClearConnectionEvidence_WhenUrlChanges()
+    {
+        // Arrange
+        await SetupDatabase(62605);
+        var dbContext = IDbContext;
+        var integration = new SonarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000062605"),
+            DisplayName = "Sonarr",
+            BaseUrl = "https://sonarr.example.com",
+            SonarrApiKey = "old-key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.Success,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
+            LastConnectionTestErrorMessage = null,
+            LastConnectionTestedAt = new DateTime(2026, 10, 1, 12, 0, 0, DateTimeKind.Utc),
+        };
+        dbContext.SonarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateSonarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Sonarr",
+            Url = "sonarr-instance",
+            ApiKey = "old-key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = endpointResult.Response!;
+        var updated = await dbContext.SonarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        updated.BaseUrl.ShouldBe("sonarr-instance");
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.ChangesPending);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Unknown);
+        updated.LastConnectionTestHttpStatusCode.ShouldBeNull();
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ShouldMarkChangesPendingAndClearConnectionEvidence_WhenApiKeyChanges()
+    {
+        // Arrange
+        await SetupDatabase(62606);
+        var dbContext = IDbContext;
+        var integration = new SonarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000062606"),
+            DisplayName = "Sonarr",
+            BaseUrl = "https://sonarr.example.com",
+            SonarrApiKey = "old-key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.ConnectionFailed,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status503ServiceUnavailable,
+            LastConnectionTestErrorMessage = "Connection failed",
+            LastConnectionTestedAt = new DateTime(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc),
+        };
+        dbContext.SonarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateSonarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Sonarr",
+            Url = "https://sonarr.example.com/",
+            ApiKey = "new-key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var updated = await dbContext.SonarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.Response!.IsSuccess.ShouldBeTrue();
+        endpointResult.Response!.Errors.Count.ShouldBe(0);
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.ChangesPending);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Unknown);
+        updated.LastConnectionTestHttpStatusCode.ShouldBeNull();
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ShouldRemainConfiguredAndPreserveConnectionEvidence_WhenOnlyNameChanges()
+    {
+        // Arrange
+        await SetupDatabase(62607);
+        var dbContext = IDbContext;
+        var testedAt = new DateTime(2026, 10, 3, 12, 0, 0, DateTimeKind.Utc);
+        var integration = new SonarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000062607"),
+            DisplayName = "Sonarr",
+            BaseUrl = "https://sonarr.example.com",
+            SonarrApiKey = "key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.Success,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
+            LastConnectionTestErrorMessage = null,
+            LastConnectionTestedAt = testedAt,
+        };
+        dbContext.SonarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateSonarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Renamed Sonarr",
+            Url = "https://sonarr.example.com",
+            ApiKey = "key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var updated = await dbContext.SonarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.Response!.IsSuccess.ShouldBeTrue();
+        endpointResult.Response!.Errors.Count.ShouldBe(0);
+        updated.DisplayName.ShouldBe("Renamed Sonarr");
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.Configured);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Success);
+        updated.LastConnectionTestHttpStatusCode.ShouldBe(StatusCodes.Status200OK);
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBe(testedAt);
+    }
+
+    [Test]
+    public async Task ShouldPreserveConnectionEvidence_WhenUrlOnlyAddsTrailingSlash()
+    {
+        // Arrange
+        await SetupDatabase(62608);
+        var dbContext = IDbContext;
+        var testedAt = new DateTime(2026, 10, 4, 12, 0, 0, DateTimeKind.Utc);
+        var integration = new SonarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000062608"),
+            DisplayName = "Sonarr",
+            BaseUrl = "https://sonarr.example.com/",
+            SonarrApiKey = "key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.Success,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
+            LastConnectionTestErrorMessage = null,
+            LastConnectionTestedAt = testedAt,
+        };
+        dbContext.SonarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateSonarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Sonarr",
+            Url = "https://sonarr.example.com///",
+            ApiKey = "key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var updated = await dbContext.SonarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.Response!.IsSuccess.ShouldBeTrue();
+        endpointResult.Response!.Errors.Count.ShouldBe(0);
+        updated.BaseUrl.ShouldBe("https://sonarr.example.com");
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.Configured);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Success);
+        updated.LastConnectionTestHttpStatusCode.ShouldBe(StatusCodes.Status200OK);
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBe(testedAt);
+    }
+
+    [Test]
+    public async Task ShouldRemainUnconfiguredAndClearConnectionEvidence_WhenConnectionIdentityChangesBeforeSetup()
+    {
+        // Arrange
+        await SetupDatabase(62609);
+        var dbContext = IDbContext;
+        var integration = new SonarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000062609"),
+            DisplayName = "Sonarr",
+            BaseUrl = "https://sonarr.example.com",
+            SonarrApiKey = "old-key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Unconfigured,
+            LastConnectionTestStatus = TestConnectionStatus.Success,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
+            LastConnectionTestErrorMessage = null,
+            LastConnectionTestedAt = new DateTime(2026, 10, 5, 12, 0, 0, DateTimeKind.Utc),
+        };
+        dbContext.SonarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var request = new UpdateSonarrIntegrationRequest
+        {
+            IntegrationId = integration.Id,
+            Name = "Sonarr",
+            Url = "https://new-sonarr.example.com",
+            ApiKey = "new-key",
+            Category = "category",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+        };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var updated = await dbContext.SonarrIntegrations.SingleAsync(CancellationToken);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.Response!.IsSuccess.ShouldBeTrue();
+        endpointResult.Response!.Errors.Count.ShouldBe(0);
+        updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.Unconfigured);
+        updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Unknown);
+        updated.LastConnectionTestHttpStatusCode.ShouldBeNull();
+        updated.LastConnectionTestErrorMessage.ShouldBeNull();
+        updated.LastConnectionTestedAt.ShouldBeNull();
+    }
+
+    [Test]
     public async Task ShouldReturnNotFound_WhenIntegrationDoesNotExist()
     {
         // Arrange

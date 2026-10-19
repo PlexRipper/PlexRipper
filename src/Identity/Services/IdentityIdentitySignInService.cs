@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using FastEndpoints.Security;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 
 namespace Reaparr.Identity.Services;
@@ -14,6 +15,7 @@ public class IdentityIdentitySignInService : IIdentitySignInService
     public IdentityIdentitySignInService(SignInManager<AppUser> signInManager)
     {
         _signInManager = signInManager;
+        _signInManager.AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     }
 
     /// <inheritdoc/>

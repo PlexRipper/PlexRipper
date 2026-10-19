@@ -1,5 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import { get, set } from '@vueuse/core';
+import { useRouteQuery } from '@vueuse/router';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import {
 	generatePlexMediaSlims,
@@ -98,19 +100,29 @@ describe('MediaOverviewStore - Filter / Search', () => {
 		expect(store.hasNoSearchResults).toBe(false);
 	});
 
-	test('clearFilter should reset filterQuery to empty string', async () => {
+	test('clearFilter should reset filterQuery and remove search from route and requests', async () => {
 		// Arrange
+		const searchQuery = useRouteQuery('q', '');
+		set(searchQuery, undefined);
 		const store = useMediaOverviewStore();
 		await loadMovies(store, 10);
-		store.filterQuery = 'some-search';
-		expect(store.filterQuery).toBe('some-search');
 
 		// Act
-		const result = subscribeSpyTo(store.clearFilter());
-		await result.onComplete();
+		await subscribeSpyTo(store.setFilterQuery('some-search')).onComplete();
+		expect(get(searchQuery)).toBe('some-search');
+		await subscribeSpyTo(store.clearFilter()).onComplete();
 
 		// Assert
 		expect(store.filterQuery).toBe('');
+		expect(get(useRouteQuery('q', ''))).toBe('');
+		const mediaRequests = mock.history.get.filter((request) => request.url === '/api/PlexMedia');
+		expect(mediaRequests.at(-1)).toMatchObject({ params: { q: '' } });
+
+		await subscribeSpyTo(store.initializeLibrary(0)).onComplete();
+
+		expect(store.filterQuery).toBe('');
+		expect(get(useRouteQuery('q', ''))).toBe('');
+		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia').at(-1)).toMatchObject({ params: { q: '' } });
 	});
 
 	test('setFilterQuery should request media from the backend', async () => {

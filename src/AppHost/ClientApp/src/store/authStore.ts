@@ -4,7 +4,7 @@ import { reactive, computed, toRefs } from 'vue';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import type { Observable } from 'rxjs';
 import { authenticationApi } from '@api';
-import { catchError, of } from 'rxjs';
+import { catchError, from, of } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
 import { get } from '@vueuse/core';
@@ -68,8 +68,11 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 				username: usernameChanged ? state.username : null,
 				password: passwordChanged ? state.password : null,
 			}).pipe(
-				tap((res) => Log.info('User credentials updated', res)),
-				switchMap(() => actions.refreshCredentials()),
+				switchMap((result) => {
+					if (!result.isSuccess) return of(result);
+					Log.info('User credentials updated', result);
+					return actions.refreshCredentials();
+				}),
 				catchError((err) => {
 					Log.error('User credentials update failed', err);
 					return of(err);
@@ -98,9 +101,9 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 
 			return authenticationApi.appUserLogOutEndpoint().pipe(
 				tap((res) => Log.info('User logged out', res)),
+				switchMap((result) => from(globalStore.resetSession()).pipe(map(() => result))),
 				tap(() => state.isLoggedIn = false),
-				tap(() => router.push('/login')),
-				tap(() => globalStore.$reset()));
+				tap(() => router.push('/login')));
 		},
 		status: () => authenticationApi.authenticationStatusEndpoint({ timeout: 5000 }).pipe(
 			tap((res) => state.isLoggedIn = res.isSuccess && !!res.value?.isLoggedIn),

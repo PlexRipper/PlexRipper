@@ -788,4 +788,515 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
         Mock.Mock<ICommandExecutor>().Verify(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(),
             It.IsAny<CancellationToken>()), Times.Never());
     }
+
+    [Test]
+    [Arguments(PlexMediaType.Movie, false, 3)]
+    [Arguments(PlexMediaType.Episode, false, 3)]
+    [Arguments(PlexMediaType.MusicTrack, false, 3)]
+    [Arguments(PlexMediaType.PhotoImage, false, 3)]
+    [Arguments(PlexMediaType.OtherVideos, false, 3)]
+    [Arguments(PlexMediaType.Movie, true, 3)]
+    [Arguments(PlexMediaType.Episode, true, 3)]
+    [Arguments(PlexMediaType.MusicTrack, true, 3)]
+    [Arguments(PlexMediaType.PhotoImage, true, 3)]
+    [Arguments(PlexMediaType.OtherVideos, true, 3)]
+    [Arguments(PlexMediaType.Movie, false, 9)]
+    [Arguments(PlexMediaType.Episode, false, 9)]
+    [Arguments(PlexMediaType.MusicTrack, false, 9)]
+    [Arguments(PlexMediaType.PhotoImage, false, 9)]
+    [Arguments(PlexMediaType.OtherVideos, false, 9)]
+    [Arguments(PlexMediaType.Movie, true, 9)]
+    [Arguments(PlexMediaType.Episode, true, 9)]
+    [Arguments(PlexMediaType.MusicTrack, true, 9)]
+    [Arguments(PlexMediaType.PhotoImage, true, 9)]
+    [Arguments(PlexMediaType.OtherVideos, true, 9)]
+    public async Task ShouldPersistMoveErrorAndRetainBytes_WhenShortcutFileSizeDoesNotMatch(
+        PlexMediaType family,
+        bool renamedInDownloads,
+        int shortcutLength
+    )
+    {
+        // Arrange
+        await SetupDatabase(
+            52229,
+            c =>
+            {
+                c.MovieDownloadTasksCount = family == PlexMediaType.Movie ? 1 : 0;
+                c.TvShowDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.TvShowSeasonDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.TvShowEpisodeDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.PlexMusicLibraryCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicArtistDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicAlbumDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicTrackDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicTrackFileDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.PlexPhotoLibraryCount = family == PlexMediaType.PhotoImage ? 1 : 0;
+                c.PlexOtherVideoLibraryCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+                c.OtherVideoDownloadTasksCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+                c.OtherVideoFileDownloadTasksCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+            }
+        );
+        var dbContext = IDbContext;
+        DownloadTaskFileBase target;
+        switch (family)
+        {
+            case PlexMediaType.MusicTrack:
+                target = await dbContext.DownloadTaskMusicTrackFiles.SingleAsync(CancellationToken);
+                break;
+            case PlexMediaType.OtherVideos:
+                target = await dbContext.DownloadTaskOtherVideoFiles.SingleAsync(CancellationToken);
+                break;
+            case PlexMediaType.PhotoImage:
+                var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
+                var album = FakeData
+                    .GetDownloadTaskPhotoAlbum(new Seed(52229))
+                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52230)).Generate(1))
+                    .Generate();
+                foreach (
+                    var node in new DownloadTaskBase[] { album }
+                        .Concat(album.Children)
+                        .Concat(album.Children.SelectMany(x => x.Children))
+                )
+                {
+                    node.PlexServerId = library.PlexServerId;
+                    node.PlexLibraryId = library.Id;
+                }
+                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                await dbContext.SaveChangesAsync(CancellationToken);
+                target = album.Children.SelectMany(x => x.Children).Single();
+                break;
+            default:
+                target = family == PlexMediaType.Movie
+                    ? await dbContext.DownloadTaskMovieFile.SingleAsync(CancellationToken)
+                    : await dbContext.DownloadTaskTvShowEpisodeFile.SingleAsync(CancellationToken);
+                break;
+        }
+
+        var paths = Mock.Container.Resolve<IPathProvider>();
+        var category = family switch
+        {
+            PlexMediaType.Movie => "Movies",
+            PlexMediaType.Episode => "TvShows",
+            PlexMediaType.MusicTrack => "Music",
+            PlexMediaType.PhotoImage => "Photos",
+            _ => "OtherVideos",
+        };
+        var relative = family switch
+        {
+            PlexMediaType.Episode => Path.Combine(target.DirectoryMeta.TvShowFolder, target.DirectoryMeta.SeasonFolder),
+            PlexMediaType.MusicTrack => Path.Combine(
+                target.DirectoryMeta.MusicArtistFolder,
+                target.DirectoryMeta.MusicAlbumFolder
+            ),
+            PlexMediaType.PhotoImage => target.DirectoryMeta.PhotoAlbumFolder,
+            PlexMediaType.OtherVideos => target.DirectoryMeta.OtherVideoFolder,
+            _ => target.DirectoryMeta.MovieFolder,
+        };
+        target.DirectoryMeta.DownloadRootPath = paths.DefaultDownloadsDestinationFolder;
+        target.DirectoryMeta.DestinationRootPath = Path.Combine(paths.DefaultDownloadsDestinationFolder, "move-destination");
+        target.DirectoryMeta.KeepCompletedInDownloadFolder = renamedInDownloads;
+        target.DataTotal = 8;
+        target.DownloadStatus = DownloadStatus.DownloadFinished;
+        dbContext.Entry(target).State = EntityState.Modified;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var key = target.ToKey();
+        var sourcePath = Path.Combine(
+            paths.DefaultDownloadsDestinationFolder,
+            category,
+            relative,
+            target.FileName.AddReaparrTempSuffixToFileName()
+        );
+        var destinationPath = Path.Combine(target.DirectoryMeta.DestinationRootPath, relative, target.FileName);
+        var shortcutPath = renamedInDownloads ? sourcePath.RemoveReapTempSuffix() : destinationPath;
+        byte[] retainedBytes = Enumerable.Range(1, shortcutLength).Select(x => (byte)x).ToArray();
+        SetupFileSystem(fs => fs.AddFile(shortcutPath, new MockFileData(retainedBytes)));
+        SetupDependencies(b => b.RegisterType<DownloadTaskUpdateDispatcher>().As<IDownloadTaskUpdateDispatcher>().SingleInstance());
+        Mock.Mock<IDownloadManagerSettings>().SetupGet(x => x.KeepCompletedInDownloadFolder).Returns(false);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
+            .Verifiable(Times.Never());
+        Result? notifiedResult = null;
+        Mock.Mock<IEventPublisher>()
+            .Setup(x =>
+                x.PublishAsync(
+                    It.Is<SendNotificationResult>(n => n.Result.IsFailed && n.Result.Errors.Count == 1),
+                    CancellationToken.None
+                )
+            )
+            .Callback<IEvent, CancellationToken>((message, _) => notifiedResult = ((SendNotificationResult)message).Result)
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new MoveDownloadFileFromFileTaskCommand(key));
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.IsCancelled.ShouldBeFalse();
+        result.Errors.Count.ShouldBe(1);
+        notifiedResult.ShouldBeSameAs(result);
+        var persisted = (await dbContext.GetDownloadTaskFileAsync(key, CancellationToken))!;
+        persisted.DownloadStatus.ShouldBe(DownloadStatus.MoveError);
+        persisted.DataReceived.ShouldBe(0);
+        persisted.FileDataTransferred.ShouldBe(0);
+        persisted.CurrentFileTransferBytesOffset.ShouldBe(0);
+        var fs = Mock.Container.Resolve<IFileSystem>();
+        fs.File.ReadAllBytes(shortcutPath).ShouldBe(retainedBytes);
+        fs.File.Exists(target.DownloadFilePath).ShouldBeFalse();
+        if (renamedInDownloads)
+            fs.File.Exists(destinationPath).ShouldBeFalse();
+        else
+            fs.File.Exists(destinationPath).ShouldBeTrue();
+        var logs = await dbContext.GetDownloadTaskLogsAsync(key, null, null, CancellationToken);
+        logs.IsSuccess.ShouldBeTrue();
+        logs.Errors.Count.ShouldBe(0);
+        logs.Value.Select(x => x.Status).ShouldBe([DownloadStatus.MoveError, DownloadStatus.MoveError]);
+        logs.Value.Last().Message.ShouldBe(result.ToString());
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IEventPublisher>().Verify();
+    }
+
+    [Test]
+    [Arguments(PlexMediaType.Movie, DownloadStatus.MovePaused, false)]
+    [Arguments(PlexMediaType.Episode, DownloadStatus.MovePaused, false)]
+    [Arguments(PlexMediaType.MusicTrack, DownloadStatus.MovePaused, false)]
+    [Arguments(PlexMediaType.PhotoImage, DownloadStatus.MovePaused, false)]
+    [Arguments(PlexMediaType.OtherVideos, DownloadStatus.MovePaused, false)]
+    [Arguments(PlexMediaType.Movie, DownloadStatus.AutoMovePaused, true)]
+    [Arguments(PlexMediaType.Episode, DownloadStatus.AutoMovePaused, true)]
+    [Arguments(PlexMediaType.MusicTrack, DownloadStatus.AutoMovePaused, true)]
+    [Arguments(PlexMediaType.PhotoImage, DownloadStatus.AutoMovePaused, true)]
+    [Arguments(PlexMediaType.OtherVideos, DownloadStatus.AutoMovePaused, true)]
+    [Arguments(PlexMediaType.Movie, DownloadStatus.MovePaused, true)]
+    [Arguments(PlexMediaType.Episode, DownloadStatus.MovePaused, true)]
+    [Arguments(PlexMediaType.MusicTrack, DownloadStatus.MovePaused, true)]
+    [Arguments(PlexMediaType.PhotoImage, DownloadStatus.MovePaused, true)]
+    [Arguments(PlexMediaType.OtherVideos, DownloadStatus.MovePaused, true)]
+    [Arguments(PlexMediaType.Movie, DownloadStatus.AutoMovePaused, false)]
+    [Arguments(PlexMediaType.Episode, DownloadStatus.AutoMovePaused, false)]
+    [Arguments(PlexMediaType.MusicTrack, DownloadStatus.AutoMovePaused, false)]
+    [Arguments(PlexMediaType.PhotoImage, DownloadStatus.AutoMovePaused, false)]
+    [Arguments(PlexMediaType.OtherVideos, DownloadStatus.AutoMovePaused, false)]
+    public async Task ShouldPreservePausedMoveBytesAndRejectUnconfirmedDestination(
+        PlexMediaType family,
+        DownloadStatus status,
+        bool missingDestination
+    )
+    {
+        // Arrange
+        await SetupDatabase(
+            52230,
+            c =>
+            {
+                c.MovieDownloadTasksCount = family == PlexMediaType.Movie ? 1 : 0;
+                c.TvShowDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.TvShowSeasonDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.TvShowEpisodeDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.PlexMusicLibraryCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicArtistDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicAlbumDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicTrackDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicTrackFileDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.PlexPhotoLibraryCount = family == PlexMediaType.PhotoImage ? 1 : 0;
+                c.PlexOtherVideoLibraryCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+                c.OtherVideoDownloadTasksCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+                c.OtherVideoFileDownloadTasksCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+            }
+        );
+        var dbContext = IDbContext;
+        DownloadTaskFileBase target;
+        switch (family)
+        {
+            case PlexMediaType.MusicTrack:
+                target = await dbContext.DownloadTaskMusicTrackFiles.SingleAsync(CancellationToken);
+                break;
+            case PlexMediaType.OtherVideos:
+                target = await dbContext.DownloadTaskOtherVideoFiles.SingleAsync(CancellationToken);
+                break;
+            case PlexMediaType.PhotoImage:
+                var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
+                var album = FakeData
+                    .GetDownloadTaskPhotoAlbum(new Seed(52230))
+                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52231)).Generate(1))
+                    .Generate();
+                foreach (
+                    var node in new DownloadTaskBase[] { album }
+                        .Concat(album.Children)
+                        .Concat(album.Children.SelectMany(x => x.Children))
+                )
+                {
+                    node.PlexServerId = library.PlexServerId;
+                    node.PlexLibraryId = library.Id;
+                }
+                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                await dbContext.SaveChangesAsync(CancellationToken);
+                target = album.Children.SelectMany(x => x.Children).Single();
+                break;
+            default:
+                target = family == PlexMediaType.Movie
+                    ? await dbContext.DownloadTaskMovieFile.SingleAsync(CancellationToken)
+                    : await dbContext.DownloadTaskTvShowEpisodeFile.SingleAsync(CancellationToken);
+                break;
+        }
+
+        var paths = Mock.Container.Resolve<IPathProvider>();
+        target.DirectoryMeta.DownloadRootPath = paths.DefaultDownloadsDestinationFolder;
+        target.DirectoryMeta.DestinationRootPath = Path.Combine(paths.DefaultDownloadsDestinationFolder, "move-destination");
+        var total = 8;
+        var offset = 3;
+        target.DataTotal = total;
+        target.DataReceived = total;
+        target.FileDataTransferred = offset;
+        target.CurrentFileTransferBytesOffset = offset;
+        target.FileTransferSpeed = 17;
+        target.TimeRemaining = 13;
+        target.DownloadStatus = status;
+        dbContext.Entry(target).State = EntityState.Modified;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var key = target.ToKey();
+        byte[] sourceBytes = [1, 2, 3, 4, 5, 6, 7, 8];
+        byte[] destinationBytes = [9, 10];
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(target.DownloadFilePath, new MockFileData(sourceBytes));
+            if (!missingDestination)
+                fs.AddFile(target.DestinationFilePath, new MockFileData(destinationBytes));
+        });
+        SetupDependencies(b => b.RegisterType<DownloadTaskUpdateDispatcher>().As<IDownloadTaskUpdateDispatcher>().SingleInstance());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
+            .Verifiable(Times.Never());
+        Result? notifiedResult = null;
+        Mock.Mock<IEventPublisher>()
+            .Setup(x =>
+                x.PublishAsync(
+                    It.Is<SendNotificationResult>(n => n.Result.IsFailed && n.Result.Errors.Count == 1),
+                    CancellationToken.None
+                )
+            )
+            .Callback<IEvent, CancellationToken>((message, _) => notifiedResult = ((SendNotificationResult)message).Result)
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new MoveDownloadFileFromFileTaskCommand(key));
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.IsCancelled.ShouldBeFalse();
+        result.Errors.Count.ShouldBe(1);
+        notifiedResult.ShouldBeSameAs(result);
+        var persisted = (await dbContext.GetDownloadTaskFileAsync(key, CancellationToken))!;
+        persisted.DownloadStatus.ShouldBe(DownloadStatus.MoveError);
+        persisted.DataReceived.ShouldBe(total);
+        persisted.FileDataTransferred.ShouldBe(offset);
+        persisted.CurrentFileTransferBytesOffset.ShouldBe(offset);
+        persisted.FileTransferSpeed.ShouldBe(17);
+        persisted.TimeRemaining.ShouldBe(13);
+        var fs = Mock.Container.Resolve<IFileSystem>();
+        fs.File.ReadAllBytes(target.DownloadFilePath).ShouldBe(sourceBytes);
+        if (missingDestination)
+            fs.File.Exists(target.DestinationFilePath).ShouldBeFalse();
+        else
+            fs.File.ReadAllBytes(target.DestinationFilePath).ShouldBe(destinationBytes);
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IEventPublisher>().Verify();
+    }
+
+    [Test]
+    [Arguments(PlexMediaType.Movie, false)]
+    [Arguments(PlexMediaType.Episode, false)]
+    [Arguments(PlexMediaType.MusicTrack, false)]
+    [Arguments(PlexMediaType.PhotoImage, false)]
+    [Arguments(PlexMediaType.OtherVideos, false)]
+    [Arguments(PlexMediaType.Movie, true)]
+    [Arguments(PlexMediaType.Episode, true)]
+    [Arguments(PlexMediaType.MusicTrack, true)]
+    [Arguments(PlexMediaType.PhotoImage, true)]
+    [Arguments(PlexMediaType.OtherVideos, true)]
+    public async Task ShouldPreservePartialMoveAcrossPauseAndResume_WhenMoveIsInterrupted(
+        PlexMediaType family,
+        bool autoPause
+    )
+    {
+        // Arrange
+        await SetupDatabase(
+            52231,
+            c =>
+            {
+                c.MovieDownloadTasksCount = family == PlexMediaType.Movie ? 1 : 0;
+                c.TvShowDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.TvShowSeasonDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.TvShowEpisodeDownloadTasksCount = family == PlexMediaType.Episode ? 1 : 0;
+                c.PlexMusicLibraryCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicArtistDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicAlbumDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicTrackDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.MusicTrackFileDownloadTasksCount = family == PlexMediaType.MusicTrack ? 1 : 0;
+                c.PlexPhotoLibraryCount = family == PlexMediaType.PhotoImage ? 1 : 0;
+                c.PlexOtherVideoLibraryCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+                c.OtherVideoDownloadTasksCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+                c.OtherVideoFileDownloadTasksCount = family == PlexMediaType.OtherVideos ? 1 : 0;
+            }
+        );
+        var dbContext = IDbContext;
+        DownloadTaskFileBase target;
+        switch (family)
+        {
+            case PlexMediaType.MusicTrack:
+                target = await dbContext.DownloadTaskMusicTrackFiles.SingleAsync(CancellationToken);
+                break;
+            case PlexMediaType.OtherVideos:
+                target = await dbContext.DownloadTaskOtherVideoFiles.SingleAsync(CancellationToken);
+                break;
+            case PlexMediaType.PhotoImage:
+                var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
+                var album = FakeData
+                    .GetDownloadTaskPhotoAlbum(new Seed(52231))
+                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52232)).Generate(1))
+                    .Generate();
+                foreach (
+                    var node in new DownloadTaskBase[] { album }
+                        .Concat(album.Children)
+                        .Concat(album.Children.SelectMany(x => x.Children))
+                )
+                {
+                    node.PlexServerId = library.PlexServerId;
+                    node.PlexLibraryId = library.Id;
+                }
+                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                await dbContext.SaveChangesAsync(CancellationToken);
+                target = album.Children.SelectMany(x => x.Children).Single();
+                break;
+            default:
+                target = family == PlexMediaType.Movie
+                    ? await dbContext.DownloadTaskMovieFile.SingleAsync(CancellationToken)
+                    : await dbContext.DownloadTaskTvShowEpisodeFile.SingleAsync(CancellationToken);
+                break;
+        }
+
+        var paths = Mock.Container.Resolve<IPathProvider>();
+        target.DirectoryMeta.DownloadRootPath = paths.DefaultDownloadsDestinationFolder;
+        target.DirectoryMeta.DestinationRootPath = Path.Combine(paths.DefaultDownloadsDestinationFolder, "move-destination");
+        var total = 3 * 1024 * 1024;
+        var prefixLength = 1024 * 1024;
+        target.DataTotal = total;
+        target.DataReceived = total;
+        target.DownloadStatus = DownloadStatus.DownloadFinished;
+        dbContext.Entry(target).State = EntityState.Modified;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var key = target.ToKey();
+        var rootKey = (await dbContext.GetRootDownloadTaskKeyAsync(key, cancellationToken: CancellationToken.None))!;
+        var content = new byte[total];
+        new Random(52231).NextBytes(content);
+        SetupFileSystem(fs => fs.AddFile(target.DownloadFilePath, new MockFileData(content)));
+        SetupDependencies(b => b.RegisterType<DownloadTaskUpdateDispatcher>().As<IDownloadTaskUpdateDispatcher>().SingleInstance());
+        Mock.Mock<IDownloadManagerSettings>().SetupGet(x => x.KeepCompletedInDownloadFolder).Returns(false);
+        using var cancellation = new CancellationTokenSource();
+        var moveOffsets = new List<long>();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                (moveCommand, ct) =>
+                {
+                    moveOffsets.Add(moveCommand.CurrentOffset);
+                    var moveHandler = Mock.Create<MoveFileWithResumeCommandHandler>();
+                    if (moveCommand.CurrentOffset == 0)
+                    {
+                        return moveHandler.ExecuteAsync(
+                            moveCommand with
+                            {
+                                Progress = progress =>
+                                {
+                                    moveCommand.Progress(progress);
+                                    cancellation.Cancel();
+                                },
+                            },
+                            ct
+                        );
+                    }
+
+                    return moveHandler.ExecuteAsync(moveCommand, ct);
+                }
+            )
+            .Verifiable(Times.Exactly(2));
+        var moveHandler = Mock.Create<MoveDownloadFileFromFileTaskCommandHandler>();
+
+        // Act
+        var interrupted = await moveHandler.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(key),
+            cancellation.Token
+        );
+
+        // Assert interruption and pause state before starting the resumed job.
+        interrupted.IsCancelled.ShouldBeTrue();
+        interrupted.Errors.Count.ShouldBe(1);
+        var fs = Mock.Container.Resolve<IFileSystem>();
+        fs.File.ReadAllBytes(target.DestinationFilePath).ShouldBe(content.Take(prefixLength).ToArray());
+        var paused = (await dbContext.GetDownloadTaskFileAsync(key, CancellationToken.None))!;
+        paused.DownloadStatus.ShouldBe(DownloadStatus.MovePaused);
+        paused.DataReceived.ShouldBe(total);
+        paused.FileDataTransferred.ShouldBe(prefixLength);
+        paused.CurrentFileTransferBytesOffset.ShouldBe(prefixLength);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(key, CancellationToken.None))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Exactly(2));
+        var pauseHandler = Mock.Create<PauseDownloadTaskCommandHandler>();
+        var pausedResult = await pauseHandler.ExecuteAsync(
+            new PauseDownloadTaskCommand(rootKey.Id, autoPause),
+            CancellationToken.None
+        );
+        pausedResult.IsSuccess.ShouldBeTrue();
+        pausedResult.Errors.Count.ShouldBe(0);
+        var pausedAfterCommand = (await dbContext.GetDownloadTaskFileAsync(key, CancellationToken.None))!;
+        pausedAfterCommand.DownloadStatus.ShouldBe(
+            autoPause ? DownloadStatus.AutoMovePaused : DownloadStatus.MovePaused
+        );
+        pausedAfterCommand.DataReceived.ShouldBe(total);
+        pausedAfterCommand.FileDataTransferred.ShouldBe(prefixLength);
+        pausedAfterCommand.CurrentFileTransferBytesOffset.ShouldBe(prefixLength);
+        pausedAfterCommand.FileTransferSpeed.ShouldBe(0);
+        pausedAfterCommand.TimeRemaining.ShouldBe(0);
+        fs.File.ReadAllBytes(target.DestinationFilePath).ShouldBe(content.Take(prefixLength).ToArray());
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(key, CancellationToken.None))
+            .Returns<DownloadTaskKey, CancellationToken>(
+                (resumeKey, ct) => moveHandler.ExecuteAsync(new MoveDownloadFileFromFileTaskCommand(resumeKey), ct)
+            )
+            .Verifiable(Times.Once());
+        Mock.Mock<IEventPublisher>()
+            .Setup(x =>
+                x.PublishAsync(
+                    It.Is<CheckDownloadQueueEvent>(e => e.PlexServerIds.SequenceEqual(new[] { target.PlexServerId })),
+                    CancellationToken.None
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        var startHandler = Mock.Create<StartDownloadTaskCommandHandler>();
+        var resumed = await startHandler.ExecuteAsync(
+            new StartDownloadTaskCommand(rootKey.Id),
+            CancellationToken.None
+        );
+
+        resumed.IsSuccess.ShouldBeTrue();
+        resumed.Errors.Count.ShouldBe(0);
+        moveOffsets.ShouldBe([0, prefixLength]);
+        fs.File.ReadAllBytes(target.DestinationFilePath).ShouldBe(content);
+        fs.File.Exists(target.DownloadFilePath).ShouldBeFalse();
+        var completed = (await dbContext.GetDownloadTaskFileAsync(key, CancellationToken.None))!;
+        completed.DownloadStatus.ShouldBe(DownloadStatus.MoveFinished);
+        completed.DataReceived.ShouldBe(total);
+        completed.FileDataTransferred.ShouldBe(total);
+        completed.CurrentFileTransferBytesOffset.ShouldBe(total);
+        completed.TimeRemaining.ShouldBe(0);
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify();
+        Mock.Mock<IEventPublisher>().Verify();
+    }
 }

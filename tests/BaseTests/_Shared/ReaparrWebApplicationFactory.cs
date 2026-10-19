@@ -17,12 +17,19 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
     private static readonly ILogger _log = LogFactory.Create<ReaparrWebApplicationFactory>();
 
     private readonly UnitTestDataConfig _config;
+    private readonly bool _useTestAuthentication;
 
-    public ReaparrWebApplicationFactory(Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
+    public ReaparrWebApplicationFactory(
+        Seed seed,
+        string memoryDbName,
+        Action<UnitTestDataConfig>? options = null,
+        bool useTestAuthentication = true
+    )
     {
         Seed = seed;
         MemoryDbName = memoryDbName;
         _config = UnitTestDataConfig.FromOptions(options);
+        _useTestAuthentication = useTestAuthentication;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -32,10 +39,13 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureTestServices(services =>
         {
-            // https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-9.0#mock-authentication
-            services
-                .AddAuthentication(defaultScheme: "TestScheme")
-                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
+            if (_useTestAuthentication)
+            {
+                // https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-9.0#mock-authentication
+                services
+                    .AddAuthentication(defaultScheme: "TestScheme")
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
+            }
         });
     }
 

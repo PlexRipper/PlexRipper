@@ -27,8 +27,9 @@ import type {
 	ServerDownloadProgressMessagePackDTO,
 	LiveLogEventDTO,
 	IntegrationSetupProgressDTO,
+	RefreshDataType,
 } from '@dto';
-import { RefreshDataType, MessageTypes } from '@dto';
+import { MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import {
 	useDownloadStore,
@@ -77,59 +78,76 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 	let downloadHubConnection: HubConnection | null;
 	let notificationHubConnection: HubConnection | null;
 	let logHubConnection: HubConnection | null;
+	let connectionOperation: Promise<void> = Promise.resolve();
+	let setupOperation: Promise<void> | null = null;
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return from((async () => {
-				Log.debug('Setting up SignalR Service');
-				const options: IHttpConnectionOptions = {
-					logMessageContent: false,
-					skipNegotiation: true,
-					logger: LogLevel.None,
-					transport: HttpTransportType.WebSockets,
-					withCredentials: true,
-				};
+			if (!setupOperation) {
+				const operation = connectionOperation.then(async () => {
+					await stopHubConnections();
+					Log.debug('Setting up SignalR Service');
+					const options: IHttpConnectionOptions = {
+						logMessageContent: false,
+						skipNegotiation: true,
+						logger: LogLevel.None,
+						transport: HttpTransportType.WebSockets,
+						withCredentials: true,
+					};
 
-				const retryPolicy: IRetryPolicy = {
-					nextRetryDelayInMilliseconds: () => 2000,
-				};
+					const retryPolicy: IRetryPolicy = {
+						nextRetryDelayInMilliseconds: () => 2000,
+					};
 
-				const baseApiUrl = Axios.defaults.baseURL;
-				// Setup Connections
-				progressHubConnection = useCypressSignalRMock(HubName.Progress, { enableForVitest: true }) ?? new HubConnectionBuilder()
-					.configureLogging(LogLevel.None)
-					.withUrl(`${baseApiUrl}/progress`, options)
-					.withAutomaticReconnect(retryPolicy)
-					.build();
-
-				const mock = useCypressSignalRMock(HubName.Download, { enableForVitest: true });
-				if (mock) {
-					downloadHubConnection = mock; // mock uses JSON internally
-				} else {
-					downloadHubConnection = new HubConnectionBuilder()
-						.withHubProtocol(new MessagePackHubProtocol())
+					const baseApiUrl = Axios.defaults.baseURL;
+					// Setup Connections
+					progressHubConnection = useCypressSignalRMock(HubName.Progress, { enableForVitest: true }) ?? new HubConnectionBuilder()
 						.configureLogging(LogLevel.None)
-						.withUrl(`${baseApiUrl}/download`, options)
+						.withUrl(`${baseApiUrl}/progress`, options)
 						.withAutomaticReconnect(retryPolicy)
 						.build();
-				}
 
-				notificationHubConnection = useCypressSignalRMock(HubName.Notifications, { enableForVitest: true }) ?? new HubConnectionBuilder()
-					.configureLogging(LogLevel.None)
-					.withUrl(`${baseApiUrl}/notifications`, options)
-					.withAutomaticReconnect(retryPolicy)
-					.build();
+					const mock = useCypressSignalRMock(HubName.Download, { enableForVitest: true });
+					if (mock) {
+						downloadHubConnection = mock; // mock uses JSON internally
+					} else {
+						downloadHubConnection = new HubConnectionBuilder()
+							.withHubProtocol(new MessagePackHubProtocol())
+							.configureLogging(LogLevel.None)
+							.withUrl(`${baseApiUrl}/download`, options)
+							.withAutomaticReconnect(retryPolicy)
+							.build();
+					}
 
-				logHubConnection = useCypressSignalRMock(HubName.Logs, { enableForVitest: true }) ?? new HubConnectionBuilder()
-					.configureLogging(LogLevel.None)
-					.withUrl(`${baseApiUrl}/logs`, options)
-					.withAutomaticReconnect(retryPolicy)
-					.build();
+					notificationHubConnection = useCypressSignalRMock(HubName.Notifications, { enableForVitest: true }) ?? new HubConnectionBuilder()
+						.configureLogging(LogLevel.None)
+						.withUrl(`${baseApiUrl}/notifications`, options)
+						.withAutomaticReconnect(retryPolicy)
+						.build();
 
-				setupSubscriptions();
+					logHubConnection = useCypressSignalRMock(HubName.Logs, { enableForVitest: true }) ?? new HubConnectionBuilder()
+						.configureLogging(LogLevel.None)
+						.withUrl(`${baseApiUrl}/logs`, options)
+						.withAutomaticReconnect(retryPolicy)
+						.build();
 
-				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection(), startLogHubConnection()]);
-			})()).pipe(
+					setupSubscriptions();
+
+					try {
+						await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection(), startLogHubConnection()]);
+					} catch (error) {
+						await stopHubConnections();
+						throw error;
+					}
+				});
+				setupOperation = operation;
+				connectionOperation = operation.catch(() => {
+					if (setupOperation === operation) {
+						setupOperation = null;
+					}
+				});
+			}
+			return from(setupOperation).pipe(
 				switchMap(() => of({ name: StoreNames.SignalrStore, isSuccess: true })),
 				catchError((error) => {
 					Log.error('Failed to setup SignalR Service', error);
@@ -145,8 +163,19 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 				'plexServerConnectionId',
 			);
 		},
-		$reset() {
-			Object.assign(state, cloneDeep(defaultState));
+		resetSession(): Promise<void> {
+			setupOperation = null;
+			const operation = connectionOperation.then(async () => {
+				await stopHubConnections();
+				state.serverConnectionCheckStatusProgressSubject.complete();
+				state.refreshDataNotificationSubject.complete();
+				state.appUpdateDownloadProgressSubject.complete();
+				state.logEventSubject.complete();
+				state.integrationSetupProgressSubject.complete();
+				Object.assign(state, cloneDeep(defaultState));
+			});
+			connectionOperation = operation.catch(() => {});
+			return operation;
 		},
 	};
 
@@ -183,12 +212,11 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 
 		notificationHubConnection?.on(MessageTypes.RefreshNotification, (data: RefreshDataType) => {
-			if (data === RefreshDataType.DownloadTasks) {
-				downloadStore.fetchDownloadList().subscribe();
-			}
 			state.refreshDataNotificationSubject.next(data);
 		});
-		notificationHubConnection?.onreconnected?.(() => {
+		const notificationConnection = notificationHubConnection;
+		notificationConnection?.onreconnected?.(() => {
+			if (notificationHubConnection !== notificationConnection || notificationConnection?.state !== HubConnectionState.Connected) return;
 			libraryStore.refreshLibrarySyncStatus().subscribe();
 		});
 	}
@@ -256,6 +284,21 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 	}
 
 	// region Start / Stop Hub Connections
+	async function stopHubConnections(): Promise<void> {
+		const connections = [progressHubConnection, downloadHubConnection, notificationHubConnection, logHubConnection];
+		for (const connection of connections) {
+			if (!connection) continue;
+			connection.off('LogEvent');
+			for (const messageType of Object.values(MessageTypes)) {
+				connection.off(messageType);
+			}
+		}
+		await Promise.all(connections.map((connection) => connection?.stop()));
+		progressHubConnection = null;
+		downloadHubConnection = null;
+		notificationHubConnection = null;
+		logHubConnection = null;
+	}
 
 	async function startDownloadHubConnection(): Promise<void> {
 		if (!downloadHubConnection || downloadHubConnection.state !== HubConnectionState.Disconnected) return;

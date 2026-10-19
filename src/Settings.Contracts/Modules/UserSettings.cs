@@ -115,17 +115,18 @@ public class UserSettings : IUserSettings
 
     public void Reset()
     {
-        _generalSettings = GeneralSettingsModule.Create();
-        _confirmationSettings = ConfirmationSettingsModule.Create();
-        _dateTimeSettings = DateTimeSettingsModule.Create();
-        _displaySettings = DisplaySettingsModule.Create();
-        _downloadManagerSettings = DownloadManagerSettingsModule.Create();
-        _languageSettings = LanguageSettingsModule.Create();
-        _debugSettings = DebugSettingsModule.Create();
+        // Keep the module instances observed by SettingsUpdated and injected into other services.
+        _generalSettings.Update(GeneralSettingsModule.Create());
+        _confirmationSettings.Update(ConfirmationSettingsModule.Create());
+        _dateTimeSettings.Update(DateTimeSettingsModule.Create());
+        _displaySettings.Update(DisplaySettingsModule.Create());
+        _downloadManagerSettings.Update(DownloadManagerSettingsModule.Create());
+        _languageSettings.Update(LanguageSettingsModule.Create());
+        _debugSettings.Update(DebugSettingsModule.Create());
         _serverSettings.Update(PlexServerSettingsModule.Create());
-        _networkSettings = NetworkSettingsModule.Create();
-        _authenticationSettings = AuthenticationModule.Create();
-        _integrationsSettings = IntegrationsSettings.Create();
+        _networkSettings.Update(NetworkSettingsModule.Create());
+        _authenticationSettings.Update(AuthenticationModule.Create());
+        _integrationsSettings.Update(IntegrationsSettings.Create());
     }
 
     public UserSettings UpdateSettings(ISettingsModel sourceSettings)

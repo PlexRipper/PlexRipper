@@ -140,7 +140,7 @@ public class ConfigManager : IConfigManager
         if (saveResult.IsFailed)
             saveResult.WithError(new Error("Failed to save a new config after resetting")).LogError();
 
-        return Result.Ok();
+        return saveResult;
     }
 
     public virtual Result SaveConfig()

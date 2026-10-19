@@ -7,7 +7,7 @@ import { catchError, filter, map, take, switchMap, tap } from 'rxjs/operators';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import type {
 	CheckAllConnectionStatusUpdateDTO, InspectPlexServerJobUpdateDTO,
-	JobStatusUpdateDTO as ApiJobStatusUpdateDTO, LibraryComparisonCompletedDTO, LibrarySyncJobQueueDTO,
+	JobStatusUpdateDTO as ApiJobStatusUpdateDTO, LibraryComparisonCompletedDTO,
 } from '@dto';
 import {
 	JobStatus,
@@ -60,7 +60,10 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 				.pipe(switchMap(() => connectionStore.refreshPlexServerConnections()))
 				.subscribe();
 
-			getters.getLibraryComparisonJobUpdate().pipe(switchMap((value) => mediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted(value.data))).subscribe();
+			getters.getLibraryComparisonJobUpdate(JobStatus.Completed).pipe(
+				filter((value) => Array.isArray(value.data?.affectedLibraryIds)),
+				switchMap((value) => mediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted(value.data)),
+			).subscribe();
 
 			return backgroundJobsApi.getAllBackgroundJobsEndpoint().pipe(
 				tap((response) => {
@@ -120,7 +123,7 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 		getInspectPlexServerJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<InspectPlexServerJobUpdateDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.InspectPlexServerJob, status),
 
-		getLibrarySyncJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<LibrarySyncJobQueueDTO>> =>
+		getLibrarySyncJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<unknown>> =>
 			getters.getJobStatusUpdate(JobTypes.LibrarySyncJob, status),
 		getLibraryComparisonJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<LibraryComparisonCompletedDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.LibraryComparisonJob, status),

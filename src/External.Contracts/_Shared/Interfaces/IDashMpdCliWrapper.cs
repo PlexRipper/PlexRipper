@@ -22,10 +22,10 @@ public interface IDashMpdCliWrapper : IAsyncDisposable
     IObservable<DashDownloadCompletedEventArgs> DownloadCompleted { get; }
 
     /// <summary>
-    /// Starts the dash-mpd-cli process with the specified arguments.
+    /// Starts the dash-mpd-cli process with the specified arguments and awaits its terminal result.
     /// </summary>
     /// <param name="options">Optional configuration options for the download.</param>
-    /// <returns>Result.Ok if the process started successfully, false otherwise.</returns>
+    /// <returns>Result representing the completed process run.</returns>
     /// <exception cref="InvalidOperationException">Thrown when attempting to start while a process is already running.</exception>
     Task<Result> StartAsync(DashMpdCliOptions options);
 

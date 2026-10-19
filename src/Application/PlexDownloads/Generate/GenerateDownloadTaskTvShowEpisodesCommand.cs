@@ -170,7 +170,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 continue;
             }
 
-            downloadTasks.Add(processResult.Value);
+            downloadTasks.AddRange(processResult.Value);
         }
 
         var saveResult = await Result.Try(() => _dbContext.SaveChangesAsync(ct));
@@ -199,7 +199,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
         await _dbContext.CreateDownloadClientLogs(logs, ct);
 
-        return Result.Ok(new DownloadTaskCreationReport { Episodes = downloadTasks.Count });
+        return Result.Ok(new DownloadTaskCreationReport { Episodes = downloadTasks.DistinctBy(x => x.ParentId).Count() });
     }
 
     private async Task<DownloadTaskTvShow?> GetOrCreateTvShowDownloadTaskAsync(
@@ -266,7 +266,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         return downloadTaskTvShowSeason;
     }
 
-    private Result<DownloadTaskTvShowEpisodeFile> ProcessEpisodeMediaData(
+    private Result<List<DownloadTaskTvShowEpisodeFile>> ProcessEpisodeMediaData(
         PlexTvShowEpisode tvShowEpisode,
         DownloadTaskTvShowEpisode episodeDownloadTask,
         DownloadMediaDTO downloadMediaDto,
@@ -285,15 +285,22 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             );
         }
 
-        // Map episodeData to DownloadTaskTvShowEpisodeFile and add to episodeDownloadTask
-        var downloadFiles = episodeData.MapToDownloadTask(
-            tvShowEpisode,
-            request,
-            downloadRootPath,
-            downloadMediaDto.KeepCompletedInDownloadFolder
-        );
+        // A selected quality may contain multiple physical parts; every part must be queued.
+        var downloadFiles = tvShowEpisode.MediaDataList
+            .Where(x => x.PlexApiMediaId == episodeData.PlexApiMediaId)
+            .Where(mediaData => !episodeDownloadTask.Children.Any(existing =>
+                existing.PlexApiMediaId == mediaData.PlexApiMediaId
+                && existing.PlexApiPartId == mediaData.PlexApiPartId
+            ))
+            .Select(x => x.MapToDownloadTask(
+                tvShowEpisode,
+                request,
+                downloadRootPath,
+                downloadMediaDto.KeepCompletedInDownloadFolder
+            ))
+            .ToList();
 
-        episodeDownloadTask.Children.Add(downloadFiles);
+        episodeDownloadTask.Children.AddRange(downloadFiles);
         _dbContext.DownloadTaskTvShowEpisodeFile.AddRange(downloadFiles);
 
         return Result.Ok(downloadFiles);

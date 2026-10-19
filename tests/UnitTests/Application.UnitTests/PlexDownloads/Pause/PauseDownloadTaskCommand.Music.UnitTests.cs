@@ -90,8 +90,8 @@ public class PauseDownloadTaskCommandMusicUnitTests : BaseCommandUnitTest<PauseD
         result.Errors.Count.ShouldBe(0);
         var after = (await dbContext.GetDownloadTaskFileAsync(target.ToKey(), CancellationToken))!;
         after.DownloadStatus.ShouldBe(expected);
-        after.DataReceived.ShouldBe(before == DownloadStatus.Moving ? 0 : 128);
-        after.FileDataTransferred.ShouldBe(before == DownloadStatus.Moving ? 0 : 64);
+        after.DataReceived.ShouldBe(128);
+        after.FileDataTransferred.ShouldBe(64);
         Mock.Mock<IDownloadTaskScheduler>().Verify();
         Mock.Mock<IMoveDownloadFileScheduler>().Verify();
         Mock.Mock<ICommandExecutor>()

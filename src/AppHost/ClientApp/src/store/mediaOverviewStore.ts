@@ -17,7 +17,7 @@ import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
 import { type IMetaDataMediaFilter, type ISelection, type ISortOption, StoreNames } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { defaultIfEmpty, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { BehaviorSubject, defer, finalize, forkJoin, type Observable, of, Subject } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import {
@@ -119,8 +119,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
 	const mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
-	const pendingPages = new Set<number>();
-	const comparisonRefreshKeysInFlight = new Set<string>();
+	const pendingPages = new Map<number, number>();
+	const comparisonRefreshKeysInFlight = new Map<string, number>();
 
 	const searchQuery = useRouteQuery('q', '', { mode: 'replace' });
 	const countryIdQuery = useRouteQuery('countryId', 0, { mode: 'replace' });
@@ -131,19 +131,31 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const scrollIndexQuery = useRouteQuery('scrollIndex', 0, { mode: 'replace' });
 	const sortQuery = useRouteQuery('sort', '', { mode: 'replace' });
 
-	// Subject to cancel in-flight requests when switching libraries
-	const cancelSubject$ = new Subject<void>();
+	let requestGeneration = 0;
+	let cancelSubject$ = new Subject<void>();
+	let initializationRequestId = 0;
+	let initializationCancelSubject$ = new Subject<void>();
+	let metadataRequestGeneration = 0;
+	let metadataCancelSubject$ = new Subject<void>();
+	let navigationRequestCount = 0;
+	let filterMetadataRequestId = 0;
+	let metadataRequestId = 0;
+
+	// Media requests can be replaced by search/filter refreshes without interrupting
+	// the library lookup and metadata required by the active initialization.
 
 	const actions = {
 		cancelPendingRequests() {
 			Log.debug('Cancelling pending media requests');
-			cancelSubject$.next();
+			invalidateRequestGeneration();
 			state.loading = false;
 		},
+
 		clearLibraryMediaData(libraryId: number): void {
 			Log.debug('Clearing media overview data for disabled library', { libraryId });
 			actions.cancelPendingRequests();
-			mediaPages.clear();
+			invalidateLibraryInitialization();
+			invalidateMetadataGeneration();
 			pendingPages.clear();
 			state.libraryId = libraryId;
 			state.totalCount = 0;
@@ -186,29 +198,33 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return of(null);
 			}
 
-			comparisonRefreshKeysInFlight.add(refreshKey);
+			const generation = requestGeneration;
+			comparisonRefreshKeysInFlight.set(refreshKey, generation);
 			Log.debug('Refreshing previously requested media pages after comparison completed', {
 				libraryId,
 				mediaType,
 				pages: pagesToRefresh,
 			});
 
-			const requests = pagesToRefresh.map((page) => actions.requestMediaPage(page, state.pageSize, true));
+			const requests = pagesToRefresh.map((page) => requestMediaPageForGeneration(page, state.pageSize, true, generation));
 			return forkJoin(requests).pipe(
-				finalize(() => comparisonRefreshKeysInFlight.delete(refreshKey)),
+				finalize(() => {
+					if (comparisonRefreshKeysInFlight.get(refreshKey) === generation) {
+						comparisonRefreshKeysInFlight.delete(refreshKey);
+					}
+				}),
 				map(() => null),
 			);
 		},
 		initializeLibrary(libraryId: number): Observable<PlexMediaStatisticsDTO | null> {
-			// Cancel any in-flight requests first
-			actions.cancelPendingRequests();
 			const pendingMediaHighlightId = state.pendingMediaHighlightId;
 			const pendingMediaHighlightLibraryId = state.pendingMediaHighlightLibraryId;
 
 			Log.debug('Initializing library', { libraryId, mediaType: get(getters.getMediaType) });
 
 			actions.$reset();
-
+			const generation = requestGeneration;
+			const initializationId = initializationRequestId;
 			// Update state
 			state.libraryId = libraryId;
 			if (pendingMediaHighlightLibraryId === libraryId) {
@@ -225,7 +241,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					? libraryStore.refreshLibrary(state.libraryId)
 					: of(null),
 			).pipe(
+				takeUntil(initializationCancelSubject$),
 				switchMap(() => {
+					if (!isLibraryInitializationActive(initializationId)) {
+						return of(null);
+					}
 					const library = libraryStore.getLibrary(state.libraryId);
 					if (!get(getters.getSupportsVideoQuality)) {
 						state.metadata.qualityId = 0;
@@ -245,27 +265,35 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					return forkJoin([
 						actions.refreshFilterMetadata(),
 						actions.refreshMetaData(),
-						actions.refreshMediaData(),
+						refreshMediaDataForGeneration(generation).pipe(defaultIfEmpty(null)),
 					]).pipe(map(([, , requestMediaResult]) => requestMediaResult));
 				}),
 			);
 		},
 		refreshMetaData() {
+			const metadataCancelSubject = metadataCancelSubject$;
+			const metadataGeneration = metadataRequestGeneration;
+			const requestId = ++metadataRequestId;
 			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
-				takeUntil(cancelSubject$),
+				takeUntil(metadataCancelSubject),
 				tap((result) => {
-					if (result.isSuccess && result.value) {
+					if (isMetadataGenerationActive(metadataGeneration)
+						&& requestId === metadataRequestId && result.isSuccess && result.value) {
 						state.metadataList = Object.freeze(result.value);
 					}
 				}),
 			);
 		},
 		refreshFilterMetadata() {
+			const metadataCancelSubject = metadataCancelSubject$;
+			const metadataGeneration = metadataRequestGeneration;
+			const requestId = ++filterMetadataRequestId;
 			state.filterMetadataLoading = true;
 			return plexLibraryApi.getMetadataFilter(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
-				takeUntil(cancelSubject$),
+				takeUntil(metadataCancelSubject),
 				tap((result) => {
-					if (result.isSuccess && result.value) {
+					if (isMetadataGenerationActive(metadataGeneration)
+						&& requestId === filterMetadataRequestId && result.isSuccess && result.value) {
 						state.availableRoleIds = result.value.roles ?? [];
 						state.availableCountryIds = result.value.countries ?? [];
 						state.availableGenreIds = result.value.genres ?? [];
@@ -273,85 +301,20 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					}
 				}),
 				finalize(() => {
-					state.filterMetadataLoading = false;
+					if (isMetadataGenerationActive(metadataGeneration) && requestId === filterMetadataRequestId) {
+						state.filterMetadataLoading = false;
+					}
 				}),
 			);
 		},
 		refreshMediaData(): Observable<PlexMediaStatisticsDTO | null> {
-			state.loading = true;
-			state.mediaLoadError = false;
-			mediaPages.clear();
-			pendingPages.clear();
-			state.itemsLength = 0;
-			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: get(getters.getMediaType) });
-			return actions.requestMediaPage(1, state.pageSize).pipe(
-				tap({
-					next: (data) => {
-						state.loading = false;
-						if (!data) {
-							state.mediaLoadError = true;
-							Log.warn('Media request returned no data');
-							return;
-						}
-						Log.debug('Media request completed successfully');
-					},
-					error: (err) => {
-						state.loading = false;
-						state.mediaLoadError = true;
-						Log.error('Media request failed', err);
-					},
-					complete: () => {
-						// Handle cancellation
-						if (state.loading) {
-							state.loading = false;
-							Log.debug('Media request was cancelled');
-						}
-					},
-				}),
-			);
+			return refreshMediaDataForGeneration(invalidateRequestGeneration());
 		},
 		retryMediaLoad(): Observable<PlexMediaStatisticsDTO | null> {
 			return actions.refreshMediaData();
 		},
 		requestMediaPage(page: number, size: number = state.pageSize, forceRefresh: boolean = false): Observable<PlexMediaStatisticsDTO | null> {
-			if (pendingPages.has(page) || (!forceRefresh && mediaPages.has(page))) {
-				return of(null);
-			}
-
-			const mediaType = get(getters.getMediaType);
-			if (state.libraryId > 0 && mediaType === PlexMediaType.None) {
-				return libraryStore.refreshLibrary(state.libraryId).pipe(
-					switchMap((library) => library ? actions.requestMediaPage(page, size, forceRefresh) : of(null)),
-				);
-			}
-
-			pendingPages.add(page);
-			return plexMediaApi.getAllMediaByTypeEndpoint({
-				q: state.filterQuery,
-				page,
-				size,
-				sort: get(getters.getSortDSL),
-				countryId: state.metadata.countryId > 0 ? state.metadata.countryId : undefined,
-				genreId: state.metadata.genreId > 0 ? state.metadata.genreId : undefined,
-				qualityId: get(getters.getSupportsVideoQuality) && state.metadata.qualityId > 0 ? state.metadata.qualityId : undefined,
-				comparisonState: normalizeComparisonState(state.metadata.comparisonState) ?? undefined,
-				roleId: state.metadata.roleId > 0 ? state.metadata.roleId : undefined,
-				mediaType,
-				plexLibraryId: state.libraryId > 0 ? state.libraryId : undefined,
-				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
-				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
-			}).pipe(
-				takeUntil(cancelSubject$),
-				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
-					if (isSuccess && value) {
-						return value;
-					}
-
-					return null;
-				}),
-				tap((data) => actions.addMediaPage(data)),
-				finalize(() => pendingPages.delete(page)),
-			);
+			return requestMediaPageForGeneration(page, size, forceRefresh, requestGeneration);
 		},
 		// Adds the requested media page to the cache
 		addMediaPage(data: PlexMediaStatisticsDTO | null) {
@@ -367,7 +330,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					Log.debug(`mediaPages was initialized with ${data.queryHash}`);
 				}
 				mediaPages.clear();
-				pendingPages.clear();
 				state.itemsLength = 0;
 				if (state.queryHash) {
 					state.currentScrollIndex = 0;
@@ -377,12 +339,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			const mediaList = Array.isArray(data.mediaList) ? data.mediaList : [];
 			const previousMediaCount = mediaPages.get(data.page)?.length ?? 0;
-			const mediaCount = data.mediaCount ?? mediaList.length;
 			mediaPages.set(data.page, markRaw(mediaList));
 			state.mediaPagesVersion++;
 			state.queryHash = data.queryHash ?? '';
-			state.itemsLength += mediaCount - previousMediaCount;
-			state.totalCount = data.totalCount ?? state.totalCount;
+			state.itemsLength += mediaList.length - previousMediaCount;
+			state.totalCount = data.mediaCount ?? data.totalCount ?? state.totalCount;
 
 			state.allMovieCount = data.totalMovieCount;
 			state.allTvShowCount = data.totalTvShowCount;
@@ -401,21 +362,27 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return Math.floor(index / state.pageSize) + 1;
 		},
 		requestRange(startIndex: number, endIndex: number): Observable<(PlexMediaStatisticsDTO | null)[]> {
+			const generation = requestGeneration;
 			const firstPage = actions.getPageForIndex(Math.max(0, startIndex));
 			const lastPage = actions.getPageForIndex(Math.max(0, endIndex));
 			const requests: Observable<PlexMediaStatisticsDTO | null>[] = [];
 
 			for (let page = firstPage; page <= lastPage; page++) {
 				if (!mediaPages.has(page)) {
-					requests.push(actions.requestMediaPage(page));
+					requests.push(requestMediaPageForGeneration(page, state.pageSize, false, generation));
 				}
 			}
 
 			if (requests.length) {
+				navigationRequestCount++;
 				state.navLoading = true;
 				return forkJoin(requests).pipe(
 					finalize(() => {
-						state.navLoading = false;
+						if (!isRequestGenerationActive(generation)) {
+							return;
+						}
+						navigationRequestCount = Math.max(0, navigationRequestCount - 1);
+						state.navLoading = navigationRequestCount > 0;
 					}),
 				);
 			}
@@ -604,8 +571,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return actions.refreshMediaData();
 		},
 		clearFilter(): Observable<PlexMediaStatisticsDTO | null> {
-			state.filterQuery = '';
-			return actions.refreshMediaData();
+			return actions.setFilterQuery('');
 		},
 		toggleSortMedia(field: MediaSortField) {
 			if (state.sortedState.field === field) {
@@ -620,12 +586,168 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			useSubscription(actions.refreshMediaData().subscribe());
 		},
 		$reset() {
+			invalidateRequestGeneration();
+			invalidateLibraryInitialization();
+			invalidateMetadataGeneration();
 			mediaPages.clear();
 			pendingPages.clear();
 			Object.assign(state, cloneDeep(defaultState));
 			state.loading = true;
 		},
 	};
+
+	function isRequestGenerationActive(generation: number): boolean {
+		return generation === requestGeneration;
+	}
+
+	function isLibraryInitializationActive(initializationId: number): boolean {
+		return initializationId === initializationRequestId;
+	}
+
+	function isMetadataGenerationActive(generation: number): boolean {
+		return generation === metadataRequestGeneration;
+	}
+
+	function invalidateRequestGeneration(): number {
+		const previousCancelSubject = cancelSubject$;
+		requestGeneration++;
+		cancelSubject$ = new Subject<void>();
+		pendingPages.clear();
+		comparisonRefreshKeysInFlight.clear();
+		navigationRequestCount = 0;
+		state.navLoading = false;
+		previousCancelSubject.next();
+		previousCancelSubject.complete();
+		return requestGeneration;
+	}
+
+	function invalidateLibraryInitialization(): number {
+		const previousCancelSubject = initializationCancelSubject$;
+		initializationRequestId++;
+		initializationCancelSubject$ = new Subject<void>();
+		previousCancelSubject.next();
+		previousCancelSubject.complete();
+		return initializationRequestId;
+	}
+
+	function invalidateMetadataGeneration(): void {
+		const previousCancelSubject = metadataCancelSubject$;
+		metadataRequestGeneration++;
+		metadataCancelSubject$ = new Subject<void>();
+		filterMetadataRequestId++;
+		metadataRequestId++;
+		state.filterMetadataLoading = false;
+		previousCancelSubject.next();
+		previousCancelSubject.complete();
+	}
+
+	function refreshMediaDataForGeneration(generation: number): Observable<PlexMediaStatisticsDTO | null> {
+		if (!isRequestGenerationActive(generation)) {
+			return of(null);
+		}
+
+		state.loading = true;
+		state.mediaLoadError = false;
+		mediaPages.clear();
+		pendingPages.clear();
+		state.itemsLength = 0;
+		state.totalCount = 0;
+		Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: get(getters.getMediaType) });
+		return requestMediaPageForGeneration(1, state.pageSize, false, generation).pipe(
+			tap({
+				next: (data) => {
+					if (!isRequestGenerationActive(generation)) {
+						return;
+					}
+					state.loading = false;
+					if (!data) {
+						state.mediaLoadError = true;
+						Log.warn('Media request returned no data');
+						return;
+					}
+					Log.debug('Media request completed successfully');
+				},
+				error: (err) => {
+					if (!isRequestGenerationActive(generation)) {
+						return;
+					}
+					state.loading = false;
+					state.mediaLoadError = true;
+					Log.error('Media request failed', err);
+				},
+				complete: () => {
+					if (!isRequestGenerationActive(generation)) {
+						return;
+					}
+					// Handle cancellation
+					if (state.loading) {
+						state.loading = false;
+						Log.debug('Media request was cancelled');
+					}
+				},
+			}),
+		);
+	}
+
+	function requestMediaPageForGeneration(
+		page: number,
+		size: number,
+		forceRefresh: boolean,
+		generation: number,
+	): Observable<PlexMediaStatisticsDTO | null> {
+		if (!isRequestGenerationActive(generation)
+			|| pendingPages.get(page) === generation
+			|| (!forceRefresh && mediaPages.has(page))) {
+			return of(null);
+		}
+
+		const mediaType = get(getters.getMediaType);
+		const cancelSubject = cancelSubject$;
+		if (state.libraryId > 0 && mediaType === PlexMediaType.None) {
+			return libraryStore.refreshLibrary(state.libraryId).pipe(
+				takeUntil(cancelSubject),
+				switchMap((library) => library
+					? requestMediaPageForGeneration(page, size, forceRefresh, generation)
+					: of(null)),
+			);
+		}
+
+		pendingPages.set(page, generation);
+		return plexMediaApi.getAllMediaByTypeEndpoint({
+			q: state.filterQuery,
+			page,
+			size,
+			sort: get(getters.getSortDSL),
+			countryId: state.metadata.countryId > 0 ? state.metadata.countryId : undefined,
+			genreId: state.metadata.genreId > 0 ? state.metadata.genreId : undefined,
+			qualityId: get(getters.getSupportsVideoQuality) && state.metadata.qualityId > 0 ? state.metadata.qualityId : undefined,
+			comparisonState: normalizeComparisonState(state.metadata.comparisonState) ?? undefined,
+			roleId: state.metadata.roleId > 0 ? state.metadata.roleId : undefined,
+			mediaType,
+			plexLibraryId: state.libraryId > 0 ? state.libraryId : undefined,
+			filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
+			filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+		}).pipe(
+			takeUntil(cancelSubject),
+			map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
+				if (isSuccess && value) {
+					return value;
+				}
+
+				return null;
+			}),
+			tap((data) => {
+				if (isRequestGenerationActive(generation)) {
+					actions.addMediaPage(data);
+				}
+			}),
+			finalize(() => {
+				if (pendingPages.get(page) === generation) {
+					pendingPages.delete(page);
+				}
+			}),
+		);
+	}
 
 	function normalizeComparisonState(value?: PlexMediaComparisonState | null): PlexMediaComparisonState | null {
 		if (!get(getters.getSupportsComparison) || !value || !Object.values(PlexMediaComparisonState).includes(value))

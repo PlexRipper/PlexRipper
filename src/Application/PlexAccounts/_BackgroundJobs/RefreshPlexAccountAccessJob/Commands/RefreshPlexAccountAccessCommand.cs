@@ -55,6 +55,7 @@ public class RefreshPlexAccountAccessCommandHandler
         }
 
         var rapports = new List<RefreshPlexAccountAccessRapportDTO>();
+        var errors = new List<IError>();
         foreach (var plexAccount in plexAccounts)
         {
             var validationResult = await _commandExecutor.Send(
@@ -82,6 +83,7 @@ public class RefreshPlexAccountAccessCommandHandler
                 if (revokeResult.IsFailed)
                 {
                     revokeResult.LogError();
+                    errors.AddRange(revokeResult.Errors);
                     continue;
                 }
 
@@ -92,6 +94,7 @@ public class RefreshPlexAccountAccessCommandHandler
             if (validationResult.IsFailed)
             {
                 validationResult.LogError();
+                errors.AddRange(validationResult.Errors);
                 continue;
             }
 
@@ -110,6 +113,7 @@ public class RefreshPlexAccountAccessCommandHandler
             if (serverAccessResult.IsFailed)
             {
                 serverAccessResult.LogError();
+                errors.AddRange(serverAccessResult.Errors);
                 continue;
             }
 
@@ -139,6 +143,7 @@ public class RefreshPlexAccountAccessCommandHandler
             if (libraryAccessResult.IsFailed)
             {
                 libraryAccessResult.LogError();
+                errors.AddRange(libraryAccessResult.Errors);
                 continue;
             }
 
@@ -155,7 +160,7 @@ public class RefreshPlexAccountAccessCommandHandler
         var rebuildResult = await _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), cancellationToken);
         rebuildResult.LogIfFailed();
 
-        return Result.Ok(rapports);
+        return Result.Ok(rapports).WithErrors(errors);
     }
 
     private async Task<Result<RefreshPlexAccountAccessRapportDTO>> RevokeAllAccess(

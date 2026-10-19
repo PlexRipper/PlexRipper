@@ -37,7 +37,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         childKeys.Count.ShouldBeGreaterThan(0);
 
         var sourceMedia = await IDbContext
-            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId, x.PlexMovie!.PlexApiRatingKey })
             .FirstAsync(CancellationToken);
 
         await IDbContext
@@ -45,7 +45,8 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
             .ExecuteUpdateAsync(
                 p =>
                     p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
-                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId)
+                        .SetProperty(x => x.PlexApiRatingKey, sourceMedia.PlexApiRatingKey),
                 CancellationToken
             );
 
@@ -337,7 +338,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         childKeys.Count.ShouldBeGreaterThan(0);
 
         var sourceMedia = await IDbContext
-            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId, x.PlexMovie!.PlexApiRatingKey })
             .FirstAsync(CancellationToken);
 
         await IDbContext
@@ -345,7 +346,8 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
             .ExecuteUpdateAsync(
                 p =>
                     p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
-                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId)
+                        .SetProperty(x => x.PlexApiRatingKey, sourceMedia.PlexApiRatingKey),
                 CancellationToken
             );
 
@@ -414,7 +416,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         childKeys.Count.ShouldBeGreaterThan(0);
 
         var sourceMedia = await IDbContext
-            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId, x.PlexMovie!.PlexApiRatingKey })
             .FirstAsync(CancellationToken);
 
         await IDbContext
@@ -422,7 +424,8 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
             .ExecuteUpdateAsync(
                 p =>
                     p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
-                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId)
+                        .SetProperty(x => x.PlexApiRatingKey, sourceMedia.PlexApiRatingKey),
                 CancellationToken
             );
 
@@ -489,7 +492,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         childKeys.Count.ShouldBeGreaterThan(0);
 
         var sourceMedia = await IDbContext
-            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId, x.PlexMovie!.PlexApiRatingKey })
             .FirstAsync(CancellationToken);
 
         await IDbContext
@@ -497,7 +500,8 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
             .ExecuteUpdateAsync(
                 p =>
                     p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
-                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId)
+                        .SetProperty(x => x.PlexApiRatingKey, sourceMedia.PlexApiRatingKey),
                 CancellationToken
             );
 
@@ -556,7 +560,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         var childKey = (await IDbContext.GetDownloadableChildTaskKeys(parent.ToKey(), CancellationToken)).First();
 
         var sourceMedia = await IDbContext
-            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .PlexMovieData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId, x.PlexMovie!.PlexApiRatingKey })
             .FirstAsync(CancellationToken);
 
         await IDbContext
@@ -564,7 +568,8 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
             .ExecuteUpdateAsync(
                 p =>
                     p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
-                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId)
+                        .SetProperty(x => x.PlexApiRatingKey, sourceMedia.PlexApiRatingKey),
                 CancellationToken
             );
 
@@ -642,7 +647,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         var childKey = (await IDbContext.GetDownloadableChildTaskKeys(parent.ToKey(), CancellationToken)).First();
 
         var sourceMedia = await IDbContext
-            .PlexTvShowEpisodeData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .PlexTvShowEpisodeData.Select(x => new { x.PlexApiMediaId, x.PlexApiPartId, x.PlexTvShowEpisode!.PlexApiRatingKey })
             .FirstOrDefaultAsync(CancellationToken);
         sourceMedia.ShouldNotBeNull();
 
@@ -651,7 +656,8 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
             .ExecuteUpdateAsync(
                 p =>
                     p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
-                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId)
+                        .SetProperty(x => x.PlexApiRatingKey, sourceMedia.PlexApiRatingKey),
                 CancellationToken
             );
 

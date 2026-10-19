@@ -108,19 +108,40 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
     }
 
     [Test]
-    public async Task ShouldReturnFail_WhenCreateDownloadTasksCommandFails()
+    public async Task ShouldReturnRecognizedFailureAndPreserveHashes_WhenCreateDownloadTasksCommandFails()
     {
         // Arrange
-        await SetupDatabase(1235, config => config.RadarrIntegrationCount = 1);
-        var integration = await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
-        var validMetadata = CreateValidTorrentMetadata();
+        await SetupDatabase(1235, config =>
+        {
+            config.RadarrIntegrationCount = 1;
+            config.MovieDownloadTasksCount = 1;
+        });
+        var dbContext = IDbContext;
+        var integration = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        var control = await dbContext.DownloadTaskMovieFile.AsTracking().SingleAsync(CancellationToken);
+        control.RadarrIntegrationId = integration.Id;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var before = (control.Id, control.ParentId, control.HashId, control.DownloadStatus);
+        var validMetadata = CreateValidTorrentMetadata() with
+        {
+            PlexApiPartId = control.PlexApiPartId,
+            ServerId = control.PlexServerId,
+            LibraryId = control.PlexLibraryId,
+        };
         var (torrentFile, torrentFileMock) = CreateMockTorrentFile(validMetadata, "test.torrent");
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
         var failureResult = Result.Fail("Command execution failed");
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(failureResult);
+            .Setup(x => x.Send(It.Is<CreateDownloadTasksCommand>(command =>
+                command.Request.Integration == integration.Id.ToRadarrIdentity()
+                && command.Request.DownloadMedias.Count == 1
+                && command.Request.DownloadMedias[0].MediaIds.SequenceEqual(new[] { validMetadata.MediaId })
+                && command.Request.DownloadMedias[0].PlexLibraryId == validMetadata.LibraryId
+                && command.Request.DownloadMedias[0].PlexServerId == validMetadata.ServerId),
+                CancellationToken))
+            .ReturnsAsync(failureResult)
+            .Verifiable(Times.Once());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
@@ -130,6 +151,14 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
 
         // Assert
         endpointResult.StatusCode.ShouldBe(200);
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.ValidationErrors.Count.ShouldBe(0);
+        endpointResult.Endpoint.HttpContext.Response.Body.Position = 0;
+        using var reader = new StreamReader(endpointResult.Endpoint.HttpContext.Response.Body);
+        (await reader.ReadToEndAsync(CancellationToken)).ShouldBe("Fails.");
+        var after = await dbContext.DownloadTaskMovieFile.SingleAsync(CancellationToken);
+        (after.Id, after.ParentId, after.HashId, after.DownloadStatus).ShouldBe(before);
+        Mock.Mock<ICommandExecutor>().Verify();
 
         // Verify command was called once
         Mock.Mock<ICommandExecutor>()

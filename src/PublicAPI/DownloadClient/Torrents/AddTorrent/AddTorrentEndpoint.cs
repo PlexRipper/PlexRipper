@@ -196,7 +196,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                     req.TorrentFile.FileName,
                     createResult.Errors
                 );
-            await Send.StringAsync("Fail.", cancellation: ct);
+            await Send.StringAsync("Fails.", cancellation: ct);
             return;
         }
 

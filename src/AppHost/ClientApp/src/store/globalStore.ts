@@ -120,7 +120,12 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			Log.info('Reaparr App Platform:', platform);
 			state.platform = platform;
 		},
-		$reset() {
+		async resetSession(): Promise<void> {
+			try {
+				await useSignalrStore().resetSession();
+			} catch (error) {
+				Log.error('Failed to stop SignalR connections during session reset', error);
+			}
 			useAccountDialogStore().$reset();
 			useAccountStore().$reset();
 			useAlertStore().$reset();
@@ -139,7 +144,6 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			useServerConnectionStore().$reset();
 			useServerStore().$reset();
 			useSettingsStore().$reset();
-			useSignalrStore().$reset();
 			useUpdateStore().$reset();
 			useIntegrationStore().$reset();
 		},

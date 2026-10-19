@@ -114,6 +114,51 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
     }
 
     [Test]
+    public async Task ShouldRequestPausedAfterStoppingDashClient_WhenClientStartIsCancelled()
+    {
+        // Arrange
+        await SetupDatabase(39394, config => config.MovieDownloadTasksCount = 1);
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.SingleAsync(CancellationToken);
+        var key = downloadTask.ToKey();
+        var context = SetupJobContext(key);
+        var sequence = new MockSequence();
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.Is<DeterminePlexDownloadClientCommand>(command => command.DownloadTaskKey == key),
+                CancellationToken.None))
+            .ReturnsAsync(Result.Ok(PlexDownloadClientType.Dash)).Verifiable(Times.Once());
+        var client = Mock.Mock<IPlexDownloadClient>();
+        client.Setup(x => x.Start(key, CancellationToken.None))
+            .ReturnsAsync(ResultExtensions.TaskIsCancelled(nameof(DownloadJob))).Verifiable(Times.Once());
+        client.InSequence(sequence).Setup(x => x.StopAsync())
+            .ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().InSequence(sequence)
+            .Setup(x => x.OnStatusChangedAsync(key, DownloadStatus.Paused, CancellationToken.None))
+            .Returns(Task.CompletedTask).Verifiable(Times.Once());
+        client.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once());
+        var clients = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
+        clients.Setup(x => x[PlexDownloadClientType.Dash]).Returns(client.Object).Verifiable(Times.Once());
+        var sut = Mock.Create<DownloadJob>(new NamedParameter("plexDownloadClientFactory", clients.Object));
+
+        // Act
+        await sut.Execute(context);
+
+        // Assert
+        context.Result.ShouldBeOfType<BackgroundJobResult>().Status.ShouldBe(JobStatus.Cancelled);
+        Mock.Mock<ICommandExecutor>().Verify();
+        client.Verify();
+        clients.Verify();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify(
+            x => x.OnStatusChangedAsync(key, DownloadStatus.Stopped, It.IsAny<CancellationToken>()),
+            Times.Never());
+        Mock.Mock<IEventPublisher>().Verify(
+            x => x.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()),
+            Times.Never());
+    }
+
+    [Test]
     public async Task ShouldSetDownloadAndDestinationPath_WhenDownloadTaskIsStarted()
     {
         // Arrange

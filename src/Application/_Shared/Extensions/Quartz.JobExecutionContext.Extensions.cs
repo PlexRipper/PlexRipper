@@ -61,6 +61,9 @@ public static partial class QuartzExtensions
                     DefaultJsonSerializerOptions.ConfigStandard
                 );
             case JobTypes.LibraryComparisonJob:
+                if (context.Get(nameof(LibraryComparisonCompletedDTO)) is LibraryComparisonCompletedDTO completed)
+                    return JsonSerializer.Serialize(completed, DefaultJsonSerializerOptions.ConfigStandard);
+
                 return JsonSerializer.Serialize(
                     context.MergedJobDataMap.GetPayload<PlexLibraryComparisonJobPayload>(),
                     DefaultJsonSerializerOptions.ConfigStandard

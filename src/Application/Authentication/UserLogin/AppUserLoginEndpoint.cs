@@ -90,8 +90,6 @@ public class AppUserLoginEndpoint : Endpoint<AppUserLoginEndpointRequest>
 
         if (signInResult.Succeeded)
         {
-            await _identitySignInService.SignInAsync([], [DefaultUserAppCredentials.DefaultAdminRole]);
-
             _log.Here().Information("User {Username} signed in successfully", username);
 
             await Send.FluentResult(Result.Ok(), ct);

@@ -15,6 +15,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
         context.SetupGet(x => x.MergedJobDataMap).Returns(jobDetail.Object.JobDataMap);
         context.SetupGet(x => x.CancellationToken).Returns(cancellationToken);
+        context.SetupGet(x => x.FireInstanceId).Returns("move-job-test");
+        context.SetupGet(x => x.Scheduler).Returns(Moq.Mock.Of<IScheduler>());
         context.SetupProperty(x => x.Result);
         return context.Object;
     }
@@ -50,6 +52,16 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
     [Arguments(PlexMediaType.MusicTrack, "already-moved")]
     [Arguments(PlexMediaType.PhotoImage, "already-moved")]
     [Arguments(PlexMediaType.OtherVideos, "already-moved")]
+    [Arguments(PlexMediaType.Movie, "paused")]
+    [Arguments(PlexMediaType.Episode, "paused")]
+    [Arguments(PlexMediaType.MusicTrack, "paused")]
+    [Arguments(PlexMediaType.PhotoImage, "paused")]
+    [Arguments(PlexMediaType.OtherVideos, "paused")]
+    [Arguments(PlexMediaType.Movie, "auto-paused")]
+    [Arguments(PlexMediaType.Episode, "auto-paused")]
+    [Arguments(PlexMediaType.MusicTrack, "auto-paused")]
+    [Arguments(PlexMediaType.PhotoImage, "auto-paused")]
+    [Arguments(PlexMediaType.OtherVideos, "auto-paused")]
     public async Task ShouldMoveOriginalBytesCompleteAndCleanOnlyUnusedFolders_WhenJobFinishes(
         PlexMediaType family,
         string scenario
@@ -143,6 +155,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         target.DataTotal = 4;
         target.DownloadStatus = scenario switch
         {
+            "paused" => DownloadStatus.MovePaused,
+            "auto-paused" => DownloadStatus.AutoMovePaused,
             "retry" => DownloadStatus.MoveError,
             "already-moved" => DownloadStatus.MoveFinished,
             _ => DownloadStatus.DownloadFinished,
@@ -268,7 +282,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             )
             .Verifiable(Times.Once());
         Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue(token))
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(
+                scenario == "late-cancellation" ? CancellationToken.None : token))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         Mock.Mock<IEventPublisher>()
@@ -509,9 +524,10 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never());
         Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue(token))
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(
+                scenario == "cancelled" ? CancellationToken.None : token))
             .ReturnsAsync(Result.Ok())
-            .Verifiable(scenario == "cancelled" ? Times.Never() : Times.Once());
+            .Verifiable(Times.Once());
         Result? notified = null;
         Mock.Mock<IEventPublisher>()
             .Setup(x =>
@@ -588,6 +604,11 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<IMoveDownloadFileQueue>().Verify();
         Mock.Mock<IEventPublisher>().Verify();
+        Moq.Mock.Get(context.Scheduler)
+            .Verify(x => x.ScheduleJob(
+                It.Is<ITrigger>(t => t.JobKey.Equals(MoveDownloadFileJob.GetJobKey(key.Id))
+                    && t.Key.Name == $"{MoveDownloadFileJob.GetJobKey(key.Id).Name}_Retry_move-job-test"),
+                token), scenario == "cancelled" ? Times.Never() : Times.Once());
     }
 
     [Test]
@@ -819,7 +840,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         Mock.Mock<IMoveDownloadFileQueue>()
             .Setup(x => x.CheckMoveDownloadFileJobQueue(CancellationToken.None))
             .ReturnsAsync(Result.Ok())
-            .Verifiable(missingPayload ? Times.Once() : Times.Never());
+            .Verifiable(Times.Once());
 
         // Act
         await Sut.Execute(context);
@@ -857,7 +878,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         Mock.Mock<IMoveDownloadFileQueue>()
             .Verify(
                 x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()),
-                missingPayload ? Times.Once() : Times.Never()
+                Times.Once()
             );
         Mock.Mock<IEventPublisher>()
             .Verify(

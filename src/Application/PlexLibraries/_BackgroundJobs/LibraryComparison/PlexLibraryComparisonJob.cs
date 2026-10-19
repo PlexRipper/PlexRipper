@@ -151,6 +151,15 @@ public class PlexLibraryComparisonJob : IJob
             return;
         }
 
+        context.Put(
+            nameof(LibraryComparisonCompletedDTO),
+            new LibraryComparisonCompletedDTO
+            {
+                AffectedLibraryIds = [ownedLibrary.Id, remoteLibrary.Id],
+                MediaType = remoteLibrary.Type,
+                CompletedAt = DateTime.UtcNow,
+            }
+        );
         context.SetResult(JobStatus.Completed);
     }
 }

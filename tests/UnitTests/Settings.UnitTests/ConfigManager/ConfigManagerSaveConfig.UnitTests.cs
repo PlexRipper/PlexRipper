@@ -1,3 +1,6 @@
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json.Nodes;
@@ -9,6 +12,44 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerSaveConfigUnitTests : BaseUnitTest<ConfigManager>
 {
+    [Test]
+    public async Task ShouldSavePostResetPreferencesAutomatically_WhenCurrentModulesChange()
+    {
+        // Arrange
+        var settings = new UserSettings();
+        SetupDependencies(builder => builder.RegisterInstance<IUserSettings>(settings));
+        SetupFileSystem(system => system.AddDirectory(Mock.Container.Resolve<IPathProvider>().ConfigDirectory));
+        var fileSystem = Mock.Container.Resolve<IFileSystem>();
+        var paths = Mock.Container.Resolve<IPathProvider>();
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(10));
+        var setupResult = Sut.Setup();
+        setupResult.IsSuccess.ShouldBeTrue();
+        setupResult.Errors.Count.ShouldBe(0);
+        fileSystem.File.Exists(paths.ConfigFileLocation).ShouldBeTrue();
+        var resetNotification = settings.SettingsUpdated.ObserveOn(TaskPoolScheduler.Default).Take(1).ToTask(timeout.Token);
+
+        // Act
+        settings.Reset();
+        await resetNotification;
+        var changedNotification = settings.SettingsUpdated.Take(1).ToTask(timeout.Token);
+        settings.LanguageSettings.Language = "fr-FR";
+        settings.DisplaySettings.MovieViewMode = ViewMode.Table;
+        await changedNotification;
+        var reloaded = new UserSettings();
+        var reader = new ConfigManager(Mock.Container.Resolve<ILogger>(), paths, reloaded,
+            fileSystem.File, fileSystem.Path, fileSystem.Directory);
+        var loadResult = reader.LoadConfig();
+
+        // Assert
+        loadResult.IsSuccess.ShouldBeTrue();
+        loadResult.Errors.Count.ShouldBe(0);
+        reloaded.LanguageSettings.Language.ShouldBe("fr-FR");
+        reloaded.DisplaySettings.MovieViewMode.ShouldBe(ViewMode.Table);
+        reloaded.ToDTO().ShouldBeEquivalentTo(settings.ToDTO());
+        reloaded.IntegrationsSettings.ReaparrApiKey.ShouldBe(settings.IntegrationsSettings.ReaparrApiKey);
+    }
+
     [Test]
     [Arguments(ViewMode.Table, ViewMode.Poster, ViewMode.Poster, true, false, true, false, true, false)]
     [Arguments(ViewMode.Poster, ViewMode.Table, ViewMode.Poster, false, true, true, false, false, true)]

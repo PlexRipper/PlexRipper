@@ -63,6 +63,7 @@ public class RefreshPlexServerAccountsAccessEndpoint
             .ToListAsync(ct);
 
         var rapports = new List<RefreshPlexAccountAccessRapportDTO>();
+        var errors = new List<IError>();
         foreach (var accountId in accountIds)
         {
             var result = await _commandExecutor.Send(
@@ -79,12 +80,13 @@ public class RefreshPlexServerAccountsAccessEndpoint
             if (result.IsFailed)
             {
                 result.LogError();
+                errors.AddRange(result.Errors);
                 continue;
             }
 
             rapports.AddRange(result.Value);
         }
 
-        await Send.FluentResult(Result.Ok(rapports), ct);
+        await Send.FluentResult(Result.Ok(rapports).WithErrors(errors), ct);
     }
 }

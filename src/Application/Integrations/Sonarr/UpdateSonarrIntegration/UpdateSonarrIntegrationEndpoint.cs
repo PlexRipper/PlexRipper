@@ -17,19 +17,10 @@ public class UpdateSonarrIntegrationRequestValidator : Validator<UpdateSonarrInt
     {
         RuleFor(x => x.IntegrationId).NotEmpty();
         RuleFor(x => x.Name).NotEmpty();
-        RuleFor(x => x.Url).NotEmpty().Must(IsHttpUrl).WithMessage("URL must be an absolute http/https URL.");
+        RuleFor(x => x.Url).NotEmpty().WithMessage("URL must be an absolute http/https URL.");
         RuleFor(x => x.ApiKey).NotEmpty();
         RuleFor(x => x.Category).NotEmpty();
         RuleFor(x => x.DownloadFolderId).GreaterThan(0);
-    }
-
-    private static bool IsHttpUrl(string value)
-    {
-        var normalizedUrl = value.TrimEnd('/');
-        return normalizedUrl.IsValidHttpUrl()
-            && Uri.TryCreate(normalizedUrl, UriKind.Absolute, out var uri)
-            && string.IsNullOrEmpty(uri.Query)
-            && string.IsNullOrEmpty(uri.Fragment);
     }
 }
 
@@ -95,11 +86,22 @@ public class UpdateSonarrIntegrationEndpoint : Endpoint<UpdateSonarrIntegrationR
             return;
         }
 
+        var connectionIdentityChanged = integration.BaseUrl.Trim().TrimEnd('/') != url
+            || integration.SonarrApiKey.Trim() != apiKey;
+
         if (
-            integration.Category != category
-            && integration.ProvisioningState == IntegrationProvisioningState.Configured
+            integration.ProvisioningState == IntegrationProvisioningState.Configured
+            && (integration.Category != category || connectionIdentityChanged)
         )
             integration.ProvisioningState = IntegrationProvisioningState.ChangesPending;
+
+        if (connectionIdentityChanged)
+        {
+            integration.LastConnectionTestStatus = TestConnectionStatus.Unknown;
+            integration.LastConnectionTestHttpStatusCode = null;
+            integration.LastConnectionTestErrorMessage = null;
+            integration.LastConnectionTestedAt = null;
+        }
 
         integration.DisplayName = name;
         integration.BaseUrl = url;

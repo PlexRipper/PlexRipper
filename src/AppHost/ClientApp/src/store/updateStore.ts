@@ -72,10 +72,13 @@ export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
 			state.isApplyingUpdate = false;
 			state.downloadProgress = 0;
 			return updateApi.downloadUpdateEndpoint().pipe(
-				tap(() => {
+				switchMap((downloadResult) => {
+					if (!downloadResult.isSuccess) {
+						return of(downloadResult);
+					}
 					state.isApplyingUpdate = true;
+					return updateApi.applyUpdateEndpoint();
 				}),
-				switchMap(() => updateApi.applyUpdateEndpoint()),
 				finalize(() => {
 					state.isDownloading = false;
 					state.isApplyingUpdate = false;

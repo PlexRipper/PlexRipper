@@ -19,6 +19,8 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     private readonly Channel<ImmediatePatchRequest> _statusChannel;
     private readonly ConcurrentDictionary<Guid, BufferedProgressUpdate> _progressByNodeId;
     private readonly ConcurrentDictionary<int, long> _sequenceByServer;
+    private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _progressGates;
+    private readonly ConcurrentDictionary<Guid, byte> _finalizedProgressNodes;
     private readonly ConcurrentDictionary<Guid, ProgressScopeKey> _scopeByNodeId;
     private readonly ConcurrentDictionary<Guid, DownloadStatus> _statusByNodeId;
     private readonly ConcurrentDictionary<Guid, DownloadTaskProgress> _lastProgressLogByNodeId;
@@ -48,6 +50,8 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }
         );
         _progressByNodeId = new ConcurrentDictionary<Guid, BufferedProgressUpdate>();
+        _progressGates = new ConcurrentDictionary<Guid, SemaphoreSlim>();
+        _finalizedProgressNodes = new ConcurrentDictionary<Guid, byte>();
         _sequenceByServer = new ConcurrentDictionary<int, long>();
         _scopeByNodeId = new ConcurrentDictionary<Guid, ProgressScopeKey>();
         _statusByNodeId = new ConcurrentDictionary<Guid, DownloadStatus>();
@@ -172,6 +176,42 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     }
 
     /// <inheritdoc />
+    public async Task<Result> PersistProgressAsync(
+        DownloadTaskKey key,
+        DownloadTaskProgress progress,
+        DirectDownloadSnapshot? snapshot = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // Mark the node before waiting for its gate so buffered work that is already queued
+        // cannot write an older estimate after this terminal value.
+        _finalizedProgressNodes[key.Id] = 0;
+
+        var progressGate = _progressGates.GetOrAdd(key.Id, _ => new SemaphoreSlim(1, 1));
+        await progressGate.WaitAsync(cancellationToken);
+        try
+        {
+            _progressByNodeId.TryRemove(key.Id, out _);
+
+            return await Result.Try(async Task<Result> () =>
+            {
+                using var dbContext = await _dbContextFactory.CreateAsync();
+                await dbContext.UpdateDownloadProgress(key, progress, snapshot, cancellationToken);
+
+                var scope = await ResolveScopeAsync(dbContext, key, cancellationToken);
+                if (scope is null)
+                    return Result.Ok();
+
+                return await SendPatchAsync(scope, [key.Id], cancellationToken, dbContext);
+            });
+        }
+        finally
+        {
+            progressGate.Release();
+        }
+    }
+
+    /// <inheritdoc />
     public void OnProgressUpdated(
         DownloadTaskKey key,
         DownloadTaskProgress progress,
@@ -179,10 +219,11 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     )
     {
         if (
-            _statusByNodeId.GetValueOrDefault(key.Id)
-            is DownloadStatus.Paused
-                or DownloadStatus.AutoPaused
-                or DownloadStatus.Deleted
+            _finalizedProgressNodes.ContainsKey(key.Id)
+            || _statusByNodeId.GetValueOrDefault(key.Id)
+                is DownloadStatus.Paused
+                    or DownloadStatus.AutoPaused
+                    or DownloadStatus.Deleted
         )
             return;
 
@@ -195,6 +236,11 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         };
 
         _progressByNodeId.AddOrUpdate(key.Id, _ => update, (_, _) => update);
+        if (_finalizedProgressNodes.ContainsKey(key.Id))
+        {
+            _progressByNodeId.TryRemove(key.Id, out _);
+            return;
+        }
 
         // On the first progress event for this node, bypass the periodic flush so the
         // front-end receives data immediately instead of waiting up to 1 second.
@@ -375,31 +421,43 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         CancellationToken stoppingToken
     )
     {
-        return await Result.Try(async Task () =>
+        var progressGate = _progressGates.GetOrAdd(update.NodeId, _ => new SemaphoreSlim(1, 1));
+        await progressGate.WaitAsync(stoppingToken);
+        try
         {
-            using var dbContext = await _dbContextFactory.CreateAsync();
+            return await Result.Try(async Task () =>
+            {
+                if (_finalizedProgressNodes.ContainsKey(update.NodeId))
+                    return;
 
-            if (
-                !_progressByNodeId.TryGetValue(update.NodeId, out var effectiveUpdate)
-                || effectiveUpdate.Progress is null
-            )
-                return;
+                using var dbContext = await _dbContextFactory.CreateAsync();
 
-            await dbContext.UpdateDownloadProgress(
-                effectiveUpdate.Key,
-                effectiveUpdate.Progress,
-                effectiveUpdate.Snapshot,
-                stoppingToken
-            );
+                if (
+                    !_progressByNodeId.TryGetValue(update.NodeId, out var effectiveUpdate)
+                    || effectiveUpdate.Progress is null
+                )
+                    return;
 
-            var scope = await ResolveScopeAsync(dbContext, effectiveUpdate.Key, stoppingToken);
-            if (scope is null)
-                return;
+                await dbContext.UpdateDownloadProgress(
+                    effectiveUpdate.Key,
+                    effectiveUpdate.Progress,
+                    effectiveUpdate.Snapshot,
+                    stoppingToken
+                );
 
-            var sendResult = await SendPatchAsync(scope, [effectiveUpdate.NodeId], stoppingToken, dbContext);
-            if (sendResult.IsFailed)
-                sendResult.LogError();
-        });
+                var scope = await ResolveScopeAsync(dbContext, effectiveUpdate.Key, stoppingToken);
+                if (scope is null)
+                    return;
+
+                var sendResult = await SendPatchAsync(scope, [effectiveUpdate.NodeId], stoppingToken, dbContext);
+                if (sendResult.IsFailed)
+                    sendResult.LogIfFailed();
+            });
+        }
+        finally
+        {
+            progressGate.Release();
+        }
     }
 
     private async Task<Result> TryFlushBufferedProgressAsync(
@@ -410,45 +468,57 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         CancellationToken cancellationToken
     )
     {
-        return await Result.Try(async Task () =>
+        var progressGate = _progressGates.GetOrAdd(bufferedProgress.NodeId, _ => new SemaphoreSlim(1, 1));
+        await progressGate.WaitAsync(cancellationToken);
+        try
         {
-            if (bufferedProgress.Progress is not null)
+            return await Result.Try(async Task () =>
             {
-                await dbContext.UpdateDownloadProgress(
-                    bufferedProgress.Key,
-                    bufferedProgress.Progress,
-                    bufferedProgress.Snapshot,
-                    cancellationToken
-                );
+                if (_finalizedProgressNodes.ContainsKey(bufferedProgress.NodeId) && bufferedProgress.Progress is not null)
+                    return;
 
-                await LogProgressJourneyAsync(
-                    dbContext,
-                    bufferedProgress.Key,
-                    bufferedProgress.Progress,
-                    cancellationToken
-                );
-            }
+                if (bufferedProgress.Progress is not null)
+                {
+                    await dbContext.UpdateDownloadProgress(
+                        bufferedProgress.Key,
+                        bufferedProgress.Progress,
+                        bufferedProgress.Snapshot,
+                        cancellationToken
+                    );
 
-            var scope = await ResolveScopeAsync(dbContext, bufferedProgress.Key, cancellationToken);
-            if (scope is null)
-                return;
+                    await LogProgressJourneyAsync(
+                        dbContext,
+                        bufferedProgress.Key,
+                        bufferedProgress.Progress,
+                        cancellationToken
+                    );
+                }
 
-            if (!changedNodeIdsByScope.TryGetValue(scope, out var changedNodeIds))
-            {
-                changedNodeIds = [];
-                changedNodeIdsByScope[scope] = changedNodeIds;
-            }
+                var scope = await ResolveScopeAsync(dbContext, bufferedProgress.Key, cancellationToken);
+                if (scope is null)
+                    return;
 
-            changedNodeIds.Add(bufferedProgress.NodeId);
+                if (!changedNodeIdsByScope.TryGetValue(scope, out var changedNodeIds))
+                {
+                    changedNodeIds = [];
+                    changedNodeIdsByScope[scope] = changedNodeIds;
+                }
 
-            if (!bufferedEntriesByScope.TryGetValue(scope, out var bufferedEntries))
-            {
-                bufferedEntries = [];
-                bufferedEntriesByScope[scope] = bufferedEntries;
-            }
+                changedNodeIds.Add(bufferedProgress.NodeId);
 
-            bufferedEntries.Add(bufferedProgress);
-        });
+                if (!bufferedEntriesByScope.TryGetValue(scope, out var bufferedEntries))
+                {
+                    bufferedEntries = [];
+                    bufferedEntriesByScope[scope] = bufferedEntries;
+                }
+
+                bufferedEntries.Add(bufferedProgress);
+            });
+        }
+        finally
+        {
+            progressGate.Release();
+        }
     }
 
     /// <summary>
@@ -683,6 +753,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     {
         if (newStatus is DownloadStatus.Queued or DownloadStatus.Restarting or DownloadStatus.Downloading)
         {
+            _finalizedProgressNodes.TryRemove(nodeId, out _);
             _lastProgressLogByNodeId.TryRemove(nodeId, out _);
             _seenProgressNodes.TryRemove(nodeId, out _);
         }

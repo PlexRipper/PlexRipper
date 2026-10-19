@@ -56,8 +56,9 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(true);
-
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([firstMovieDownloadTask.Children.First().ToKey()]);
         // Act
         Sut.Setup();
         var result = await Sut.CheckDownloadQueueServer(1);
@@ -67,6 +68,103 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         result.Errors.Count.ShouldBeGreaterThan(0);
     }
 
+    [Test]
+    public async Task ShouldNotStartNextDownloadTask_WhenJobIsStillRunningBeforeDatabaseStatusIsDownloading()
+    {
+        // Arrange
+        await SetupDatabase(
+            78971,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
+        var activeTask = downloadTasks[0].Children[0];
+        activeTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([activeTask.ToKey()]);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnOk();
+
+        // Act
+        var result = await Sut.CheckDownloadQueueServer(activeTask.PlexServerId);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBeGreaterThan(0);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(
+                x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+    }
+
+
+    [Test]
+    public async Task ShouldStartDownloadTask_WhenAnotherServerHasActiveDownloadJob()
+    {
+        // Arrange
+        await SetupDatabase(
+            78972,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 2;
+                config.MovieDownloadTasksCount = 2;
+            }
+        );
+        var dbContext = IDbContext;
+        var otherLibrary = await dbContext.PlexLibraries.OrderByDescending(x => x.PlexServerId).FirstAsync(CancellationToken);
+        var movedTask = await dbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children)
+            .OrderByDescending(x => x.Id).FirstAsync(CancellationToken);
+        new List<DownloadTaskMovie> { movedTask }.SetRelationshipIds(otherLibrary.PlexServerId, otherLibrary.Id);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
+        var serverIds = downloadTasks.Select(x => x.PlexServerId).Distinct().Order().ToArray();
+        serverIds.Length.ShouldBe(2);
+
+        var activeServerId = serverIds[0];
+        var targetServerId = serverIds[1];
+        var activeTask = downloadTasks.First(x => x.PlexServerId == activeServerId).Children[0];
+        var targetTask = downloadTasks.First(x => x.PlexServerId == targetServerId).Children[0];
+        activeTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+        targetTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .Returns((int serverId) =>
+                Task.FromResult<List<DownloadTaskKey>>(serverId == activeServerId ? [activeTask.ToKey()] : []));
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnOk();
+
+        // Act
+        var result = await Sut.CheckDownloadQueueServer(targetServerId);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldNotBeNull();
+        result.Value.PlexServerId.ShouldBe(targetServerId);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(
+                x => x.StartDownloadTaskJob(
+                    It.Is<DownloadTaskKey>(key => key.PlexServerId == targetServerId),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once()
+            );
+    }
     [Test]
     public async Task ShouldNotStartDownloads_WhenServerIsPausedByUser()
     {
@@ -163,7 +261,9 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
 
         // Act
         var result = await Sut.CheckDownloadQueueServer(downloadTasks[0].PlexServerId);
@@ -199,7 +299,9 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
 
         // Act
         var result = await Sut.CheckDownloadQueueServer(downloadTasks[0].PlexServerId);
@@ -236,7 +338,9 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
 
         // Act
         var result = await Sut.CheckDownloadQueueServer(1);
@@ -282,8 +386,9 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
                 CancellationToken
             );
 
-        // Mock the scheduler to return true (job still running - race condition)
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(true);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([firstMovieDownloadTask.Children.First().ToKey()]);
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
@@ -339,8 +444,9 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
                 CancellationToken
             );
 
-        // Mock the scheduler to return true (job is running)
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(true);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([firstMovieDownloadTask.Children.First().ToKey()]);
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))

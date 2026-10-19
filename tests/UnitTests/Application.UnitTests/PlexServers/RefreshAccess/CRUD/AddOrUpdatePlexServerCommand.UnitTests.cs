@@ -3,6 +3,61 @@ namespace Reaparr.Application.UnitTests;
 public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePlexServersCommandHandler>
 {
     [Test]
+    public async Task ShouldPreserveCustomOwnership_WhenPlexAdvertisesThenOmitsSameConnection()
+    {
+        // Arrange
+        await SetupDatabase(23725, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexServerConnectionPerServerCount = 2;
+        });
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.Include(x => x.PlexServerConnections).SingleAsync(CancellationToken);
+        var connections = server.PlexServerConnections.OrderBy(x => x.Id).ToArray();
+        var custom = connections[0];
+        var managed = connections[1];
+        await dbContext.PlexServerConnections.Where(x => x.Id == custom.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(c => c.IsCustom, true), CancellationToken);
+        var advertisedCustom = new PlexServerConnection
+        {
+            Protocol = custom.Protocol, Address = custom.Address, Port = custom.Port, Url = custom.Url,
+            Local = custom.Local, Relay = custom.Relay, IPv4 = custom.IPv4, IPv6 = custom.IPv6,
+            PlexServerId = server.Id, IsCustom = false, LatestConnectionStatus = null,
+        };
+        server.PlexServerConnections = [advertisedCustom, managed];
+        var before = await dbContext.PlexServerConnections.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.IsCustom }).ToListAsync(CancellationToken);
+        before.ShouldBe([new { custom.Id, IsCustom = true }, new { managed.Id, IsCustom = false }]);
+        var validator = new AddOrUpdatePlexServersCommandValidator();
+        var advertisedRequest = new AddOrUpdatePlexServersCommand([server]);
+        (await validator.ValidateAsync(advertisedRequest, CancellationToken)).IsValid.ShouldBeTrue();
+
+        // Act
+        var advertisedResult = await Sut.ExecuteAsync(advertisedRequest, CancellationToken);
+        dbContext.ClearChangeTracker();
+        var afterMatch = await dbContext.PlexServerConnections.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.IsCustom }).ToListAsync(CancellationToken);
+        server.PlexServerConnections = [managed];
+        var omittedResult = await Sut.ExecuteAsync(new AddOrUpdatePlexServersCommand([server]), CancellationToken);
+        dbContext.ClearChangeTracker();
+
+        // Assert
+        advertisedResult.IsSuccess.ShouldBeTrue();
+        advertisedResult.Errors.Count.ShouldBe(0);
+        advertisedResult.Value.Created.ShouldBeEmpty();
+        advertisedResult.Value.Updated.ShouldBe([server.Id]);
+        afterMatch.ShouldBe(before);
+        omittedResult.IsSuccess.ShouldBeTrue();
+        omittedResult.Errors.Count.ShouldBe(0);
+        omittedResult.Value.Created.ShouldBeEmpty();
+        omittedResult.Value.Updated.ShouldBe([server.Id]);
+        (await dbContext.PlexServerConnections.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.IsCustom }).ToListAsync(CancellationToken)).ShouldBe(before);
+        (await dbContext.PlexServerConnections.Where(x => x.Id == custom.Id)
+            .Select(x => x.Url).SingleAsync(CancellationToken)).ShouldBe(custom.Url);
+    }
+
+    [Test]
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()
     {
         // Arrange

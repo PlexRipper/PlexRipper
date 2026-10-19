@@ -500,7 +500,8 @@ public class SearchTvShowCommandUnitTests : BaseCommandUnitTest<SearchTvShowComm
                 i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString())
             )
             .ShouldBeTrue();
-        result.Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
+        result.Value.Channel.Items.Select(i => i.Attributes.Single(a => a.Name == "imdb").Value)
+            .ShouldBe(Enumerable.Repeat(imdb[2..], result.Value.Channel.Items.Count));
 
         // Titles should equal the part file name used during mapping
         var expectedTitle = await dbContext
@@ -999,7 +1000,8 @@ public class SearchTvShowCommandUnitTests : BaseCommandUnitTest<SearchTvShowComm
 
         // Assert
         result.Value.Channel.Items.ShouldNotBeEmpty();
-        result.Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
+        result.Value.Channel.Items.Select(i => i.Attributes.Single(a => a.Name == "imdb").Value)
+            .ShouldBe(Enumerable.Repeat(imdb[2..], result.Value.Channel.Items.Count));
         result
             .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
             .ShouldBeTrue();

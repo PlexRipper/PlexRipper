@@ -204,7 +204,7 @@ public static partial class QuartzExtensions
     }
 
     /// <summary>
-    /// Deletes the supplied jobs as a batch and succeeds immediately when no keys are supplied.
+    /// Deletes the supplied jobs as a batch and succeeds when no keys are supplied or all requested keys are absent afterward.
     /// </summary>
     public static async Task<Result> DeleteBatchJobs(
         this IScheduler scheduler,
@@ -215,7 +215,19 @@ public static partial class QuartzExtensions
         if (!keys.Any())
             return Result.Ok();
 
-        return await Result.Try(async Task () => await scheduler.DeleteJobs(keys.ToList(), cancellationToken));
+        return await Result.Try(async Task<Result> () =>
+        {
+            if (await scheduler.DeleteJobs(keys.ToList(), cancellationToken))
+                return Result.Ok();
+
+            foreach (var key in keys)
+            {
+                if (await scheduler.CheckExists(key, cancellationToken))
+                    return Result.Fail("Failed to delete all requested Quartz jobs");
+            }
+
+            return Result.Ok();
+        });
     }
 
     /// <summary>

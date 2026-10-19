@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using CliWrap;
 using CliWrap.EventStream;
@@ -22,10 +23,16 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     private readonly CancellationTokenSource _gracefulCts = new();
     private readonly CancellationTokenSource _forcefulCts = new();
     private readonly string _binaryPath;
+    private readonly object _lifecycleGate = new();
 
     private readonly Subject<string> _stdoutSubject = new();
     private readonly Subject<DashDownloadProgress> _progressSubject = new();
     private readonly Subject<DashDownloadCompletedEventArgs> _downloadCompletedSubject = new();
+
+    private Task<Result>? _runTask;
+    private Task<Result>? _stopTask;
+    private Task? _disposeTask;
+    private bool _disposed;
 
     private bool _hasNetworkError;
     private string? _networkErrorLine;
@@ -57,6 +64,18 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// <inheritdoc/>
     public async Task<Result> StartAsync(DashMpdCliOptions options)
     {
+        lock (_lifecycleGate)
+        {
+            if (_disposed)
+                return Result.Fail("Cannot start dash-mpd-cli after the wrapper has been disposed.");
+
+            if (_runTask is { IsCompleted: false })
+                throw new InvalidOperationException("dash-mpd-cli is already running.");
+
+            if (_gracefulCts.IsCancellationRequested || _forcefulCts.IsCancellationRequested)
+                return ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper));
+        }
+
         _hasNetworkError = false;
         _networkErrorLine = null;
 
@@ -92,18 +111,48 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             .WithWorkingDirectory(options.WorkingDirectory)
             .WithEnvironmentVariables(envVars);
 
-        return await RunEventLoopAsync(command, _gracefulCts.Token);
+        Task<Result> runTask;
+        lock (_lifecycleGate)
+        {
+            if (_disposed)
+                return Result.Fail("Cannot start dash-mpd-cli after the wrapper has been disposed.");
+            if (_runTask is { IsCompleted: false })
+                throw new InvalidOperationException("dash-mpd-cli is already running.");
+
+            if (_gracefulCts.IsCancellationRequested || _forcefulCts.IsCancellationRequested)
+                return ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper));
+
+            _stopTask = null;
+            runTask = RunEventLoopAsync(command, _forcefulCts.Token, _gracefulCts.Token);
+            _runTask = runTask;
+        }
+
+        return await runTask;
     }
 
-    private async Task<Result> RunEventLoopAsync(Command command, CancellationToken cancellationToken)
+    private async Task<Result> RunEventLoopAsync(
+        Command command,
+        CancellationToken forcefulCancellationToken,
+        CancellationToken gracefulCancellationToken
+    )
     {
+        // Do not let synchronous process events invoke observers while StartAsync holds the lifecycle gate.
+        await Task.Yield();
+
         var processResult = Result.Ok();
 
         var listenResult = await Result.Try(
             (Func<Task>)(
                 async () =>
                 {
-                    await foreach (var cmdEvent in command.ListenAsync(cancellationToken))
+                    await foreach (
+                        var cmdEvent in command.ListenAsync(
+                            Encoding.Default,
+                            Encoding.Default,
+                            forcefulCancellationToken,
+                            gracefulCancellationToken
+                        )
+                    )
                     {
                         switch (cmdEvent)
                         {
@@ -238,30 +287,51 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// Stops the running process gracefully, then forcefully if it does not exit within the grace period.
     /// </summary>
     /// <returns>A task that completes when the process has stopped.</returns>
-    public async Task<Result> StopAsync()
+    public Task<Result> StopAsync()
+    {
+        lock (_lifecycleGate)
+        {
+            _stopTask ??= StopCoreAsync();
+            return _stopTask;
+        }
+    }
+
+    private async Task<Result> StopCoreAsync()
     {
         _log.Here().Information("Stopping dash-mpd-cli process");
         await _gracefulCts.CancelAsync();
         _forcefulCts.CancelAfter(TimeSpan.FromSeconds(10));
-        return Result.Ok();
+
+        var runTask = _runTask;
+        if (runTask is null)
+            return Result.Ok();
+
+        return await Result.Try(async Task<Result>() => await runTask);
     }
 
     /// <summary>
     /// Asynchronously disposes of the wrapper and ensures the process is terminated.
     /// </summary>
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
+    {
+        lock (_lifecycleGate)
+        {
+            _disposed = true;
+            _disposeTask ??= DisposeCoreAsync();
+            return new ValueTask(_disposeTask);
+        }
+    }
+
+    private async Task DisposeCoreAsync()
     {
         try
         {
-            if (!_gracefulCts.IsCancellationRequested)
-                await _gracefulCts.CancelAsync();
-
-            if (!_forcefulCts.IsCancellationRequested)
-                await _forcefulCts.CancelAsync();
+            var stopResult = await StopAsync();
+            stopResult.LogIfFailed();
         }
         catch (Exception ex)
         {
-            _log.Here().Warning(ex, "Error cancelling tokens during dispose");
+            _log.Here().Warning(ex, "Error stopping dash-mpd-cli during dispose");
         }
 
         try

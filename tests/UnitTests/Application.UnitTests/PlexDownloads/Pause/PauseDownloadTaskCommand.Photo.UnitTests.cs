@@ -89,7 +89,7 @@ public class PauseDownloadTaskCommandPhotoUnitTests : BaseCommandUnitTest<PauseD
         result.Errors.Count.ShouldBe(0);
         var after = await dbContext.DownloadTaskPhotoImageFiles.SingleAsync(x => x.Id == target.Id, CancellationToken);
         after.DownloadStatus.ShouldBe(expected);
-        after.DataReceived.ShouldBe(before == DownloadStatus.Moving ? 0 : 512);
+        after.DataReceived.ShouldBe(512);
         (
             await dbContext.DownloadTaskPhotoImages.SingleAsync(x => x.Id == target.ParentId, CancellationToken)
         ).DownloadStatus.ShouldBe(expected);

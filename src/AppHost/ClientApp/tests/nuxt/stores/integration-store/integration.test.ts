@@ -323,6 +323,330 @@ describe('IntegrationStore', () => {
 		expect(store.testResult).toBeNull();
 	});
 
+	test('Should clear displayed connection test when URL identity changes', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestedAt: testResult.testedAt,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		Object.assign(store.draft, { type: IntegrationType.Radarr, url: 'http://radarr', apiKey: 'key' });
+		store.testResult = testResult;
+
+		// Act
+		store.draft.url = 'http://new-radarr';
+
+		// Assert
+		expect(store.testResult).toBeNull();
+	});
+
+	test('Should clear displayed connection test for a new draft when URL identity changes', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.openAdd(IntegrationType.Radarr);
+		Object.assign(store.draft, { url: 'http://radarr', apiKey: 'key' });
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.testResult = testResult;
+
+		// Act
+		store.draft.url = 'http://new-radarr';
+
+		// Assert
+		expect(store.testResult).toBeNull();
+	});
+
+	test('Should clear displayed connection test when API key identity changes', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestedAt: testResult.testedAt,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		Object.assign(store.draft, { type: IntegrationType.Radarr, url: 'http://radarr', apiKey: 'key' });
+		store.testResult = testResult;
+
+		// Act
+		store.draft.apiKey = 'new-key';
+
+		// Assert
+		expect(store.testResult).toBeNull();
+	});
+
+	test('Should preserve displayed connection test when only the name changes', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestedAt: testResult.testedAt,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		Object.assign(store.draft, { type: IntegrationType.Radarr, url: 'http://radarr', apiKey: 'key' });
+		store.testResult = testResult;
+
+		// Act
+		store.draft.name = 'Renamed Radarr';
+
+		// Assert
+		expect(store.testResult).toEqual(testResult);
+	});
+
+	test('Should preserve displayed connection test when URL only adds trailing slashes', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestedAt: testResult.testedAt,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		Object.assign(store.draft, { type: IntegrationType.Radarr, url: 'http://radarr', apiKey: 'key' });
+		store.testResult = testResult;
+
+		// Act
+		store.draft.url = 'http://radarr///';
+
+		// Assert
+		expect(store.testResult).toEqual(testResult);
+	});
+
+	test('Should not reapply stale connection test after saving a changed connection identity', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.items = [{
+			baseUrl: 'http://radarr',
+			category: 'radarr',
+			downloadFolderId: 1,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestedAt: testResult.testedAt,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			type: IntegrationType.Radarr,
+		}];
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestedAt: testResult.testedAt,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		Object.assign(store.draft, { type: IntegrationType.Radarr, url: 'http://radarr', apiKey: 'key' });
+		store.testResult = testResult;
+		Object.assign(store.draft, {
+			type: IntegrationType.Radarr,
+			name: 'Radarr',
+			url: 'http://new-radarr',
+			apiKey: 'new-key',
+			category: 'radarr',
+			downloadFolderId: 1,
+		});
+		const updatedDetail = {
+			id: 'id',
+			name: 'Radarr',
+			url: 'http://new-radarr',
+			apiKey: 'new-key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			provisioningState: IntegrationProvisioningState.ChangesPending,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestedAt: null,
+		};
+		const updatedSummary = {
+			baseUrl: 'http://new-radarr',
+			category: 'radarr',
+			downloadFolderId: 1,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.ChangesPending,
+			type: IntegrationType.Radarr,
+		};
+		const update = vi.spyOn(integrationApi, 'updateRadarrIntegrationEndpoint').mockReturnValue(success(updatedDetail));
+		const refresh = vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([updatedSummary]));
+
+		// Act
+		const result = subscribeSpyTo(store.save());
+		await result.onComplete();
+
+		// Assert
+		expect(result.getLastValue()).toEqual(expect.objectContaining({ isSuccess: true }));
+		expect(update).toHaveBeenCalledWith('id', {
+			name: 'Radarr',
+			url: 'http://new-radarr',
+			apiKey: 'new-key',
+			category: 'radarr',
+			downloadFolderId: 1,
+		});
+		expect(refresh).toHaveBeenCalledTimes(1);
+		expect(store.testResult).toBeNull();
+		expect(store.detail?.lastConnectionTestStatus).toBe(TestConnectionStatus.Unknown);
+		expect(store.items[0]?.lastConnectionTestStatus).toBe(TestConnectionStatus.Unknown);
+	});
+
+	test('Should not reapply a connection test cleared while refresh is pending', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.items = [{
+			baseUrl: 'http://radarr',
+			category: 'radarr',
+			downloadFolderId: 1,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestedAt: testResult.testedAt,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			type: IntegrationType.Radarr,
+		}];
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: 200,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			lastConnectionTestedAt: testResult.testedAt,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		store.testResult = testResult;
+		const refreshResponse = new Subject<ResultDTO<IntegrationSummary[]>>();
+		const refresh = vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(refreshResponse.asObservable());
+
+		// Act
+		const result = subscribeSpyTo(store.refresh());
+		store.testResult = null;
+		refreshResponse.next({
+			isSuccess: true,
+			value: [{
+				baseUrl: 'http://radarr',
+				category: 'radarr',
+				downloadFolderId: 1,
+				externalDownloadClientId: null,
+				externalIndexerId: null,
+				id: 'id',
+				lastConnectionTestErrorMessage: null,
+				lastConnectionTestHttpStatusCode: null,
+				lastConnectionTestStatus: TestConnectionStatus.Unknown,
+				lastConnectionTestedAt: null,
+				name: 'Radarr',
+				provisioningState: IntegrationProvisioningState.Configured,
+				type: IntegrationType.Radarr,
+			}],
+			errors: [],
+			successes: [],
+			statusCode: 200,
+		});
+		refreshResponse.complete();
+		await result.onComplete();
+
+		// Assert
+		expect(refresh).toHaveBeenCalledTimes(1);
+		expect(store.items[0]?.lastConnectionTestStatus).toBe(TestConnectionStatus.Unknown);
+	});
+
 	test('Should not report a stale connection test as current after credentials change', async () => {
 		// Arrange
 		const store = useIntegrationStore();
@@ -418,12 +742,12 @@ describe('IntegrationStore', () => {
 		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(refreshResponse.asObservable());
 
 		const save = subscribeSpyTo(store.save());
-		store.testResult = null;
 		refreshResponse.next({ isSuccess: true, value: [staleSummary], errors: [], successes: [], statusCode: 200 });
 		refreshResponse.complete();
 		await save.onComplete();
 
 		expect(store.items[0]!.lastConnectionTestStatus).toBe(TestConnectionStatus.Success);
+		expect(store.testResult).toEqual(testResult);
 	});
 
 	test('Should require a download folder when validating a draft', () => {

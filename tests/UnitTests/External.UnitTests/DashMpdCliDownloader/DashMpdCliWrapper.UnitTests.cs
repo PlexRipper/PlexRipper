@@ -67,6 +67,91 @@ public class DashMpdCliWrapperUnitTests : BaseUnitTest
         await wrapper.DisposeAsync();
     }
 
+    [Test]
+    public async Task ShouldAwaitNativeRunnerBeforeStopCompletes()
+    {
+        // Arrange
+        var wrapper = CreateWrapper("/usr/bin/yes");
+        var outputEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var outputRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var shouldBlockOutput = 1;
+        using var subscription = wrapper.StandardOutput.Subscribe(_ =>
+        {
+            if (Interlocked.Exchange(ref shouldBlockOutput, 0) == 1)
+            {
+                outputEntered.TrySetResult();
+                outputRelease.Task.GetAwaiter().GetResult();
+            }
+        });
+
+        try
+        {
+            var startTask = Task.Run(() => wrapper.StartAsync(CreateOptions("--")), CancellationToken);
+            await outputEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+
+            // Act
+            var stopTask = Task.Run(() => wrapper.StopAsync(), CancellationToken);
+
+            // Assert
+            stopTask.IsCompleted.ShouldBeFalse();
+            outputRelease.TrySetResult();
+            var stopResult = await stopTask.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+            var startResult = await startTask.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+            stopResult.IsCancelled.ShouldBeTrue();
+            startResult.IsCancelled.ShouldBeTrue();
+        }
+        finally
+        {
+            outputRelease.TrySetResult();
+            await wrapper.DisposeAsync();
+        }
+    }
+
+    [Test]
+    public async Task ShouldAwaitNativeRunnerBeforeDisposeCompletesAndSubjectsClose()
+    {
+        // Arrange
+        var wrapper = CreateWrapper("/usr/bin/yes");
+        var outputEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var outputRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var subjectsCompleted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var shouldBlockOutput = 1;
+        using var subscription = wrapper.StandardOutput.Subscribe(
+            _ =>
+            {
+                if (Interlocked.Exchange(ref shouldBlockOutput, 0) == 1)
+                {
+                    outputEntered.TrySetResult();
+                    outputRelease.Task.GetAwaiter().GetResult();
+                }
+            },
+            () => subjectsCompleted.TrySetResult()
+        );
+
+        try
+        {
+            var startTask = Task.Run(() => wrapper.StartAsync(CreateOptions("--")), CancellationToken);
+            await outputEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+
+            // Act
+            var disposeTask = Task.Run(() => wrapper.DisposeAsync().AsTask(), CancellationToken);
+
+            // Assert
+            disposeTask.IsCompleted.ShouldBeFalse();
+            subjectsCompleted.Task.IsCompleted.ShouldBeFalse();
+            outputRelease.TrySetResult();
+            await disposeTask.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+            var startResult = await startTask.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+            startResult.IsCancelled.ShouldBeTrue();
+            await subjectsCompleted.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+        }
+        finally
+        {
+            outputRelease.TrySetResult();
+            await wrapper.DisposeAsync();
+        }
+    }
+
     private static DashMpdCliWrapper CreateWrapper(string binaryPath)
     {
         var fileSystem = new System.IO.Abstractions.FileSystem();
@@ -83,14 +168,14 @@ public class DashMpdCliWrapperUnitTests : BaseUnitTest
         return wrapper;
     }
 
-    private static DashMpdCliOptions CreateOptions()
+    private static DashMpdCliOptions CreateOptions(string mpdUrl = "https://example.com/manifest.mpd")
     {
         var workingDirectory = Path.Combine(Path.GetTempPath(), $"reaparr-dash-wrapper-test-{Guid.NewGuid():N}");
         Directory.CreateDirectory(workingDirectory);
 
         return new DashMpdCliOptions
         {
-            MpdUrl = "https://example.com/manifest.mpd",
+            MpdUrl = mpdUrl,
             Output = Path.Combine(workingDirectory, "output.mkv.reaptemp"),
             WorkingDirectory = workingDirectory,
             Quiet = true,

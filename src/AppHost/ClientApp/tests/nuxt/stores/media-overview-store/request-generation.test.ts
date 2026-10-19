@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { baseSetup, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import {
 	generatePlexMediaSlims,
@@ -127,6 +127,52 @@ describe('MediaOverviewStore - Request generation ownership', () => {
 		expect(store.getMediaItems).toEqual(secondPage.mediaList);
 	});
 
+	test('Should retain library metadata when a query supersedes the initial media request', async () => {
+		// Arrange
+		const store = useMediaOverviewStore();
+		const libraryStore = useLibraryStore();
+		const library = createLibrary(7);
+		libraryStore.updateLibrary(library);
+		const metadataResponse = new Subject<ResultDTO<PlexMediaMetadataDTO>>();
+		const filterMetadataResponse = new Subject<ResultDTO<PlexMediaFilterMetadataDTO>>();
+		const initialMediaResponse = new Subject<ResultDTO<PlexMediaStatisticsDTO>>();
+		const queryMediaResponse = new Subject<ResultDTO<PlexMediaStatisticsDTO>>();
+		const metadataRequest = vi.spyOn(plexLibraryApi, 'getLibraryMediaMetadata').mockReturnValue(metadataResponse.asObservable());
+		const filterMetadataRequest = vi.spyOn(plexLibraryApi, 'getMetadataFilter').mockReturnValue(filterMetadataResponse.asObservable());
+		vi.spyOn(plexLibraryApi, 'getPlexLibraryByIdEndpoint').mockReturnValue(of(generateResultDTO(library)));
+		const queryPage = createPage('Q', 'query-new', 1);
+		const mediaRequest = vi.spyOn(plexMediaApi, 'getAllMediaByTypeEndpoint').mockImplementation((query) =>
+			query.q === 'new-query' ? queryMediaResponse.asObservable() : initialMediaResponse.asObservable());
+		const initialization = subscribeSpyTo(store.initializeLibrary(library.id));
+
+		// Act
+		const query = subscribeSpyTo(store.setFilterQuery('new-query'));
+
+		// Assert
+		expect(metadataRequest).toHaveBeenCalledTimes(1);
+		expect(filterMetadataRequest).toHaveBeenCalledTimes(1);
+		expect(mediaRequest).toHaveBeenCalledTimes(2);
+		expect(initialMediaResponse.observers).toHaveLength(0);
+
+		// Act
+		queryMediaResponse.next(generateResultDTO(queryPage));
+		queryMediaResponse.complete();
+		await query.onComplete();
+		metadataResponse.next(generateResultDTO(createMetadata(42)));
+		metadataResponse.complete();
+		filterMetadataResponse.next(generateResultDTO(createFilterMetadata(40)));
+		filterMetadataResponse.complete();
+		await initialization.onComplete();
+
+		// Assert
+		expect(store.filterQuery).toBe('new-query');
+		expect(store.metadataList.mediaCount).toBe(42);
+		expect(store.availableCountryIds).toEqual([40]);
+		expect(store.availableGenreIds).toEqual([41]);
+		expect(store.availableQualityIds).toEqual([42]);
+		expect(store.availableRoleIds).toEqual([43]);
+		expect(store.getMediaItems).toEqual(queryPage.mediaList);
+	});
 	test('Should cancel obsolete library metadata and media when switching libraries', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();

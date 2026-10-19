@@ -252,6 +252,98 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
         );
     }
 
+    [Test]
+    public async Task ShouldDeleteOnlyAffectedComparisonResults_WhenCancellationAlreadyDeletedTheQuartzJob()
+    {
+        // Arrange
+        await SetupDatabase(
+            91118,
+            config =>
+            {
+                config.PlexServerCount = 4;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        var controlRemoteLibrary = libraries[2];
+        var controlOwnedLibrary = libraries[3];
+        await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.Movie);
+        await AddCurrentScopeAsync(controlRemoteLibrary, controlOwnedLibrary, PlexMediaType.Movie);
+        var affectedComparison = CreateMovieComparison(
+            remoteLibrary.Id, ownedLibrary.Id,
+            (await GetLibraryMovieAsync(remoteLibrary.Id)).Id,
+            (await GetLibraryMovieAsync(ownedLibrary.Id)).Id,
+            PlexMediaComparisonHitState.Matched
+        );
+        var controlComparison = CreateMovieComparison(
+            controlRemoteLibrary.Id, controlOwnedLibrary.Id,
+            (await GetLibraryMovieAsync(controlRemoteLibrary.Id)).Id,
+            (await GetLibraryMovieAsync(controlOwnedLibrary.Id)).Id,
+            PlexMediaComparisonHitState.Matched
+        );
+        dbContext.PlexMovieComparisons.AddRange(affectedComparison, controlComparison);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        (await dbContext.PlexMovieComparisons.CountAsync(CancellationToken)).ShouldBe(2);
+        (await dbContext.PlexComparisonScopes.CountAsync(CancellationToken)).ShouldBe(2);
+        var retainedScopeIds = await dbContext.PlexComparisonScopes
+            .Where(x => x.OwnedPlexLibraryId == controlOwnedLibrary.Id)
+            .Select(x => x.Id).ToListAsync(CancellationToken);
+        retainedScopeIds.Count.ShouldBe(1);
+
+        var jobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id);
+        var scheduler = Mock.Mock<IScheduler>();
+        var isExecuting = true;
+        var jobExists = true;
+        ConfigureAffectedJob(
+            scheduler, jobKey,
+            new PlexLibraryComparisonJobPayload(ownedLibrary.Id, remoteLibrary.Id),
+            () => isExecuting,
+            () => isExecuting = false,
+            interruptSucceeds: true
+        );
+        scheduler.Setup(x => x.CheckExists(jobKey, CancellationToken))
+            .ReturnsAsync(() => jobExists).Verifiable(Times.Exactly(2));
+        scheduler.Setup(x => x.DeleteJob(jobKey, CancellationToken))
+            .Callback(() => jobExists = false).ReturnsAsync(true).Verifiable(Times.Once());
+        scheduler.Setup(x => x.Interrupt(jobKey, CancellationToken))
+            .Callback(() => isExecuting = false).ReturnsAsync(true).Verifiable(Times.Once());
+        scheduler.Setup(x => x.DeleteJobs(
+                It.Is<IReadOnlyCollection<JobKey>>(keys => keys.Count == 1 && keys.Contains(jobKey)),
+                CancellationToken))
+            .ReturnsAsync(false).Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new InvalidateLibraryComparisonJobsCommand([ownedLibrary.Id]), CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        isExecuting.ShouldBeFalse();
+        jobExists.ShouldBeFalse();
+        var retainedComparisons = await dbContext.PlexMovieComparisons
+            .Select(x => new { x.Id, x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.RemotePlexMediaId, x.OwnedPlexMediaId })
+            .ToListAsync(CancellationToken);
+        retainedComparisons.ShouldBe([
+            new
+            {
+                controlComparison.Id,
+                controlComparison.RemotePlexLibraryId,
+                controlComparison.OwnedPlexLibraryId,
+                controlComparison.RemotePlexMediaId,
+                controlComparison.OwnedPlexMediaId,
+            },
+        ]);
+        (await dbContext.PlexComparisonScopes.Select(x => x.Id).ToListAsync(CancellationToken))
+            .ShouldBe(retainedScopeIds);
+        scheduler.Verify();
+    }
+
     private static void ConfigureAffectedJob(
         Mock<IScheduler> scheduler,
         JobKey jobKey,

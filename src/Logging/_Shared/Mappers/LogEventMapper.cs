@@ -1,12 +1,18 @@
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Reaparr.Logging;
 
 public static class LogEventMapper
 {
     private static long _sequence;
+    // Share each event across history and live delivery without retaining the original LogEvent.
+    private static readonly ConditionalWeakTable<LogEvent, LiveLogEventDTO> _mappedEvents = new();
 
-    public static LiveLogEventDTO ToLiveLogEvent(this LogEvent logEvent)
+    public static LiveLogEventDTO ToLiveLogEvent(this LogEvent logEvent) =>
+        _mappedEvents.GetValue(logEvent, CreateLiveLogEvent);
+
+    private static LiveLogEventDTO CreateLiveLogEvent(LogEvent logEvent)
     {
         var fileName = logEvent.GetStringProperty(SlimLogConfig.FileName);
         var lineNumber = logEvent.GetIntProperty(SlimLogConfig.LineNumber);

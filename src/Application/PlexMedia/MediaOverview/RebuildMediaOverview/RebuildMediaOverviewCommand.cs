@@ -185,11 +185,11 @@ public sealed class RebuildMediaOverviewCommandHandler : ICommandHandler<Rebuild
                         x.Id,
                         x.PlexLibraryId,
                         x.SearchTitle,
-                        x.Year,
+                        Year = 0,
                         x.AddedAt,
                         x.UpdatedAt,
-                        x.Duration,
-                        x.MediaSize,
+                        Duration = x.Memberships.Sum(edge => edge.PlexPhotoMediaData!.Duration ?? 0),
+                        MediaSize = x.Memberships.Sum(edge => edge.PlexPhotoMediaData!.Size),
                     })
                     .ToListAsync(cancellationToken);
                 var snapshots = source

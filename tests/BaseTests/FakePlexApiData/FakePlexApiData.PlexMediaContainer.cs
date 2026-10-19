@@ -73,7 +73,6 @@ public partial class FakePlexApiData
         .RuleFor(l => l.Banner, (f, x) => $"/library/metadata/{x.RatingKey}/banner/{f.Random.Int(100000, 1000000)}")
         .RuleFor(l => l.Theme, (f, x) => $"/library/metadata/{x.RatingKey}/theme/{f.Random.Int(100000, 1000000)}")
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
-        // set to null to avoid serializing the entire LocalDate object, needs to be long
         .RuleFor(l => l.OriginallyAvailableAt, _ => null)
         .RuleFor(l => l.AudienceRatingImage, _ => "rottentomatoes://image.rating.upright")
         .RuleFor(l => l.Index, f => f.Random.Int(1))
@@ -96,6 +95,9 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Offset, _ => 0L)
             .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
             .Ignore(x => x.Metadata) // Generated in FinishWith
+            .Ignore(x => x.Directory)
+            .Ignore(x => x.Photo)
+            .Ignore(x => x.Video)
             .Ignore(x => x.Size); // Generated in FinishWith
 
     /// <summary>

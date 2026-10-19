@@ -97,7 +97,10 @@ public partial class FakePlexApiData
                             media.VideoCodec = "";
                             media.AudioCodec = "";
                             foreach (var part in media.Part!)
+                            {
                                 part.File = $"/fixture/photos/photo-{part.Id}.jpg";
+                                part.Stream = [];
+                            }
                         }
                     }
                 }

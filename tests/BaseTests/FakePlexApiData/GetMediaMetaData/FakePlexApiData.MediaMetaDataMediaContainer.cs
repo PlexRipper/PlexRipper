@@ -1,6 +1,5 @@
 using Bogus.Hollywood;
 using LukeHagar.PlexAPI.SDK.Models.Components;
-using NodaTime;
 using Stream = LukeHagar.PlexAPI.SDK.Models.Components.Stream;
 using StreamType = LukeHagar.PlexAPI.SDK.Models.Components.StreamType;
 
@@ -13,6 +12,9 @@ public partial class FakePlexApiData
             .StrictMode(true)
             .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
             .Ignore(x => x.Metadata) // Generated in FinishWith
+            .Ignore(x => x.Directory)
+            .Ignore(x => x.Photo)
+            .Ignore(x => x.Video)
             .Ignore(x => x.TotalSize)
             .Ignore(x => x.Offset)
             .Ignore(x => x.Size); // Generated in FinishWith
@@ -40,7 +42,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.Art, (_, x) => $"/library/metadata/{x.RatingKey}/art/{x.UpdatedAt}")
         .RuleFor(l => l.Theme, (f, x) => $"/library/metadata/{x.RatingKey}/theme/{f.Random.Int(100000, 1000000)}")
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
-        .RuleFor(l => l.OriginallyAvailableAt, _ => LocalDate.MinIsoValue)
+        .RuleFor(l => l.OriginallyAvailableAt, _ => "-9998-01-01")
         .RuleFor(l => l.AudienceRatingImage, _ => "rottentomatoes://image.rating.upright")
         .RuleFor(l => l.Index, f => f.Random.Int(1))
         .RuleFor(l => l.LeafCount, f => f.Random.Int(1))

@@ -41,7 +41,9 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
         List<ComparisonDetailsRow> rows;
         if (currentLibraryIds.Count == 0)
         {
-            state = await GetUncomparedStateAsync(tvShow.PlexLibraryId, isOwned, ct);
+            state = await _dbContext.GetUncomparedComparisonStateAsync(
+                _scheduler, tvShow.PlexLibraryId, isOwned, PlexMediaType.TvShow, ct
+            );
             rows = [];
         }
         else
@@ -337,24 +339,6 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
         }
 
         return result;
-    }
-
-    private async Task<PlexMediaComparisonState> GetUncomparedStateAsync(int libraryId, bool isOwned, CancellationToken ct)
-    {
-        if (await _dbContext.PlexLibraries.AnyAsync(x => x.Id == libraryId && x.Outdated, ct))
-            return PlexMediaComparisonState.NotCompared;
-
-        var candidates = isOwned ? _dbContext.PlexLibraries.WhereIsNotOwned() : _dbContext.PlexLibraries.WhereIsOwned();
-        var libraryIds = await candidates
-            .Where(x => x.Type == PlexMediaType.TvShow && !x.Outdated)
-            .Select(x => x.Id)
-            .ToListAsync(ct);
-        var keys = libraryIds.Select(x => isOwned
-            ? PlexLibraryComparisonJob.GetJobKey(libraryId, x)
-            : PlexLibraryComparisonJob.GetJobKey(x, libraryId));
-        return await _scheduler.HasActiveJobs(keys, ct)
-            ? PlexMediaComparisonState.Pending
-            : PlexMediaComparisonState.NotCompared;
     }
 
     private async Task<Dictionary<int, int>> GetPlexServerIdsByLibraryIdAsync(

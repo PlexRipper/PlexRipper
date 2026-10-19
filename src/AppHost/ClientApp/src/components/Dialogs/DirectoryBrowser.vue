@@ -5,11 +5,19 @@
 		:loading="isLoading"
 		button-align="between"
 		:type="{} as FolderPathDTO"
-		@opened="open">
+		@opened="open"
+		@closed="emit('closed')">
 		<template #title>
 			{{ dialogTitle }}
 		</template>
 		<template #top-row>
+			<QAlert
+				v-if="errorMessage"
+				cy="directory-browser-save-error"
+				role="alert"
+				type="error">
+				{{ errorMessage }}
+			</QAlert>
 			<QRow>
 				<QCol
 					v-if="!isCurrentWritable"
@@ -28,11 +36,12 @@
 				</QCol>
 				<QCol>
 					<PTextField
-						v-model="currentPath"
+						:model-value="currentPath"
+						:readonly="saving"
 						outlined
 						color="red"
 						:placeholder="t('components.directory-browser.no-path')"
-						@update:model-value="requestDirectories" />
+						@update:model-value="updateCurrentPath" />
 				</QCol>
 			</QRow>
 			<q-markup-table class="directory-browser-table q-pr-md">
@@ -109,8 +118,9 @@
 			<CancelButton @click="cancel" />
 			<ConfirmButton
 				cy="directory-browser-confirm-button"
-				:disabled="!isCurrentWritable"
-				:tooltip-text="!isCurrentWritable ? $t('components.directory-browser.current-folder-has-no-write-permission') : ''"
+				:disabled="saving || !isCurrentWritable"
+				:loading="saving"
+				:tooltip-text="!saving && !isCurrentWritable ? $t('components.directory-browser.current-folder-has-no-write-permission') : ''"
 				@click="confirm()" />
 		</template>
 	</QCardDialog>
@@ -128,8 +138,11 @@ import { useDialogStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 
 const { t } = useI18n();
+const props = defineProps<{
+	saving: boolean;
+	errorMessage: string;
+}>();
 const dialogStore = useDialogStore();
-
 const path = ref<FolderPathDTO | null>(null);
 const currentPath = ref('');
 const currentPathModel = ref<FileSystemModelDTO | null>(null);
@@ -148,8 +161,8 @@ const returnRow = ref<FileSystemModelDTO>({
 });
 
 const emit = defineEmits<{
-	(e: 'confirm', path: FolderPathDTO): void;
-	(e: 'cancel'): void;
+	(e: 'confirm' | 'opened', path: FolderPathDTO): void;
+	(e: 'cancel' | 'closed'): void;
 }>();
 
 const isCurrentWritable = computed(() => {
@@ -203,9 +216,10 @@ function open(data: FolderPathDTO): void {
 		return;
 	}
 	selectedPath = cloneDeep(selectedPath);
-	requestDirectories(selectedPath.directory);
 	set(path, selectedPath);
 	set(currentPath, selectedPath.directory);
+	emit('opened', selectedPath);
+	requestDirectories(selectedPath.directory);
 }
 
 function cancel(): void {
@@ -214,23 +228,44 @@ function cancel(): void {
 }
 
 function confirm(): void {
-	if (!get(path)) {
+	if (props.saving) {
+		return;
+	}
+
+	const selectedPath = get(path);
+	if (!selectedPath) {
 		Log.error('path was null when confirming DirectoryBrowser');
 		return;
 	}
 
-	emit('confirm', get(path) as FolderPathDTO);
-	dialogStore.closeDialog(DialogType.DirectoryBrowserDialog);
+	emit('confirm', cloneDeep(selectedPath));
+}
+
+function updateCurrentPath(newPath: string): void {
+	if (props.saving) {
+		return;
+	}
+
+	set(currentPath, newPath);
+	requestDirectories(newPath);
 }
 
 function requestDirectories(newPath?: string): void {
+	if (props.saving) {
+		return;
+	}
+
 	if (!newPath) {
 		Log.warn(`path was invalid "${newPath}" setting to default empty root file-system view`);
 		newPath = '';
 	}
 
-	if (path.value) {
-		path.value.directory = newPath;
+	const currentPathValue = get(path);
+	if (currentPathValue) {
+		set(path, {
+			...currentPathValue,
+			directory: newPath,
+		});
 	}
 
 	useSubscription(
@@ -240,9 +275,9 @@ function requestDirectories(newPath?: string): void {
 			})
 			.subscribe(({ isSuccess, value }) => {
 				if (isSuccess && value) {
-					set(items, value?.directories);
-					set(currentPathModel, value?.current ?? null);
-					set(parentPath, value?.parent);
+					set(items, value.directories);
+					set(currentPathModel, value.current ?? null);
+					set(parentPath, value.parent);
 					set(isLoading, false);
 				}
 			}),
@@ -250,13 +285,14 @@ function requestDirectories(newPath?: string): void {
 }
 
 function directoryNavigate(dataRow: FileSystemModelDTO): void {
-	if (!dataRow.hasReadPermission) {
+	if (props.saving || !dataRow.hasReadPermission) {
 		return;
 	}
 
 	if (dataRow.path === '..') {
-		requestDirectories(parentPath.value);
-		set(currentPath, parentPath.value);
+		const parentPathValue = get(parentPath);
+		requestDirectories(parentPathValue);
+		set(currentPath, parentPathValue);
 	} else {
 		requestDirectories(dataRow.path);
 		set(currentPath, dataRow.path);

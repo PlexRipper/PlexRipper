@@ -6,7 +6,8 @@ import { mountSuspended } from '@nuxt/test-utils/runtime';
 import { Subject } from 'rxjs';
 import { createI18n } from 'vue-i18n';
 import { baseSetup } from '@services-test-base';
-import { useDownloadStore, useFolderPathStore } from '@store';
+import { useDialogStore, useDownloadStore, useFolderPathStore } from '@store';
+import { DialogType } from '@enums';
 import { FolderType, PlexMediaType, type DownloadMediaDTO, type DownloadPreviewContainerDTO, type FolderPathDTO } from '@dto';
 import DownloadConfirmation from '@/components/Dialogs/DownloadConfirmation.vue';
 import messages from '@/lang/en-US.json';
@@ -112,9 +113,11 @@ describe('DownloadConfirmation - family destinations and preview lifetime', () =
 		expect(wrapper.text()).not.toContain('Quality');
 	});
 
-	test('Should keep Other Videos quality information and never borrow a Movie destination', async () => {
+	test('Should keep Other Videos quality information and close the browser after a custom destination is selected', async () => {
 		const response = new Subject<DownloadPreviewContainerDTO | null>();
 		const wrapper = await render([folder(10, PlexMediaType.Movie, FolderType.MovieFolder, true)], [response]);
+		const dialogStore = useDialogStore();
+		const closeDialog = vi.spyOn(dialogStore, 'closeDialog');
 		wrapper.getComponent(CardDialog).vm.$emit('opened', command(PlexMediaType.OtherVideos));
 		response.next(preview('Personal video', PlexMediaType.OtherVideos));
 		await flushPromises();
@@ -126,6 +129,7 @@ describe('DownloadConfirmation - family destinations and preview lifetime', () =
 			...folder(0, PlexMediaType.OtherVideos, FolderType.OtherVideosFolder), directory: '/custom/personal-videos',
 		});
 		await flushPromises();
+		expect(closeDialog).toHaveBeenCalledWith(DialogType.DirectoryBrowserDialog);
 		await wrapper.get('[data-cy="download-confirmation-submit"]').findAll('button')[0]!.trigger('click');
 		expect(wrapper.emitted('download')?.[0]?.[0]).toMatchObject({ destinationFolderPathId: 0, customDestinationFolderPath: '/custom/personal-videos' });
 	});

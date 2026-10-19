@@ -36,6 +36,11 @@ public interface IUserService
     Task<IdentityResult> UpdateAsync(AppUser user);
 
     /// <summary>
+    /// Validates a password against the configured Identity policy without changing the user.
+    /// </summary>
+    Task<IdentityResult> ValidatePasswordAsync(AppUser user, string password);
+
+    /// <summary>
     /// Generates a password reset token for a user
     /// </summary>
     Task<string> GeneratePasswordResetTokenAsync(AppUser user);

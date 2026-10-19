@@ -76,6 +76,18 @@ public class UpdateCredentialsEndpoint : Endpoint<UpdateCredentialsEndpointReque
         var newUsername = req.Username;
         var newPassword = req.Password;
 
+        // Validate before saving the username so password-policy failures leave both credentials unchanged.
+        var passwordValidation = newPassword is null
+            ? null
+            : await _userService.ValidatePasswordAsync(user, newPassword);
+        if (passwordValidation is { Succeeded: false })
+        {
+            var result = Result.Fail(passwordValidation.Errors.Select(e => e.Description)).LogError();
+            result.Add400BadRequestError("Failed to update password");
+            await Send.FluentResult(result, ct);
+            return;
+        }
+
         if (newUsername is not null)
         {
             // Update the username

@@ -35,6 +35,23 @@ public class IdentityUserService : IUserService
     public async Task<IdentityResult> UpdateAsync(AppUser user) => await _userManager.UpdateAsync(user);
 
     /// <inheritdoc/>
+    public async Task<IdentityResult> ValidatePasswordAsync(AppUser user, string password)
+    {
+        List<IdentityError>? errors = null;
+        foreach (var validator in _userManager.PasswordValidators)
+        {
+            var result = await validator.ValidateAsync(_userManager, user, password);
+            if (!result.Succeeded)
+            {
+                errors ??= [];
+                errors.AddRange(result.Errors);
+            }
+        }
+
+        return errors is null ? IdentityResult.Success : IdentityResult.Failed(errors.ToArray());
+    }
+
+    /// <inheritdoc/>
     public async Task<string> GeneratePasswordResetTokenAsync(AppUser user) =>
         await _userManager.GeneratePasswordResetTokenAsync(user);
 

@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 
@@ -9,31 +10,47 @@ internal class DesktopLaunchWorkflowUnitTests : BaseUnitTest<DesktopLaunchBuildC
     public async Task ShouldLaunchNewestTopLevelAppImage_WhenLinuxPackagedLaunchIsRequested()
     {
         // Arrange
-        const string artifactDirectory = "/repo/release-output";
-        const string olderArtifact = "/repo/release-output/Reaparr-1.0.0.AppImage";
-        const string newestArtifact = "/repo/release-output/Reaparr-1.1.0.AppImage";
-        const string nestedArtifact = "/repo/release-output/nested/Reaparr-nested.AppImage";
+        const string rootDirectory = "/repo";
+        const string artifactDirectorySetting = "release-output";
+        const string olderArtifactName = "Reaparr-1.0.0.AppImage";
+        const string newestArtifactName = "Reaparr-1.1.0.AppImage";
+        const string nestedArtifactName = "Reaparr-nested.AppImage";
         var olderWriteTime = new DateTimeOffset(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
         var newestWriteTime = new DateTimeOffset(2026, 10, 17, 12, 0, 0, TimeSpan.Zero);
 
         SetupFileSystem(system =>
         {
+            var artifactDirectory = system.Path.GetFullPath(artifactDirectorySetting, rootDirectory);
+            var nestedArtifactDirectory = system.Path.Combine(artifactDirectory, "nested");
             system.AddDirectory(artifactDirectory);
-            system.AddDirectory("/repo/release-output/nested");
-            system.AddFile(olderArtifact, new MockFileData("older") { LastWriteTime = olderWriteTime });
-            system.AddFile(newestArtifact, new MockFileData("newest") { LastWriteTime = newestWriteTime });
-            system.AddFile(nestedArtifact, new MockFileData("nested") { LastWriteTime = newestWriteTime.AddDays(1) });
-            system.AddFile("/repo/release-output/not-an-app-image.zip", new MockFileData("other"));
+            system.AddDirectory(nestedArtifactDirectory);
+            system.AddFile(
+                system.Path.Combine(artifactDirectory, olderArtifactName),
+                new MockFileData("older") { LastWriteTime = olderWriteTime }
+            );
+            system.AddFile(
+                system.Path.Combine(artifactDirectory, newestArtifactName),
+                new MockFileData("newest") { LastWriteTime = newestWriteTime }
+            );
+            system.AddFile(
+                system.Path.Combine(nestedArtifactDirectory, nestedArtifactName),
+                new MockFileData("nested") { LastWriteTime = newestWriteTime.AddDays(1) }
+            );
+            system.AddFile(system.Path.Combine(artifactDirectory, "not-an-app-image.zip"), new MockFileData("other"));
         });
+
+        var fileSystem = Mock.Container.Resolve<IFileSystem>();
+        var artifactDirectory = fileSystem.Path.GetFullPath(artifactDirectorySetting, rootDirectory);
+        var newestArtifact = fileSystem.Path.Combine(artifactDirectory, newestArtifactName);
 
         var settings = new DesktopCommandSettings
         {
             RuntimeIdentifier = "linux-x64",
             LaunchMode = "packaged",
-            ArtifactDirectory = "release-output",
+            ArtifactDirectory = artifactDirectorySetting,
         };
 
-        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
+        SetupDependencies(builder => builder.Register(_ => rootDirectory).As<string>().SingleInstance());
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x =>
@@ -73,22 +90,31 @@ internal class DesktopLaunchWorkflowUnitTests : BaseUnitTest<DesktopLaunchBuildC
     public async Task ShouldFail_WhenLinuxPackagedArtifactIsMissing()
     {
         // Arrange
-        const string artifactDirectory = "/repo/.artifacts/linux-x64";
+        const string rootDirectory = "/repo";
+        const string runtimeIdentifier = "linux-x64";
         SetupFileSystem(system =>
         {
+            var artifactDirectory = system.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+            var nestedArtifactDirectory = system.Path.Combine(artifactDirectory, "nested");
             system.AddDirectory(artifactDirectory);
-            system.AddDirectory("/repo/.artifacts/linux-x64/nested");
-            system.AddFile("/repo/.artifacts/linux-x64/nested/Reaparr.AppImage", new MockFileData("nested"));
-            system.AddFile("/repo/.artifacts/linux-x64/Reaparr.zip", new MockFileData("not an AppImage"));
+            system.AddDirectory(nestedArtifactDirectory);
+            system.AddFile(
+                system.Path.Combine(nestedArtifactDirectory, "Reaparr.AppImage"),
+                new MockFileData("nested")
+            );
+            system.AddFile(
+                system.Path.Combine(artifactDirectory, "Reaparr.zip"),
+                new MockFileData("not an AppImage")
+            );
         });
 
         var settings = new DesktopCommandSettings
         {
-            RuntimeIdentifier = "linux-x64",
+            RuntimeIdentifier = runtimeIdentifier,
             LaunchMode = "packaged",
         };
 
-        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
+        SetupDependencies(builder => builder.Register(_ => rootDirectory).As<string>().SingleInstance());
 
         // Act
         var result = await Sut.ExecuteAsync(new DesktopLaunchBuildCommand(settings), CancellationToken);
@@ -126,21 +152,27 @@ internal class DesktopLaunchWorkflowUnitTests : BaseUnitTest<DesktopLaunchBuildC
     public async Task ShouldFailAndNotLaunch_WhenChmodFailsForLinuxPackagedArtifact()
     {
         // Arrange
-        const string artifactDirectory = "/repo/.artifacts/linux-x64";
-        const string appImage = "/repo/.artifacts/linux-x64/Reaparr.AppImage";
+        const string rootDirectory = "/repo";
+        const string runtimeIdentifier = "linux-x64";
         SetupFileSystem(system =>
         {
+            var artifactDirectory = system.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+            var appImage = system.Path.Combine(artifactDirectory, "Reaparr.AppImage");
             system.AddDirectory(artifactDirectory);
             system.AddFile(appImage, new MockFileData("app image"));
         });
 
+        var fileSystem = Mock.Container.Resolve<IFileSystem>();
+        var artifactDirectory = fileSystem.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+        var appImage = fileSystem.Path.Combine(artifactDirectory, "Reaparr.AppImage");
+
         var settings = new DesktopCommandSettings
         {
-            RuntimeIdentifier = "linux-x64",
+            RuntimeIdentifier = runtimeIdentifier,
             LaunchMode = "packaged",
         };
 
-        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
+        SetupDependencies(builder => builder.Register(_ => rootDirectory).As<string>().SingleInstance());
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x =>
@@ -180,20 +212,29 @@ internal class DesktopLaunchWorkflowUnitTests : BaseUnitTest<DesktopLaunchBuildC
     public async Task ShouldLaunchPublishedExecutable_WhenLinuxLaunchModeIsPublished()
     {
         // Arrange
-        const string publishedExecutable = "/repo/.artifacts/linux-x64/publish/Reaparr.AppHost";
+        const string rootDirectory = "/repo";
+        const string runtimeIdentifier = "linux-x64";
         SetupFileSystem(system =>
         {
-            system.AddDirectory("/repo/.artifacts/linux-x64/publish");
+            var artifactDirectory = system.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+            var publishDirectory = system.Path.Combine(artifactDirectory, "publish");
+            var publishedExecutable = system.Path.Combine(publishDirectory, "Reaparr.AppHost");
+            system.AddDirectory(publishDirectory);
             system.AddFile(publishedExecutable, new MockFileData("published"));
         });
 
+        var fileSystem = Mock.Container.Resolve<IFileSystem>();
+        var artifactDirectory = fileSystem.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+        var publishDirectory = fileSystem.Path.Combine(artifactDirectory, "publish");
+        var publishedExecutable = fileSystem.Path.Combine(publishDirectory, "Reaparr.AppHost");
+
         var settings = new DesktopCommandSettings
         {
-            RuntimeIdentifier = "linux-x64",
+            RuntimeIdentifier = runtimeIdentifier,
             LaunchMode = "published",
         };
 
-        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
+        SetupDependencies(builder => builder.Register(_ => rootDirectory).As<string>().SingleInstance());
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x =>
@@ -220,21 +261,30 @@ internal class DesktopLaunchWorkflowUnitTests : BaseUnitTest<DesktopLaunchBuildC
     public async Task ShouldLaunchPublishedExecutable_WhenLinuxPackagingIsSkipped()
     {
         // Arrange
-        const string publishedExecutable = "/repo/.artifacts/linux-x64/publish/Reaparr.AppHost";
+        const string rootDirectory = "/repo";
+        const string runtimeIdentifier = "linux-x64";
         SetupFileSystem(system =>
         {
-            system.AddDirectory("/repo/.artifacts/linux-x64/publish");
+            var artifactDirectory = system.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+            var publishDirectory = system.Path.Combine(artifactDirectory, "publish");
+            var publishedExecutable = system.Path.Combine(publishDirectory, "Reaparr.AppHost");
+            system.AddDirectory(publishDirectory);
             system.AddFile(publishedExecutable, new MockFileData("published"));
         });
 
+        var fileSystem = Mock.Container.Resolve<IFileSystem>();
+        var artifactDirectory = fileSystem.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+        var publishDirectory = fileSystem.Path.Combine(artifactDirectory, "publish");
+        var publishedExecutable = fileSystem.Path.Combine(publishDirectory, "Reaparr.AppHost");
+
         var settings = new DesktopCommandSettings
         {
-            RuntimeIdentifier = "linux-x64",
+            RuntimeIdentifier = runtimeIdentifier,
             LaunchMode = "packaged",
             SkipPackage = true,
         };
 
-        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
+        SetupDependencies(builder => builder.Register(_ => rootDirectory).As<string>().SingleInstance());
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x =>
@@ -261,15 +311,24 @@ internal class DesktopLaunchWorkflowUnitTests : BaseUnitTest<DesktopLaunchBuildC
     public async Task ShouldUseExpectedWindowsLaunchFallback_OnEachHost()
     {
         // Arrange
-        const string publishedExecutable = "/repo/.artifacts/win-x64/publish/Reaparr.AppHost.exe";
+        const string rootDirectory = "/repo";
+        const string runtimeIdentifier = "win-x64";
         SetupFileSystem(system =>
         {
-            system.AddDirectory("/repo/.artifacts/win-x64/publish");
+            var artifactDirectory = system.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+            var publishDirectory = system.Path.Combine(artifactDirectory, "publish");
+            var publishedExecutable = system.Path.Combine(publishDirectory, "Reaparr.AppHost.exe");
+            system.AddDirectory(publishDirectory);
             system.AddFile(publishedExecutable, new MockFileData("published"));
         });
 
-        var settings = new DesktopCommandSettings { RuntimeIdentifier = "win-x64" };
-        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
+        var fileSystem = Mock.Container.Resolve<IFileSystem>();
+        var artifactDirectory = fileSystem.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+        var publishDirectory = fileSystem.Path.Combine(artifactDirectory, "publish");
+        var publishedExecutable = fileSystem.Path.Combine(publishDirectory, "Reaparr.AppHost.exe");
+
+        var settings = new DesktopCommandSettings { RuntimeIdentifier = runtimeIdentifier };
+        SetupDependencies(builder => builder.Register(_ => rootDirectory).As<string>().SingleInstance());
 
         if (OperatingSystem.IsWindows())
         {
@@ -319,15 +378,24 @@ internal class DesktopLaunchWorkflowUnitTests : BaseUnitTest<DesktopLaunchBuildC
     public async Task ShouldUseExpectedWindowsLaunchFallback_WhenWineIsUnavailable()
     {
         // Arrange
-        const string publishedExecutable = "/repo/.artifacts/win-x64/publish/Reaparr.AppHost.exe";
+        const string rootDirectory = "/repo";
+        const string runtimeIdentifier = "win-x64";
         SetupFileSystem(system =>
         {
-            system.AddDirectory("/repo/.artifacts/win-x64/publish");
+            var artifactDirectory = system.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+            var publishDirectory = system.Path.Combine(artifactDirectory, "publish");
+            var publishedExecutable = system.Path.Combine(publishDirectory, "Reaparr.AppHost.exe");
+            system.AddDirectory(publishDirectory);
             system.AddFile(publishedExecutable, new MockFileData("published"));
         });
 
-        var settings = new DesktopCommandSettings { RuntimeIdentifier = "win-x64" };
-        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
+        var fileSystem = Mock.Container.Resolve<IFileSystem>();
+        var artifactDirectory = fileSystem.Path.Combine(rootDirectory, ".artifacts", runtimeIdentifier);
+        var publishDirectory = fileSystem.Path.Combine(artifactDirectory, "publish");
+        var publishedExecutable = fileSystem.Path.Combine(publishDirectory, "Reaparr.AppHost.exe");
+
+        var settings = new DesktopCommandSettings { RuntimeIdentifier = runtimeIdentifier };
+        SetupDependencies(builder => builder.Register(_ => rootDirectory).As<string>().SingleInstance());
 
         if (OperatingSystem.IsWindows())
         {

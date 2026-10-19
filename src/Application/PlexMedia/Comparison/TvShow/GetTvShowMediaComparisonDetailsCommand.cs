@@ -251,7 +251,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
         {
             (true, true, true) => PlexMediaComparisonState.PartialAndHigherQuality,
             (true, true, false) => PlexMediaComparisonState.Partial,
-            (true, false, _) => PlexMediaComparisonState.Missing,
+            (_, false, _) => PlexMediaComparisonState.Missing,
             (false, _, true) => PlexMediaComparisonState.HigherQuality,
             _ => PlexMediaComparisonState.Owned,
         };

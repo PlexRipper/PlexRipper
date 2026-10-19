@@ -765,4 +765,68 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             result.Value.Rows.ShouldBeEmpty();
     }
 
+    [Test]
+    [Arguments(false, false, PlexMediaComparisonState.Missing)]
+    [Arguments(false, true, PlexMediaComparisonState.Owned)]
+    [Arguments(true, false, PlexMediaComparisonState.Owned)]
+    [Arguments(true, true, PlexMediaComparisonState.Owned)]
+    public async Task ShouldUseOwnershipAndShowMatches_WhenTvShowHasNoEpisodes(
+        bool isOwned,
+        bool hasShowMatch,
+        PlexMediaComparisonState expectedState
+    )
+    {
+        // Arrange
+        await SetupDatabase(
+            63582,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexAccountCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 0;
+                config.TvShowEpisodeCount = 0;
+            }
+        );
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
+        await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
+        var remoteShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
+        var ownedShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
+        await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.TvShow);
+        if (hasShowMatch)
+        {
+            dbContext.PlexTvShowComparisons.Add(
+                CreateTvShowComparison(
+                    remoteLibrary.Id,
+                    ownedLibrary.Id,
+                    remoteShow.Id,
+                    ownedShow.Id,
+                    PlexMediaComparisonHitState.Matched
+                )
+            );
+            await dbContext.SaveChangesAsync(CancellationToken);
+        }
+        (await dbContext.PlexTvShowEpisodes.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.PlexTvShowComparisons.CountAsync(CancellationToken)).ShouldBe(hasShowMatch ? 1 : 0);
+        var targetShow = isOwned ? ownedShow : remoteShow;
+
+        // Act
+        var result = await TestHandlerExecuteAsync<PlexMediaComparisonDetailsDTO>(
+            new GetTvShowMediaComparisonDetailsCommand(targetShow.Id)
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.PlexMediaId.ShouldBe(targetShow.Id);
+        result.Value.Type.ShouldBe(PlexMediaType.TvShow);
+        result.Value.State.ShouldBe(expectedState);
+        result.Value.Rows.ShouldBeEmpty();
+    }
+
 }

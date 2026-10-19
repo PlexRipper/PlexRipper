@@ -229,38 +229,34 @@ public class StartDownloadTaskCommandMovieUnitTests : BaseUnitTest<StartDownload
         movieDownloadTasks.SetDownloadStatus(DownloadStatus.MoveError);
         await dbContext.SaveChangesAsync(CancellationToken);
 
+        var expectedKey = movieDownloadTasks.Single().ToKey();
         var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
+            .Setup(x => x.IsDownloadFileMoving(expectedKey, CancellationToken))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Once());
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
+            .Setup(x => x.StartMoveDownloadFileJob(expectedKey, CancellationToken))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
 
         // Act
         var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
 
-        // Assert: move job retried, download job never touched
+        // Assert: explicit start retries the move job without touching the download job
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        (await dbContext.GetDownloadTaskStatusAsync(expectedKey, CancellationToken)).ShouldBe(DownloadStatus.MoveError);
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(
                 x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
                 Times.Never()
             );
-        Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(
-                x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
-                Times.Once()
-            );
-        Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(
-                x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
-                Times.Once()
-            );
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify();
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>

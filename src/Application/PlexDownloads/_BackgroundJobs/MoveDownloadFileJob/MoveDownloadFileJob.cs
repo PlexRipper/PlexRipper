@@ -5,6 +5,9 @@ public sealed record MoveDownloadFileJobPayload(DownloadTaskKey DownloadTaskKey)
 [DisallowConcurrentExecution]
 public class MoveDownloadFileJob : IJob
 {
+    internal const string RetryCountKey = "MoveRetryCount";
+    internal const int MaxRetryCount = 5;
+
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
@@ -27,6 +30,17 @@ public class MoveDownloadFileJob : IJob
     }
 
     public static JobKey GetJobKey(Guid id) => new($"{nameof(MoveDownloadFileJob)}_{id}", nameof(MoveDownloadFileJob));
+
+    private static int GetRetryCount(IJobExecutionContext context)
+    {
+        if (
+            !context.MergedJobDataMap.TryGetValue(RetryCountKey, out var value)
+            || !int.TryParse(value?.ToString(), out var retryCount)
+        )
+            return 0;
+
+        return Math.Max(retryCount, 0);
+    }
 
     public async Task Execute(IJobExecutionContext context)
     {
@@ -114,8 +128,13 @@ public class MoveDownloadFileJob : IJob
             if (moveResult.IsFailed)
             {
                 _log.Here().Error("Failed to move all files for {DownloadTaskKey}", downloadTaskKey);
+                var retryCount = GetRetryCount(context);
+                if (retryCount >= MaxRetryCount)
+                    return moveResult;
+
                 // The current key is still executing. A separate one-shot trigger survives this firing
                 // and Quartz's non-concurrency guard holds it until this execution has been released.
+                var nextRetryCount = retryCount + 1;
                 var retryResult = await Result.Try(async Task () =>
                 {
                     var jobKey = GetJobKey(downloadTaskKey.Id);
@@ -126,6 +145,7 @@ public class MoveDownloadFileJob : IJob
                     var retryTrigger = TriggerBuilder.Create()
                         .WithIdentity(triggerKey)
                         .ForJob(jobKey)
+                        .UsingJobData(RetryCountKey, nextRetryCount)
                         .StartAt(DateTimeOffset.UtcNow.AddMinutes(1))
                         .WithSimpleSchedule(x => x.WithMisfireHandlingInstructionFireNow())
                         .Build();

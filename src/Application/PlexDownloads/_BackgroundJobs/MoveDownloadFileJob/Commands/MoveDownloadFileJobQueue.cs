@@ -34,11 +34,9 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        // Find the oldest ready-to-move task (DownloadFinished preferred, MoveError as retry)
+        // Find the oldest ready-to-move task.
         var movieCandidates = dbContext
-            .DownloadTaskMovieFile.Where(x =>
-                x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
-            )
+            .DownloadTaskMovieFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
             .Select(x => new
             {
                 x.Id,
@@ -46,13 +44,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 x.PlexLibraryId,
                 Type = DownloadTaskType.MovieData,
                 x.CreatedAt,
-                IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
             });
 
         var episodeCandidates = dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x =>
-                x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
-            )
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
             .Select(x => new
             {
                 x.Id,
@@ -60,13 +55,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 x.PlexLibraryId,
                 Type = DownloadTaskType.EpisodeData,
                 x.CreatedAt,
-                IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
             });
 
         var photoCandidates = dbContext
-            .DownloadTaskPhotoImageFiles.Where(x =>
-                x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
-            )
+            .DownloadTaskPhotoImageFiles.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
             .Select(x => new
             {
                 x.Id,
@@ -74,13 +66,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 x.PlexLibraryId,
                 Type = DownloadTaskType.PhotoData,
                 x.CreatedAt,
-                IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
             });
 
         var musicCandidates = dbContext
-            .DownloadTaskMusicTrackFiles.Where(x =>
-                x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
-            )
+            .DownloadTaskMusicTrackFiles.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
             .Select(x => new
             {
                 x.Id,
@@ -88,13 +77,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 x.PlexLibraryId,
                 Type = DownloadTaskType.MusicTrackData,
                 x.CreatedAt,
-                IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
             });
 
         var otherVideoCandidates = dbContext
-            .DownloadTaskOtherVideoFiles.Where(x =>
-                x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
-            )
+            .DownloadTaskOtherVideoFiles.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
             .Select(x => new
             {
                 x.Id,
@@ -102,15 +88,13 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 x.PlexLibraryId,
                 Type = DownloadTaskType.OtherVideoData,
                 x.CreatedAt,
-                IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
             });
         var key = await movieCandidates
             .Concat(episodeCandidates)
             .Concat(photoCandidates)
             .Concat(musicCandidates)
             .Concat(otherVideoCandidates)
-            .OrderByDescending(x => x.IsDownloadFinished)
-            .ThenBy(x => x.CreatedAt)
+            .OrderBy(x => x.CreatedAt)
             .Select(x => new DownloadTaskKey
             {
                 Id = x.Id,
@@ -122,7 +106,7 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
 
         if (key is null)
         {
-            _log.Here().Debug("No DownloadTask with status DownloadFinished or MoveError found, nothing to move");
+            _log.Here().Debug("No DownloadTask with status DownloadFinished found, nothing to move");
             return Result.Ok();
         }
 

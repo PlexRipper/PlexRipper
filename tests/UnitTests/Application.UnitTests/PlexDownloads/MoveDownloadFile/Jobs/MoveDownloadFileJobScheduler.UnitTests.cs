@@ -179,6 +179,8 @@ public class MoveDownloadFileJobSchedulerUnitTests : BaseUnitTest<MoveDownloadFi
         };
         var jobKey = MoveDownloadFileJob.GetJobKey(key.Id);
 
+        IJobDetail? scheduledDetail = null;
+
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(CancellationToken))
             .ReturnsAsync([])
@@ -198,6 +200,7 @@ public class MoveDownloadFileJobSchedulerUnitTests : BaseUnitTest<MoveDownloadFi
             .Verifiable(Times.Once());
         Mock.Mock<IScheduler>()
             .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), CancellationToken))
+            .Callback<IJobDetail, ITrigger, CancellationToken>((detail, _, _) => scheduledDetail = detail)
             .ReturnsAsync(DateTimeOffset.UtcNow)
             .Verifiable(Times.Once());
 
@@ -208,6 +211,8 @@ public class MoveDownloadFileJobSchedulerUnitTests : BaseUnitTest<MoveDownloadFi
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         Mock.Mock<IScheduler>().Verify();
+        scheduledDetail.ShouldNotBeNull();
+        scheduledDetail.JobDataMap.ContainsKey(MoveDownloadFileJob.RetryCountKey).ShouldBeFalse();
     }
 
     [Test]

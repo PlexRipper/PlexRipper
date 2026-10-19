@@ -60,7 +60,7 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 
 			// Job payloads identify work; the queue endpoint owns its current status.
 			backgroundJobsStore.getLibrarySyncJobUpdate()
-				.pipe(concatMap(() => actions.refreshLibrarySyncStatus()))
+				.pipe(switchMap(() => actions.refreshLibrarySyncStatus()))
 				.subscribe();
 
 			return forkJoin([actions.refreshLibraries(), actions.refreshLibrarySyncStatus()]).pipe(switchMap(() => of({

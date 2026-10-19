@@ -1,14 +1,15 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { JobStatus, JobTypes, LibrarySyncJobStatus, PlexConnectionTypes, type PlexServerConnectionDTO, type PlexServerStatusDTO } from '@dto';
+import { JobStatus, JobTypes, LibrarySyncJobStatus, PlexConnectionTypes, type LibrarySyncJobQueueDTO, type PlexServerConnectionDTO, type PlexServerStatusDTO } from '@dto';
 import { LibrarySyncWaitingReason } from '@enums';
 import { PlexLibraryPaths } from '@api/api-paths';
 import { generateFailedResultDTO, generateLibrarySyncJobQueue, generateResultDTO } from '@mock';
 import { useBackgroundJobsStore, useLibraryStore, useServerConnectionStore } from '@store';
 import { plexLibraryApi } from '@api';
-import { throwError } from 'rxjs';
+import { Subject, throwError } from 'rxjs';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import { generateJobStatusUpdate } from '@factories';
+import type { ResultDTO } from '@interfaces';
 import { flushPromises } from '@vue/test-utils';
 
 describe('LibraryStore queue state', () => {
@@ -269,6 +270,46 @@ describe('LibraryStore queue state', () => {
 		// Assert
 		expect(libraryStore.syncQueues).toEqual([completed]);
 		expect(libraryStore.getIsLibrarySyncing(11)).toBe(false);
+	});
+	test('Should cancel an older job snapshot and expose the latest response', async () => {
+		// Arrange
+		const jobs = useBackgroundJobsStore();
+		const libraryStore = useLibraryStore();
+		mock.onGet(PlexLibraryPaths.getAllPlexLibrariesEndpoint()).reply(200, generateResultDTO([]));
+		await subscribeSpyTo(jobs.setup()).onComplete();
+		await subscribeSpyTo(libraryStore.setup()).onComplete();
+		const firstSnapshot = new Subject<ResultDTO<LibrarySyncJobQueueDTO[]>>();
+		const latestSnapshot = new Subject<ResultDTO<LibrarySyncJobQueueDTO[]>>();
+		const snapshotRequest = vi.spyOn(plexLibraryApi, 'getLibrarySyncStatusEndpoint')
+			.mockImplementationOnce(() => firstSnapshot.asObservable())
+			.mockImplementationOnce(() => latestSnapshot.asObservable());
+		const payload = { serverId: 1, libraryId: 11, forceMediaRefresh: false };
+		const latestQueue = generateLibrarySyncJobQueue({
+			plexLibraryId: 11,
+			plexServerId: 1,
+			status: LibrarySyncJobStatus.Processing,
+		});
+
+		// Act
+		jobs.setStatusJobUpdate(generateJobStatusUpdate({
+			jobType: JobTypes.LibrarySyncJob, jobStatus: JobStatus.Started, data: payload,
+		}));
+		jobs.setStatusJobUpdate(generateJobStatusUpdate({
+			jobType: JobTypes.LibrarySyncJob, jobStatus: JobStatus.Started, data: payload,
+		}));
+
+		// Assert
+		expect(snapshotRequest).toHaveBeenCalledTimes(2);
+		expect(firstSnapshot.observers).toHaveLength(0);
+		expect(latestSnapshot.observers).toHaveLength(1);
+
+		// Act
+		latestSnapshot.next(generateResultDTO([latestQueue]));
+		latestSnapshot.complete();
+		await flushPromises();
+
+		// Assert
+		expect(libraryStore.syncQueues).toEqual([latestQueue]);
 	});
 });
 

@@ -175,10 +175,11 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { finalize, switchMap } from 'rxjs';
+import { filter, finalize, switchMap, take } from 'rxjs';
 import { DialogType } from '@enums';
 import { LibrarySyncJobStatus, type DownloadMediaDTO, PlexMediaType, ViewMode } from '@dto';
 import type { IMediaOverviewBarActions } from '@interfaces';
+import { useGlobalStore } from '@store';
 import {
 	listenMediaOverviewDownloadCommand,
 	sendMediaOverviewDownloadCommand,
@@ -199,6 +200,7 @@ const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
 const accountStore = useAccountStore();
+const globalStore = useGlobalStore();
 
 const props = defineProps<{
 	libraryId: number;
@@ -343,10 +345,17 @@ function retryMediaLoad() {
 	useSubscription(mediaOverviewStore.retryMediaLoad().subscribe());
 }
 
-function onOptionsClosed(hasChanged: boolean) {
-	if (hasChanged) {
-		useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
+function onOptionsClosed(hasChanged: boolean, visibilityChanged: boolean) {
+	if (!hasChanged) {
+		return;
 	}
+
+	if (visibilityChanged && mediaOverviewStore.allMediaMode) {
+		useSubscription(mediaOverviewStore.refreshMediaDataWithMetadata().subscribe());
+		return;
+	}
+
+	useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
 }
 
 function refreshCompletedLibrary(): void {
@@ -391,9 +400,13 @@ watch(
 onMounted(() => {
 	resetProgress();
 
-	// Initialize the library in the store
+	// The loading overlay does not prevent mounting before settings are loaded.
 	useSubscription(
-		mediaOverviewStore.initializeLibrary(props.libraryId).subscribe({
+		globalStore.getPageSetupReady.pipe(
+			filter(Boolean),
+			take(1),
+			switchMap(() => mediaOverviewStore.initializeLibrary(props.libraryId)),
+		).subscribe({
 			next: async () => {
 				const requestedScrollIndex = mediaOverviewStore.currentScrollIndex;
 				if (requestedScrollIndex <= 0) {

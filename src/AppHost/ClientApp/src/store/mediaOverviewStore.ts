@@ -147,6 +147,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const actions = {
 		cancelPendingRequests() {
 			Log.debug('Cancelling pending media requests');
+			invalidateMetadataGeneration();
 			invalidateRequestGeneration();
 			state.loading = false;
 		},
@@ -155,7 +156,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			Log.debug('Clearing media overview data for disabled library', { libraryId });
 			actions.cancelPendingRequests();
 			invalidateLibraryInitialization();
-			invalidateMetadataGeneration();
 			pendingPages.clear();
 			state.libraryId = libraryId;
 			state.totalCount = 0;
@@ -271,11 +271,20 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		refreshMetaData() {
-			const metadataCancelSubject = metadataCancelSubject$;
-			const metadataGeneration = metadataRequestGeneration;
 			const requestId = ++metadataRequestId;
-			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
-				takeUntil(metadataCancelSubject),
+			const cancelSubject = metadataCancelSubject$;
+			const metadataGeneration = metadataRequestGeneration;
+			const query = {
+				mediaType: get(getters.getMediaType),
+				...(state.libraryId === 0
+					? {
+							filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
+							filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+						}
+					: {}),
+			};
+			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, query).pipe(
+				takeUntil(cancelSubject),
 				tap((result) => {
 					if (isMetadataGenerationActive(metadataGeneration)
 						&& requestId === metadataRequestId && result.isSuccess && result.value) {
@@ -285,12 +294,21 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		refreshFilterMetadata() {
-			const metadataCancelSubject = metadataCancelSubject$;
-			const metadataGeneration = metadataRequestGeneration;
 			const requestId = ++filterMetadataRequestId;
+			const cancelSubject = metadataCancelSubject$;
+			const metadataGeneration = metadataRequestGeneration;
 			state.filterMetadataLoading = true;
-			return plexLibraryApi.getMetadataFilter(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
-				takeUntil(metadataCancelSubject),
+			const query = {
+				mediaType: get(getters.getMediaType),
+				...(state.libraryId === 0
+					? {
+							filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
+							filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+						}
+					: {}),
+			};
+			return plexLibraryApi.getMetadataFilter(state.libraryId, query).pipe(
+				takeUntil(cancelSubject),
 				tap((result) => {
 					if (isMetadataGenerationActive(metadataGeneration)
 						&& requestId === filterMetadataRequestId && result.isSuccess && result.value) {
@@ -306,6 +324,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					}
 				}),
 			);
+		},
+		refreshMediaDataWithMetadata() {
+			invalidateMetadataGeneration();
+			const mediaRequest = actions.refreshMediaData().pipe(defaultIfEmpty(null));
+			const metadataRequest = actions.refreshMetaData();
+			const filterMetadataRequest = actions.refreshFilterMetadata();
+			return forkJoin([mediaRequest, metadataRequest, filterMetadataRequest]);
 		},
 		refreshMediaData(): Observable<PlexMediaStatisticsDTO | null> {
 			return refreshMediaDataForGeneration(invalidateRequestGeneration());

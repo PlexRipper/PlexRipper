@@ -52,9 +52,29 @@ public class UpdatePlexServerConnectionEndpoint
 
     public override async Task HandleAsync(UpdatePlexServerConnectionEndpointRequest req, CancellationToken ct)
     {
+        var existing = await _dbContext.PlexServerConnections.GetAsync(req.Id, ct);
+        if (existing is null)
+        {
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.Id), ct);
+            return;
+        }
+
+        if (!existing.IsCustom)
+        {
+            await Send.FluentResult(ResultExtensions.Create400BadRequestResult("Only custom connections can be edited"), ct);
+            return;
+        }
+
+        if (existing.PlexServerId != req.PlexServerId)
+        {
+            await Send.FluentResult(
+                ResultExtensions.Create400BadRequestResult("A connection cannot be moved to another Plex server"), ct);
+            return;
+        }
+
         var connection = new PlexServerConnection
         {
-            Id = req.Id,
+            Id = existing.Id,
             Protocol = req.Protocol.ToLower(),
             Address = req.Address,
             Port = req.Port,
@@ -63,7 +83,7 @@ public class UpdatePlexServerConnectionEndpoint
             Relay = req.Address.Contains("plex.direct"),
             IPv4 = req.Address.IsIpv4(),
             IPv6 = req.Address.IsIPv6(),
-            PlexServerId = req.PlexServerId,
+            PlexServerId = existing.PlexServerId,
             IsCustom = true,
         };
 

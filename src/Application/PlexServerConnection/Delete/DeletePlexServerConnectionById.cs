@@ -36,16 +36,48 @@ public class DeletePlexServerConnectionById : Endpoint<DeletePlexServerConnectio
     public override async Task HandleAsync(DeletePlexServerConnectionByIdRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        var deleteCount = await _dbContext
-            .PlexServerConnections.Where(x => x.Id == req.PlexServerConnectionId)
-            .ExecuteDeleteAsync(ct);
+        var connection = await _dbContext.PlexServerConnections
+            .FirstOrDefaultAsync(x => x.Id == req.PlexServerConnectionId, ct);
 
-        if (deleteCount == 0)
+        if (connection is null)
         {
             await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.PlexServerConnectionId),
                 ct
             );
+            return;
+        }
+
+        if (!connection.IsCustom)
+        {
+            await Send.FluentResult(ResultExtensions.Create400BadRequestResult("Only custom connections can be deleted"), ct);
+            return;
+        }
+
+        var deleteResult = await _dbContext.ExecuteTransactionAsync(async (context, token) =>
+        {
+            var deleted = await context.PlexServerConnections
+                .Where(x => x.Id == connection.Id && x.IsCustom)
+                .ExecuteDeleteAsync(token);
+            if (deleted > 0)
+            {
+                await context.PlexServers.IgnoreIsEnabledFilter()
+                    .Where(x => x.Id == connection.PlexServerId && x.PreferredConnectionId == connection.Id)
+                    .ExecuteUpdateAsync(x => x.SetProperty(y => y.PreferredConnectionId, 0), token);
+            }
+
+            return deleted;
+        }, ct);
+        if (deleteResult.IsCancelledOrFailed)
+        {
+            await Send.FluentResult(deleteResult.LogIfFailed().ToResult(), ct);
+            return;
+        }
+
+        if (deleteResult.Value == 0)
+        {
+            await Send.FluentResult(
+                ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.PlexServerConnectionId), ct);
             return;
         }
 

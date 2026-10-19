@@ -133,12 +133,14 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 	let requestGeneration = 0;
 	let cancelSubject$ = new Subject<void>();
+	let initializationRequestId = 0;
+	let initializationCancelSubject$ = new Subject<void>();
 	let navigationRequestCount = 0;
 	let filterMetadataRequestId = 0;
 	let metadataRequestId = 0;
 
-	// Subjects and generation state cancel obsolete requests without allowing their
-	// response/finalization handlers to mutate the active query.
+	// Media requests can be replaced by search/filter refreshes without interrupting
+	// the library lookup and metadata required by the active initialization.
 
 	const actions = {
 		cancelPendingRequests() {
@@ -150,6 +152,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		clearLibraryMediaData(libraryId: number): void {
 			Log.debug('Clearing media overview data for disabled library', { libraryId });
 			actions.cancelPendingRequests();
+			invalidateLibraryInitialization();
 			mediaPages.clear();
 			pendingPages.clear();
 			state.libraryId = libraryId;
@@ -219,7 +222,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			actions.$reset();
 			const generation = requestGeneration;
-			const cancelSubject = cancelSubject$;
+			const initializationId = initializationRequestId;
+			const initializationCancelSubject = initializationCancelSubject$;
 
 			// Update state
 			state.libraryId = libraryId;
@@ -237,9 +241,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					? libraryStore.refreshLibrary(state.libraryId)
 					: of(null),
 			).pipe(
-				takeUntil(cancelSubject),
+				takeUntil(initializationCancelSubject),
 				switchMap(() => {
-					if (!isRequestGenerationActive(generation)) {
+					if (!isLibraryInitializationActive(initializationId)) {
 						return of(null);
 					}
 					const library = libraryStore.getLibrary(state.libraryId);
@@ -267,27 +271,25 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		refreshMetaData() {
-			const generation = requestGeneration;
+			const initializationCancelSubject = initializationCancelSubject$;
 			const requestId = ++metadataRequestId;
-			const cancelSubject = cancelSubject$;
 			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
-				takeUntil(cancelSubject),
+				takeUntil(initializationCancelSubject),
 				tap((result) => {
-					if (isRequestGenerationActive(generation) && requestId === metadataRequestId && result.isSuccess && result.value) {
+					if (requestId === metadataRequestId && result.isSuccess && result.value) {
 						state.metadataList = Object.freeze(result.value);
 					}
 				}),
 			);
 		},
 		refreshFilterMetadata() {
-			const generation = requestGeneration;
+			const initializationCancelSubject = initializationCancelSubject$;
 			const requestId = ++filterMetadataRequestId;
-			const cancelSubject = cancelSubject$;
 			state.filterMetadataLoading = true;
 			return plexLibraryApi.getMetadataFilter(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
-				takeUntil(cancelSubject),
+				takeUntil(initializationCancelSubject),
 				tap((result) => {
-					if (isRequestGenerationActive(generation) && requestId === filterMetadataRequestId && result.isSuccess && result.value) {
+					if (requestId === filterMetadataRequestId && result.isSuccess && result.value) {
 						state.availableRoleIds = result.value.roles ?? [];
 						state.availableCountryIds = result.value.countries ?? [];
 						state.availableGenreIds = result.value.genres ?? [];
@@ -295,7 +297,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					}
 				}),
 				finalize(() => {
-					if (isRequestGenerationActive(generation) && requestId === filterMetadataRequestId) {
+					if (requestId === filterMetadataRequestId) {
 						state.filterMetadataLoading = false;
 					}
 				}),
@@ -581,6 +583,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		$reset() {
 			invalidateRequestGeneration();
+			invalidateLibraryInitialization();
 			mediaPages.clear();
 			pendingPages.clear();
 			Object.assign(state, cloneDeep(defaultState));
@@ -592,6 +595,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		return generation === requestGeneration;
 	}
 
+	function isLibraryInitializationActive(initializationId: number): boolean {
+		return initializationId === initializationRequestId;
+	}
+
 	function invalidateRequestGeneration(): number {
 		const previousCancelSubject = cancelSubject$;
 		requestGeneration++;
@@ -599,13 +606,22 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		pendingPages.clear();
 		comparisonRefreshKeysInFlight.clear();
 		navigationRequestCount = 0;
-		filterMetadataRequestId++;
-		metadataRequestId++;
 		state.navLoading = false;
-		state.filterMetadataLoading = false;
 		previousCancelSubject.next();
 		previousCancelSubject.complete();
 		return requestGeneration;
+	}
+
+	function invalidateLibraryInitialization(): number {
+		const previousCancelSubject = initializationCancelSubject$;
+		initializationRequestId++;
+		initializationCancelSubject$ = new Subject<void>();
+		filterMetadataRequestId++;
+		metadataRequestId++;
+		state.filterMetadataLoading = false;
+		previousCancelSubject.next();
+		previousCancelSubject.complete();
+		return initializationRequestId;
 	}
 
 	function refreshMediaDataForGeneration(generation: number): Observable<PlexMediaStatisticsDTO | null> {

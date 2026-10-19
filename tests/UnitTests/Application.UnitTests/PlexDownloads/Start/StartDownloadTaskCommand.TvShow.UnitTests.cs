@@ -673,7 +673,7 @@ public class StartDownloadTaskCommandTvShowUnitTests : BaseUnitTest<StartDownloa
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
     [Test]
-    public async Task ShouldHaveFailedResult_WhenPausingActiveDownloadFails()
+    public async Task ShouldStopNewJobAndPreserveTaskStates_WhenPausingActiveDownloadFails()
     {
         // Arrange
         await SetupDatabase(
@@ -713,13 +713,27 @@ public class StartDownloadTaskCommandTvShowUnitTests : BaseUnitTest<StartDownloa
                 CancellationToken
             );
 
+        var before = await dbContext.DownloadTaskTvShowEpisodeFile
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.DownloadStatus })
+            .ToListAsync(CancellationToken);
+        var startedKey = orderedDownloadTasks[0].ToKey();
+
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
             .ReturnsAsync([downloadingTask.ToKey()]);
 
         Mock.Mock<IDownloadTaskScheduler>()
-            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
+            .SetupSequence(x => x.IsDownloading(startedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
+            .ReturnsAsync(true);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StopDownloadTaskJob(
+                startedKey,
+                It.Is<CancellationToken>(token => token != CancellationToken && !token.IsCancellationRequested),
+                true))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
@@ -733,7 +747,14 @@ public class StartDownloadTaskCommandTvShowUnitTests : BaseUnitTest<StartDownloa
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
         result.Errors.ShouldContain(x => x.Message.Contains("Pause command failed"));
+        var after = await dbContext.DownloadTaskTvShowEpisodeFile
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.DownloadStatus })
+            .ToListAsync(CancellationToken);
+        after.ShouldBe(before);
+        Mock.Mock<IDownloadTaskScheduler>().Verify();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<PauseDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Once());
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());

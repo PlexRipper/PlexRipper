@@ -133,7 +133,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                         nextDownloadTaskKey,
                         cancellationToken
                     );
-                    if (startResult.IsFailed)
+                    if (startResult.IsCancelledOrFailed)
                     {
                         foreach (var (waitingTaskKey, waitingTaskStatus) in queuedWaitingTasks)
                         {
@@ -156,19 +156,33 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                         return startResult.LogIfFailed();
                     }
 
-                    var activeDownloadKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(
-                        key.PlexServerId
-                    );
-
-                    // Avoid pausing the download task that just started.
-                    foreach (var downloadKey in activeDownloadKeys.Where(x => x != nextDownloadTaskKey))
+                    var handoffResult = await Result.Try(async Task<Result> () =>
                     {
-                        var pauseResult = await _commandExecutor.Send(
-                            new PauseDownloadTaskCommand(downloadKey.Id),
-                            cancellationToken
+                        var activeDownloadKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(
+                            key.PlexServerId
                         );
-                        if (pauseResult.IsFailed)
-                            return pauseResult.LogIfFailed();
+
+                        // Avoid pausing the download task that just started.
+                        foreach (var downloadKey in activeDownloadKeys.Where(x => x != nextDownloadTaskKey))
+                        {
+                            var pauseResult = await _commandExecutor.Send(
+                                new PauseDownloadTaskCommand(downloadKey.Id),
+                                cancellationToken
+                            );
+                            if (pauseResult.IsCancelledOrFailed)
+                                return pauseResult;
+                        }
+
+                        return Result.Ok();
+                    });
+                    if (handoffResult.IsCancelledOrFailed)
+                    {
+                        var cleanupResult = await UndoFailedHandoff(
+                            nextDownloadTaskKey,
+                            downloadPreviousStatus,
+                            queuedWaitingTasks
+                        );
+                        return Result.Merge(handoffResult, cleanupResult).LogIfFailed();
                     }
                 }
 
@@ -203,5 +217,59 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         await _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(key.PlexServerId), cancellationToken);
 
         return Result.Ok();
+    }
+
+    private async Task<Result> UndoFailedHandoff(
+        DownloadTaskKey startedKey,
+        DownloadStatus previousStatus,
+        List<(DownloadTaskKey Key, DownloadStatus Status)> queuedWaitingTasks
+    )
+    {
+        // Request cancellation must not prevent stopping the job that this request just started.
+        using var cleanupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        var stopResult = await Result.Try(async Task<Result> () =>
+        {
+            if (!await _downloadTaskScheduler.IsDownloading(startedKey, cleanupTimeout.Token))
+                return Result.Ok();
+
+            return await _downloadTaskScheduler.StopDownloadTaskJob(startedKey, cleanupTimeout.Token);
+        });
+
+        var restoreResult = await Result.Try(async Task () =>
+        {
+            if (stopResult.IsSuccess)
+            {
+                var currentStatus = await _dbContext.GetDownloadStatusAsync(startedKey);
+                if (
+                    currentStatus != previousStatus
+                    && currentStatus is DownloadStatus.Queued
+                        or DownloadStatus.Downloading
+                        or DownloadStatus.Paused
+                        or DownloadStatus.AutoPaused
+                )
+                {
+                    await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                        startedKey,
+                        previousStatus,
+                        CancellationToken.None
+                    );
+                }
+            }
+
+            foreach (var (waitingKey, waitingStatus) in queuedWaitingTasks)
+            {
+                // A sibling may have completed or changed phase while the handoff was in flight.
+                if (await _dbContext.GetDownloadStatusAsync(waitingKey) == DownloadStatus.Queued)
+                {
+                    await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                        waitingKey,
+                        waitingStatus,
+                        CancellationToken.None
+                    );
+                }
+            }
+        });
+
+        return Result.Merge(stopResult, restoreResult);
     }
 }

@@ -85,7 +85,7 @@ public class UpdateRadarrIntegrationEndpointUnitTests
         {
             IntegrationId = integration.Id,
             Name = "Radarr",
-            Url = "radarr-instance",
+            Url = "https://radarr.example.com",
             ApiKey = "new-key",
             Category = "category",
             DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
@@ -100,7 +100,8 @@ public class UpdateRadarrIntegrationEndpointUnitTests
         endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
         endpointResult.Response!.IsSuccess.ShouldBeTrue();
         endpointResult.Response!.Errors.Count.ShouldBe(0);
-        updated.BaseUrl.ShouldBe("radarr-instance");
+        updated.BaseUrl.ShouldBe("https://radarr.example.com");
+        updated.RadarrApiKey.ShouldBe("new-key");
         updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.ChangesPending);
         updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Unknown);
         updated.LastConnectionTestHttpStatusCode.ShouldBeNull();

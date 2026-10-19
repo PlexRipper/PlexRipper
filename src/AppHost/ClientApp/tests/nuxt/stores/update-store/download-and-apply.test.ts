@@ -1,4 +1,4 @@
-import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
+import { describe, beforeAll, beforeEach, test, expect, assert } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { Subject, takeUntil } from 'rxjs';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
@@ -43,9 +43,11 @@ describe('UpdateStore.downloadAndApplyUpdate()', () => {
 
 		// Assert
 		expect(failed.getValues()).toHaveLength(1);
-		expect(failed.getLastValue().isSuccess).toBe(false);
-		expect(failed.getLastValue().statusCode).toBe(failureMode === 'network' ? 999 : failureMode);
-		expect(failed.getLastValue().errors).toEqual(failureMode === 'network'
+		const failedResult = failed.getLastValue();
+		assert.isDefined(failedResult);
+		expect(failedResult.isSuccess).toBe(false);
+		expect(failedResult.statusCode).toBe(failureMode === 'network' ? 999 : failureMode);
+		expect(failedResult.errors).toEqual(failureMode === 'network'
 			? [{ message: 'Internal Server Error', reasons: [], metadata: {} }]
 			: failure.errors);
 		expect(mock.history.post.map((request) => request.url)).toEqual([UpdatePaths.downloadUpdateEndpoint()]);
@@ -57,8 +59,10 @@ describe('UpdateStore.downloadAndApplyUpdate()', () => {
 		await retry.onComplete();
 
 		// Assert
-		expect(retry.getLastValue().isSuccess).toBe(true);
-		expect(retry.getLastValue().errors).toEqual([]);
+		const retryResult = retry.getLastValue();
+		assert.isDefined(retryResult);
+		expect(retryResult.isSuccess).toBe(true);
+		expect(retryResult.errors).toEqual([]);
 		expect(mock.history.post.map((request) => request.url)).toEqual([
 			UpdatePaths.downloadUpdateEndpoint(), UpdatePaths.downloadUpdateEndpoint(), UpdatePaths.applyUpdateEndpoint(),
 		]);
@@ -97,8 +101,10 @@ describe('UpdateStore.downloadAndApplyUpdate()', () => {
 		]);
 		apply.resolve([applyFails ? 500 : 200, applyResult]);
 		await result.onComplete();
-		expect(result.getLastValue().isSuccess).toBe(!applyFails);
-		expect(result.getLastValue().errors).toEqual(applyResult.errors);
+		const completedResult = result.getLastValue();
+		assert.isDefined(completedResult);
+		expect(completedResult.isSuccess).toBe(!applyFails);
+		expect(completedResult.errors).toEqual(applyResult.errors);
 		expect(store.isDownloading).toBe(false);
 		expect(store.isApplyingUpdate).toBe(false);
 	});

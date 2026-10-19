@@ -1124,9 +1124,15 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         context.User.Identity.ShouldNotBeNull();
         context.User.Identity.IsAuthenticated.ShouldBeTrue();
         context.User.Identity.Name.ShouldBe(TEST_USERNAME);
-        context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value.ShouldBe(TEST_USER_ID);
-        context.User.FindFirst("HeaderAuth")?.Value.ShouldBe("true");
-        context.User.FindFirst(ClaimTypes.Email)?.Value.ShouldBe(TEST_EMAIL);
+        var nameIdentifierClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
+        nameIdentifierClaim.ShouldNotBeNull();
+        nameIdentifierClaim!.Value.ShouldBe(TEST_USER_ID);
+        var headerAuthClaim = context.User.FindFirst("HeaderAuth");
+        headerAuthClaim.ShouldNotBeNull();
+        headerAuthClaim!.Value.ShouldBe("true");
+        var emailClaim = context.User.FindFirst(ClaimTypes.Email);
+        emailClaim.ShouldNotBeNull();
+        emailClaim!.Value.ShouldBe(TEST_EMAIL);
         context.User.IsInRole("User").ShouldBeTrue();
         context.User.IsInRole("Admin").ShouldBeTrue();
         signedInClaims.Select(x => (x.Type, x.Value)).ShouldBe(

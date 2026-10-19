@@ -22,13 +22,15 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
+    private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
 
     public PauseDownloadTaskCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         IDownloadTaskScheduler downloadTaskScheduler,
         IMoveDownloadFileScheduler moveDownloadFileScheduler,
-        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
+        IMoveDownloadFileQueue moveDownloadFileQueue
     )
     {
         _log = log.ForContext<PauseDownloadTaskCommandHandler>();
@@ -36,6 +38,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
         _downloadTaskScheduler = downloadTaskScheduler;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
+        _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
     public async Task<Result> ExecuteAsync(PauseDownloadTaskCommand command, CancellationToken cancellationToken)
@@ -48,6 +51,21 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
         var filesById = (await _dbContext.GetDownloadTaskFilesAsync(downloadTasks, cancellationToken)).ToDictionary(x =>
             x.Id
         );
+        var continueMoveQueue = false;
+        async Task<Result> FinishAsync(Result result)
+        {
+            // Settle every selected child before considering a waiting move.
+            if (continueMoveQueue && !command.AutoPause)
+            {
+                var queueResult = await Result.Try(() =>
+                    _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(CancellationToken.None)
+                );
+                queueResult.LogIfFailed();
+            }
+
+            return result;
+        }
+
         foreach (var downloadTaskKey in downloadTasks)
         {
             if (!filesById.TryGetValue(downloadTaskKey.Id, out var downloadTask))
@@ -73,8 +91,8 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                         downloadTaskKey,
                         cancellationToken
                     );
-                    if (stopMoveResult.IsFailed)
-                        return stopMoveResult.LogIfFailed();
+                    if (stopMoveResult.IsCancelledOrFailed)
+                        return await FinishAsync(stopMoveResult.LogIfFailed());
                 }
 
                 await _dbContext.ClearDownloadSpeed(downloadTaskKey, cancellationToken);
@@ -83,6 +101,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                     command.AutoPause ? DownloadStatus.AutoMovePaused : DownloadStatus.MovePaused,
                     cancellationToken
                 );
+                continueMoveQueue = true;
                 continue;
             }
 
@@ -101,8 +120,8 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                         downloadTaskKey,
                         cancellationToken
                     );
-                    if (stopMoveResult.IsFailed)
-                        return stopMoveResult.LogIfFailed();
+                    if (stopMoveResult.IsCancelledOrFailed)
+                        return await FinishAsync(stopMoveResult.LogIfFailed());
                 }
 
                 await _dbContext.ClearDownloadSpeed(downloadTaskKey, cancellationToken);
@@ -112,6 +131,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                     command.AutoPause ? DownloadStatus.AutoMovePaused : DownloadStatus.MovePaused,
                     cancellationToken
                 );
+                continueMoveQueue = true;
 
                 continue;
             }
@@ -129,7 +149,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
 
             var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
             if (stopResult.IsFailed)
-                return stopResult.LogIfFailed();
+                return await FinishAsync(stopResult.LogIfFailed());
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 downloadTaskKey,
@@ -138,6 +158,6 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             );
         }
 
-        return Result.Ok();
+        return await FinishAsync(Result.Ok());
     }
 }

@@ -282,7 +282,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             )
             .Verifiable(Times.Once());
         Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue(token))
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(
+                scenario == "late-cancellation" ? CancellationToken.None : token))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         Mock.Mock<IEventPublisher>()
@@ -523,9 +524,10 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never());
         Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue(token))
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(
+                scenario == "cancelled" ? CancellationToken.None : token))
             .ReturnsAsync(Result.Ok())
-            .Verifiable(scenario == "cancelled" ? Times.Never() : Times.Once());
+            .Verifiable(Times.Once());
         Result? notified = null;
         Mock.Mock<IEventPublisher>()
             .Setup(x =>
@@ -838,7 +840,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         Mock.Mock<IMoveDownloadFileQueue>()
             .Setup(x => x.CheckMoveDownloadFileJobQueue(CancellationToken.None))
             .ReturnsAsync(Result.Ok())
-            .Verifiable(missingPayload ? Times.Once() : Times.Never());
+            .Verifiable(Times.Once());
 
         // Act
         await Sut.Execute(context);
@@ -876,7 +878,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         Mock.Mock<IMoveDownloadFileQueue>()
             .Verify(
                 x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()),
-                missingPayload ? Times.Once() : Times.Never()
+                Times.Once()
             );
         Mock.Mock<IEventPublisher>()
             .Verify(

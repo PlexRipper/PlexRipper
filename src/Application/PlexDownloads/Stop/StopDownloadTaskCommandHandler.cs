@@ -16,6 +16,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
+    private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
 
     public StopDownloadTaskCommandHandler(
         ILogger log,
@@ -23,7 +24,8 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         ICommandExecutor commandExecutor,
         IDownloadTaskScheduler downloadTaskScheduler,
-        IMoveDownloadFileScheduler moveDownloadFileScheduler
+        IMoveDownloadFileScheduler moveDownloadFileScheduler,
+        IMoveDownloadFileQueue moveDownloadFileQueue
     )
     {
         _log = log.ForContext<StopDownloadTaskCommandHandler>();
@@ -32,6 +34,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         _commandExecutor = commandExecutor;
         _downloadTaskScheduler = downloadTaskScheduler;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
+        _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
     public async Task<Result> ExecuteAsync(StopDownloadTaskCommand command, CancellationToken cancellationToken)
@@ -44,6 +47,20 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         var filesById = (await _dbContext.GetDownloadTaskFilesAsync(downloadTasks, cancellationToken)).ToDictionary(x =>
             x.Id
         );
+        var continueMoveQueue = false;
+        async Task<Result> FinishAsync(Result result)
+        {
+            if (continueMoveQueue)
+            {
+                var queueResult = await Result.Try(() =>
+                    _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(CancellationToken.None)
+                );
+                queueResult.LogIfFailed();
+            }
+
+            return result;
+        }
+
 
         foreach (var downloadTaskKey in downloadTasks)
         {
@@ -78,7 +95,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 {
                     // At most one download task runs per server; if stopping it fails there is
                     // nothing left to stop safely, so abort.
-                    return stopResult.LogIfFailed();
+                    return await FinishAsync(stopResult.LogIfFailed());
                 }
             }
 
@@ -88,8 +105,8 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     downloadTaskKey,
                     cancellationToken
                 );
-                if (stopMoveResult.IsFailed)
-                    return stopMoveResult.LogIfFailed();
+                if (stopMoveResult.IsCancelledOrFailed)
+                    return await FinishAsync(stopMoveResult.LogIfFailed());
             }
 
             // Only delete the download file when NOT in the completed phase (file is already
@@ -104,7 +121,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     cancellationToken
                 );
                 if (deleteFilesResult.IsFailed)
-                    return deleteFilesResult.LogIfFailed();
+                    return await FinishAsync(deleteFilesResult.LogIfFailed());
             }
 
             _log.Here()
@@ -120,14 +137,15 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 cancellationToken
             );
             if (resetResult.IsFailed)
-                return resetResult.LogIfFailed();
+                return await FinishAsync(resetResult.LogIfFailed());
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 downloadTaskKey,
                 DownloadStatus.Stopped,
                 cancellationToken
             );
+            continueMoveQueue |= downloadTask.DownloadTaskPhase == DownloadTaskPhase.FileTransfer;
         }
 
-        return Result.Ok();
+        return await FinishAsync(Result.Ok());
     }
 }

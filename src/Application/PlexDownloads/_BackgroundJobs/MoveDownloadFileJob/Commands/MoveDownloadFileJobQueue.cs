@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Hosting;
+
 namespace Reaparr.Application;
 
 public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
@@ -5,16 +7,19 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
+    private readonly IHostApplicationLifetime _appLifetime;
 
     public MoveDownloadFileJobQueue(
         ILogger log,
         IReaparrDbContextFactory dbContextFactory,
-        IMoveDownloadFileScheduler moveDownloadFileScheduler
+        IMoveDownloadFileScheduler moveDownloadFileScheduler,
+        IHostApplicationLifetime appLifetime
     )
     {
         _log = log.ForContext<MoveDownloadFileJobQueue>();
         _dbContextFactory = dbContextFactory;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
+        _appLifetime = appLifetime;
     }
 
     /// <inheritdoc/>
@@ -23,6 +28,9 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
     /// <inheritdoc/>
     public async Task<Result> CheckMoveDownloadFileJobQueue(CancellationToken cancellationToken)
     {
+        if (_appLifetime.ApplicationStopping.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(CheckMoveDownloadFileJobQueue));
+
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
 
@@ -117,6 +125,9 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
             _log.Here().Debug("No DownloadTask with status DownloadFinished or MoveError found, nothing to move");
             return Result.Ok();
         }
+
+        if (_appLifetime.ApplicationStopping.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(CheckMoveDownloadFileJobQueue));
 
         var startResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(key, cancellationToken);
         return startResult.IsSuccess ? Result.Ok() : startResult;

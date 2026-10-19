@@ -45,15 +45,11 @@ public class MoveDownloadFileJob : IJob
 
         async Task QueueNextAsync()
         {
-            var queueResult = await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(ct);
-            if (queueResult.IsCancelled)
-            {
-                queueResult.LogWarning();
-                return;
-            }
-
-            if (queueResult.IsFailed)
-                queueResult.LogError();
+            // An individual job cancellation must not cancel continuation of unrelated waiting moves.
+            // The queue itself refuses new work once host shutdown begins.
+            var queueToken = ct.IsCancellationRequested ? CancellationToken.None : ct;
+            var queueResult = await Result.Try(() => _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(queueToken));
+            queueResult.LogIfFailed();
         }
 
         var executionResult = await Result.Try(async Task<Result> () =>
@@ -70,6 +66,7 @@ public class MoveDownloadFileJob : IJob
             if (currentTask is null)
             {
                 ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogWarning();
+                await QueueNextAsync();
                 return Result.Ok();
             }
 
@@ -107,6 +104,10 @@ public class MoveDownloadFileJob : IJob
                         nameof(downloadTaskKey),
                         downloadTaskKey.Id
                     );
+                var status = await _dbContext.GetDownloadStatusAsync(downloadTaskKey);
+                if (status is null or DownloadStatus.MovePaused or DownloadStatus.AutoMovePaused
+                    or DownloadStatus.Stopped or DownloadStatus.Completed)
+                    await QueueNextAsync();
                 return moveResult;
             }
 

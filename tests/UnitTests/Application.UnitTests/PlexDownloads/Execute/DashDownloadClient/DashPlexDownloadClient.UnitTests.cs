@@ -8,6 +8,23 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 {
     private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
+        var outputFileInfoMock = new Mock<IFileInfo>();
+        outputFileInfoMock.Setup(x => x.Exists).Returns(true);
+        outputFileInfoMock.Setup(x => x.Length).Returns(0);
+
+        Mock.Mock<IFileInfoFactory>()
+            .Setup(x => x.New(It.IsAny<string>()))
+            .Returns(outputFileInfoMock.Object);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.PersistProgressAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
         Mock.Mock<INotificationHubService>()
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()))
             .Returns(Task.CompletedTask);
@@ -43,11 +60,12 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     }
 
     [Test]
-    [Arguments(12345L, "12345")]
-    [Arguments(0L, null)]
-    public async Task ShouldReturnSuccessAndPersistDownloadFinished_WhenProcessExitsZero(
+    [Arguments(12345L, "12345", 0L)]
+    [Arguments(0L, null, 999L)]
+    public async Task ShouldReturnSuccessAndPersistActualOutputProgress_WhenProcessExitsZero(
         long speedLimitBytes,
-        string? expectedLimitRate
+        string? expectedLimitRate,
+        long reportedTotalBytes
     )
     {
         // Arrange
@@ -73,6 +91,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         DashMpdCliOptions? capturedOptions = null;
         var terminalWriteEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var terminalWriteRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var completionOrder = new List<string>();
 
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
@@ -83,6 +102,17 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Returns<DashMpdCliOptions>(options =>
             {
                 capturedOptions = options;
+                progressSubject.OnNext(
+                    new DashDownloadProgress
+                    {
+                        DownloadedBytes = reportedTotalBytes / 2,
+                        TotalBytes = reportedTotalBytes,
+                        Percent = reportedTotalBytes == 0 ? 0 : 50,
+                        DownloadSpeedInBytes = 1024,
+                        Eta = 10,
+                        RawOutput = "{}",
+                    }
+                );
                 completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 0, Result.Ok()));
                 return Task.FromResult(Result.Ok());
             });
@@ -105,6 +135,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     if (status != DownloadStatus.DownloadFinished)
                         return Task.CompletedTask;
 
+                    completionOrder.Add("finished");
                     terminalWriteEntered.TrySetResult();
                     return terminalWriteRelease.Task;
                 }
@@ -135,6 +166,32 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Returns(Task.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);
+        var outputFileInfoMock = new Mock<IFileInfo>();
+        outputFileInfoMock.Setup(x => x.Exists).Returns(true);
+        outputFileInfoMock.Setup(x => x.Length).Returns(7_654L);
+        Mock.Mock<IFileInfoFactory>()
+            .Setup(x => x.New(It.IsAny<string>()))
+            .Returns(outputFileInfoMock.Object);
+
+        DownloadTaskProgress? finalProgress = null;
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.PersistProgressAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<DownloadTaskKey, DownloadTaskProgress, DirectDownloadSnapshot?, CancellationToken>(
+                (_, progress, _, _) =>
+                {
+                    finalProgress = progress;
+                    completionOrder.Add("progress");
+                }
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
         await terminalWriteEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
         startTask.IsCompleted.ShouldBeFalse();
@@ -146,6 +203,23 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         result.Errors.Count.ShouldBe(0);
         capturedOptions.ShouldNotBeNull();
         capturedOptions.LimitRate.ShouldBe(expectedLimitRate);
+        finalProgress.ShouldNotBeNull();
+        finalProgress!.DataTotal.ShouldBe(7_654L);
+        finalProgress.DataReceived.ShouldBe(7_654L);
+        finalProgress.Percentage.ShouldBe(100m);
+        completionOrder.ShouldBe(["progress", "finished"]);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.PersistProgressAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadTaskProgress>(),
+                        It.IsAny<DirectDownloadSnapshot?>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<IFileInfoFactory>().Verify(x => x.New(capturedOptions!.Output), Times.Once());
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
@@ -169,6 +243,338 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 x => x.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
+    }
+
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(true, true)]
+    public async Task ShouldReportDownloadClientError_WhenDashOutputIsMissingOrUnreadable(
+        bool outputExists,
+        bool outputIsUnreadable
+    )
+    {
+        // Arrange
+        await SetupDatabase(
+            12012,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var machineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        SetupSpeedLimit(machineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.DownloadClientError,
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 0, Result.Ok()));
+                return Task.FromResult(Result.Ok());
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var outputFileInfoMock = new Mock<IFileInfo>();
+        outputFileInfoMock.Setup(x => x.Exists).Returns(outputExists);
+        if (outputIsUnreadable)
+            outputFileInfoMock.Setup(x => x.Length).Throws(new IOException("Cannot read DASH output length."));
+        else
+            outputFileInfoMock.Setup(x => x.Length).Returns(0);
+        Mock.Mock<IFileInfoFactory>()
+            .Setup(x => x.New(It.IsAny<string>()))
+            .Returns(outputFileInfoMock.Object);
+
+        // Act
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.PersistProgressAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadTaskProgress>(),
+                        It.IsAny<DirectDownloadSnapshot?>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+    }
+
+
+    [Test]
+    public async Task ShouldReportDownloadClientError_WhenFinalProgressPersistenceFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            12013,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var machineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        SetupSpeedLimit(machineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.DownloadClientError,
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 0, Result.Ok()));
+                return Task.FromResult(Result.Ok());
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var outputFileInfoMock = new Mock<IFileInfo>();
+        outputFileInfoMock.Setup(x => x.Exists).Returns(true);
+        outputFileInfoMock.Setup(x => x.Length).Returns(7_654L);
+        Mock.Mock<IFileInfoFactory>()
+            .Setup(x => x.New(It.IsAny<string>()))
+            .Returns(outputFileInfoMock.Object);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.PersistProgressAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Fail("progress persistence failed"))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldPersistActualOutputProgressBeforeDownloadFinishedStatus()
+    {
+        // Arrange
+        await SetupDatabase(
+            12011,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var machineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        SetupSpeedLimit(machineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsServerDownloading(downloadTask.PlexServerId))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<UpdateScheduledDownloadLimitsCommand>(), CancellationToken.None))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(RefreshDataType.DownloadTasks))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        var patches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        var finishedPatchEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) =>
+                {
+                    patches.Add(upserts);
+                    if (upserts.Any(x => x.Id == downloadTask.Id && x.Status == DownloadStatus.DownloadFinished))
+                        finishedPatchEntered.TrySetResult();
+                }
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+
+        var outputFileInfoMock = new Mock<IFileInfo>();
+        outputFileInfoMock.Setup(x => x.Exists).Returns(true);
+        outputFileInfoMock.Setup(x => x.Length).Returns(7_654L);
+        Mock.Mock<IFileInfoFactory>()
+            .Setup(x => x.New(It.IsAny<string>()))
+            .Returns(outputFileInfoMock.Object);
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                progressSubject.OnNext(
+                    new DashDownloadProgress
+                    {
+                        DownloadedBytes = 500,
+                        TotalBytes = 999,
+                        Percent = 50,
+                        DownloadSpeedInBytes = 100,
+                        Eta = 12,
+                        RawOutput = "{}",
+                    }
+                );
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 0, Result.Ok()));
+                return Task.FromResult(Result.Ok());
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var dispatcher = Mock.Create<DownloadTaskUpdateDispatcher>();
+        await using var client = Mock.Create<DashPlexDownloadClient>(
+            new NamedParameter("dashWrapper", dashWrapperMock.Object),
+            new NamedParameter("downloadTaskUpdateDispatcher", dispatcher)
+        );
+
+        await dispatcher.StartAsync(CancellationToken.None);
+        // Act
+        var result = await client.Start(downloadTask.ToKey(), CancellationToken);
+        await finishedPatchEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+        await dispatcher.StopAsync(CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var persisted = await IDbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
+        persisted.ShouldNotBeNull();
+        persisted.DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished);
+        persisted.DataTotal.ShouldBe(7_654L);
+        persisted.DataReceived.ShouldBe(7_654L);
+        persisted.Percentage.ShouldBe(100m);
+
+        var finishedPatch = patches
+            .SelectMany(x => x)
+            .Single(x => x.Id == downloadTask.Id && x.Status == DownloadStatus.DownloadFinished);
+        finishedPatch.DataTotal.ShouldBe(7_654L);
+        finishedPatch.DataReceived.ShouldBe(7_654L);
+        // DownloadFinished starts the file-transfer phase, whose progress is still zero.
+        finishedPatch.Percentage.ShouldBe(0m);
+        var filePatches = patches.SelectMany(x => x).Where(x => x.Id == downloadTask.Id).ToList();
+        var finalProgressIndex = filePatches.FindIndex(x =>
+            x.Status == DownloadStatus.Downloading
+            && x.DataTotal == 7_654L
+            && x.DataReceived == 7_654L
+            && x.Percentage == 100m
+        );
+        finalProgressIndex.ShouldBeGreaterThanOrEqualTo(0);
+        filePatches.FindIndex(x => x.Status == DownloadStatus.DownloadFinished)
+            .ShouldBeGreaterThan(finalProgressIndex);
+        Mock.Mock<IDownloadTaskScheduler>().Verify();
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IDownloadHubService>().Verify();
+        Mock.Mock<INotificationHubService>().Verify();
     }
 
     [Test]

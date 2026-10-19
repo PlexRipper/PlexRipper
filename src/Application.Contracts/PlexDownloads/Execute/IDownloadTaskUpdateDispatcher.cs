@@ -22,6 +22,16 @@ public interface IDownloadTaskUpdateDispatcher
     );
 
     /// <summary>
+    /// Persists a terminal progress update immediately, bypassing the buffered progress queue.
+    /// </summary>
+    Task<Result> PersistProgressAsync(
+        DownloadTaskKey key,
+        DownloadTaskProgress progress,
+        DirectDownloadSnapshot? snapshot = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Buffers a progress update for periodic persistence and patch dispatch.
     /// </summary>
     void OnProgressUpdated(DownloadTaskKey key, DownloadTaskProgress progress, DirectDownloadSnapshot? snapshot = null);

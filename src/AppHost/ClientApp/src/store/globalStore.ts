@@ -121,7 +121,11 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			state.platform = platform;
 		},
 		async resetSession(): Promise<void> {
-			await useSignalrStore().resetSession();
+			try {
+				await useSignalrStore().resetSession();
+			} catch (error) {
+				Log.error('Failed to stop SignalR connections during session reset', error);
+			}
 			useAccountDialogStore().$reset();
 			useAccountStore().$reset();
 			useAlertStore().$reset();

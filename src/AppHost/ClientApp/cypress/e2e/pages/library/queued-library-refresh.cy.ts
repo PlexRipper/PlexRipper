@@ -151,41 +151,24 @@ describe('Queued library refresh visibility', () => {
 				cy.getCy('sync-server-media-dialog-library-eta').should('not.exist');
 				cy.getCy('sync-server-media-dialog-hide-btn').click();
 				cy.then(() => {
-					queues = queues.map((queue) => queue.plexLibraryId === processingLibrary.id
-						? { ...queue, status: LibrarySyncJobStatus.Completed, completedAt: new Date().toISOString() }
-						: queue);
+					const queue = queues.find((item) => item.plexLibraryId === processingLibrary.id)!;
+					queue.status = LibrarySyncJobStatus.Completed;
+					queue.completedAt = new Date().toISOString();
+					cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Completed, queue);
 				});
-
-				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-					JobTypes.LibrarySyncJob,
-					JobStatus.Completed,
-					generateLibrarySyncJobQueue({
-						plexLibraryId: processingLibrary.id,
-						plexServerId: server.id,
-						status: LibrarySyncJobStatus.Completed,
-						completedAt: new Date().toISOString(),
-					}),
-				);
-				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-					JobTypes.LibrarySyncJob,
-					JobStatus.Started,
-					generateLibrarySyncJobQueue({
-						plexLibraryId: queuedLibrary.id,
-						plexServerId: server.id,
-						status: LibrarySyncJobStatus.Processing,
-					}),
-				);
+				cy.then(() => {
+					const queue = queues.find((item) => item.plexLibraryId === queuedLibrary.id)!;
+					queue.status = LibrarySyncJobStatus.Processing;
+					queue.completedAt = null;
+					cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Started, queue);
+				});
 				cy.getCy('refresh-library-container').should('be.visible');
-				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-					JobTypes.LibrarySyncJob,
-					JobStatus.Completed,
-					generateLibrarySyncJobQueue({
-						plexLibraryId: queuedLibrary.id,
-						plexServerId: server.id,
-						status: LibrarySyncJobStatus.Failed,
-						errorMessage: 'Plex refresh failed',
-					}),
-				);
+				cy.then(() => {
+					const queue = queues.find((item) => item.plexLibraryId === queuedLibrary.id)!;
+					queue.status = LibrarySyncJobStatus.Failed;
+					queue.errorMessage = 'Plex refresh failed';
+					cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Completed, queue);
+				});
 				cy.get('.media-overview-results').should('be.visible');
 				cy.then(() => {
 					expect(mediaRequestCount, 'failure must not reload media as success').to.equal(mediaRequestsBeforeTerminal);
@@ -197,16 +180,12 @@ describe('Queued library refresh visibility', () => {
 				cy.wait('@queueLibraryRefresh');
 				cy.getCy('media-overview-library-sync-queued-banner').should('be.visible');
 
-				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-					JobTypes.LibrarySyncJob,
-					JobStatus.Completed,
-					generateLibrarySyncJobQueue({
-						plexLibraryId: queuedLibrary.id,
-						plexServerId: server.id,
-						status: LibrarySyncJobStatus.Completed,
-						completedAt: new Date().toISOString(),
-					}),
-				);
+				cy.then(() => {
+					const queue = queues.find((item) => item.plexLibraryId === queuedLibrary.id)!;
+					queue.status = LibrarySyncJobStatus.Completed;
+					queue.completedAt = new Date().toISOString();
+					cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Completed, queue);
+				});
 				cy.getCy('media-overview-library-sync-queued-banner').should('not.exist');
 				cy.getCy('media-overview-refresh-library-btn').should('be.visible');
 				cy.get('.media-overview-results').should('be.visible');
@@ -235,6 +214,12 @@ describe('Queued library refresh visibility', () => {
 				if (!server) {
 					throw new Error('Plex server not found');
 				}
+				let queues = data.plexLibrarySyncJobStatuses.map((queue) => queue.plexLibraryId === processingLibrary.id
+					? { ...queue, status: LibrarySyncJobStatus.Processing, completedAt: null }
+					: queue);
+				cy.intercept('GET', PlexLibraryPaths.getLibrarySyncStatusEndpoint(), (request) => {
+					request.reply(200, generateResultDTO(queues));
+				}).as('queueSnapshot');
 				cy.intercept('GET', PlexServerConnectionPaths.getAllPlexServerConnectionsEndpoint(), {
 					statusCode: 200,
 					body: generateResultDTO(data.plexServerConnections.map((connection) => ({
@@ -269,31 +254,21 @@ describe('Queued library refresh visibility', () => {
 						status: LibrarySyncJobStatus.Processing,
 					}),
 				);
-				cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(queuedLibrary.id), {
-					statusCode: 200,
-					body: generateResultDTO(generateLibrarySyncJobQueue({
+				cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(queuedLibrary.id), (request) => {
+					const queue = generateLibrarySyncJobQueue({
 						plexLibraryId: queuedLibrary.id,
 						plexServerId: server.id,
 						status: LibrarySyncJobStatus.Queued,
-					})),
+					});
+					queues = queues.map((item) => item.plexLibraryId === queue.plexLibraryId ? queue : item);
+					request.reply(200, generateResultDTO(queue));
 				}).as('queueFirstSync');
-				cy.intercept('DELETE', PlexLibraryPaths.cancelLibrarySyncEndpoint(queuedLibrary.id), {
-					statusCode: 200,
-					body: generateResultDTO(undefined),
+				cy.intercept('DELETE', PlexLibraryPaths.cancelLibrarySyncEndpoint(queuedLibrary.id), (request) => {
+					queues = queues.map((queue) => queue.plexLibraryId === queuedLibrary.id
+						? { ...queue, status: LibrarySyncJobStatus.Cancelled }
+						: queue);
+					request.reply(200, generateResultDTO(undefined));
 				}).as('cancelQueuedRefresh');
-				cy.intercept('GET', PlexLibraryPaths.getLibrarySyncStatusEndpoint(), {
-					statusCode: 200,
-					body: generateResultDTO(data.plexLibraries.map((item) => generateLibrarySyncJobQueue({
-						plexLibraryId: item.id,
-						plexServerId: item.plexServerId,
-						status: item.id === queuedLibrary.id
-							? LibrarySyncJobStatus.Cancelled
-							: item.id === processingLibrary.id
-								? LibrarySyncJobStatus.Processing
-								: LibrarySyncJobStatus.Completed,
-						completedAt: item.id === queuedLibrary.id ? null : '1970-01-01T00:00:00.000Z',
-					}))),
-				}).as('cancelledQueueSnapshot');
 
 				cy.getCy('media-overview-refresh-library-btn').click();
 				cy.getCy('refresh-mode-incremental-button').click();
@@ -305,7 +280,7 @@ describe('Queued library refresh visibility', () => {
 				cy.contains('The library media data has not yet been synced').should('not.exist');
 				cy.getCy('cancel-queued-library-sync-button').click();
 				cy.wait('@cancelQueuedRefresh').its('request.method').should('equal', 'DELETE');
-				cy.wait('@cancelledQueueSnapshot');
+				cy.wait('@queueSnapshot');
 
 				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
 					JobTypes.LibrarySyncJob,
@@ -319,16 +294,12 @@ describe('Queued library refresh visibility', () => {
 				cy.getCy('media-overview-library-sync-queued-panel').should('not.exist');
 				cy.contains('The library media data has not yet been synced').should('exist');
 				cy.getCy('background-activity-button-badge').should('contain.text', 1);
-				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
-					JobTypes.LibrarySyncJob,
-					JobStatus.Completed,
-					generateLibrarySyncJobQueue({
-						plexLibraryId: processingLibrary.id,
-						plexServerId: server.id,
-						status: LibrarySyncJobStatus.Completed,
-						completedAt: new Date().toISOString(),
-					}),
-				);
+				cy.then(() => {
+					const queue = queues.find((item) => item.plexLibraryId === processingLibrary.id)!;
+					queue.status = LibrarySyncJobStatus.Completed;
+					queue.completedAt = new Date().toISOString();
+					cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(JobTypes.LibrarySyncJob, JobStatus.Completed, queue);
+				});
 				cy.getCy('background-activity-button-badge').should('not.exist');
 				cy.getCy('media-overview-library-sync-queued-panel').should('not.exist');
 				cy.contains('The library media data has not yet been synced').should('exist');

@@ -21,6 +21,10 @@ public class AuthenticationCookiePipelineIntegrationTests : BaseIntegrationTests
             { new StringContent(DefaultUserAppCredentials.DefaultPassword), "Password" },
             { new StringContent(rememberMe.ToString()), "RememberMe" },
         };
+        var seededUser = await container.Resolve<IUserService>().FindByNameAsync(
+            DefaultUserAppCredentials.DefaultUsername
+        );
+        seededUser.ShouldNotBeNull();
 
         // Act
         var response = await client.PostAsync(ApiRoutes.LoginEndpoint, formData);
@@ -33,7 +37,9 @@ public class AuthenticationCookiePipelineIntegrationTests : BaseIntegrationTests
         ticket.Principal.Identity.ShouldNotBeNull();
         ticket.Principal.Identity.IsAuthenticated.ShouldBeTrue();
         ticket.Principal.Identity.Name.ShouldBe(DefaultUserAppCredentials.DefaultUsername);
-        ticket.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value.ShouldNotBeNullOrWhiteSpace();
+        var nameIdentifierClaim = ticket.Principal.FindFirst(ClaimTypes.NameIdentifier);
+        nameIdentifierClaim.ShouldNotBeNull();
+        nameIdentifierClaim!.Value.ShouldBe(seededUser!.Id);
         ticket.Principal.IsInRole(DefaultUserAppCredentials.DefaultAdminRole).ShouldBeTrue();
         ticket.Properties.IsPersistent.ShouldBe(rememberMe);
 

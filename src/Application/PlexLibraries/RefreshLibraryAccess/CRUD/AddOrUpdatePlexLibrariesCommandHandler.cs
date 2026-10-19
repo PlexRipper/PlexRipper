@@ -61,19 +61,16 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             .PlexLibraries.GroupBy(x => x.PlexServerId)
             .ToDictionary(group => group.Key, group => group.GroupBy(x => x.Uuid).Select(x => x.Last()).ToList());
 
+        var existingLibraries = await LoadExistingLibrariesAsync(plexServerLibrariesDict, cancellationToken);
+
         foreach (var (_, incomingPlexLibraries) in plexServerLibrariesDict)
         {
             foreach (var incomingPlexLibrary in incomingPlexLibraries)
             {
-                var plexLibraryDb = await _dbContext
-                    .PlexLibraries.IgnoreIsEnabledFilter()
-                    .AsTracking()
-                    .FirstOrDefaultAsync(
-                        x => x.PlexServerId == incomingPlexLibrary.PlexServerId && x.Uuid == incomingPlexLibrary.Uuid,
-                        cancellationToken
-                    );
-
-                if (plexLibraryDb is null)
+                if (!existingLibraries.TryGetValue(
+                    (incomingPlexLibrary.PlexServerId, incomingPlexLibrary.Uuid),
+                    out var plexLibraryDb
+                ))
                 {
                     _log.Here()
                         .Debug("Adding PlexLibrary {PlexLibraryName} to the database", incomingPlexLibrary.Title);
@@ -123,16 +120,16 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 plexAccount.DisplayName
             );
 
+        // When a server is owned by an account, then mark all libraries as owned as well
+        var ownedServerIds = await _dbContext
+            .PlexAccountServers.Where(x => x.PlexAccountId == plexAccountId && x.IsServerOwned)
+            .Select(x => x.PlexServerId)
+            .ToHashSetAsync(cancellationToken);
+
         foreach (var (plexServerId, incomingPlexLibraries) in plexServerLibrariesDict)
         {
             var currentPlexLibraryAccessList = await _dbContext
                 .PlexAccountLibraries.Where(x => x.PlexAccountId == plexAccountId && x.PlexServerId == plexServerId)
-                .ToListAsync(cancellationToken);
-
-            // When a server is owned by an account, then mark all libraries as owned as well
-            var ownedServerIds = await _dbContext
-                .PlexAccountServers.Where(x => x.PlexAccountId == plexAccountId && x.IsServerOwned)
-                .Select(x => x.PlexServerId)
                 .ToListAsync(cancellationToken);
 
             var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
@@ -260,6 +257,20 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         }
 
         return Result.Ok(rapportList);
+    }
+
+    private Task<Dictionary<(int PlexServerId, string Uuid), PlexLibrary>> LoadExistingLibrariesAsync(
+        IReadOnlyDictionary<int, List<PlexLibrary>> incomingLibraries,
+        CancellationToken cancellationToken
+    )
+    {
+        var incomingServerIds = incomingLibraries.Keys.ToArray();
+        var incomingUuids = incomingLibraries.SelectMany(x => x.Value, (_, library) => library.Uuid).Distinct().ToArray();
+        return _dbContext
+            .PlexLibraries.IgnoreIsEnabledFilter()
+            .AsTracking()
+            .Where(x => incomingServerIds.Contains(x.PlexServerId) && incomingUuids.Contains(x.Uuid))
+            .ToDictionaryAsync(x => (x.PlexServerId, x.Uuid), cancellationToken);
     }
 
     private async Task AddHistoryEventsAsync(

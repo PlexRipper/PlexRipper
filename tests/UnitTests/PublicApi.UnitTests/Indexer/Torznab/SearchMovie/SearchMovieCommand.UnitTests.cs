@@ -243,7 +243,8 @@ public class SearchMovieCommandUnitTests : BaseCommandUnitTest<SearchMovieComman
         // Assert
         result.ShouldNotBeNull();
         result.Value.Channel.Items.ShouldNotBeEmpty();
-        result.Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
+        result.Value.Channel.Items.Select(i => i.Attributes.Single(a => a.Name == "imdb").Value)
+            .ShouldBe(Enumerable.Repeat(imdb[2..], result.Value.Channel.Items.Count));
 
         var expectedTitles = movie.MediaDataList.OrderBy(md => md.PlexApiPartId).Select(md => md.GetFileName).ToList();
         result.Value.Channel.Items.Select(i => i.Title).ToList().ShouldBe(expectedTitles);
@@ -508,9 +509,8 @@ public class SearchMovieCommandUnitTests : BaseCommandUnitTest<SearchMovieComman
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         result.Value.Channel.Items.ShouldNotBeEmpty();
-        result.Value.Channel.Items.ShouldAllBe(x =>
-            x.Attributes.Any(attribute => attribute.Name == "imdb" && attribute.Value == movie.Guid_IMDB)
-        );
+        result.Value.Channel.Items.Select(item => item.Attributes.Single(attribute => attribute.Name == "imdb").Value)
+            .ShouldBe(Enumerable.Repeat(movie.Guid_IMDB![2..], result.Value.Channel.Items.Count));
     }
 
     [Test]

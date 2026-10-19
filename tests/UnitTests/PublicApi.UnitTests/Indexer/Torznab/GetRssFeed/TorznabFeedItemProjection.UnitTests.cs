@@ -274,6 +274,43 @@ public class TorznabFeedItemProjectionUnitTests
         second.PubDate.ShouldBe(projection.AddedAt.ToString("R"));
     }
 
+    [Test]
+    [Arguments(PlexMediaType.Movie, "tt0000123", "0000123")]
+    [Arguments(PlexMediaType.Movie, "TT0000123", "0000123")]
+    [Arguments(PlexMediaType.Movie, "0000123", "0000123")]
+    [Arguments(PlexMediaType.Episode, "tt0000123", "0000123")]
+    [Arguments(PlexMediaType.Episode, "TT0000123", "0000123")]
+    [Arguments(PlexMediaType.Episode, "0000123", "0000123")]
+    [Arguments(PlexMediaType.Movie, null, null)]
+    [Arguments(PlexMediaType.Episode, "", null)]
+    public void ShouldEmitNumericImdbAttributeWithoutChangingStoredIdentity(
+        PlexMediaType mediaType, string? storedId, string? expectedValue)
+    {
+        // Arrange
+        var projection = CreateProjection() with { MediaType = mediaType, ImdbId = storedId };
+        var identity = new IntegrationIdentity(
+            mediaType == PlexMediaType.Movie ? IntegrationType.Radarr : IntegrationType.Sonarr, Guid.NewGuid());
+
+        // Act
+        var item = projection.ToTorznabItem(identity, "key", "http://localhost");
+        var requested = projection.ToTorznabItem(identity, "key", "http://localhost",
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "imdb" });
+        var excluded = projection.ToTorznabItem(identity, "key", "http://localhost",
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "seeders" });
+
+        // Assert
+        var expected = expectedValue is null ? Array.Empty<string>() : new[] { expectedValue };
+        item.Attributes.Where(attribute => attribute.Name == "imdb").Select(attribute => attribute.Value).ShouldBe(expected);
+        requested.Attributes.Where(attribute => attribute.Name == "imdb").Select(attribute => attribute.Value).ShouldBe(expected);
+        excluded.Attributes.ShouldNotContain(attribute => attribute.Name == "imdb");
+        projection.ImdbId.ShouldBe(storedId);
+        requested.Guid.Value.ShouldBe(item.Guid.Value);
+        requested.Attributes.Where(attribute => attribute.Name is "size" or "category")
+            .Select(attribute => (attribute.Name, attribute.Value))
+            .ShouldBe(item.Attributes.Where(attribute => attribute.Name is "size" or "category")
+                .Select(attribute => (attribute.Name, attribute.Value)));
+    }
+
     private static TorznabFeedItemProjection CreateProjection() =>
         new()
         {

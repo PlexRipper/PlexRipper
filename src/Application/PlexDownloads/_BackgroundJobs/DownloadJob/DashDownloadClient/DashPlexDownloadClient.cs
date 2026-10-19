@@ -182,7 +182,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         Interlocked.Exchange(ref _stopRequested, 1);
 
         var stopResult = await _dashWrapper.StopAsync();
-        if (stopResult.IsCancelled || stopResult.IsFailed)
+        if (stopResult.IsFailed && !stopResult.IsCancelled)
             return stopResult;
 
         return await AwaitTerminalWorkAsync();

@@ -10,6 +10,22 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
     {
         var directoryMock = new Mock<IDirectory>();
         directoryMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
+        var outputFileInfoMock = new Mock<IFileInfo>();
+        outputFileInfoMock.Setup(x => x.Exists).Returns(true);
+        outputFileInfoMock.Setup(x => x.Length).Returns(0);
+        Mock.Mock<IFileInfoFactory>()
+            .Setup(x => x.New(It.IsAny<string>()))
+            .Returns(outputFileInfoMock.Object);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.PersistProgressAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
         Mock.Mock<INotificationHubService>()
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()))
             .Returns(Task.CompletedTask)
@@ -149,6 +165,87 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             stoppedWriteRelease.TrySetResult();
         }
         }
+
+    [Test]
+    public async Task ShouldAcceptCancelledRunnerStop_AndAwaitTerminalWorkBeforePersistingStopped()
+    {
+        // Arrange
+        await SetupDatabase(
+            13004,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        SetupSpeedLimit(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+        var terminalWorkEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var terminalWorkRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var runnerStopEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var statusOrder = new List<DownloadStatus>();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns<DownloadTaskKey, DownloadStatus, CancellationToken>(
+                (_, status, _) =>
+                {
+                    statusOrder.Add(status);
+                    if (status != DownloadStatus.DownloadFinished)
+                        return Task.CompletedTask;
+
+                    terminalWorkEntered.TrySetResult();
+                    return terminalWorkRelease.Task;
+                }
+            )
+            .Verifiable(Times.Exactly(3));
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
+        dashWrapperMock
+            .Setup(x => x.StopAsync())
+            .Callback(() => runnerStopEntered.TrySetResult())
+            .ReturnsAsync(ResultExtensions.TaskIsCancelled(nameof(IDashMpdCliWrapper)));
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var startResult = await sut.Start(downloadTask.ToKey(), CancellationToken);
+        startResult.IsSuccess.ShouldBeTrue();
+
+        // Act
+        completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 0, Result.Ok()));
+        await terminalWorkEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+        var stopTask = sut.StopAsync();
+
+        // Assert
+        await runnerStopEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+        stopTask.IsCompleted.ShouldBeFalse();
+        statusOrder.ShouldBe([DownloadStatus.Downloading, DownloadStatus.DownloadFinished]);
+
+        terminalWorkRelease.TrySetResult();
+        var stopResult = await stopTask.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
+        stopResult.IsSuccess.ShouldBeTrue();
+        stopResult.Errors.Count.ShouldBe(0);
+        statusOrder.ShouldBe(
+            [DownloadStatus.Downloading, DownloadStatus.DownloadFinished, DownloadStatus.Stopped]
+        );
+        dashWrapperMock.Verify(x => x.StopAsync(), Times.Once());
+    }
 
 
     [Test]

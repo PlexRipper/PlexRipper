@@ -17,6 +17,13 @@
 		</template>
 		<template #default>
 			<div>
+				<QAlert
+					v-if="errorMessage"
+					cy="generate-token-error"
+					type="error"
+					role="alert">
+					{{ errorMessage }}
+				</QAlert>
 				<!--	Verification Code input	-->
 				<QRow
 					v-if="needVerificationToken"
@@ -65,8 +72,8 @@
 <script setup lang="ts">
 import { set, useClipboard } from '@vueuse/core';
 import { DialogType } from '@enums';
+import { useAccountDialogStore } from '@store';
 import VOtpInput from 'vue3-otp-input';
-import { useAccountDialogStore } from '#imports';
 import { useSubscription } from '@vueuse/rxjs';
 
 const accountDialogStore = useAccountDialogStore();
@@ -75,6 +82,8 @@ const { copy } = useClipboard({ legacy: true });
 const generatedToken = ref<string>('');
 const verificationCodeValue = ref<string>('');
 const needVerificationToken = ref<boolean>(false);
+const errorMessage = ref('');
+let latestRequestId = 0;
 
 function onOpen() {
 	requestToken();
@@ -87,16 +96,25 @@ function onComplete(verificationCode: string) {
 }
 
 function requestToken(verificationCode: string = '') {
+	const requestId = ++latestRequestId;
+	set(errorMessage, '');
 	useSubscription(accountDialogStore.generateToken(verificationCode).subscribe({
-		next({ isSuccess, value }) {
+		next({ isSuccess, value, errors }) {
+			if (requestId !== latestRequestId) {
+				return;
+			}
+
+			if (!isSuccess) {
+				set(errorMessage, errors.map((error) => error.message).join('\n'));
+				return;
+			}
+
 			if (value?.needsVerificationCode) {
 				set(needVerificationToken, true);
 				return;
 			}
 
-			if (isSuccess) {
-				set(generatedToken, value?.plexAuthToken ?? '');
-			}
+			set(generatedToken, value?.plexAuthToken ?? '');
 		},
 	}));
 }

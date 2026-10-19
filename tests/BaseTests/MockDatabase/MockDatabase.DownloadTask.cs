@@ -89,7 +89,7 @@ public static partial class MockDatabase
     }
 
     private static void ApplyIntegrationTestPaths(
-        IEnumerable<DownloadTaskPhotoAlbum> downloadTasks,
+        IEnumerable<DownloadTaskPhotoFolder> downloadTasks,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo
     )
@@ -97,12 +97,26 @@ public static partial class MockDatabase
         if (!appRuntimeInfo.IsIntegrationTestMode)
             return;
 
-        foreach (var downloadTask in downloadTasks)
-        foreach (var image in downloadTask.Children)
-        foreach (var child in image.Children)
+        var folderIndex = 0;
+        foreach (var folder in downloadTasks)
         {
-            child.DirectoryMeta.DownloadRootPath = pathProvider.DefaultDownloadsDestinationFolder;
-            child.DirectoryMeta.DestinationRootPath = pathProvider.DefaultPhotosDestinationFolder;
+            folder.DownloadRootPath = pathProvider.DefaultDownloadsDestinationFolder;
+            // Seeded folders represent captured root contexts. Keep the first at the configured
+            // default and namespace additional contexts beneath the configured Photos root.
+            folder.DestinationRootPath = folderIndex == 0
+                ? pathProvider.DefaultPhotosDestinationFolder
+                : Path.Combine(pathProvider.DefaultPhotosDestinationFolder, $"root-{folderIndex}");
+            var rootName = folder.Title.SanitizeFolderName();
+            var relativePhotoFolder = string.IsNullOrEmpty(folder.RelativePath)
+                ? rootName
+                : $"{rootName}/{folder.RelativePath}";
+            foreach (var file in folder.Files)
+            {
+                file.DirectoryMeta.DownloadRootPath = folder.DownloadRootPath;
+                file.DirectoryMeta.DestinationRootPath = folder.DestinationRootPath;
+                file.DirectoryMeta.PhotoFolder = relativePhotoFolder;
+            }
+            folderIndex++;
         }
     }
 
@@ -239,7 +253,7 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<ReaparrDbContext> AddDownloadTaskPhotoAlbums(
+    public static async Task<ReaparrDbContext> AddDownloadTaskPhotoFolders(
         this ReaparrDbContext context,
         Seed seed,
         IPathProvider pathProvider,
@@ -249,28 +263,46 @@ public static partial class MockDatabase
     {
         var config = FakeDataConfig.FromOptions(options);
         var downloadTasks = FakeData
-            .GetDownloadTaskPhotoAlbum(seed, options)
-            .Generate(config.PhotoAlbumDownloadTasksCount);
+            .GetDownloadTaskPhotoFolder(seed, options)
+            .Generate(config.PhotoFolderDownloadTasksCount);
 
-        var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.PhotoAlbum);
-        plexLibrary.ShouldNotBeNull(
+        var plexLibraries = context.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.PhotoAlbum)
+            .OrderBy(x => x.Id)
+            .ToList();
+        plexLibraries.ShouldNotBeEmpty(
             "No PlexLibrary available with type PhotoAlbum, consider setting config.DisableForeignKeyCheck = true"
         );
 
-        var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
-        plexServer.ShouldNotBeNull();
+        // Every seeded folder captures a distinct root context. Existing photo libraries are distributed
+        // first; additional contexts for a library use root-N below the configured Photos destination.
+        var folderIndex = 0;
+        foreach (var folder in downloadTasks)
+        {
+            var plexLibrary = plexLibraries[folderIndex % plexLibraries.Count];
+            folder.PlexServerId = plexLibrary.PlexServerId;
+            folder.PlexLibraryId = plexLibrary.Id;
+            if (folderIndex > 0)
+                folder.DestinationRootPath = Path.Combine(folder.DestinationRootPath, $"root-{folderIndex}");
+            foreach (var file in folder.Files)
+            {
+                file.PlexServerId = plexLibrary.PlexServerId;
+                file.PlexLibraryId = plexLibrary.Id;
+                file.DirectoryMeta.DestinationRootPath = folder.DestinationRootPath;
+            }
 
-        downloadTasks.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
+            folderIndex++;
+        }
+
         ApplyIntegrationTestPaths(downloadTasks, pathProvider, appRuntimeInfo);
-
-        context.DownloadTaskPhotoAlbums.AddRange(downloadTasks);
+        context.DownloadTaskPhotoFolders.AddRange(downloadTasks);
         await context.SaveChangesAsync();
 
         _log.Here()
             .Debug(
-                "Added {PhotoAlbumDownloadTasksCount} PhotoAlbum {NameOfDownloadTask}s to ReaparrDbContext: {DatabaseName}",
-                config.PhotoAlbumDownloadTasksCount,
-                nameof(DownloadTaskPhotoAlbum),
+                "Added {PhotoFolderDownloadTasksCount} PhotoFolder {NameOfDownloadTask}s to ReaparrDbContext: {DatabaseName}",
+                config.PhotoFolderDownloadTasksCount,
+                nameof(DownloadTaskPhotoFolder),
                 context.DatabaseName
             );
 

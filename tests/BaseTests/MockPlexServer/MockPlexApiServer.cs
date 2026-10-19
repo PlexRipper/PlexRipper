@@ -50,6 +50,8 @@ public class MockPlexApiServer : IMockPlexApiServer
     private readonly Dictionary<string, List<Metadata>> _tracks = [];
     private readonly Dictionary<string, List<Metadata>> _photoAlbums = [];
     private readonly Dictionary<string, List<Metadata>> _photos = [];
+    private readonly Dictionary<string, Dictionary<string, List<Metadata>>> _photoAlbumMembers = [];
+    private readonly Dictionary<string, Dictionary<string, List<Metadata>>> _photoFolderMembers = [];
     private readonly Dictionary<string, List<Metadata>> _otherVideos = [];
 
     private IReaparrDbContext _dbContext;
@@ -239,11 +241,15 @@ public class MockPlexApiServer : IMockPlexApiServer
         // Setup libraries responses
         foreach (var server in _servers)
         {
+            foreach (var library in _libraries[server.ClientIdentifier].Where(x => x.Type.ToPlexMediaType() == PlexMediaType.PhotoAlbum))
+                library.Location = [new LibrarySectionLocation { Id = 1, Path = "/fixture/photos" }];
             foreach (var connection in _connections[server.ClientIdentifier])
             {
                 var uriBuilder = new UriBuilder(connection.Uri) { Path = "/library/sections/all" };
                 handler
-                    .SetupRequest(HttpMethod.Get, uriBuilder.Uri)
+                    .SetupRequest(HttpMethod.Get, request =>
+                        request.RequestUri!.GetLeftPart(UriPartial.Path) == uriBuilder.Uri.GetLeftPart(UriPartial.Path)
+                        || request.RequestUri.GetLeftPart(UriPartial.Path) == new Uri(new UriBuilder(connection.Uri).Uri, "/library/sections").GetLeftPart(UriPartial.Path))
                     .ReturnsAsync(
                         (HttpRequestMessage req, CancellationToken _) =>
                         {
@@ -261,6 +267,8 @@ public class MockPlexApiServer : IMockPlexApiServer
                             response.Object.ShouldNotBeNull();
                             response.Object.MediaContainer.ShouldNotBeNull();
                             response.Object.MediaContainer.Directory = _libraries[server.ClientIdentifier];
+                            response.Object.MediaContainer.Size = response.Object.MediaContainer.Directory.Count;
+                            response.Object.MediaContainer.TotalSize = response.Object.MediaContainer.Directory.Count;
                             return response.Object.ToJsonHttpResponse(req, HttpStatusCode.OK);
                         }
                     );
@@ -365,21 +373,52 @@ public class MockPlexApiServer : IMockPlexApiServer
                         .GetMediaMetaDataMetadata(_seed, PlexMediaType.PhotoAlbum, _options)
                         .Generate(_config.PhotoAlbumsPerLibraryCount);
                     var photoList = new List<Metadata>();
-                    foreach (var album in albumList)
+                    var albumMembers = new Dictionary<string, List<Metadata>>(StringComparer.Ordinal);
+                    Metadata? sharedAsset = null;
+
+                    for (var albumIndex = 0; albumIndex < albumList.Count; albumIndex++)
                     {
+                        var album = albumList[albumIndex];
                         var photos = FakePlexApiData
                             .GetMediaMetaDataMetadata(_seed, PlexMediaType.PhotoImage, _options)
                             .Generate(_config.PhotosPerAlbumCount + _config.PhotoClipsPerAlbumCount);
+                        if (_config.PhotoAlbumsOverlap && albumIndex > 0 && sharedAsset is not null && photos.Count > 0)
+                            photos[0] = sharedAsset;
+
                         photos.ForEach(x => x.SetParentValues(album));
                         for (var i = _config.PhotosPerAlbumCount; i < photos.Count; i++)
                         {
                             photos[i].Type = "clip";
-                            photos[i].Subtype = "photo";
+                            photos[i].Subtype = null;
+                            foreach (var media in photos[i].Media ?? [])
+                            {
+                                media.Container = "mp4";
+                                media.VideoCodec = "h264";
+                                media.AudioCodec = "aac";
+                                foreach (var part in media.Part ?? [])
+                                    part.File = $"/fixture/photos/clip-{part.Id}.mp4";
+                            }
                         }
-                        photoList.AddRange(photos);
+
+                        if (_config.PhotoAlbumsOverlap && sharedAsset is null && photos.Count > 0)
+                            sharedAsset = photos[0];
+
+                        var members = photos.DistinctBy(x => x.RatingKey, StringComparer.Ordinal).ToList();
+                        albumMembers[album.RatingKey!] = members;
+                        foreach (var photo in members)
+                        {
+                            if (photoList.All(x => x.RatingKey != photo.RatingKey))
+                                photoList.Add(photo);
+                        }
                     }
+
                     _photoAlbums.TryAdd(libraryKey, albumList);
                     _photos.TryAdd(libraryKey, photoList);
+                    _photoAlbumMembers.TryAdd(libraryKey, albumMembers);
+                    _photoFolderMembers.TryAdd(
+                        libraryKey,
+                        new Dictionary<string, List<Metadata>>(StringComparer.Ordinal) { ["root"] = photoList }
+                    );
                     continue;
                 }
 
@@ -426,10 +465,19 @@ public class MockPlexApiServer : IMockPlexApiServer
                                     && int.TryParse(containerSizeValue, out var size)
                                 )
                                     containerSize = size;
+                                if (req.Headers.TryGetValues("X-Plex-Container-Start", out var starts)
+                                    && int.TryParse(starts.Single(), out var headerStart))
+                                    containerStart = headerStart;
+                                if (req.Headers.TryGetValues("X-Plex-Container-Size", out var sizes)
+                                    && int.TryParse(sizes.Single(), out var headerSize))
+                                    containerSize = headerSize;
 
-                                // Check if the type is specified in the query parameters
+                                // Photos use Plex's numeric type 13 for images and 12 for clips.
                                 var libraryType = PlexMediaType.Unknown;
-                                if (queryDict.TryGetValue("type", out var type))
+                                queryDict.TryGetValue("type", out var type);
+                                if (library.Type.ToPlexMediaType() == PlexMediaType.PhotoAlbum && (type == "12" || type == "13"))
+                                    libraryType = PlexMediaType.PhotoImage;
+                                else if (type is not null)
                                     libraryType = type.ToPlexMediaTypeFromTypeInt();
                                 if (
                                     library.Agent == "com.plexapp.agents.none"
@@ -444,7 +492,16 @@ public class MockPlexApiServer : IMockPlexApiServer
                                     options: _options
                                 );
 
-                                var fullList = GetMediaItems(library.Uuid, libraryType);
+                                var fullList =
+                                    library.Type.ToPlexMediaType() == PlexMediaType.PhotoAlbum
+                                        ? type switch
+                                        {
+                                            "12" => _photos[library.Uuid].Where(x => x.Type == "clip").ToList(),
+                                            "13" => _photos[library.Uuid].Where(x => x.Type != "clip").ToList(),
+                                            "14" => _photoAlbums[library.Uuid],
+                                            _ => _photos[library.Uuid],
+                                        }
+                                        : GetMediaItems(library.Uuid, libraryType);
 
                                 // Apply slicing based on containerStart and containerSize
                                 if (containerSize > 0)
@@ -487,6 +544,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                         .SetupRequest(
                             HttpMethod.Get,
                             uri => uri.RequestUri!.AbsolutePath.StartsWith("/library/metadata/")
+                                && !uri.RequestUri.AbsolutePath.EndsWith("/children", StringComparison.Ordinal)
                         )
                         .ReturnsAsync(
                             (HttpRequestMessage request, CancellationToken _) =>
@@ -518,10 +576,60 @@ public class MockPlexApiServer : IMockPlexApiServer
                                     .MediaContainerWithMetadata!.ToJsonHttpResponse(request, HttpStatusCode.OK);
                             }
                         );
+
+                    if (library.Type.ToPlexMediaType() == PlexMediaType.PhotoAlbum)
+                    {
+                        handler.SetupRequest(HttpMethod.Get, request =>
+                                request.RequestUri!.GetLeftPart(UriPartial.Authority)
+                                    == new UriBuilder(connection.Uri).Uri.GetLeftPart(UriPartial.Authority)
+                                && (
+                                    IsPhotoFolderRequest(request, library.Key)
+                                    || _photoAlbums[library.Uuid].Any(album =>
+                                        request.RequestUri.AbsolutePath == $"/library/metadata/{album.RatingKey}/children")
+                                ))
+                            .ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
+                            {
+                                var requestUri = request.RequestUri!;
+                                List<Metadata> metadata;
+                                if (requestUri.AbsolutePath.EndsWith("/children", StringComparison.Ordinal))
+                                {
+                                    var albumKey = requestUri.AbsolutePath["/library/metadata/".Length..^"/children".Length];
+                                    metadata = _photoAlbumMembers[library.Uuid].GetValueOrDefault(albumKey) ?? [];
+                                }
+                                else
+                                {
+                                    var parent = request.ParseQueryToDictionary().TryGetValue("parent", out var parentKey)
+                                        ? parentKey
+                                        : "root";
+                                    metadata = _photoFolderMembers[library.Uuid].GetValueOrDefault(parent)
+                                        ?? _photoFolderMembers[library.Uuid].GetValueOrDefault("root")
+                                        ?? [];
+                                }
+                                var offset = request.Headers.TryGetValues("X-Plex-Container-Start", out var offsets)
+                                    ? int.Parse(offsets.Single(), System.Globalization.CultureInfo.InvariantCulture)
+                                    : 0;
+                                var size = request.Headers.TryGetValues("X-Plex-Container-Size", out var sizes)
+                                    ? int.Parse(sizes.Single(), System.Globalization.CultureInfo.InvariantCulture)
+                                    : 50;
+                                var page = metadata.Skip(offset).Take(size).ToList();
+                                return new
+                                {
+                                    MediaContainer = new { offset, size = page.Count, totalSize = metadata.Count, Metadata = page },
+                                }.ToJsonHttpResponse(request, HttpStatusCode.OK);
+                            });
+                    }
                 }
             }
         }
     }
+
+    private static bool IsPhotoFolderRequest(HttpRequestMessage request, string? libraryKey) =>
+        !string.IsNullOrEmpty(libraryKey)
+        && request.RequestUri!.AbsolutePath == $"/library/sections/{libraryKey}/folder"
+        && (
+            string.IsNullOrEmpty(request.RequestUri.Query)
+            || request.ParseQueryToDictionary().ContainsKey("parent")
+        );
 
     private Metadata? GetMediaItem(string key)
     {

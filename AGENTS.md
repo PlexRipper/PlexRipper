@@ -32,6 +32,15 @@ Reaparr is a cross-platform Plex media downloader hosted on GitHub: https://gith
 
 ---
 
+## CodeScene safeguards
+
+- After completing the related implementation and test edits, run `code_health_review` on every changed source file.
+- Address introduced Code Health regressions within the approved scope, then repeat the affected review and confirm the result with `code_health_score`.
+- Before committing, run `pre_commit_code_health_safeguard` and require it to pass. Report unavailable checks or out-of-scope findings as blockers rather than expanding the change.
+- Code Health supplements behavioral tests and technical review; it does not replace them or authorize commits.
+
+---
+
 ## Safety constraints
 
 > **NEVER** install system packages on the host unless explicitly instructed.
@@ -73,8 +82,25 @@ If working on the frontend, then load `reaparr-frontend` skill first for project
 
 > **Package manager:** The frontend uses **Bun exclusively** — never use npm, yarn, or pnpm.
 
-> **`generate-ts` prerequisite:** Start the backend in development mode with `dotnet run --project src/AppHost` before executing `bun run generate-ts`.
+> **API generation:** With the backend running through Rider, run `bun run generate-api-ts` from `src/AppHost/ClientApp`.
 
+
+---
+
+## Running Reaparr
+
+Start the backend, then the frontend:
+
+| Application | IDE / configuration | Project selector |
+| --- | --- | --- |
+| Backend | Rider: `Reaparr Docker Development` | `rootFolder`: absolute repository root |
+| Frontend | WebStorm: `dev`, using Bun | `projectPath`: absolute `src/AppHost/ClientApp` path |
+
+Use the IDE's `restart_run_configuration` with the selector above, `configurationName`, `mode: "run"`, and `waitForExit: false`. It starts the application or stops the existing matching instance before restarting; do not wait for these long-running processes to exit.
+
+To stop, use `stop_run_configuration` with the same project selector and configuration name.
+
+Use WebStorm for the frontend; only fall back to `bun run dev` from `src/AppHost/ClientApp` when WebStorm cannot launch it.
 
 ---
 

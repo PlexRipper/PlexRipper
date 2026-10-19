@@ -36,10 +36,12 @@ Generic minimal-file or DRY guidance must not override this structure. In Reapar
 
 Native repository tooling is mandatory for backend work. Use these tools directly:
 - `read`, `edit`, and `write` for file operations;
-- `glob` and repository search tools for discovery;
+- codebase-memory for structural/text discovery and impact analysis, and `glob` for file-name discovery;
 - `lsp` for symbol inspection, references, refactors, and diagnostics;
 - short `bash` commands for native project tooling and factual checks;
 - `dotnet-test-mcp` or the repository's native test command for backend tests.
+
+For application start, restart, and stop instructions, see **Running Reaparr** in the project root `AGENTS.md`.
 
 ### Uncommitted-change reviews
 
@@ -52,33 +54,27 @@ When asked to review, audit, or correct uncommitted backend changes:
 
 ### Native tooling fast path
 
-After one successful native tool call, reuse the same tool family for the task:
+After identifying the indexed project and repository tool route, reuse them for the task:
 
 | Action | Native tool |
 | --- | --- |
 | Read file/range | `read` |
 | Create or overwrite file | `write` |
 | Surgical edit | `edit` |
-| Find paths | `glob` |
+| Find paths | codebase-memory search; `glob` for file names |
 | Symbol-aware lookup/refactor | `lsp` |
 | Short project command | `bash` |
 | Backend tests | `dotnet-test-mcp` or the repository's native test command |
 
-Only switch tool families when a needed capability is unavailable or a native call fails.
+Use repository-native file/LSP tools without requiring an external IDE. Codebase-memory remains the discovery/impact route; backend tests use `dotnet-test-mcp` when available.
 
-### Native tooling retry rule
+### Tool failures
 
-If a native tool fails, retry the same tool once with a narrower request before changing approach:
-- File read fails -> read a smaller range.
-- Search fails -> narrow the path or search term.
-- Diagnostics fail -> retry the same file, then use narrower `lsp` diagnostics.
-- Test execution fails -> preserve the failure evidence and retry through the repository's documented test route.
-
-Do not treat an external editor integration as a prerequisite for backend work.
+Correct malformed parameters before retrying. Narrow oversized requests. For a permission denial, do not retry the underlying operation through another tool; request the specific missing permission. For unavailable required indexing or test tooling, report the exact blocker rather than changing runners. An unchanged test failure is evidence to diagnose, not a reason to rerun.
 
 ## Secondary Skill Routing
 
-Load this skill first, then load narrower skills when the task matches. When editing or creating backend unit tests under `tests/UnitTests/`, `reaparr-backend-unit-tests` is mandatory, even if the production code being tested lives in a tooling project such as `tools/Build`. 
+Load this skill first, then load narrower skills when the task matches. When editing or creating backend unit tests under `tests/UnitTests/`, `reaparr-backend-unit-tests` is mandatory, even if the production code being tested lives in a tooling project such as `tools/Build`.
 
 | Task | Load next |
 | --- | --- |
@@ -142,8 +138,8 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 
 ### Endpoints
 
-- Endpoints inherit from the project-local `BaseEndpoint<TRequest, TResponse>`.
-- Do not inherit from raw FastEndpoints `Endpoint<,>` directly.
+- Match existing FastEndpoints inheritance: `Endpoint<TRequest, TResponse>` or `EndpointWithoutRequest<TResponse>`, as appropriate for the operation.
+- Reaparr has no project-local `BaseEndpoint<,>` requirement; do not introduce a wrapper just to satisfy guidance.
 - Endpoint behavior should usually dispatch through `ICommandExecutor` rather than embedding orchestration logic.
 
 ### Dependency Injection
@@ -335,16 +331,6 @@ Rules:
 10. Re-read changed files after edits to confirm the intended changes landed.
 11. Use native diagnostics and language-server analysis to find errors that need fixing before claiming completion. Do not run a build as an error-discovery mechanism.
 
-## Apply Backend Changes (Native Development)
-
-Run the backend with the repository's native command:
-
-```bash
-dotnet run --project src/AppHost
-```
-
-Use the process tool for long-running services, observe readiness before exercising the service, and stop the process after verification.
-
 ## Run and Test Commands
 
 Do not run `dotnet build` or project build commands solely to discover errors. Use `lsp` diagnostics and targeted native checks first. Build-related execution is allowed when it is part of running tests or the requested application workflow.
@@ -365,12 +351,6 @@ When `dotnet-test-mcp` is available, prefer it for backend test execution. Other
 Use direct calls to the documented test tool after one successful health check. If it is unavailable, use the repository's native test command and preserve the failure evidence.
 
 All backend test execution should use the documented test route. Never use an external editor run configuration for test execution.
-
-### Running the backend AppHost (not test-related)
-
-```bash
-dotnet run --project src/AppHost
-```
 
 ## Verification Gates
 
@@ -404,7 +384,7 @@ Do not claim success unless native diagnostics and required tests passed. If the
 - Editing backend unit tests without also loading `reaparr-backend-unit-tests`.
 - Testing filesystem behavior with real `File`, `Directory`, temp directories, or host filesystem state instead of `BaseUnitTest.SetupFileSystem(...)` and `MockFileSystem`.
 - Treating this skill as optional for small changes.
-- Using external editor integrations instead of native repository tools.
+- Using external editor integrations instead of native repository tools for file operations, or using shell commands instead of IDE run configurations for development-service lifecycle.
 - Switching to broad filesystem commands after one native-tool hiccup instead of retrying with a narrower request.
 - Running `dotnet build` or a project build to discover compile errors instead of using native diagnostics.
 - Creating backend code files in new folders without keeping the namespace at the project root and updating the owning `.csproj.DotSettings` `NamespaceFoldersToSkip` entry.

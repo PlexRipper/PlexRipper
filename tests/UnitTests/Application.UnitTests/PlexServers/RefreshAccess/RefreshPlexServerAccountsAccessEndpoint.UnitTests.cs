@@ -57,7 +57,12 @@ public class RefreshPlexServerAccountsAccessEndpointUnitTests
         if (!failed)
             response.Response.Value.ShouldBeEquivalentTo(reports);
         else if (!cancelled)
+        {
             response.Response.Errors.Single().Message.ShouldBe("Account refresh failed");
+            response.Response.Value.ShouldBeEquivalentTo(
+                reports.Where(x => x.PlexAccountId != targetId).ToList()
+            );
+        }
         (await dbContext.PlexAccountServers.OrderBy(x => x.PlexAccountId)
             .Select(x => new { x.PlexAccountId, x.PlexServerId }).ToListAsync(CancellationToken)).ShouldBe(before);
         Mock.Mock<ICommandExecutor>().Verify();

@@ -54,6 +54,9 @@ public class TorrentMetadataDTOValidator : Validator<TorrentMetadataDTO>
             .WithMessage("Type must be Episode or Movie.");
 
         RuleFor(x => x.VideoQuality).IsInEnum().WithMessage("Quality must be a valid VideoQuality value.");
+        RuleFor(x => x)
+            .Must(r => r.DataId == r.PartId)
+            .WithMessage($"{nameof(TorrentMetadataDTO.DataId)} and {nameof(TorrentMetadataDTO.PartId)} must match.");
     }
 }
 
@@ -148,6 +151,32 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
             return;
         }
 
+        var identity = HttpContext.GetIntegrationIdentity();
+        if (!identity.Supports(metadata.Type))
+        {
+            await Send.ForbiddenAsync(ct);
+            return;
+        }
+
+        var source = await GetValidatedMediaSourceAsync(metadata, ct);
+        if (source is null)
+        {
+            _log.Here()
+                .Warning(
+                    "[Torrent/Add] Torrent metadata does not match a stored {MediaType} source: {MetaData}",
+                    metadata.Type,
+                    metadata
+                );
+            AddError(
+                new FluentValidation.Results.ValidationFailure(
+                    nameof(TorrentMetadataDTO.DataId),
+                    "DataId, PartId, MediaId, PlexApiPartId, LibraryId, and ServerId must identify the same media source."
+                )
+            );
+            await Send.ErrorsAsync(cancellation: ct);
+            return;
+        }
+
         _log.Here()
             .Debug(
                 "[Torrent/Add] Uploaded torrent file: {TorrentFileName}, {Size} bytes, MetaData={MetaData}",
@@ -156,6 +185,22 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                 metadata
             );
 
+        var torrentDetails = (
+            Metadata: metadata,
+            HashId: hashId,
+            FileName: req.TorrentFile.FileName
+        );
+        await CreateAndTrackDownloadAsync(torrentDetails, source, identity, ct);
+    }
+
+    private async Task CreateAndTrackDownloadAsync(
+        (TorrentMetadataDTO Metadata, string HashId, string FileName) torrent,
+        MediaSourceIdentity source,
+        IntegrationIdentity identity,
+        CancellationToken ct
+    )
+    {
+        var metadata = torrent.Metadata;
         List<DownloadMediaDTO> list =
         [
             new()
@@ -177,12 +222,6 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                 KeepCompletedInDownloadFolder = true,
             },
         ];
-        var identity = HttpContext.GetIntegrationIdentity();
-        if (!identity.Supports(metadata.Type))
-        {
-            await Send.ForbiddenAsync(ct);
-            return;
-        }
 
         var createResult = await _commandExecutor.Send(
             new CreateDownloadTasksCommand(new CreateDownloadTasksRequest(list, integration: identity)),
@@ -193,7 +232,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
             _log.Here()
                 .Error(
                     "[Torrent/Add] Failed to create download tasks for torrent {TorrentFileName}, Error: {Error}",
-                    req.TorrentFile.FileName,
+                    torrent.FileName,
                     createResult.Errors
                 );
             await Send.StringAsync("Fails.", cancellation: ct);
@@ -201,53 +240,120 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         }
 
         // Set the hashId on the created download tasks so Sonarr/Radarr can keep track
-        await SetHashIdOnDownloadTask(metadata, hashId, identity);
+        if (
+            !await SetHashIdOnDownloadTask(
+                (Type: metadata.Type, Source: source),
+                torrent.HashId,
+                identity,
+                ct
+            )
+        )
+        {
+            await Send.StringAsync("Fails.", cancellation: ct);
+            return;
+        }
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }
 
-    private async Task SetHashIdOnDownloadTask(TorrentMetadataDTO metaData, string hashId, IntegrationIdentity identity)
-    {
-        var count = 0;
-        switch (metaData.Type)
+    private Task<MediaSourceIdentity?> GetValidatedMediaSourceAsync(TorrentMetadataDTO metadata, CancellationToken ct) =>
+        metadata.Type switch
         {
-            case PlexMediaType.Episode:
-                count = await _dbContext
-                    .DownloadTaskTvShowEpisodeFile.WhereIntegrationOwnershipMatches(identity)
-                    .Where(x =>
-                        x.PlexLibraryId == metaData.LibraryId
-                        && x.PlexServerId == metaData.ServerId
-                        && x.PlexApiPartId == metaData.PlexApiPartId
-                    )
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId));
-                break;
-            case PlexMediaType.Movie:
-                count = await _dbContext
-                    .DownloadTaskMovieFile.WhereIntegrationOwnershipMatches(identity)
-                    .Where(x =>
-                        x.PlexLibraryId == metaData.LibraryId
-                        && x.PlexServerId == metaData.ServerId
-                        && x.PlexApiPartId == metaData.PlexApiPartId
-                    )
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId));
-                break;
-            default:
-                _log.Here()
-                    .Error(
-                        "Unsupported PlexMediaType {PlexMediaType} for setting HashId on DownloadTask",
-                        metaData.Type
-                    );
-                break;
-        }
+            PlexMediaType.Episode => GetValidatedMediaSourceAsync(
+                _dbContext.PlexTvShowEpisodeData.Where(p =>
+                    p.PlexTvShowEpisodeId == metadata.MediaId
+                    && p.PlexTvShowEpisode!.PlexLibraryId == metadata.LibraryId
+                    && p.PlexTvShowEpisode.PlexServerId == metadata.ServerId),
+                metadata, ct),
+            PlexMediaType.Movie => GetValidatedMediaSourceAsync(
+                _dbContext.PlexMovieData.Where(p =>
+                    p.PlexMovieId == metadata.MediaId
+                    && p.PlexMovie!.PlexLibraryId == metadata.LibraryId
+                    && p.PlexMovie.PlexServerId == metadata.ServerId),
+                metadata, ct),
+            _ => Task.FromResult<MediaSourceIdentity?>(null),
+        };
+
+    private static Task<MediaSourceIdentity?> GetValidatedMediaSourceAsync<T>(
+        IQueryable<T> parts,
+        TorrentMetadataDTO metadata,
+        CancellationToken ct
+    ) where T : BasePlexMediaData =>
+        parts.Where(p => p.Id == metadata.DataId
+                && p.PlexApiPartId == metadata.PlexApiPartId
+                && p.PlexLibraryId == metadata.LibraryId
+                && p.PlexServerId == metadata.ServerId)
+            .Select(p => new MediaSourceIdentity
+            {
+                PlexApiRatingKey = p.PlexApiRatingKey,
+                PlexApiMediaId = p.PlexApiMediaId,
+                PlexApiPartId = p.PlexApiPartId,
+                PlexLibraryId = p.PlexLibraryId,
+                PlexServerId = p.PlexServerId,
+            })
+            .SingleOrDefaultAsync(ct);
+
+    private async Task<bool> SetHashIdOnDownloadTask(
+        (PlexMediaType Type, MediaSourceIdentity Source) validatedSource,
+        string hashId,
+        IntegrationIdentity identity,
+        CancellationToken ct
+    )
+    {
+        var count = validatedSource.Type switch
+        {
+            PlexMediaType.Episode => await SetHashIdAsync(
+                _dbContext.DownloadTaskTvShowEpisodeFile.WhereIntegrationOwnershipMatches(identity),
+                validatedSource.Source, hashId, ct),
+            PlexMediaType.Movie => await SetHashIdAsync(
+                _dbContext.DownloadTaskMovieFile.WhereIntegrationOwnershipMatches(identity),
+                validatedSource.Source, hashId, ct),
+            _ => 0,
+        };
 
         if (count == 0)
+        {
             _log.Here()
                 .Warning(
-                    "Could not find any DownloadTask to set HashId for torrent with MetaData: {MetaData}",
-                    metaData
+                    "Could not find any DownloadTask to set HashId for torrent source: {Source}",
+                    validatedSource.Source
                 );
-        else
-            _log.Here()
-                .Debug("Set HashId on {Count} DownloadTasks for torrent with MetaData: {MetaData}", count, metaData);
+            return false;
+        }
+
+        _log.Here()
+            .Debug(
+                "Set HashId on {Count} DownloadTasks for torrent source: {Source}",
+                count,
+                validatedSource.Source
+            );
+        return true;
+    }
+
+    private static Task<int> SetHashIdAsync<T>(
+        IQueryable<T> files,
+        MediaSourceIdentity source,
+        string hashId,
+        CancellationToken ct
+    ) where T : DownloadTaskFileBase =>
+        files.Where(x =>
+                x.PlexLibraryId == source.PlexLibraryId
+                && x.PlexServerId == source.PlexServerId
+                && x.PlexApiRatingKey == source.PlexApiRatingKey
+                && x.PlexApiMediaId == source.PlexApiMediaId
+                && x.PlexApiPartId == source.PlexApiPartId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId), ct);
+
+    private record MediaSourceIdentity
+    {
+        public required int PlexApiRatingKey { get; init; }
+
+        public required int PlexApiMediaId { get; init; }
+
+        public required int PlexApiPartId { get; init; }
+
+        public required int PlexLibraryId { get; init; }
+
+        public required int PlexServerId { get; init; }
     }
 }

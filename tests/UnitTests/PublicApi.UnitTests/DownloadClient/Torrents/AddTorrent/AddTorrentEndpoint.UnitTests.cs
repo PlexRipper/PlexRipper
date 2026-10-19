@@ -16,14 +16,22 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             1234,
             config =>
             {
+                config.MovieCount = 1;
                 config.MovieDownloadTasksCount = 1;
                 config.RadarrIntegrationCount = 1;
             }
         );
-        var integration = await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
-        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var dbContext = IDbContext;
+        var integration = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        var movieData = await dbContext.PlexMovieData.SingleAsync(CancellationToken);
+        var movieFile = await dbContext.DownloadTaskMovieFile.AsTracking().SingleAsync(CancellationToken);
+        movieFile.RadarrIntegrationId = integration.Id;
+        movieFile.UpdateInitProperty(nameof(DownloadTaskMovieFile.PlexApiRatingKey), movieData.PlexApiRatingKey);
+        movieFile.UpdateInitProperty(nameof(DownloadTaskMovieFile.PlexApiMediaId), movieData.PlexApiMediaId);
+        movieFile.UpdateInitProperty(nameof(DownloadTaskMovieFile.PlexApiPartId), movieData.PlexApiPartId);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
-        var validMetadata = CreateValidTorrentMetadata() with { PlexApiPartId = movieFile.PlexApiPartId };
+        var validMetadata = CreateSourceMetadata(movieData, movieData.PlexMovieId);
         var (torrentFile, torrentFileMock) = CreateMockTorrentFile(validMetadata, "test.torrent");
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
@@ -37,9 +45,12 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             integrationIdentity: integration.Id.ToRadarrIdentity()
         );
 
-        // Assert
         endpointResult.StatusCode.ShouldBe(200);
-
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.ValidationErrors.Count.ShouldBe(0);
+        endpointResult.Endpoint.HttpContext.Response.Body.Position = 0;
+        using var responseReader = new StreamReader(endpointResult.Endpoint.HttpContext.Response.Body);
+        (await responseReader.ReadToEndAsync(CancellationToken)).ShouldBe("Ok.");
         // Verify command was called with correct data
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -65,6 +76,26 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
         // Verify IFormFile mock interactions
         torrentFileMock.Verify(f => f.OpenReadStream(), Times.Once);
         torrentFileMock.Verify(f => f.FileName, Times.AtLeastOnce);
+    }
+
+    [Test]
+    public async Task ShouldRejectScalarValidTorrent_WhenDataAndPartIdsDiffer()
+    {
+        // Arrange
+        var invalidMetadata = CreateValidTorrentMetadata() with { DataId = 2 };
+        var (torrentFile, torrentFileMock) = CreateMockTorrentFile(invalidMetadata, "mismatched.torrent");
+        var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeFalse();
+        endpointResult.ValidationErrors.Count.ShouldBe(1);
+        endpointResult.StatusCode.ShouldBe(400);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+        torrentFileMock.Verify(x => x.OpenReadStream(), Times.Once());
     }
 
     [Test]
@@ -113,21 +144,18 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
         // Arrange
         await SetupDatabase(1235, config =>
         {
+            config.MovieCount = 1;
             config.RadarrIntegrationCount = 1;
             config.MovieDownloadTasksCount = 1;
         });
         var dbContext = IDbContext;
         var integration = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        var movieData = await dbContext.PlexMovieData.SingleAsync(CancellationToken);
         var control = await dbContext.DownloadTaskMovieFile.AsTracking().SingleAsync(CancellationToken);
         control.RadarrIntegrationId = integration.Id;
         await dbContext.SaveChangesAsync(CancellationToken);
         var before = (control.Id, control.ParentId, control.HashId, control.DownloadStatus);
-        var validMetadata = CreateValidTorrentMetadata() with
-        {
-            PlexApiPartId = control.PlexApiPartId,
-            ServerId = control.PlexServerId,
-            LibraryId = control.PlexLibraryId,
-        };
+        var validMetadata = CreateSourceMetadata(movieData, movieData.PlexMovieId);
         var (torrentFile, torrentFileMock) = CreateMockTorrentFile(validMetadata, "test.torrent");
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
@@ -170,83 +198,100 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
     }
 
     [Test]
-    public void TorrentMetadataDTOValidator_ShouldValidateAllRequiredFields()
+    public async Task ShouldReturnRecognizedFailure_WhenValidatedTorrentHasNoOwnedHashTarget()
     {
         // Arrange
-        var validator = new TorrentMetadataDTOValidator();
-        var validMetadata = CreateValidTorrentMetadata();
+        await SetupDatabase(
+            1236,
+            config =>
+            {
+                config.MovieCount = 1;
+                config.RadarrIntegrationCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var integration = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        var movieData = await dbContext.PlexMovieData.SingleAsync(CancellationToken);
+        var metadata = CreateSourceMetadata(movieData, movieData.PlexMovieId);
+        var (torrentFile, torrentFileMock) = CreateMockTorrentFile(metadata, "missing-target.torrent");
+        var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
-        var result = validator.Validate(validMetadata);
+        var endpointResult = await TestEndpointHandleAsync(
+            request,
+            integrationIdentity: integration.Id.ToRadarrIdentity()
+        );
 
         // Assert
-        result.IsValid.ShouldBeTrue();
-        result.Errors.ShouldBeEmpty();
+        endpointResult.StatusCode.ShouldBe(200);
+        endpointResult.IsValid.ShouldBeTrue();
+        endpointResult.ValidationErrors.Count.ShouldBe(0);
+        endpointResult.Endpoint.HttpContext.Response.Body.Position = 0;
+        using var reader = new StreamReader(endpointResult.Endpoint.HttpContext.Response.Body);
+        (await reader.ReadToEndAsync(CancellationToken)).ShouldBe("Fails.");
+        (await dbContext.DownloadTaskMovieFile.Select(x => x.Id).ToListAsync(CancellationToken)).ShouldBeEmpty();
+        Mock.Mock<ICommandExecutor>().Verify();
+        torrentFileMock.Verify(x => x.OpenReadStream(), Times.Once());
     }
 
     [Test]
-    public void TorrentMetadataDTOValidator_ShouldFailValidation_WhenFieldsAreInvalid()
+    public async Task ShouldRejectMixedMediaIdentityBeforeCreatingTasks_WhenTorrentIsUploaded()
     {
         // Arrange
-        var validator = new TorrentMetadataDTOValidator();
-        var invalidMetadata = new TorrentMetadataDTO
+        await SetupDatabase(
+            1237,
+            config =>
+            {
+                config.PlexMovieLibraryCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
+                config.RadarrIntegrationCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var integration = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        var movieData = await dbContext.PlexMovieData.SingleAsync(CancellationToken);
+        var episodeData = await dbContext.PlexTvShowEpisodeData.SingleAsync(CancellationToken);
+        var before = await dbContext
+            .DownloadTaskMovieFile.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.ParentId, x.HashId, x.RadarrIntegrationId })
+            .ToArrayAsync(CancellationToken);
+        var forgedMetadata = CreateSourceMetadata(episodeData, movieData.PlexMovieId) with
         {
-            Type = (PlexMediaType)999, // Invalid enum value
-            MediaId = 0,
-            DataId = 0,
-            PartId = 0,
-            PlexApiPartId = 0,
-            VideoQuality = (VideoQuality)999, // Invalid enum value
-            LibraryId = 0,
-            ServerId = 0,
+            VideoQuality = movieData.VideoQuality,
         };
+        var (torrentFile, torrentFileMock) = CreateMockTorrentFile(forgedMetadata, "mixed-identity.torrent");
+        var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
         // Act
-        var result = validator.Validate(invalidMetadata);
+        var endpointResult = await TestEndpointHandleAsync(
+            request,
+            integrationIdentity: integration.Id.ToRadarrIdentity()
+        );
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.Count.ShouldBeGreaterThan(0);
-
-        // Check specific validation errors
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.LibraryId));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.ServerId));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.MediaId));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.DataId));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PartId));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PlexApiPartId));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Type));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.VideoQuality));
-    }
-
-    [Test]
-    public void AddTorrentEndpointRequestValidator_ShouldRequireTorrentFile()
-    {
-        // Arrange
-        var validator = new AddTorrentEndpointRequestValidator();
-        var request = new AddTorrentEndpointRequest { TorrentFile = null };
-
-        // Act
-        var result = validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(AddTorrentEndpointRequest.TorrentFile));
-    }
-
-    [Test]
-    public void TorrentMetadataDTOValidator_ShouldRejectUnsupportedMediaTypes()
-    {
-        // Arrange
-        var validator = new TorrentMetadataDTOValidator();
-        var request = CreateValidTorrentMetadata(PlexMediaType.Season);
-
-        // Act
-        var result = validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Type));
+        endpointResult.StatusCode.ShouldBe(400);
+        endpointResult.IsValid.ShouldBeFalse();
+        endpointResult.ValidationErrors.Count.ShouldBe(1);
+        endpointResult.ValidationErrors.Single().PropertyName.ShouldBe(nameof(TorrentMetadataDTO.DataId));
+        (
+            await dbContext
+                .DownloadTaskMovieFile.OrderBy(x => x.Id)
+                .Select(x => new { x.Id, x.ParentId, x.HashId, x.RadarrIntegrationId })
+                .ToArrayAsync(CancellationToken)
+        ).ShouldBe(before);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+        torrentFileMock.Verify(x => x.OpenReadStream(), Times.Once());
     }
 
     [Test]
@@ -335,10 +380,6 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
     [Test]
     public async Task ShouldSetHashIdOnMovieDownloadTask_WhenTorrentIsMovieType()
     {
-        // Arrange
-        var movieMetadata = CreateValidTorrentMetadata();
-        var (torrentFile, torrentFileMock) = CreateMockTorrentFile(movieMetadata, "movie.torrent");
-        var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
         // Setup database with movie download tasks that match the metadata
         await SetupDatabase(
@@ -353,36 +394,23 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
         );
         var integration = await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
 
-        // Get the actual server and library IDs from the database
-        var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
-        var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
         using var movieContext = IDbContext;
+        var movieData = await movieContext.PlexMovieData.SingleAsync(CancellationToken);
         var movieFile = await movieContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
         var movie = await movieContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
         movie.RadarrIntegrationId = integration.Id;
         movieFile.RadarrIntegrationId = integration.Id;
+        movieFile.UpdateInitProperty(nameof(DownloadTaskMovieFile.PlexApiRatingKey), movieData.PlexApiRatingKey);
+        movieFile.UpdateInitProperty(nameof(DownloadTaskMovieFile.PlexApiMediaId), movieData.PlexApiMediaId);
+        movieFile.UpdateInitProperty(nameof(DownloadTaskMovieFile.PlexApiPartId), movieData.PlexApiPartId);
         await movieContext.SaveChangesAsync(CancellationToken);
 
-        // Create metadata with the actual database IDs
-        var actualMetadata = new TorrentMetadataDTO
-        {
-            Type = PlexMediaType.Movie,
-            MediaId = 1,
-            DataId = 1,
-            PartId = 1,
-            PlexApiPartId = movieFile.PlexApiPartId,
-            VideoQuality = VideoQuality.HD,
-            LibraryId = library.Id,
-            ServerId = server.Id,
-        };
+        // Create metadata with the actual source row identity
+        var actualMetadata = CreateSourceMetadata(movieData, movieData.PlexMovieId);
 
-        // Update the torrent file with the correct metadata
-        var (actualTorrentFile, actualTorrentFileMock) = CreateMockTorrentFile(actualMetadata, "movie.torrent");
-        request = new AddTorrentEndpointRequest { TorrentFile = actualTorrentFile };
-
-        // Update the mock references for verification
-        torrentFileMock = actualTorrentFileMock;
-        movieMetadata = actualMetadata;
+        var (torrentFile, torrentFileMock) = CreateMockTorrentFile(actualMetadata, "movie.torrent");
+        var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
+        var movieMetadata = actualMetadata;
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
@@ -422,18 +450,15 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
     [Test]
     public async Task ShouldSetHashIdOnEpisodeDownloadTask_WhenTorrentIsEpisodeType()
     {
-        // Arrange
-        var episodeMetadata = CreateValidTorrentMetadata(PlexMediaType.Episode);
-        var (torrentFile, torrentFileMock) = CreateMockTorrentFile(episodeMetadata, "episode.torrent");
-        var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
         // Setup database with TV show download tasks that match the metadata
         await SetupDatabase(
             5678,
             config =>
             {
-                config.PlexServerCount = 1;
                 config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
@@ -442,36 +467,23 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
         );
         var integration = await IDbContext.SonarrIntegrations.SingleAsync(CancellationToken);
 
-        // Get the actual server and library IDs from the database
-        var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
-        var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
         using var episodeContext = IDbContext;
+        var episodeData = await episodeContext.PlexTvShowEpisodeData.SingleAsync(CancellationToken);
         var episodeFile = await episodeContext.DownloadTaskTvShowEpisodeFile.AsTracking().FirstAsync(CancellationToken);
         var episode = await episodeContext.DownloadTaskTvShowEpisode.AsTracking().FirstAsync(CancellationToken);
         episode.SonarrIntegrationId = integration.Id;
         episodeFile.SonarrIntegrationId = integration.Id;
+        episodeFile.UpdateInitProperty(nameof(DownloadTaskTvShowEpisodeFile.PlexApiRatingKey), episodeData.PlexApiRatingKey);
+        episodeFile.UpdateInitProperty(nameof(DownloadTaskTvShowEpisodeFile.PlexApiMediaId), episodeData.PlexApiMediaId);
+        episodeFile.UpdateInitProperty(nameof(DownloadTaskTvShowEpisodeFile.PlexApiPartId), episodeData.PlexApiPartId);
         await episodeContext.SaveChangesAsync(CancellationToken);
 
-        // Create metadata with the actual database IDs
-        var actualMetadata = new TorrentMetadataDTO
-        {
-            Type = PlexMediaType.Episode,
-            MediaId = 1,
-            DataId = 1,
-            PartId = 1,
-            PlexApiPartId = episodeFile.PlexApiPartId,
-            VideoQuality = VideoQuality.HD,
-            LibraryId = library.Id,
-            ServerId = server.Id,
-        };
+        // Create metadata with the actual source row identity
+        var actualMetadata = CreateSourceMetadata(episodeData, episodeData.PlexTvShowEpisodeId, PlexMediaType.Episode);
 
-        // Update the torrent file with the correct metadata
-        var (actualTorrentFile, actualTorrentFileMock) = CreateMockTorrentFile(actualMetadata, "episode.torrent");
-        request = new AddTorrentEndpointRequest { TorrentFile = actualTorrentFile };
-
-        // Update the mock references for verification
-        torrentFileMock = actualTorrentFileMock;
-        episodeMetadata = actualMetadata;
+        var (torrentFile, torrentFileMock) = CreateMockTorrentFile(actualMetadata, "episode.torrent");
+        var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
+        var episodeMetadata = actualMetadata;
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
@@ -507,6 +519,23 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
         updatedEpisodeFile.HashId.ShouldNotBeNull();
         updatedEpisodeFile.HashId.ShouldNotBeEmpty();
     }
+
+    private static TorrentMetadataDTO CreateSourceMetadata(
+        BasePlexMediaData source,
+        int mediaId,
+        PlexMediaType type = PlexMediaType.Movie
+    ) =>
+        new()
+        {
+            Type = type,
+            MediaId = mediaId,
+            DataId = source.Id,
+            PartId = source.Id,
+            PlexApiPartId = source.PlexApiPartId,
+            VideoQuality = source.VideoQuality,
+            LibraryId = source.PlexLibraryId,
+            ServerId = source.PlexServerId,
+        };
 
     private static TorrentMetadataDTO CreateValidTorrentMetadata(PlexMediaType type = PlexMediaType.Movie) =>
         new()

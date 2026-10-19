@@ -10,7 +10,7 @@ public static class PlexMediaTypeMappers
     /// <param name="value">The string representation of <see cref="PlexMediaType"/>.</param>
     /// <returns>The converted enum of type <see cref="PlexMediaType"/>.</returns>
     /// <exception cref="NotImplementedException">Throws exception if string has no enum <see cref="PlexMediaType"/> equivalent.</exception>
-    public static PlexMediaType ToPlexMediaType(this string value)
+    public static PlexMediaType ToPlexMediaType(this string? value)
     {
         return value switch
         {
@@ -46,7 +46,7 @@ public static class PlexMediaTypeMappers
             var logResult = _log.Here()
                 .ErrorResult(
                     "Failed to convert string \"{Value}\" to type {NameOfPlexMediaType}",
-                    value,
+                    value ?? "<null>",
                     nameof(PlexMediaType)
                 );
             throw new NotImplementedException(logResult.ToString());

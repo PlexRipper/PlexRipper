@@ -590,6 +590,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                             .ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
                             {
                                 var requestUri = request.RequestUri!;
+                                var query = request.ParseQueryToDictionary();
                                 List<Metadata> metadata;
                                 if (requestUri.AbsolutePath.EndsWith("/children", StringComparison.Ordinal))
                                 {
@@ -598,7 +599,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                                 }
                                 else
                                 {
-                                    var parent = request.ParseQueryToDictionary().TryGetValue("parent", out var parentKey)
+                                    var parent = query.TryGetValue("parent", out var parentKey)
                                         ? parentKey
                                         : "root";
                                     metadata = _photoFolderMembers[library.Uuid].GetValueOrDefault(parent)
@@ -607,10 +608,14 @@ public class MockPlexApiServer : IMockPlexApiServer
                                 }
                                 var offset = request.Headers.TryGetValues("X-Plex-Container-Start", out var offsets)
                                     ? int.Parse(offsets.Single(), System.Globalization.CultureInfo.InvariantCulture)
-                                    : 0;
+                                    : query.TryGetValue("X-Plex-Container-Start", out var start)
+                                        ? int.Parse(start, System.Globalization.CultureInfo.InvariantCulture)
+                                        : 0;
                                 var size = request.Headers.TryGetValues("X-Plex-Container-Size", out var sizes)
                                     ? int.Parse(sizes.Single(), System.Globalization.CultureInfo.InvariantCulture)
-                                    : 50;
+                                    : query.TryGetValue("X-Plex-Container-Size", out var pageSize)
+                                        ? int.Parse(pageSize, System.Globalization.CultureInfo.InvariantCulture)
+                                        : 50;
                                 var page = metadata.Skip(offset).Take(size).ToList();
                                 return new
                                 {
@@ -625,11 +630,7 @@ public class MockPlexApiServer : IMockPlexApiServer
 
     private static bool IsPhotoFolderRequest(HttpRequestMessage request, string? libraryKey) =>
         !string.IsNullOrEmpty(libraryKey)
-        && request.RequestUri!.AbsolutePath == $"/library/sections/{libraryKey}/folder"
-        && (
-            string.IsNullOrEmpty(request.RequestUri.Query)
-            || request.ParseQueryToDictionary().ContainsKey("parent")
-        );
+        && request.RequestUri!.AbsolutePath == $"/library/sections/{libraryKey}/folder";
 
     private Metadata? GetMediaItem(string key)
     {

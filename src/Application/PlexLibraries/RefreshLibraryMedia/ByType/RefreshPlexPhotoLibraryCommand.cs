@@ -1,17 +1,20 @@
 namespace Reaparr.Application;
 
-public record RefreshPlexPhotoLibraryCommand(PlexLibrary PlexLibrary, bool ForceMediaRefresh = false)
-    : ICommand<Result<PlexLibrary>>;
+public record RefreshPlexPhotoLibraryCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    bool ForceMediaRefresh = false
+) : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexPhotoLibraryCommandValidator : AbstractValidator<RefreshPlexPhotoLibraryCommand>
 {
     public RefreshPlexPhotoLibraryCommandValidator()
     {
         RuleFor(x => x).NotNull();
-        RuleFor(x => x.PlexLibrary).NotNull();
-        RuleFor(x => x.PlexLibrary.Id).GreaterThan(0);
-        RuleFor(x => x.PlexLibrary.Type).Equal(PlexMediaType.PhotoAlbum);
-        RuleFor(x => x.PlexLibrary.PlexServerId).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.Id).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.Type).Equal(PlexMediaType.PhotoAlbum);
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.PlexServerId).GreaterThan(0);
     }
 }
 
@@ -35,79 +38,59 @@ public class RefreshPlexPhotoLibraryCommandHandler : ICommandHandler<RefreshPlex
         _librarySyncProgressStore = librarySyncProgressStore;
     }
 
-    public async Task<Result<PlexLibrary>> ExecuteAsync(
-        RefreshPlexPhotoLibraryCommand command,
-        CancellationToken cancellationToken
-    )
+    public async Task<Result<PlexLibrary>> ExecuteAsync(RefreshPlexPhotoLibraryCommand command, CancellationToken ct)
     {
-        var libraryId = command.PlexLibrary.Id;
-        await _librarySyncProgressStore.StartAsync(libraryId, PlexMediaType.PhotoAlbum);
-        var retrievalResult = await Result.Try(() =>
-            _commandExecutor.Send(
-                new GetPhotoLibrarySnapshotFromPlexApiCommand(command.PlexLibrary),
-                cancellationToken
-            )
-        );
-        if (retrievalResult.IsCancelled)
-            return retrievalResult.ToResult().LogWarning();
-        if (retrievalResult.IsFailed)
-        {
-            await _librarySyncProgressStore.UpdateErrorAsync(libraryId, retrievalResult.ToResult(), cancellationToken);
-            return retrievalResult.ToResult().LogError();
-        }
+        var library = command.LibraryMetadata.PlexLibrary;
+        await _librarySyncProgressStore.StartAsync(library.Id, PlexMediaType.PhotoAlbum);
 
-        var snapshot = retrievalResult.Value;
         var syncResult = await Result.Try(() =>
-            _commandExecutor.Send(
-                new SyncPlexPhotosCommand(snapshot, command.ForceMediaRefresh),
-                cancellationToken
-            )
+            _commandExecutor.Send(new SyncPlexPhotosCommand(command.LibraryMetadata, command.ForceMediaRefresh), ct)
         );
         if (syncResult.IsCancelled)
             return syncResult.ToResult().LogWarning();
         if (syncResult.IsFailed)
         {
-            await _librarySyncProgressStore.UpdateErrorAsync(libraryId, syncResult.ToResult(), cancellationToken);
+            await _librarySyncProgressStore.UpdateErrorAsync(library.Id, syncResult.ToResult(), ct);
             return syncResult.ToResult().LogError();
         }
 
         var optimizationResult = await _commandExecutor.Send(
             new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },
-            cancellationToken
+            ct
         );
         optimizationResult.LogIfFailed();
 
         await _librarySyncProgressStore.UpdateItemAsync(
-            libraryId,
+            library.Id,
             new LibraryProgressItem
             {
                 MediaType = PlexMediaType.PhotoAlbum,
-                Received = snapshot.PlexLibrary.PhotoAlbums.Count,
-                Total = snapshot.PlexLibrary.PhotoAlbums.Count,
+                Received = library.PhotoAlbums.Count,
+                Total = library.PhotoAlbums.Count,
                 TimeRemaining = TimeSpan.Zero,
             },
-            cancellationToken
+            ct
         );
         await _librarySyncProgressStore.UpdateItemAsync(
-            libraryId,
+            library.Id,
             new LibraryProgressItem
             {
                 MediaType = PlexMediaType.PhotoImage,
-                Received = snapshot.PlexLibrary.PhotoMediaData.Count,
-                Total = snapshot.PlexLibrary.PhotoMediaData.Count,
+                Received = library.PhotoMediaData.Count,
+                Total = library.PhotoMediaData.Count,
                 TimeRemaining = TimeSpan.Zero,
             },
-            cancellationToken
+            ct
         );
 
-        var rebuildResult = await _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), cancellationToken);
+        var rebuildResult = await _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), ct);
         rebuildResult.LogIfFailed();
 
-        _log.Here().Information("Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}", command.PlexLibrary.Title, libraryId);
+        _log.Here().Information("Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}", library.Title, library.Id);
 
-        var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(libraryId, CancellationToken.None);
+        var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(library.Id, CancellationToken.None);
         return plexLibraryDb is null
-            ? ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId)
+            ? ResultExtensions.EntityNotFound(nameof(PlexLibrary), library.Id)
             : Result.Ok(plexLibraryDb);
     }
 }

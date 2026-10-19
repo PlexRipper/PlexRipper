@@ -131,7 +131,6 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
     [Arguments(PlexMediaType.Movie, PlexMediaType.Movie)]
     [Arguments(PlexMediaType.TvShow, PlexMediaType.TvShow)]
     [Arguments(PlexMediaType.MusicArtist, PlexMediaType.MusicArtist)]
-    [Arguments(PlexMediaType.PhotoAlbum, PlexMediaType.PhotoAlbum)]
     [Arguments(PlexMediaType.OtherVideos, PlexMediaType.OtherVideos)]
     public async Task ShouldReturnNaturallySortedRootsWithoutFetchingDescendants_WhenLibraryIsSupported(
         PlexMediaType type,
@@ -263,7 +262,6 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
 
     [Test]
     [Arguments(PlexMediaType.MusicArtist)]
-    [Arguments(PlexMediaType.PhotoAlbum)]
     [Arguments(PlexMediaType.OtherVideos)]
     public async Task ShouldReturnEmptyRootsWithoutFetchingDescendants_WhenRootCollectionIsEmpty(PlexMediaType type)
     {

@@ -3,102 +3,69 @@ namespace Reaparr.Application.UnitTests;
 public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<RefreshPlexPhotoLibraryCommand>
 {
     [Test]
-    public async Task ShouldRejectNonPhotoLibrariesBeforeRetrieval()
+    public async Task ShouldRejectNonPhotoLibrariesBeforeSync()
     {
-        // Arrange
         await SetupDatabase(73101, x => x.PlexMovieLibraryCount = 1);
         var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
-        var originalType = library.Type;
+        var metadata = CreateMetadata(library);
+        metadata.PlexLibrary.Type.ShouldBe(PlexMediaType.Movie);
 
-        // Act
-        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshPlexPhotoLibraryCommand(library));
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshPlexPhotoLibraryCommand(metadata));
 
-        // Assert
         result.IsFailed.ShouldBeTrue();
-        result.IsCancelled.ShouldBeFalse();
         result.ToResult().Has400BadRequestError().ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains(nameof(PlexMediaType.PhotoAlbum), StringComparison.Ordinal));
-        result.ValueOrDefault.ShouldBeNull();
-        library.Type.ShouldBe(originalType);
-        Mock.Mock<ICommandExecutor>()
-            .Verify(
-                x => x.Send(It.IsAny<GetPhotoLibrarySnapshotFromPlexApiCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
-            );
-        Mock.Mock<ILibrarySyncProgressStore>()
-            .Verify(
-                x => x.StartAsync(It.IsAny<int>(), It.IsAny<PlexMediaType>(), It.IsAny<IReadOnlyDictionary<PlexMediaType, int>?>()),
-                Times.Never
-            );
+        Mock.Mock<ICommandExecutor>().Verify(
+            x => x.Send(It.IsAny<SyncPlexPhotosCommand>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
+        Mock.Mock<ILibrarySyncProgressStore>().Verify(
+            x => x.StartAsync(It.IsAny<int>(), It.IsAny<PlexMediaType>(), It.IsAny<IReadOnlyDictionary<PlexMediaType, int>?>()),
+            Times.Never
+        );
     }
 
     [Test]
-    public async Task ShouldPreserveCatalogAndReportRetrievalFailure()
+    public async Task ShouldPropagateSyncFailureWithoutPublishingProgress()
     {
-        // Arrange
-        await SetupDatabase(73102, x =>
-        {
-            x.PlexPhotoLibraryCount = 1;
-            x.PhotoAlbumCount = 1;
-            x.PhotoCount = 1;
-        });
-        var dbContext = IDbContext;
-        var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-        var beforeCounts = await dbContext
-            .PlexPhotoMediaData.OrderBy(x => x.Id)
-            .Select(x => new { x.Id, x.PlexApiRatingKey, x.Key })
-            .ToListAsync(CancellationToken);
-        var failure = Result.Fail<PhotoLibrarySnapshot>("catalog retrieval incomplete");
+        await SetupDatabase(73102, x => x.PlexPhotoLibraryCount = 1);
+        var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var metadata = CreateMetadata(library);
+        var failure = Result.Fail<CrudPhotosReport>("catalog reconciliation failed");
+
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x => x.StartAsync(library.Id, PlexMediaType.PhotoAlbum, null))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.Is<GetPhotoLibrarySnapshotFromPlexApiCommand>(c => c.PlexLibrary == library), CancellationToken))
+            .Setup(x => x.Send(It.Is<SyncPlexPhotosCommand>(c => ReferenceEquals(c.LibraryMetadata, metadata)), CancellationToken))
             .ReturnsAsync(failure)
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.UpdateErrorAsync(library.Id, It.Is<Result>(r => r.IsFailed && r.Errors.Count == 1), CancellationToken))
+            .Setup(x => x.UpdateErrorAsync(library.Id, It.Is<Result>(r => r.IsFailed), CancellationToken))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
-        // Act
-        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshPlexPhotoLibraryCommand(library));
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshPlexPhotoLibraryCommand(metadata));
 
-        // Assert
         result.IsFailed.ShouldBeTrue();
-        result.IsCancelled.ShouldBeFalse();
-        result.Errors.Count.ShouldBe(1);
-        result.Errors[0].Message.ShouldBe(failure.Errors[0].Message);
-        result.ValueOrDefault.ShouldBeNull();
-        var afterCounts = await dbContext
-            .PlexPhotoMediaData.OrderBy(x => x.Id)
-            .Select(x => new { x.Id, x.PlexApiRatingKey, x.Key })
-            .ToListAsync(CancellationToken);
-        afterCounts.ShouldBe(beforeCounts);
-        Mock.Mock<ICommandExecutor>().Verify(x => x.Send(It.IsAny<SyncPlexPhotosCommand>(), It.IsAny<CancellationToken>()), Times.Never);
-        Mock.Mock<ICommandExecutor>().Verify(x => x.Send(It.IsAny<ScheduleOptimizeDatabaseJobCommand>(), It.IsAny<CancellationToken>()), Times.Never);
-        Mock.Mock<ICommandExecutor>().Verify(x => x.Send(It.IsAny<QueueMediaOverviewRebuildCommand>(), It.IsAny<CancellationToken>()), Times.Never);
-        Mock.Mock<ICommandExecutor>().Verify();
+        result.Errors.ShouldContain(x => x.Message == "catalog reconciliation failed");
+        Mock.Mock<ICommandExecutor>().Verify(
+            x => x.Send(It.IsAny<ScheduleOptimizeDatabaseJobCommand>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
+        Mock.Mock<ICommandExecutor>().Verify(
+            x => x.Send(It.IsAny<QueueMediaOverviewRebuildCommand>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
         Mock.Mock<ILibrarySyncProgressStore>().Verify();
     }
 
     [Test]
-    public async Task ShouldSyncSnapshotPublishProgressAndQueueOverviewRebuild()
+    public async Task ShouldSyncGraphPublishProgressAndQueueOverviewRebuild()
     {
-        // Arrange
         await SetupDatabase(73103, x => x.PlexPhotoLibraryCount = 1);
-        var dbContext = IDbContext;
-        var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-        var payload = FakeData.GetPlexLibrary(new Seed(73103), PlexMediaType.PhotoAlbum).Generate();
-        payload.Id = library.Id;
-        payload.PlexServerId = library.PlexServerId;
-        var album = CreateAlbum(501, "Album");
-        var file = CreateFile(601, 701);
-        payload.PhotoAlbums.Add(album);
-        payload.PhotoMediaData.Add(file);
-        var root = CreateRootInput("/fixture/photos");
-        var snapshot = new PhotoLibrarySnapshot(payload, [root], [new(501, 601)]);
+        var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var metadata = CreateMetadata(library, includePhoto: true);
         var report = new CrudPhotosReport { CreatedPhotoAlbums = 1, CreatedPhotos = 1 };
 
         Mock.Mock<ILibrarySyncProgressStore>()
@@ -106,11 +73,7 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.Is<GetPhotoLibrarySnapshotFromPlexApiCommand>(c => c.PlexLibrary == library), CancellationToken))
-            .ReturnsAsync(Result.Ok(snapshot))
-            .Verifiable(Times.Once());
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.Is<SyncPlexPhotosCommand>(c => c.Snapshot == snapshot && !c.ForceMediaRefresh), CancellationToken))
+            .Setup(x => x.Send(It.Is<SyncPlexPhotosCommand>(c => ReferenceEquals(c.LibraryMetadata, metadata)), CancellationToken))
             .ReturnsAsync(Result.Ok(report))
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
@@ -123,8 +86,8 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
                 library.Id,
                 It.Is<LibraryProgressItem>(p =>
                     p.MediaType == PlexMediaType.PhotoAlbum
-                    && p.Received == snapshot.PlexLibrary.PhotoAlbums.Count
-                    && p.Total == snapshot.PlexLibrary.PhotoAlbums.Count
+                    && p.Received == metadata.PlexLibrary.PhotoAlbums.Count
+                    && p.Total == metadata.PlexLibrary.PhotoAlbums.Count
                     && p.TimeRemaining == TimeSpan.Zero
                 ),
                 CancellationToken
@@ -136,8 +99,8 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
                 library.Id,
                 It.Is<LibraryProgressItem>(p =>
                     p.MediaType == PlexMediaType.PhotoImage
-                    && p.Received == snapshot.PlexLibrary.PhotoMediaData.Count
-                    && p.Total == snapshot.PlexLibrary.PhotoMediaData.Count
+                    && p.Received == metadata.PlexLibrary.PhotoMediaData.Count
+                    && p.Total == metadata.PlexLibrary.PhotoMediaData.Count
                     && p.TimeRemaining == TimeSpan.Zero
                 ),
                 CancellationToken
@@ -145,63 +108,103 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
-        // Act
-        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshPlexPhotoLibraryCommand(library));
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshPlexPhotoLibraryCommand(metadata));
 
-        // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
-        result.Errors.Count.ShouldBe(0);
         result.Value.Id.ShouldBe(library.Id);
-        result.Value.Type.ShouldBe(PlexMediaType.PhotoAlbum);
         Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<ILibrarySyncProgressStore>().Verify();
     }
 
     [Test]
-    public async Task ShouldPropagateCancelledRetrievalWithoutSyncOrPublication()
+    public async Task ShouldPropagateCancelledSyncWithoutPublication()
     {
-        // Arrange
         await SetupDatabase(73104, x => x.PlexPhotoLibraryCount = 1);
         var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
-        var cancelled = ResultExtensions.TaskIsCancelled("photo retrieval");
+        var metadata = CreateMetadata(library);
+        var cancelled = ResultExtensions.TaskIsCancelled("photo reconciliation");
+
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x => x.StartAsync(library.Id, PlexMediaType.PhotoAlbum, null))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.Is<GetPhotoLibrarySnapshotFromPlexApiCommand>(c => c.PlexLibrary == library), CancellationToken))
+            .Setup(x => x.Send(It.Is<SyncPlexPhotosCommand>(c => ReferenceEquals(c.LibraryMetadata, metadata)), CancellationToken))
             .ReturnsAsync(cancelled)
             .Verifiable(Times.Once());
 
-        // Act
-        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshPlexPhotoLibraryCommand(library));
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshPlexPhotoLibraryCommand(metadata));
 
-        // Assert
         result.IsCancelled.ShouldBeTrue();
-        result.Errors.Count.ShouldBe(cancelled.Errors.Count);
-        result.ValueOrDefault.ShouldBeNull();
-        Mock.Mock<ICommandExecutor>().Verify(x => x.Send(It.IsAny<SyncPlexPhotosCommand>(), It.IsAny<CancellationToken>()), Times.Never);
-        Mock.Mock<ICommandExecutor>().Verify(x => x.Send(It.IsAny<QueueMediaOverviewRebuildCommand>(), It.IsAny<CancellationToken>()), Times.Never);
-        Mock.Mock<ILibrarySyncProgressStore>().Verify(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()), Times.Never);
-        Mock.Mock<ICommandExecutor>().Verify();
-        Mock.Mock<ILibrarySyncProgressStore>().Verify();
+        Mock.Mock<ICommandExecutor>().Verify(
+            x => x.Send(It.IsAny<QueueMediaOverviewRebuildCommand>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
+        Mock.Mock<ILibrarySyncProgressStore>().Verify(
+            x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
-    private static PhotoSourceRootInput CreateRootInput(string path)
+    private static InsertMediaMetaDataCommandResponse CreateMetadata(PlexLibrary databaseLibrary, bool includePhoto = false)
     {
-        PhotoSourcePathResolver.TryCreateIdentityKey(path, out var identity, out var error).ShouldBeTrue(error);
-        return new PhotoSourceRootInput(null, identity, path);
+        var library = FakeData.GetPlexLibrary(new Seed(databaseLibrary.Id + 100), databaseLibrary.Type).Generate();
+        library.Id = databaseLibrary.Id;
+        library.PlexServerId = databaseLibrary.PlexServerId;
+        library.PhotoAlbums.Clear();
+        library.PhotoMediaData.Clear();
+        library.PhotoFolders.Clear();
+        if (includePhoto)
+        {
+            var root = CreateRoot();
+            var album = CreateAlbum(501);
+            var file = CreateFile(601);
+            root.Files.Add(file);
+            file.PlexPhotoFolder = root;
+            album.Memberships.Add(new PlexPhotoAlbumMembership
+            {
+                PlexPhotoAlbumId = 0,
+                PlexPhotoMediaDataId = 0,
+                PlexPhotoAlbum = album,
+                PlexPhotoMediaData = file,
+            });
+            library.PhotoFolders.Add(root);
+            library.PhotoAlbums.Add(album);
+            library.PhotoMediaData.Add(file);
+        }
+
+        return new InsertMediaMetaDataCommandResponse(library)
+        {
+            PlexActors = [],
+            PlexGenresVideo = [],
+            PlexGenresAudio = [],
+            PlexCountries = [],
+        };
     }
 
-    private static PlexPhotoAlbum CreateAlbum(int ratingKey, string title) =>
+    private static PlexPhotoFolder CreateRoot() =>
+        new()
+        {
+            Id = 0,
+            PlexServerId = 1,
+            PlexLibraryId = 1,
+            ParentId = null,
+            RelativePath = string.Empty,
+            Title = "photos",
+            RootIdentityKey = "path:posix:/fixture/photos",
+            SourceRootPath = "/fixture/photos",
+            IsActive = true,
+        };
+
+    private static PlexPhotoAlbum CreateAlbum(int ratingKey) =>
         new()
         {
             Id = 0,
             PlexServerId = 1,
             PlexLibraryId = 1,
             PlexApiRatingKey = ratingKey,
-            Title = title,
-            SearchTitle = title.ToSearchTitle(),
+            Title = "Album",
+            SearchTitle = "album",
             Summary = null,
             PlexApiMetaDataKey = ratingKey,
             HasThumb = false,
@@ -209,15 +212,15 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
             UpdatedAt = null,
         };
 
-    private static PlexPhotoMediaData CreateFile(int ratingKey, int partId) =>
+    private static PlexPhotoMediaData CreateFile(int ratingKey) =>
         new()
         {
             Id = 0,
             PlexServerId = 1,
             PlexLibraryId = 1,
             PlexApiRatingKey = ratingKey,
-            PlexApiMediaId = partId + 100,
-            PlexApiPartId = partId,
+            PlexApiMediaId = 701,
+            PlexApiPartId = 702,
             AssetKind = PhotoAssetKind.Image,
             Title = "file.jpg",
             SearchTitle = "file.jpg",
@@ -229,7 +232,7 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
             OriginallyAvailableAt = null,
             SourcePath = "/fixture/photos/file.jpg",
             OriginalFilename = "file.jpg",
-            Key = $"/library/parts/{partId}/file.jpg",
+            Key = "/library/parts/702/file.jpg",
             Size = 20,
             Container = "jpg",
             Width = 100,

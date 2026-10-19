@@ -158,7 +158,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
 
             case PlexMediaType.PhotoAlbum:
                 Mock.SetupCommand(() => It.Is<RefreshPlexPhotoLibraryCommand>(c =>
-                        c.PlexLibrary == updatedLibrary && c.ForceMediaRefresh == forceMediaRefresh))
+                        c.LibraryMetadata.PlexLibrary == updatedLibrary && c.ForceMediaRefresh == forceMediaRefresh))
                     .ReturnsAsync(Result.Ok(updatedLibrary))
                     .Verifiable(Times.Once());
                 break;
@@ -263,7 +263,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         Mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         if (libraryType == PlexMediaType.PhotoAlbum)
-            Mock.SetupCommand(() => It.Is<RefreshPlexPhotoLibraryCommand>(c => c.PlexLibrary == updatedLibrary))
+            Mock.SetupCommand(() => It.Is<RefreshPlexPhotoLibraryCommand>(c => c.LibraryMetadata.PlexLibrary == updatedLibrary))
                 .ReturnsAsync(Result.Fail<PlexLibrary>("Typed refresh failed")).Verifiable(Times.Once());
         else
             Mock.SetupCommand(() => It.Is<RefreshPlexMovieLibraryCommand>(c => c.LibraryMetadata.PlexLibrary == updatedLibrary))

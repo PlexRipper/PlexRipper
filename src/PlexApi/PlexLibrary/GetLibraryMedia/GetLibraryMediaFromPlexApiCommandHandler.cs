@@ -11,16 +11,19 @@ public class GetLibraryMediaFromPlexApiCommandHandler
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ILibrarySyncProgressStore _librarySyncProgressStore;
+    private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetLibraryMediaFromPlexApiCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
-        ILibrarySyncProgressStore librarySyncProgressStore
+        ILibrarySyncProgressStore librarySyncProgressStore,
+        IPlexApiClientFactory plexApiClientFactory
     )
     {
         _log = log.ForContext<GetLibraryMediaFromPlexApiCommandHandler>();
         _commandExecutor = commandExecutor;
         _librarySyncProgressStore = librarySyncProgressStore;
+        _plexApiClientFactory = plexApiClientFactory;
     }
 
     public async Task<Result<LibraryMetadata>> ExecuteAsync(
@@ -68,6 +71,27 @@ public class GetLibraryMediaFromPlexApiCommandHandler
             }
 
             var mediaType = command.MediaType ?? library.Type;
+            if (command.MediaType is null && mediaType == PlexMediaType.PhotoAlbum)
+            {
+                var clientResult = await _plexApiClientFactory.CreateClientAsync(library.PlexServerId, 30, 3, null);
+                if (clientResult.IsFailed)
+                    return clientResult.ToResult().LogIfFailed();
+
+                var populateResult = await PlexPhotoLibraryRetriever.PopulateAsync(clientResult.Value, library, _log, ct);
+                if (populateResult.IsFailed)
+                    return populateResult.LogIfFailed();
+
+                return Result.Ok(
+                    new LibraryMetadata(library)
+                    {
+                        Countries = [],
+                        GenresVideo = [],
+                        GenresAudio = [],
+                        Actors = [],
+                        PhotoClipCount = library.PhotoMediaData.Count(x => x.AssetKind == PhotoAssetKind.VideoClip),
+                    }
+                );
+            }
             var mediaResult = await _commandExecutor.Send(
                 new GetAllMediaByTypeFromPlexApiCommand(library, mediaType),
                 ct

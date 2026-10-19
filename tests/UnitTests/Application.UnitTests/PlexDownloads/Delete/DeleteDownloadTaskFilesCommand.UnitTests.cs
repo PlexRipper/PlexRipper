@@ -477,13 +477,13 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseCommandUnitTest<Delet
 
     [Test]
     [Arguments(DownloadTaskType.MusicTrackData, "Music", "empty")]
-    [Arguments(DownloadTaskType.PhotoData, "Photos", "empty")]
+    [Arguments(DownloadTaskType.PhotoImage, "Photos", "empty")]
     [Arguments(DownloadTaskType.OtherVideoData, "OtherVideos", "empty")]
     [Arguments(DownloadTaskType.MusicTrackData, "Music", "active")]
-    [Arguments(DownloadTaskType.PhotoData, "Photos", "active")]
+    [Arguments(DownloadTaskType.PhotoImage, "Photos", "active")]
     [Arguments(DownloadTaskType.OtherVideoData, "OtherVideos", "active")]
     [Arguments(DownloadTaskType.MusicTrackData, "Music", "unrelated")]
-    [Arguments(DownloadTaskType.PhotoData, "Photos", "unrelated")]
+    [Arguments(DownloadTaskType.PhotoImage, "Photos", "unrelated")]
     [Arguments(DownloadTaskType.OtherVideoData, "OtherVideos", "unrelated")]
     public async Task ShouldPreserveNewFamilyCategoryRoots_WhenCleaningTaskFiles(
         DownloadTaskType taskType,
@@ -500,9 +500,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseCommandUnitTest<Delet
                 config.MusicAlbumDownloadTasksCount = taskType == DownloadTaskType.MusicTrackData ? 1 : 0;
                 config.MusicTrackDownloadTasksCount = taskType == DownloadTaskType.MusicTrackData ? 2 : 0;
                 config.MusicTrackFileDownloadTasksCount = taskType == DownloadTaskType.MusicTrackData ? 1 : 0;
-                config.PhotoAlbumDownloadTasksCount = taskType == DownloadTaskType.PhotoData ? 1 : 0;
-                config.PhotoImageDownloadTasksCount = taskType == DownloadTaskType.PhotoData ? 2 : 0;
-                config.PhotoImageFileDownloadTasksCount = taskType == DownloadTaskType.PhotoData ? 1 : 0;
+                config.PhotoFolderDownloadTasksCount = taskType == DownloadTaskType.PhotoImage ? 1 : 0;
+                config.PhotoImageDownloadTasksCount = taskType == DownloadTaskType.PhotoImage ? 2 : 0;
                 config.OtherVideoDownloadTasksCount = taskType == DownloadTaskType.OtherVideoData ? 2 : 0;
                 config.OtherVideoFileDownloadTasksCount = taskType == DownloadTaskType.OtherVideoData ? 1 : 0;
             }
@@ -558,7 +557,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseCommandUnitTest<Delet
         persistedControl.DirectoryMeta.ShouldBe(control.DirectoryMeta);
     }
     [Test]
-    public async Task ShouldDeleteStandalonePhotoFilesWithoutAlbumScope()
+    public async Task ShouldDeletePhotoFilesFromFolder()
     {
         // Arrange
         await SetupDatabase(
@@ -566,9 +565,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseCommandUnitTest<Delet
             config =>
             {
                 config.PlexPhotoLibraryCount = 1;
-                config.PhotoAlbumDownloadTasksCount = 0;
+                config.PhotoFolderDownloadTasksCount = 1;
                 config.PhotoImageDownloadTasksCount = 1;
-                config.PhotoImageFileDownloadTasksCount = 1;
             }
         );
         var fileTask = await IDbContext.DownloadTaskPhotoImageFiles.SingleAsync(CancellationToken);
@@ -589,6 +587,6 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseCommandUnitTest<Delet
         var file = Mock.Container.Resolve<IFile>();
         file.Exists(reapTempPath).ShouldBeFalse();
         file.Exists(plainPath).ShouldBeFalse();
-        (await IDbContext.DownloadTaskPhotoImages.SingleAsync(CancellationToken)).ParentId.ShouldBeNull();
+        (await IDbContext.DownloadTaskPhotoFolders.SingleAsync(CancellationToken)).ParentId.ShouldBeNull();
     }
 }

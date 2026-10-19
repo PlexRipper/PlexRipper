@@ -294,9 +294,8 @@ public class CleanUpDownloadTaskFoldersCommonUnitTests : BaseCommandUnitTest<Cle
                 config.MusicAlbumDownloadTasksCount = 1;
                 config.MusicTrackDownloadTasksCount = 1;
                 config.MusicTrackFileDownloadTasksCount = 1;
-                config.PhotoAlbumDownloadTasksCount = 1;
+                config.PhotoFolderDownloadTasksCount = 1;
                 config.PhotoImageDownloadTasksCount = 1;
-                config.PhotoImageFileDownloadTasksCount = 1;
                 config.OtherVideoDownloadTasksCount = 1;
                 config.OtherVideoFileDownloadTasksCount = 1;
             }
@@ -319,7 +318,7 @@ public class CleanUpDownloadTaskFoldersCommonUnitTests : BaseCommandUnitTest<Cle
             file.DirectoryMeta.SeasonFolder = string.Empty;
             file.DirectoryMeta.MusicArtistFolder = string.Empty;
             file.DirectoryMeta.MusicAlbumFolder = string.Empty;
-            file.DirectoryMeta.PhotoAlbumFolder = string.Empty;
+            file.DirectoryMeta.PhotoFolder = string.Empty;
             file.DirectoryMeta.OtherVideoFolder = string.Empty;
             file.DownloadStatus = DownloadStatus.Completed;
             dbContext.Entry(file).State = EntityState.Modified;

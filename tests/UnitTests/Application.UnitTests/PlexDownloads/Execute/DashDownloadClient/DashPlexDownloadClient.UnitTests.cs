@@ -1294,7 +1294,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     [Arguments(DownloadTaskType.MovieData, "mp4")]
     [Arguments(DownloadTaskType.EpisodeData, "mp4")]
     [Arguments(DownloadTaskType.MusicTrackData, "flac")]
-    [Arguments(DownloadTaskType.PhotoData, "jpg")]
+    [Arguments(DownloadTaskType.PhotoImage, "jpg")]
     [Arguments(DownloadTaskType.OtherVideoData, "avi")]
     public async Task ShouldCreateDashOutputUsingMkvFilePathAndNormalizedFileName(
         DownloadTaskType taskType,
@@ -1315,9 +1315,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 config.MusicAlbumDownloadTasksCount = 1;
                 config.MusicTrackDownloadTasksCount = 1;
                 config.MusicTrackFileDownloadTasksCount = 1;
-                config.PhotoAlbumDownloadTasksCount = 2;
+                config.PhotoFolderDownloadTasksCount = 2;
                 config.PhotoImageDownloadTasksCount = 1;
-                config.PhotoImageFileDownloadTasksCount = 1;
                 config.OtherVideoDownloadTasksCount = 2;
                 config.OtherVideoFileDownloadTasksCount = 1;
             }

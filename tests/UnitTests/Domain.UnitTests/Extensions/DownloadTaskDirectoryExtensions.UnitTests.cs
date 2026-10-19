@@ -13,9 +13,8 @@ public class DownloadTaskDirectoryExtensionsUnitTests : BaseUnitTest
     [Arguments(DownloadTaskType.MusicAlbum, "Music", "Artist/Album")]
     [Arguments(DownloadTaskType.MusicTrack, "Music", "Artist/Album")]
     [Arguments(DownloadTaskType.MusicTrackData, "Music", "Artist/Album")]
-    [Arguments(DownloadTaskType.PhotoAlbum, "Photos", "Photos")]
+    [Arguments(DownloadTaskType.PhotoFolder, "Photos", "Photos")]
     [Arguments(DownloadTaskType.PhotoImage, "Photos", "Photos")]
-    [Arguments(DownloadTaskType.PhotoData, "Photos", "Photos")]
     [Arguments(DownloadTaskType.OtherVideo, "OtherVideos", "Video")]
     [Arguments(DownloadTaskType.OtherVideoData, "OtherVideos", "Video")]
     public void ShouldResolveDownloadAndDestinationDirectories(
@@ -69,7 +68,7 @@ public class DownloadTaskDirectoryExtensionsUnitTests : BaseUnitTest
             SeasonFolder = "Season 01",
             MusicArtistFolder = "Artist",
             MusicAlbumFolder = "Album",
-            PhotoAlbumFolder = "Photos",
+            PhotoFolder = "Photos",
             OtherVideoFolder = "Video",
             KeepCompletedInDownloadFolder = false,
         };

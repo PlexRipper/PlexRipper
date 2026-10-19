@@ -101,7 +101,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
         file.DirectoryMeta.SeasonFolder.ShouldBe(string.Empty);
         file.DirectoryMeta.MusicArtistFolder.ShouldBe(string.Empty);
         file.DirectoryMeta.MusicAlbumFolder.ShouldBe(string.Empty);
-        file.DirectoryMeta.PhotoAlbumFolder.ShouldBe(string.Empty);
+        file.DirectoryMeta.PhotoFolder.ShouldBe(string.Empty);
         file.DestinationFolderPathId.ShouldBe(folder.Id);
         var log = await dbContext.DownloadTaskOtherVideoFileLogs.SingleAsync(CancellationToken);
         log.DownloadTaskFileId.ShouldBe(file.Id);

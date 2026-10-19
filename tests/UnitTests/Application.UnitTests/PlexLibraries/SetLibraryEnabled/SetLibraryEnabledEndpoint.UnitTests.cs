@@ -4,256 +4,99 @@ public class SetLibraryEnabledEndpointUnitTests
     : BaseEndpointUnitTest<SetLibraryEnabledEndpoint, SetLibraryEnabledRequest, ResultDTO<PlexLibraryDTO>>
 {
     [Test]
-    public async Task ShouldPurgeOnlySelectedPhotoLibrary_AndResetAllFamilyMetrics()
+    public async Task ShouldDisablePhotoLibraryByClearingCatalogAndDescendantsWhileRetainingRoots()
     {
         // Arrange
-        await SetupDatabase(
-            4601,
-            config =>
-            {
-                config.PlexServerCount = 1;
-            }
-        );
+        await SetupDatabase(73301, x => x.PlexServerCount = 1);
         var dbContext = IDbContext;
         var serverId = await dbContext.PlexServers.Select(x => x.Id).SingleAsync(CancellationToken);
-        var targetLibrary = FakeData.GetPlexLibrary(new Seed(4601), PlexMediaType.PhotoAlbum).Generate();
-        targetLibrary.PlexServerId = serverId;
-        var controlLibrary = FakeData.GetPlexLibrary(new Seed(4602), PlexMediaType.PhotoAlbum).Generate();
-        controlLibrary.PlexServerId = serverId;
-        dbContext.PlexLibraries.AddRange(targetLibrary, controlLibrary);
+        var target = FakeData.GetPlexLibrary(new Seed(73301), PlexMediaType.PhotoAlbum).Generate();
+        target.PlexServerId = serverId;
+        var control = FakeData.GetPlexLibrary(new Seed(73302), PlexMediaType.PhotoAlbum).Generate();
+        control.PlexServerId = serverId;
+        dbContext.PlexLibraries.AddRange(target, control);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        dbContext.PlexPhotoAlbums.AddRange(
-            CreatePhotoAlbum(targetLibrary.Id, serverId, 101, "Target album"),
-            CreatePhotoAlbum(controlLibrary.Id, serverId, 102, "Control album")
-        );
+        var targetRoot = CreateRoot(target, serverId, "/fixture/target", true);
+        var controlRoot = CreateRoot(control, serverId, "/fixture/control", true);
+        dbContext.PlexPhotoFolders.AddRange(targetRoot, controlRoot);
         await dbContext.SaveChangesAsync(CancellationToken);
-        dbContext.LibrarySyncJobQueues.Add(
-            new LibrarySyncJobQueue
-            {
-                PlexServerId = serverId,
-                PlexLibraryId = targetLibrary.Id,
-                Priority = 3,
-                Status = LibrarySyncJobStatus.Cancelled,
-                CreatedAt = DateTime.UtcNow.AddMinutes(-2),
-                CompletedAt = DateTime.UtcNow.AddMinutes(-1),
-            }
-        );
+        var targetChild = CreateChild(target, serverId, targetRoot, "Trips", "Trips");
+        dbContext.PlexPhotoFolders.Add(targetChild);
         await dbContext.SaveChangesAsync(CancellationToken);
-        await dbContext
-            .PlexLibraries.Where(x => x.Id == targetLibrary.Id)
-            .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(y => y.MediaSize, 999L)
-                        .SetProperty(y => y.SyncedContentChangedAt, 123L)
-                        .SetProperty(y => y.MusicArtistCount, 1)
-                        .SetProperty(y => y.MusicAlbumCount, 2)
-                        .SetProperty(y => y.MusicTrackCount, 3)
-                        .SetProperty(y => y.PhotoAlbumCount, 6)
-                        .SetProperty(y => y.PhotoImageCount, 7)
-                        .SetProperty(y => y.PhotoClipCount, 8)
-                        .SetProperty(y => y.OtherVideoCount, 11),
-                CancellationToken
-            );
-
+        var targetAlbum = CreateAlbum(target, serverId, 801);
+        var controlAlbum = CreateAlbum(control, serverId, 802);
+        var targetFile = CreateFile(target, serverId, 901, targetChild.Id);
+        var controlFile = CreateFile(control, serverId, 902, controlRoot.Id);
+        dbContext.PlexPhotoAlbums.AddRange(targetAlbum, controlAlbum);
+        dbContext.PlexPhotoMediaData.AddRange(targetFile, controlFile);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        dbContext.PlexPhotoAlbumMemberships.Add(new PlexPhotoAlbumMembership
+        {
+            PlexPhotoAlbumId = targetAlbum.Id,
+            PlexPhotoMediaDataId = targetFile.Id,
+        });
+        await dbContext.SaveChangesAsync(CancellationToken);
         Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.Is<CancelLibrarySyncJobCommand>(command => command.PlexLibraryId == targetLibrary.Id),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(x => x.Send(It.Is<CancelLibrarySyncJobCommand>(c => c.PlexLibraryId == target.Id), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
-        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand())
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand()).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
         Mock.Mock<INotificationHubService>()
-            .Setup(x =>
-                x.SendRefreshNotificationAsync(
-                    It.Is<List<RefreshDataType>>(types =>
-                        types.SequenceEqual(
-                            new[] { RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus }
-                        )
-                    )
-                )
-            )
+            .Setup(x => x.SendRefreshNotificationAsync(It.Is<List<RefreshDataType>>(types =>
+                types.SequenceEqual(new[] { RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus })
+            )))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
-            new SetLibraryEnabledRequest { PlexLibraryId = targetLibrary.Id, IsEnabled = false }
+            new SetLibraryEnabledRequest { PlexLibraryId = target.Id, IsEnabled = false }
         );
 
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
-        endpointResult.Response.ShouldNotBeNull();
-        endpointResult.Response.IsSuccess.ShouldBeTrue();
-        endpointResult.Response.Errors.Count.ShouldBe(0);
-        endpointResult.Response.Value.ShouldNotBeNull().IsEnabled.ShouldBeFalse();
-        var remainingAlbums = await dbContext
-            .PlexPhotoAlbums.AsNoTracking()
-            .Select(x => new { x.PlexLibraryId, x.PlexApiRatingKey })
-            .ToListAsync(CancellationToken);
-        remainingAlbums.ShouldBe([new { PlexLibraryId = controlLibrary.Id, PlexApiRatingKey = 102 }]);
-        var updatedLibrary = await dbContext
-            .PlexLibraries.IgnoreIsEnabledFilter()
-            .AsNoTracking()
-            .SingleAsync(x => x.Id == targetLibrary.Id, CancellationToken);
-        updatedLibrary.IsEnabled.ShouldBeFalse();
-        updatedLibrary.SyncedAt.ShouldBeNull();
-        updatedLibrary.SyncedContentChangedAt.ShouldBeNull();
-        updatedLibrary.Outdated.ShouldBeFalse();
-        new[]
-        {
-            updatedLibrary.MusicArtistCount,
-            updatedLibrary.MusicAlbumCount,
-            updatedLibrary.MusicTrackCount,
-            updatedLibrary.PhotoAlbumCount,
-            updatedLibrary.PhotoImageCount,
-            updatedLibrary.PhotoClipCount,
-            updatedLibrary.OtherVideoCount,
-        }.ShouldAllBe(x => x == 0);
-        updatedLibrary.MediaSize.ShouldBe(0);
-        var retainedQueueHistory = await dbContext
-            .LibrarySyncJobQueues.AsNoTracking()
-            .Where(x => x.PlexLibraryId == targetLibrary.Id)
-            .Select(x => new
-            {
-                x.PlexLibraryId,
-                x.Status,
-                x.CompletedAt,
-            })
-            .SingleAsync(CancellationToken);
-        retainedQueueHistory.PlexLibraryId.ShouldBe(targetLibrary.Id);
-        retainedQueueHistory.Status.ShouldBe(LibrarySyncJobStatus.Cancelled);
-        retainedQueueHistory.CompletedAt.ShouldNotBeNull();
+        var response = endpointResult.Response.ShouldNotBeNull();
+        response.IsSuccess.ShouldBeTrue();
+        response.Errors.Count.ShouldBe(0);
+        response.Value.ShouldNotBeNull().IsEnabled.ShouldBeFalse();
+        (await dbContext.PlexPhotoAlbums.Select(x => new { x.PlexLibraryId, x.PlexApiRatingKey }).ToListAsync(CancellationToken))
+            .ShouldBe([new { PlexLibraryId = control.Id, PlexApiRatingKey = 802 }]);
+        (await dbContext.PlexPhotoMediaData.Select(x => new { x.PlexLibraryId, x.PlexApiRatingKey }).ToListAsync(CancellationToken))
+            .ShouldBe([new { PlexLibraryId = control.Id, PlexApiRatingKey = 902 }]);
+        (await dbContext.PlexPhotoFolders.Where(x => x.PlexLibraryId == target.Id).Select(x => new { x.Id, x.ParentId, x.IsActive }).ToListAsync(CancellationToken))
+            .ShouldBe([new { Id = targetRoot.Id, ParentId = (int?)null, IsActive = (bool?)false }]);
+        (await dbContext.PlexPhotoFolders.Where(x => x.PlexLibraryId == control.Id).Select(x => new { x.Id, x.ParentId, x.IsActive }).ToListAsync(CancellationToken))
+            .ShouldBe([new { Id = controlRoot.Id, ParentId = (int?)null, IsActive = (bool?)true }]);
+        (await dbContext.PlexPhotoAlbumMemberships.CountAsync(CancellationToken)).ShouldBe(0);
         Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<INotificationHubService>().Verify();
     }
 
     [Test]
-    public async Task ShouldPurgeMusicAndOtherVideoRoots_WithoutPurgingOtherLibraries()
+    public async Task ShouldEnableDisabledPhotoLibraryAndQueueFreshSync()
     {
         // Arrange
-        await SetupDatabase(4604, config => config.PlexServerCount = 1);
+        await SetupDatabase(73302, x => x.PlexServerCount = 1);
         var dbContext = IDbContext;
         var serverId = await dbContext.PlexServers.Select(x => x.Id).SingleAsync(CancellationToken);
-        var targetMusic = FakeData.GetPlexLibrary(new Seed(4604), PlexMediaType.MusicArtist).Generate();
-        var controlMusic = FakeData.GetPlexLibrary(new Seed(4605), PlexMediaType.MusicArtist).Generate();
-        var targetOtherVideos = FakeData.GetPlexLibrary(new Seed(4606), PlexMediaType.OtherVideos).Generate();
-        var controlOtherVideos = FakeData.GetPlexLibrary(new Seed(4607), PlexMediaType.OtherVideos).Generate();
-        var libraries = new[] { targetMusic, controlMusic, targetOtherVideos, controlOtherVideos };
-        foreach (var library in libraries)
-            library.PlexServerId = serverId;
-
-        dbContext.PlexLibraries.AddRange(libraries);
-        await dbContext.SaveChangesAsync(CancellationToken);
-        dbContext.PlexMusicArtists.AddRange(
-            CreateArtist(targetMusic.Id, serverId, 201, "Target artist"),
-            CreateArtist(controlMusic.Id, serverId, 202, "Control artist")
-        );
-        dbContext.PlexOtherVideos.AddRange(
-            CreateOtherVideo(targetOtherVideos.Id, serverId, 301, "Target video"),
-            CreateOtherVideo(controlOtherVideos.Id, serverId, 302, "Control video")
-        );
-        await dbContext.SaveChangesAsync(CancellationToken);
-
-        var targetLibraryIds = new[] { targetMusic.Id, targetOtherVideos.Id };
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.Is<CancelLibrarySyncJobCommand>(command => targetLibraryIds.Contains(command.PlexLibraryId)),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Exactly(2));
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.Is<InvalidateLibraryComparisonJobsCommand>(c =>
-                        c.PlexLibraryIds.SequenceEqual(new[] { targetMusic.Id })
-                    ),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
-        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand())
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Exactly(2));
-        Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Exactly(2));
-
-        // Act
-        foreach (var libraryId in targetLibraryIds)
-        {
-            var endpointResult = await TestEndpointHandleAsync(
-                new SetLibraryEnabledRequest { PlexLibraryId = libraryId, IsEnabled = false }
-            );
-            endpointResult.IsValid.ShouldBeTrue();
-            endpointResult.Response.ShouldNotBeNull().IsSuccess.ShouldBeTrue();
-            endpointResult.Response.Errors.Count.ShouldBe(0);
-        }
-
-        // Assert
-        var remainingArtists = await dbContext
-            .PlexMusicArtists.AsNoTracking()
-            .Select(x => new { x.PlexLibraryId, x.PlexApiRatingKey })
-            .ToListAsync(CancellationToken);
-        remainingArtists.ShouldBe([new { PlexLibraryId = controlMusic.Id, PlexApiRatingKey = 202 }]);
-        var remainingVideos = await dbContext
-            .PlexOtherVideos.AsNoTracking()
-            .Select(x => new { x.PlexLibraryId, x.PlexApiRatingKey })
-            .ToListAsync(CancellationToken);
-        remainingVideos.ShouldBe([new { PlexLibraryId = controlOtherVideos.Id, PlexApiRatingKey = 302 }]);
-        Mock.Mock<ICommandExecutor>().Verify();
-        Mock.Mock<INotificationHubService>().Verify();
-    }
-
-    [Test]
-    [Arguments(PlexMediaType.MusicArtist)]
-    [Arguments(PlexMediaType.PhotoAlbum)]
-    public async Task ShouldQueueFreshSyncWithoutOverviewRebuild_WhenReEnablingLibrary(PlexMediaType libraryType)
-    {
-        // Arrange
-        await SetupDatabase(
-            4603,
-            config =>
-            {
-                config.PlexServerCount = 1;
-            }
-        );
-        var dbContext = IDbContext;
-        var serverId = await dbContext.PlexServers.Select(x => x.Id).SingleAsync(CancellationToken);
-        var library = FakeData.GetPlexLibrary(new Seed(4603), libraryType).Generate();
+        var library = FakeData.GetPlexLibrary(new Seed(73303), PlexMediaType.PhotoAlbum).Generate();
         library.PlexServerId = serverId;
         library.IsEnabled = false;
         dbContext.PlexLibraries.Add(library);
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.Is<QueueLibrarySyncJobCommand>(command =>
-                        command.PlexLibraryIds.SequenceEqual(new[] { library.Id })
-                        && !command.ForceLibrarySync
-                        && !command.ForceMediaRefresh
-                    ),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(x => x.Send(It.Is<QueueLibrarySyncJobCommand>(c =>
+                c.PlexLibraryIds.SequenceEqual(new[] { library.Id }) && !c.ForceLibrarySync && !c.ForceMediaRefresh
+            ), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
-        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand())
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+        Mock.SetupCommand(() => new QueueMediaOverviewRebuildCommand()).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
+            .Setup(x => x.SendRefreshNotificationAsync(It.Is<List<RefreshDataType>>(types =>
+                types.SequenceEqual(new[] { RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus })
+            )))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
@@ -264,110 +107,88 @@ public class SetLibraryEnabledEndpointUnitTests
 
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
-        endpointResult.Response.ShouldNotBeNull();
-        endpointResult.Response.IsSuccess.ShouldBeTrue();
-        endpointResult.Response.Errors.Count.ShouldBe(0);
-        endpointResult.Response.Value.ShouldNotBeNull().IsEnabled.ShouldBeTrue();
-        var isEnabled = await dbContext
-            .PlexLibraries.IgnoreIsEnabledFilter()
-            .Where(x => x.Id == library.Id)
-            .Select(x => x.IsEnabled)
-            .SingleAsync(CancellationToken);
-        isEnabled.ShouldBeTrue();
+        var response = endpointResult.Response.ShouldNotBeNull();
+        response.IsSuccess.ShouldBeTrue();
+        response.Errors.Count.ShouldBe(0);
+        response.Value.ShouldNotBeNull().IsEnabled.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<INotificationHubService>().Verify();
     }
 
-    private static PlexMusicArtist CreateArtist(int libraryId, int serverId, int ratingKey, string title) =>
+    private static PlexPhotoFolder CreateRoot(PlexLibrary library, int serverId, string path, bool active) =>
         new()
         {
-            PlexApiRatingKey = ratingKey,
-            Title = title,
-            Year = 2026,
-            SortIndex = ratingKey,
-            SearchTitle = title.ToSearchTitle(),
-            Duration = 1,
-            MediaSize = 1,
-            PlexApiMetaDataKey = ratingKey,
-            Studio = string.Empty,
-            Summary = string.Empty,
-            ContentRating = string.Empty,
-            Rating = 0,
-            ChildCount = 0,
-            AddedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            OriginallyAvailableAt = null,
-            HasThumb = false,
-            HasArt = false,
-            HasTheme = false,
-            FullTitle = title,
-            Guid = string.Empty,
-            Guid_IMDB = null,
-            Guid_TMDB = null,
-            Guid_TVDB = null,
-            PlexLibraryId = libraryId,
+            Id = 0,
             PlexServerId = serverId,
+            PlexLibraryId = library.Id,
+            ParentId = null,
+            RelativePath = string.Empty,
+            Title = path[(path.LastIndexOf('/') + 1)..],
+            RootIdentityKey = $"path:posix:{path}",
+            SourceRootPath = path,
+            PlexApiLocationId = null,
+            IsActive = active,
         };
 
-    private static PlexOtherVideo CreateOtherVideo(int libraryId, int serverId, int ratingKey, string title) =>
+    private static PlexPhotoFolder CreateChild(PlexLibrary library, int serverId, PlexPhotoFolder root, string path, string title) =>
         new()
         {
-            PlexApiRatingKey = ratingKey,
-            Title = title,
-            Year = 2026,
-            SortIndex = ratingKey,
-            SearchTitle = title.ToSearchTitle(),
-            Duration = 1,
-            MediaSize = 1,
-            PlexApiMetaDataKey = ratingKey,
-            Studio = string.Empty,
-            Summary = string.Empty,
-            ContentRating = string.Empty,
-            Rating = 0,
-            ChildCount = 0,
-            AddedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            OriginallyAvailableAt = null,
-            HasThumb = false,
-            HasArt = false,
-            HasTheme = false,
-            FullTitle = title,
-            Guid = string.Empty,
-            Guid_IMDB = null,
-            Guid_TMDB = null,
-            Guid_TVDB = null,
-            PlexLibraryId = libraryId,
+            Id = 0,
             PlexServerId = serverId,
+            PlexLibraryId = library.Id,
+            ParentId = root.Id,
+            RelativePath = path,
+            Title = title,
+            RootIdentityKey = null,
+            SourceRootPath = null,
+            PlexApiLocationId = null,
+            IsActive = null,
         };
 
-    private static PlexPhotoAlbum CreatePhotoAlbum(int libraryId, int serverId, int ratingKey, string title) =>
+    private static PlexPhotoAlbum CreateAlbum(PlexLibrary library, int serverId, int ratingKey) =>
         new()
         {
+            Id = 0,
+            PlexServerId = serverId,
+            PlexLibraryId = library.Id,
             PlexApiRatingKey = ratingKey,
-            Title = title,
-            Year = 2026,
-            Duration = 1,
+            Title = $"Album {ratingKey}",
+            SearchTitle = $"album {ratingKey}",
+            Summary = null,
             PlexApiMetaDataKey = ratingKey,
-            Studio = string.Empty,
-            Summary = string.Empty,
-            ContentRating = string.Empty,
-            Rating = 0,
-            ChildCount = 0,
+            HasThumb = false,
+            AddedAt = DateTime.UtcNow,
+            UpdatedAt = null,
+        };
+
+    private static PlexPhotoMediaData CreateFile(PlexLibrary library, int serverId, int ratingKey, int folderId) =>
+        new()
+        {
+            Id = 0,
+            PlexServerId = serverId,
+            PlexLibraryId = library.Id,
+            PlexApiRatingKey = ratingKey,
+            PlexApiMediaId = ratingKey + 100,
+            PlexApiPartId = ratingKey + 200,
+            AssetKind = PhotoAssetKind.Image,
+            Title = $"file-{ratingKey}.jpg",
+            SearchTitle = $"file-{ratingKey}.jpg",
+            Summary = null,
+            PlexApiMetaDataKey = ratingKey,
+            HasThumb = false,
+            AddedAt = DateTime.UtcNow,
             UpdatedAt = null,
             OriginallyAvailableAt = null,
-            HasThumb = false,
-            HasArt = false,
-            HasTheme = false,
-            FullTitle = title,
-            Guid = string.Empty,
-            Guid_IMDB = null,
-            Guid_TMDB = null,
-            Guid_TVDB = null,
-            SearchTitle = title.ToSearchTitle(),
-            SortIndex = ratingKey,
-            MediaSize = 1,
-            AddedAt = DateTime.UtcNow,
-            PlexLibraryId = libraryId,
-            PlexServerId = serverId,
+            SourcePath = null,
+            OriginalFilename = $"file-{ratingKey}.jpg",
+            Key = $"/library/parts/{ratingKey}/file.jpg",
+            Size = 10,
+            Container = "jpg",
+            Width = 100,
+            Height = 100,
+            Duration = null,
+            VideoCodec = null,
+            AudioCodec = null,
+            PlexPhotoFolderId = folderId,
         };
 }

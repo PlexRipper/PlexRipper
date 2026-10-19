@@ -211,7 +211,7 @@ public class GetTorrentFilesEndpointUnitTests
             SeasonFolder = seasonFolder,
             MusicArtistFolder = string.Empty,
             MusicAlbumFolder = string.Empty,
-            PhotoAlbumFolder = string.Empty,
+            PhotoFolder = string.Empty,
             OtherVideoFolder = string.Empty,
             KeepCompletedInDownloadFolder = false,
         };

@@ -1,7 +1,106 @@
 namespace Reaparr.Application.UnitTests;
 
+
 public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloadPreviewQueryValidator>
 {
+    [Test]
+    [Arguments(PlexMediaType.PhotoAlbum)]
+    [Arguments(PlexMediaType.PhotoImage)]
+    public async Task ShouldAcceptPhotoSelection_WhenQualitiesAreEmpty(PlexMediaType type)
+    {
+        // Arrange
+        var query = new GetDownloadPreviewQuery(
+            [
+                new DownloadMediaDTO
+                {
+                    Type = type,
+                    PlexServerId = 1,
+                    PlexLibraryId = 2,
+                    MediaIds = [3],
+                    Qualities = [],
+                },
+            ]
+        );
+
+        // Act
+        var result = await Sut.ValidateAsync(query, CancellationToken);
+
+        // Assert
+        result.IsValid.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+    }
+
+    [Test]
+    [Arguments(PlexMediaType.PhotoAlbum)]
+    [Arguments(PlexMediaType.PhotoImage)]
+    public async Task ShouldRejectPhotoSelection_WhenQualitySelectorIsPresent(PlexMediaType type)
+    {
+        // Arrange
+        var query = new GetDownloadPreviewQuery(
+            [
+                new DownloadMediaDTO
+                {
+                    Type = type,
+                    PlexServerId = 1,
+                    PlexLibraryId = 2,
+                    MediaIds = [3],
+                    Qualities =
+                    [
+                        new PlexMediaQualityDTO
+                        {
+                            MediaId = 3,
+                            DataId = 4,
+                            MediaDataType = PlexMediaType.PhotoImage,
+                            VideoQuality = VideoQuality.Unknown,
+                        },
+                    ],
+                },
+            ]
+        );
+
+        // Act
+        var result = await Sut.ValidateAsync(query, CancellationToken);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count.ShouldBe(1);
+        result.Errors.Single().ErrorMessage.ShouldBe("Photo selections must not include quality or part selectors.");
+    }
+
+    [Test]
+    public async Task ShouldStillAcceptMovieQualitySelector_WhenPhotoRuleDoesNotApply()
+    {
+        // Arrange
+        var query = new GetDownloadPreviewQuery(
+            [
+                new DownloadMediaDTO
+                {
+                    Type = PlexMediaType.Movie,
+                    PlexServerId = 1,
+                    PlexLibraryId = 2,
+                    MediaIds = [3],
+                    Qualities =
+                    [
+                        new PlexMediaQualityDTO
+                        {
+                            MediaId = 3,
+                            DataId = 4,
+                            MediaDataType = PlexMediaType.Movie,
+                            VideoQuality = VideoQuality.Unknown,
+                        },
+                    ],
+                },
+            ]
+        );
+
+        // Act
+        var result = await Sut.ValidateAsync(query, CancellationToken);
+
+        // Assert
+        result.IsValid.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+    }
+
     [Test]
     [Arguments(PlexMediaType.MusicArtist, false)]
     [Arguments(PlexMediaType.MusicArtist, true)]
@@ -11,7 +110,7 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
     [Arguments(PlexMediaType.MusicTrack, true)]
     [Arguments(PlexMediaType.OtherVideos, false)]
     [Arguments(PlexMediaType.OtherVideos, true)]
-    public async Task ShouldAcceptEntireSelection_WhenMusicOrOtherVideoIsAloneOrMixedWithMovie(
+    public async Task ShouldAcceptMusicOrOtherVideoSelection_WhenAloneOrMixedWithMovie(
         PlexMediaType type,
         bool mixedWithMovie
     )
@@ -40,35 +139,9 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
                     Qualities = [],
                 }
             );
-        var query = new GetDownloadPreviewQuery(selections);
 
         // Act
-        var result = await Sut.ValidateAsync(query, CancellationToken);
-
-        // Assert
-        result.IsValid.ShouldBeTrue();
-        result.Errors.Count.ShouldBe(0);
-    }
-
-    [Test]
-    [Arguments(PlexMediaType.PhotoAlbum)]
-    [Arguments(PlexMediaType.PhotoImage)]
-    public async Task ShouldAcceptPhotoSelections_WhenAlbumOrImageIsSelected(PlexMediaType type)
-    {
-        // Arrange
-        var query = new GetDownloadPreviewQuery([
-            new DownloadMediaDTO
-            {
-                Type = type,
-                PlexServerId = 1,
-                PlexLibraryId = 11,
-                MediaIds = [101],
-                Qualities = [],
-            },
-        ]);
-
-        // Act
-        var result = await Sut.ValidateAsync(query, CancellationToken);
+        var result = await Sut.ValidateAsync(new GetDownloadPreviewQuery(selections), CancellationToken);
 
         // Assert
         result.IsValid.ShouldBeTrue();
@@ -76,7 +149,7 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
     }
 
     [Test]
-    public async Task ShouldAcceptOrdinaryMixedRequest_WhenEveryDownloadSelectionLevelIsPresent()
+    public async Task ShouldAcceptOrdinaryMixedRequest_WhenEverySupportedSelectionLevelIsPresent()
     {
         // Arrange
         var supportedTypes = new[]
@@ -94,14 +167,16 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
         };
         var query = new GetDownloadPreviewQuery(
             supportedTypes
-                .Select((type, index) => new DownloadMediaDTO
-                {
-                    Type = type,
-                    PlexServerId = index + 1,
-                    PlexLibraryId = index + 11,
-                    MediaIds = [index + 101],
-                    Qualities = [],
-                })
+                .Select(
+                    (type, index) => new DownloadMediaDTO
+                    {
+                        Type = type,
+                        PlexServerId = index + 1,
+                        PlexLibraryId = index + 11,
+                        MediaIds = [index + 101],
+                        Qualities = [],
+                    }
+                )
                 .ToList()
         );
 
@@ -118,21 +193,21 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
     [Arguments(PlexMediaType.Games)]
     [Arguments(PlexMediaType.Unknown)]
     [Arguments((PlexMediaType)int.MaxValue)]
-    public async Task ShouldRejectUnsupportedSentinelOrUndefinedType_WhenSelectionIsOtherwiseValid(
-        PlexMediaType type
-    )
+    public async Task ShouldRejectUnsupportedMediaType_WhenSelectionIsOtherwiseValid(PlexMediaType type)
     {
         // Arrange
-        var query = new GetDownloadPreviewQuery([
-            new DownloadMediaDTO
-            {
-                Type = type,
-                PlexServerId = 1,
-                PlexLibraryId = 11,
-                MediaIds = [101],
-                Qualities = [],
-            },
-        ]);
+        var query = new GetDownloadPreviewQuery(
+            [
+                new DownloadMediaDTO
+                {
+                    Type = type,
+                    PlexServerId = 1,
+                    PlexLibraryId = 11,
+                    MediaIds = [101],
+                    Qualities = [],
+                },
+            ]
+        );
 
         // Act
         var result = await Sut.ValidateAsync(query, CancellationToken);

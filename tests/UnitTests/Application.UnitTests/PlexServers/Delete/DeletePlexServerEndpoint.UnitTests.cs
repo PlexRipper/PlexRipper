@@ -276,7 +276,7 @@ public class DeletePlexServerEndpointUnitTests
             SeasonFolder = string.Empty,
             MusicArtistFolder = string.Empty,
             MusicAlbumFolder = string.Empty,
-            PhotoAlbumFolder = string.Empty,
+            PhotoFolder = string.Empty,
             OtherVideoFolder = string.Empty,
             KeepCompletedInDownloadFolder = false,
         };

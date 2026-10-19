@@ -101,7 +101,7 @@ public class GetMediaDetailByIdEndpointUnitTests
     }
 
     [Test]
-    public async Task ShouldReturnPhotoAlbumImagesWithOriginalIds_WhenPhotoAlbumDetailIsRequested()
+    public async Task ShouldReturnDirectPhotoFilesWithoutAlbumOwnership_WhenPhotoAlbumDetailIsRequested()
     {
         // Arrange
         await SetupDatabase(
@@ -116,11 +116,12 @@ public class GetMediaDetailByIdEndpointUnitTests
         );
         var dbContext = IDbContext;
         var album = await dbContext
-            .PlexPhotoAlbums.Include(x => x.Photos)
-                .ThenInclude(x => x.MediaDataList)
+            .PlexPhotoAlbums.Include(x => x.Memberships)
+                .ThenInclude(x => x.PlexPhotoMediaData)
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
-        album.Photos.Count.ShouldBe(2);
+        var files = album.Memberships.Select(x => x.PlexPhotoMediaData!).OrderBy(x => x.Id).ToList();
+        files.Count.ShouldBe(2);
 
         // Act
         var response = await TestEndpointHandleAsync(
@@ -140,20 +141,21 @@ public class GetMediaDetailByIdEndpointUnitTests
         dto.ParentId.ShouldBeNull();
         dto.DiscNumber.ShouldBeNull();
         dto.TrackNumber.ShouldBeNull();
-        dto.Children.Select(x => x.Id).ShouldBe(album.Photos.OrderBy(x => x.SortIndex).Select(x => x.Id));
+        dto.Children.Select(x => x.Id).ShouldBe(files.OrderByNatural(x => x.Title).Select(x => x.Id));
+        dto.MediaSize.ShouldBe(files.Sum(x => x.Size));
+        dto.ChildCount.ShouldBe(files.Count);
         foreach (var photo in dto.Children)
         {
-            var original = album.Photos.Single(x => x.Id == photo.Id);
-            (photo.ParentId, photo.Type).ShouldBe(((int?)album.Id, PlexMediaType.PhotoImage));
+            var original = files.Single(x => x.Id == photo.Id);
+            (photo.ParentId, photo.Type).ShouldBe(((int?)null, PlexMediaType.PhotoImage));
+            (photo.Title, photo.MediaSize, photo.Duration).ShouldBe(
+                (original.Title, original.Size, original.Duration ?? 0)
+            );
             photo.Children.ShouldBeEmpty();
             photo.DiscNumber.ShouldBeNull();
             photo.TrackNumber.ShouldBeNull();
-            photo
-                .MediaData.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId))
-                .ShouldBe(original.MediaDataList.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId)));
-            photo
-                .Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType))
-                .ShouldBe(original.MediaDataList.Select(x => (x.Id, original.Id, PlexMediaType.PhotoImage)));
+            photo.MediaData.ShouldBeEmpty();
+            photo.Qualities.ShouldBeEmpty();
             var validation = await PlexMediaDtoValidator.ValidateAsync(photo, CancellationToken);
             validation.Errors.ShouldBeEmpty();
         }
@@ -397,10 +399,13 @@ public class GetMediaDetailByIdEndpointUnitTests
             }
         );
         var dbContext = IDbContext;
-        BasePlexMedia root =
-            type == PlexMediaType.MusicArtist
-                ? await dbContext.PlexMusicArtists.SingleAsync(CancellationToken)
-                : await dbContext.PlexPhotoAlbums.SingleAsync(CancellationToken);
+        var root = type == PlexMediaType.MusicArtist
+            ? await dbContext.PlexMusicArtists
+                .Select(x => new { x.Id, x.PlexLibraryId, ChildCount = x.ChildCount })
+                .SingleAsync(CancellationToken)
+            : await dbContext.PlexPhotoAlbums
+                .Select(x => new { x.Id, x.PlexLibraryId, ChildCount = x.Memberships.Count })
+                .SingleAsync(CancellationToken);
         root.ChildCount.ShouldBe(0);
         if (type == PlexMediaType.MusicArtist)
         {

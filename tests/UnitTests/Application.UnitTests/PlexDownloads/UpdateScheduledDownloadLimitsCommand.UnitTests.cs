@@ -105,8 +105,8 @@ public class UpdateScheduledDownloadLimitsCommandUnitTests : BaseCommandUnitTest
             config.MusicAlbumDownloadTasksCount = 1;
             config.MusicTrackDownloadTasksCount = 1;
             config.MusicTrackFileDownloadTasksCount = 1;
+            config.PhotoFolderDownloadTasksCount = 1;
             config.PhotoImageDownloadTasksCount = 1;
-            config.PhotoImageFileDownloadTasksCount = 1;
             config.OtherVideoFileDownloadTasksCount = 1;
         });
 
@@ -128,9 +128,9 @@ public class UpdateScheduledDownloadLimitsCommandUnitTests : BaseCommandUnitTest
                 }
                 case PlexMediaType.PhotoAlbum:
                 {
-                    var task = FakeData.GetDownloadTaskPhotoAlbum(new Seed(85341), taskOptions).Generate();
+                    var task = FakeData.GetDownloadTaskPhotoFolder(new Seed(85341), taskOptions).Generate();
                     new[] { task }.SetRelationshipIds(server.Id, library.Id);
-                    dbContext.DownloadTaskPhotoAlbums.Add(task);
+                    dbContext.DownloadTaskPhotoFolders.Add(task);
                     break;
                 }
                 case PlexMediaType.OtherVideos:

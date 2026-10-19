@@ -102,6 +102,147 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             .Where(x => x.DownloadTaskTvShowEpisodeId == target.Id)
             .OrderBy(x => x.DownloadTaskFileId).Select(x => x.DownloadTaskFileId).ToListAsync(CancellationToken);
         logs.ShouldBe(files.Select(x => x.Id).Order().ToList());
+
+        var originalFiles = await dbContext.DownloadTaskTvShowEpisodeFile.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.ParentId, x.FileName, x.DownloadStatus, x.PlexApiMediaId, x.PlexApiPartId })
+            .ToListAsync(CancellationToken);
+        var originalLogIds = await dbContext.DownloadTaskTvShowEpisodeFileLogs.OrderBy(x => x.Id)
+            .Select(x => x.Id).ToListAsync(CancellationToken);
+
+        // A second completed request must not create fresh file rows, paths, or queue logs.
+        var repeated = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(
+            new GenerateDownloadTaskTvShowEpisodesCommand([request]));
+        repeated.IsSuccess.ShouldBeTrue();
+        repeated.Errors.Count.ShouldBe(0);
+        repeated.Value.Episodes.ShouldBe(0);
+        (await dbContext.DownloadTaskTvShowEpisodeFile.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.ParentId, x.FileName, x.DownloadStatus, x.PlexApiMediaId, x.PlexApiPartId })
+            .ToListAsync(CancellationToken)).ShouldBe(originalFiles);
+        (await dbContext.DownloadTaskTvShowEpisodeFileLogs.OrderBy(x => x.Id)
+            .Select(x => x.Id).ToListAsync(CancellationToken)).ShouldBe(originalLogIds);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ShouldAddOnlyMissingOwnedParts_WhenRequestsOverlapAndAnotherQualityIsSelected(bool differentOwner)
+    {
+        // Arrange
+        var seed = await SetupDatabase(91336, config =>
+        {
+            config.PlexServerCount = 1;
+            config.TvShowCount = 1;
+            config.TvShowSeasonCount = 1;
+            config.TvShowEpisodeCount = 1;
+            config.SonarrIntegrationCount = 2;
+        });
+        var dbContext = IDbContext;
+        var owners = await dbContext.SonarrIntegrations.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        owners.Count.ShouldBe(2);
+        var firstOwner = new IntegrationIdentity(IntegrationType.Sonarr, owners[0].Id);
+        var targetOwner = differentOwner
+            ? new IntegrationIdentity(IntegrationType.Sonarr, owners[1].Id)
+            : firstOwner;
+        var episode = await dbContext.PlexTvShowEpisodes.AsTracking().Include(x => x.MediaDataList)
+            .SingleAsync(CancellationToken);
+        var firstPart = episode.MediaDataList.Single();
+        dbContext.Entry(firstPart).CurrentValues.SetValues(new
+        {
+            PlexApiMediaId = 91001, PlexApiPartId = 92001, OriginalFilename = "episode.first.mkv",
+        });
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var selection = new DownloadMediaDTO
+        {
+            Type = PlexMediaType.Episode,
+            MediaIds = [episode.Id],
+            PlexServerId = episode.PlexServerId,
+            PlexLibraryId = episode.PlexLibraryId,
+            Qualities = [new PlexMediaQualityDTO
+            {
+                MediaDataType = PlexMediaType.Episode, MediaId = episode.Id,
+                DataId = firstPart.Id, VideoQuality = firstPart.VideoQuality,
+            }],
+        };
+        var firstResult = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(
+            new GenerateDownloadTaskTvShowEpisodesCommand(
+                new CreateDownloadTasksRequest([selection], integration: firstOwner)));
+        firstResult.IsSuccess.ShouldBeTrue();
+        firstResult.Errors.Count.ShouldBe(0);
+        firstResult.Value.Episodes.ShouldBe(1);
+        var original = await dbContext.DownloadTaskTvShowEpisodeFile.SingleAsync(CancellationToken);
+        original.SonarrIntegrationId.ShouldBe(firstOwner.Id);
+        (original.PlexApiMediaId, original.PlexApiPartId).ShouldBe((91001, 92001));
+        await dbContext.SetDownloadStatus(original.ToKey(), DownloadStatus.Paused);
+        var originalRootId = await dbContext.DownloadTaskTvShow.Select(x => x.Id).SingleAsync(CancellationToken);
+        var secondPart = FakeData.GetPlexTvShowEpisodeMediaData(seed).Generate();
+        dbContext.Entry(secondPart).CurrentValues.SetValues(new
+        {
+            PlexTvShowEpisodeId = episode.Id, episode.PlexServerId, episode.PlexLibraryId,
+            episode.PlexApiRatingKey, PlexApiMediaId = 91001, PlexApiPartId = 92002,
+            OriginalFilename = "episode.second.mkv",
+        });
+        var otherQuality = FakeData.GetPlexTvShowEpisodeMediaData(seed).Generate();
+        dbContext.Entry(otherQuality).CurrentValues.SetValues(new
+        {
+            PlexTvShowEpisodeId = episode.Id, episode.PlexServerId, episode.PlexLibraryId,
+            episode.PlexApiRatingKey, PlexApiMediaId = 91002, PlexApiPartId = 92001,
+            OriginalFilename = "episode.other-quality.mkv",
+        });
+        dbContext.PlexTvShowEpisodeData.AddRange(secondPart, otherQuality);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var overlappingRequest = new GenerateDownloadTaskTvShowEpisodesCommand(
+            new CreateDownloadTasksRequest([selection], integration: targetOwner));
+
+        // Act
+        var overlap = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(overlappingRequest);
+        var repeated = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(overlappingRequest);
+
+        // Assert — the overlap adds the missing part, not a duplicate of the retained first file.
+        overlap.IsSuccess.ShouldBeTrue();
+        overlap.Errors.Count.ShouldBe(0);
+        overlap.Value.Episodes.ShouldBe(1);
+        repeated.IsSuccess.ShouldBeTrue();
+        repeated.Errors.Count.ShouldBe(0);
+        repeated.Value.Episodes.ShouldBe(0);
+        var targetFiles = await dbContext.DownloadTaskTvShowEpisodeFile
+            .Where(x => x.SonarrIntegrationId == targetOwner.Id).OrderBy(x => x.PlexApiPartId)
+            .ToListAsync(CancellationToken);
+        targetFiles.Select(x => (x.PlexApiMediaId, x.PlexApiPartId)).ShouldBe([(91001, 92001), (91001, 92002)]);
+        var retained = await dbContext.DownloadTaskTvShowEpisodeFile.SingleAsync(x => x.Id == original.Id, CancellationToken);
+        (retained.ParentId, retained.FileName, retained.DownloadFilePath, retained.DestinationFilePath, retained.DownloadStatus)
+            .ShouldBe((original.ParentId, original.FileName, original.DownloadFilePath, original.DestinationFilePath, DownloadStatus.Paused));
+        if (differentOwner)
+            targetFiles.Select(x => x.ParentId).ShouldNotContain(original.ParentId);
+
+        // Select the other quality with the same PartId: media identity must also be compared.
+        var otherSelection = selection with
+        {
+            Qualities = [new PlexMediaQualityDTO
+            {
+                MediaDataType = PlexMediaType.Episode, MediaId = episode.Id,
+                DataId = otherQuality.Id, VideoQuality = otherQuality.VideoQuality,
+            }],
+        };
+        var otherResult = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(
+            new GenerateDownloadTaskTvShowEpisodesCommand(
+                new CreateDownloadTasksRequest([otherSelection], integration: targetOwner)));
+        otherResult.IsSuccess.ShouldBeTrue();
+        otherResult.Errors.Count.ShouldBe(0);
+        otherResult.Value.Episodes.ShouldBe(1);
+        var allFiles = await dbContext.DownloadTaskTvShowEpisodeFile.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        allFiles.Where(x => x.SonarrIntegrationId == targetOwner.Id)
+            .OrderBy(x => x.PlexApiMediaId).ThenBy(x => x.PlexApiPartId)
+            .Select(x => (x.PlexApiMediaId, x.PlexApiPartId))
+            .ShouldBe([(91001, 92001), (91001, 92002), (91002, 92001)]);
+        allFiles.Where(x => x.SonarrIntegrationId != targetOwner.Id).Select(x => x.Id)
+            .ShouldBe(differentOwner ? [original.Id] : []);
+        var roots = await dbContext.DownloadTaskTvShow.OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.SonarrIntegrationId }).ToListAsync(CancellationToken);
+        roots.Single(x => x.Id == originalRootId).SonarrIntegrationId.ShouldBe(firstOwner.Id);
+        roots.Select(x => x.SonarrIntegrationId).Order()
+            .ShouldBe(differentOwner ? new Guid?[] { firstOwner.Id, targetOwner.Id }.Order() : [firstOwner.Id]);
+        (await dbContext.DownloadTaskTvShowEpisodeFileLogs.OrderBy(x => x.DownloadTaskFileId)
+            .Select(x => x.DownloadTaskFileId).ToListAsync(CancellationToken)).ShouldBe(allFiles.Select(x => x.Id).ToList());
     }
 
     [Test]

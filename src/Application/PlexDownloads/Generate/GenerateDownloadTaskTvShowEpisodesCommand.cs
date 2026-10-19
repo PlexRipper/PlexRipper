@@ -288,6 +288,10 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         // A selected quality may contain multiple physical parts; every part must be queued.
         var downloadFiles = tvShowEpisode.MediaDataList
             .Where(x => x.PlexApiMediaId == episodeData.PlexApiMediaId)
+            .Where(mediaData => !episodeDownloadTask.Children.Any(existing =>
+                existing.PlexApiMediaId == mediaData.PlexApiMediaId
+                && existing.PlexApiPartId == mediaData.PlexApiPartId
+            ))
             .Select(x => x.MapToDownloadTask(
                 tvShowEpisode,
                 request,

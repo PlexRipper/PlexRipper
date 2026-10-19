@@ -272,6 +272,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             case DownloadStatus.Downloading:
                 return "downloading";
             case DownloadStatus.Queued:
+            case DownloadStatus.Restarting:
                 return "queuedDL";
             case DownloadStatus.Stopped:
             case DownloadStatus.Paused:
@@ -287,6 +288,11 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             case DownloadStatus.Error:
             case DownloadStatus.MoveError:
             case DownloadStatus.ServerUnreachable:
+            case DownloadStatus.AuthError:
+            case DownloadStatus.StorageError:
+            case DownloadStatus.SourceUnavailable:
+            case DownloadStatus.DownloadClientError:
+            case DownloadStatus.IntegrityError:
                 return "error";
             case DownloadStatus.Moving:
                 return "moving";

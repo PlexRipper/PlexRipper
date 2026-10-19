@@ -116,10 +116,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         // Ensure the download directory exists and has enough disk space
         var ensureDirectoryStopwatch = Stopwatch.StartNew();
-        var ensureDirectoryResult = await _commandExecutor.Send(
-            new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, downloadTask.DataTotal),
-            cancellationToken
-        );
+        var ensureDirectoryResult = await EnsureDownloadDirectoryAsync(downloadTask, cancellationToken);
         _log.Here()
             .Debug(
                 "Ensured download directory for {MediaFileName} in {ElapsedMilliseconds} ms",
@@ -288,6 +285,56 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         return Result.Ok();
     }
+
+    private async Task<Result> EnsureDownloadDirectoryAsync(
+        DownloadTaskFileBase downloadTask,
+        CancellationToken cancellationToken
+    )
+    {
+        var requiredBytes = downloadTask.DataTotal;
+        if (
+            downloadTask.DirectDownloadSnapshot is { Chunks.Count: > 0, IsSupportDownloadInRange: true } snapshot
+            && snapshot.TotalFileSize == downloadTask.DataTotal
+        )
+        {
+            var artifactResult = ValidateResumeArtifact(snapshot);
+            if (artifactResult.IsFailed)
+                return artifactResult;
+
+            requiredBytes = GetRemainingDownloadBytes(snapshot);
+        }
+
+        // A fully persisted resume already has its directory and needs no more file data.
+        if (requiredBytes == 0 && downloadTask.DataTotal > 0)
+            return Result.Ok();
+
+        return await _commandExecutor.Send(
+            new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, requiredBytes),
+            cancellationToken
+        );
+    }
+
+    private static long GetRemainingDownloadBytes(DirectDownloadSnapshot snapshot)
+    {
+        var remaining = snapshot.TotalFileSize;
+        var nextStart = 0L;
+        foreach (var chunk in snapshot.Chunks)
+        {
+            if (chunk.Start != nextStart || !HasValidSavedPosition(chunk, snapshot.TotalFileSize))
+                return snapshot.TotalFileSize;
+
+            remaining -= chunk.Position;
+            nextStart = chunk.End + 1;
+        }
+
+        return nextStart == snapshot.TotalFileSize ? remaining : snapshot.TotalFileSize;
+    }
+
+    private static bool HasValidSavedPosition(DirectDownloadSnapshotChunk chunk, long totalBytes) =>
+        chunk.End >= chunk.Start
+        && chunk.End < totalBytes
+        && chunk.Position >= 0
+        && chunk.Position <= chunk.End - chunk.Start + 1;
 
     private async Task<Result> DownloadAttemptAsync(
         DownloadTaskFileBase downloadTask,

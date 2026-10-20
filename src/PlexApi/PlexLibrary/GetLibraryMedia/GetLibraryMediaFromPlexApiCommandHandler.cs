@@ -201,10 +201,9 @@ public class GetLibraryMediaFromPlexApiCommandHandler
 
         while (state.PendingFolderParents.Count > 0)
         {
-            var identity = state.PendingFolderParents.First();
-            state.PendingFolderParents.Remove(identity);
-            var parent = identity == PhotoRootParentToken ? null : identity;
-            var folderResult = await ReadPhotoFolderTreeAsync(client, sectionIdResult.Value, parent, state, ct);
+            var pendingFolder = state.PendingFolderParents.First();
+            state.PendingFolderParents.Remove(pendingFolder.Key);
+            var folderResult = await ReadPhotoFolderTreeAsync(client, sectionIdResult.Value, pendingFolder.Value, state, ct);
             if (folderResult.IsCancelledOrFailed)
                 return folderResult.LogIfFailed();
         }
@@ -261,25 +260,36 @@ public class GetLibraryMediaFromPlexApiCommandHandler
         switch (item.Shape)
         {
             case PhotoItemShape.Folder:
-                if (!TryGetPhotoFolderParent(item.Metadata.Key, out var parent))
+                if (!TryGetPhotoFolderNavigation(item.Metadata.Key, state.SectionId, out var folderNavigation))
                     return Result.Fail("Plex returned a photo folder without a valid parent token").LogError();
 
-                state.PendingFolderParents.Add(parent);
+                state.PendingFolderParents.TryAdd(folderNavigation.Identity, folderNavigation);
                 return Result.Ok();
             case PhotoItemShape.Asset:
                 return MergePhotoAsset(item, null, state.Assets);
             case PhotoItemShape.Album:
             {
+                if (!TryGetPhotoAlbumNavigation(item.Metadata.Key, out var albumNavigation))
+                    return Result.Fail("Plex returned a photo album without a valid children token").LogError();
+
                 var albumId = ParsePhotoRatingKey(item.Metadata);
-                if (state.Albums.ContainsKey(albumId))
+                var navigationKey = $"{albumId}\u001f{albumNavigation.Identity}";
+                if (!state.AlbumNavigationKeys.Add(navigationKey))
                     return Result.Ok();
 
-                var album = item.Metadata.ToPlexPhotoAlbum(item.MediaType ?? PlexMediaType.PhotoAlbum);
-                album.PlexLibraryId = library.Id;
-                album.PlexServerId = library.PlexServerId;
-                state.Albums.Add(albumId, album);
+                if (!state.Albums.TryGetValue(albumId, out var album))
+                {
+                    album = item.Metadata.ToPlexPhotoAlbum(item.MediaType ?? PlexMediaType.PhotoAlbum);
+                    album.PlexLibraryId = library.Id;
+                    album.PlexServerId = library.PlexServerId;
+                    state.Albums.Add(albumId, album);
+                }
 
-                var childrenResult = await client.GetPhotoAlbumChildrenAsync(albumId, ct);
+                var childrenResult = await client.GetPhotoAlbumChildrenAsync(
+                    albumNavigation.RequestId,
+                    albumNavigation.AdditionalQuery,
+                    ct
+                );
                 if (childrenResult.IsCancelledOrFailed)
                     return childrenResult.ToResult().LogIfFailed();
 
@@ -305,18 +315,23 @@ public class GetLibraryMediaFromPlexApiCommandHandler
     private static async Task<Result> ReadPhotoFolderTreeAsync(
         IPlexAPI client,
         long sectionId,
-        string? parent,
+        PhotoFolderNavigation navigation,
         PhotoCatalogState state,
         CancellationToken ct
     )
     {
-        var identity = parent ?? PhotoRootParentToken;
+        var identity = navigation.Identity;
         if (state.CompletedFolderParents.Contains(identity))
             return Result.Ok();
         if (!state.ActiveFolderParents.Add(identity))
             return Result.Fail($"Plex returned a cyclic photo folder navigation path at '{identity}'").LogError();
 
-        var pageResult = await client.GetPhotoFolderItemsAsync(sectionId, parent, ct);
+        var pageResult = await client.GetPhotoFolderItemsAsync(
+            sectionId,
+            navigation.Parent,
+            navigation.AdditionalQuery,
+            ct
+        );
         if (pageResult.IsCancelledOrFailed)
             return pageResult.ToResult().LogIfFailed();
 
@@ -336,10 +351,10 @@ public class GetLibraryMediaFromPlexApiCommandHandler
 
             if (item.Shape == PhotoItemShape.Album)
                 return Result.Fail("Plex returned a nested photo album in folder traversal").LogError();
-            if (!TryGetPhotoFolderParent(item.Metadata.Key, out var childParent))
+            if (!TryGetPhotoFolderNavigation(item.Metadata.Key, sectionId, out var childNavigation))
                 return Result.Fail("Plex returned a photo folder without a valid parent token").LogError();
 
-            var childResult = await ReadPhotoFolderTreeAsync(client, sectionId, childParent, state, ct);
+            var childResult = await ReadPhotoFolderTreeAsync(client, sectionId, childNavigation, state, ct);
             if (childResult.IsCancelledOrFailed)
                 return childResult.LogIfFailed();
         }
@@ -437,10 +452,24 @@ public class GetLibraryMediaFromPlexApiCommandHandler
         return existing.PlexApiMediaId == Convert.ToInt32(media.Id)
             && existing.PlexApiPartId == Convert.ToInt32(part.Id)
             && existing.AssetKind == kind
-            && string.Equals(existing.SourcePath, sourcePath, StringComparison.Ordinal)
+            && AreEquivalentPhotoSourcePaths(existing.SourcePath, sourcePath)
             && string.Equals(existing.Key, part.Key, StringComparison.Ordinal)
             && existing.Size == Math.Max(0, part.Size ?? 0)
             && existing.Duration == duration;
+    }
+
+    private static bool AreEquivalentPhotoSourcePaths(string? existing, string? observed)
+    {
+        if (string.Equals(existing, observed, StringComparison.Ordinal))
+            return true;
+        if (existing is null || observed is null)
+            return false;
+        if (
+            !existing.TryCreatePhotoRootIdentity(out var existingIdentity, out _, out _)
+            || !observed.TryCreatePhotoRootIdentity(out var observedIdentity, out _, out _)
+        )
+            return false;
+        return string.Equals(existingIdentity, observedIdentity, StringComparison.Ordinal);
     }
 
     private static List<PlexPhotoFolder> BuildPhotoFolders(
@@ -544,45 +573,167 @@ public class GetLibraryMediaFromPlexApiCommandHandler
         !string.IsNullOrWhiteSpace(key)
         && key.Split('?', 2)[0].TrimEnd('/').EndsWith("/children", StringComparison.OrdinalIgnoreCase);
 
-    private static bool TryGetPhotoFolderParent(string? key, out string parent)
+    private static bool TryGetPhotoAlbumNavigation(string? key, out PhotoAlbumNavigation navigation)
     {
-        parent = string.Empty;
-        if (string.IsNullOrWhiteSpace(key))
+        navigation = null!;
+        if (!TryGetReturnedPhotoRoute(key, out var path, out var query))
             return false;
 
-        var queryIndex = key.IndexOf('?', StringComparison.Ordinal);
-        if (queryIndex <= 0 || !key[..queryIndex].TrimEnd('/').EndsWith("/folder", StringComparison.OrdinalIgnoreCase))
+        const string prefix = "/library/metadata/";
+        const string suffix = "/children";
+        if (
+            !path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            || !path.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)
+        )
             return false;
 
-        string? foundParent = null;
-        foreach (var parameter in key[(queryIndex + 1)..].Split('&', StringSplitOptions.RemoveEmptyEntries))
-        {
-            var parts = parameter.Split('=', 2);
-            if (!string.Equals(Uri.UnescapeDataString(parts[0]), "parent", StringComparison.OrdinalIgnoreCase))
-                continue;
-            if (foundParent is not null || parts.Length == 1 || string.IsNullOrWhiteSpace(parts[1]))
-                return false;
-
-            foundParent = Uri.UnescapeDataString(parts[1]);
-            if (foundParent.Length == 0)
-                return false;
-        }
-
-        if (foundParent is null)
+        var idText = path[prefix.Length..^suffix.Length];
+        if (
+            idText.Contains("/", StringComparison.Ordinal)
+            || !int.TryParse(idText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var requestId)
+            || requestId <= 0
+        )
             return false;
 
-        parent = foundParent;
+        navigation = new PhotoAlbumNavigation(
+            requestId,
+            query,
+            BuildPhotoNavigationIdentity(path, query)
+        );
         return true;
     }
 
+    private static bool TryGetPhotoFolderNavigation(
+        string? key,
+        long sectionId,
+        out PhotoFolderNavigation navigation
+    )
+    {
+        navigation = null!;
+        if (!TryGetReturnedPhotoRoute(key, out var path, out var query))
+            return false;
+
+        var expectedPath = $"/library/sections/{sectionId}/folder";
+        if (!string.Equals(path, expectedPath, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var parentArguments = query
+            .Where(x => string.Equals(x.Key, "parent", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (parentArguments.Count != 1 || string.IsNullOrWhiteSpace(parentArguments[0].Value))
+            return false;
+
+        var additionalQuery = query
+            .Where(x => !string.Equals(x.Key, "parent", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        navigation = new PhotoFolderNavigation(
+            parentArguments[0].Value,
+            additionalQuery,
+            BuildPhotoNavigationIdentity(path, query)
+        );
+        return true;
+    }
+
+    private static bool TryGetReturnedPhotoRoute(
+        string? key,
+        out string path,
+        out List<KeyValuePair<string, string>> query
+    )
+    {
+        path = string.Empty;
+        query = [];
+        if (string.IsNullOrWhiteSpace(key) || !key.StartsWith("/", StringComparison.Ordinal))
+            return false;
+
+        var queryIndex = key.IndexOf('?', StringComparison.Ordinal);
+        path = (queryIndex < 0 ? key : key[..queryIndex]).TrimEnd('/');
+        if (path.Length == 0)
+            return false;
+        if (queryIndex < 0)
+            return true;
+
+        var rawQuery = key[(queryIndex + 1)..];
+        if (rawQuery.Length == 0)
+            return false;
+        foreach (var parameter in rawQuery.Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = parameter.Split('=', 2);
+            if (parts.Length != 2)
+                return false;
+
+            string name;
+            string value;
+            try
+            {
+                name = Uri.UnescapeDataString(parts[0]);
+                value = Uri.UnescapeDataString(parts[1]);
+            }
+            catch (UriFormatException)
+            {
+                return false;
+            }
+
+            if (
+                string.IsNullOrWhiteSpace(name)
+                || IsPhotoCredentialArgument(name)
+            )
+                return false;
+            if (IsPhotoPagingArgument(name))
+                continue;
+            query.Add(new KeyValuePair<string, string>(name, value));
+        }
+
+        return true;
+    }
+
+    private static string BuildPhotoNavigationIdentity(
+        string path,
+        IReadOnlyCollection<KeyValuePair<string, string>> query
+    ) =>
+        query.Count == 0
+            ? path
+            : $"{path}?{string.Join(
+                "&",
+                query
+                    .OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(x => x.Key, StringComparer.Ordinal)
+                    .ThenBy(x => x.Value, StringComparer.Ordinal)
+                    .Select(x => $"{Uri.EscapeDataString(x.Key)}={Uri.EscapeDataString(x.Value)}")
+            )}";
+
+    private static bool IsPhotoPagingArgument(string name) =>
+        name.Equals("X-Plex-Container-Start", StringComparison.OrdinalIgnoreCase)
+        || name.Equals("X-Plex-Container-Size", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsPhotoCredentialArgument(string name) =>
+        name.Equals("X-Plex-Token", StringComparison.OrdinalIgnoreCase)
+        || name.Equals("token", StringComparison.OrdinalIgnoreCase)
+        || name.Equals("authToken", StringComparison.OrdinalIgnoreCase);
+
     private const string PhotoRootParentToken = "<root>";
+
+    private sealed record PhotoFolderNavigation(
+        string? Parent,
+        IReadOnlyList<KeyValuePair<string, string>> AdditionalQuery,
+        string Identity
+    );
+
+    private sealed record PhotoAlbumNavigation(
+        int RequestId,
+        IReadOnlyList<KeyValuePair<string, string>> AdditionalQuery,
+        string Identity
+    );
 
     private sealed class PhotoCatalogState(long sectionId)
     {
         public long SectionId { get; } = sectionId;
         public Dictionary<int, PlexPhotoAlbum> Albums { get; } = [];
         public Dictionary<int, PhotoAssetState> Assets { get; } = [];
-        public HashSet<string> PendingFolderParents { get; } = [PhotoRootParentToken];
+        public Dictionary<string, PhotoFolderNavigation> PendingFolderParents { get; } = new()
+        {
+            [PhotoRootParentToken] = new(null, [], PhotoRootParentToken),
+        };
+        public HashSet<string> AlbumNavigationKeys { get; } = [];
         public HashSet<string> ActiveFolderParents { get; } = [];
         public HashSet<string> CompletedFolderParents { get; } = [];
     }

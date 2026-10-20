@@ -4,6 +4,7 @@ public static partial class DbSetExtensions
 {
     public static IQueryable<DownloadTaskPhotoFolder> IncludeAll(this IQueryable<DownloadTaskPhotoFolder> tasks) =>
         tasks
+            .IgnoreQueryFilters(["IsEnabled"])
             .Include(x => x.PlexServer)
             .Include(x => x.PlexLibrary)
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))

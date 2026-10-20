@@ -251,7 +251,10 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
         var albumCount = await context.PlexPhotoAlbums.CountAsync(x => x.PlexLibraryId == library.Id, ct);
         var totalMediaSize =
             await context.PlexPhotoMediaData.Where(x => x.PlexLibraryId == library.Id).Select(x => (long?)x.Size).SumAsync(ct) ?? 0;
-        await context.PlexLibraries
+        // Catalog metrics and shared sync completion must commit with photo reconciliation.
+        var syncedAt = DateTime.UtcNow;
+        await context
+            .PlexLibraries
             .Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(
                 setters =>
@@ -263,7 +266,10 @@ public class SyncPlexPhotosCommandHandler : ICommandHandler<SyncPlexPhotosComman
                         .SetProperty(x => x.PhotoAlbumCount, albumCount)
                         .SetProperty(x => x.PhotoImageCount, photoCount - clipCount)
                         .SetProperty(x => x.PhotoClipCount, clipCount)
-                        .SetProperty(x => x.MediaSize, totalMediaSize),
+                        .SetProperty(x => x.MediaSize, totalMediaSize)
+                        .SetProperty(x => x.SyncedAt, syncedAt)
+                        .SetProperty(x => x.SyncedContentChangedAt, library.ContentChangedAt)
+                        .SetProperty(x => x.Outdated, false),
                 ct
             );
 

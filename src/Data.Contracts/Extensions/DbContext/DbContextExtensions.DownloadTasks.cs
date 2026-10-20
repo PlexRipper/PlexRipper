@@ -276,7 +276,9 @@ public static partial class DbContextExtensions
         CancellationToken cancellationToken = default
     )
     {
-        var directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var directories = new HashSet<string>(
+            OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal
+        );
         await AddActiveDownloadDirectoriesAsync(
             dbContext.DownloadTaskMovieFile,
             DownloadTaskType.MovieData,
@@ -499,7 +501,8 @@ public static partial class DbContextExtensions
                 case DownloadTaskType.PhotoImage:
                     return (
                         await dbContext
-                            .DownloadTaskPhotoImageFiles.Include(x => x.PlexServer)
+                            .DownloadTaskPhotoImageFiles.IgnoreQueryFilters(["IsEnabled"])
+                            .Include(x => x.PlexServer)
                             .Include(x => x.PlexLibrary)
                             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
                     )?.ToGeneric();
@@ -714,7 +717,8 @@ public static partial class DbContextExtensions
                     .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
             case DownloadTaskType.PhotoImage:
                 return await dbContext
-                    .DownloadTaskPhotoImageFiles.Include(x => x.PlexServer)
+                    .DownloadTaskPhotoImageFiles.IgnoreQueryFilters(["IsEnabled"])
+                    .Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
                     .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
             case DownloadTaskType.MusicTrackData:
@@ -747,7 +751,10 @@ public static partial class DbContextExtensions
 
         await AddFilesAsync(dbContext.DownloadTaskMovieFile, DownloadTaskType.MovieData);
         await AddFilesAsync(dbContext.DownloadTaskTvShowEpisodeFile, DownloadTaskType.EpisodeData);
-        await AddFilesAsync(dbContext.DownloadTaskPhotoImageFiles, DownloadTaskType.PhotoImage);
+        await AddFilesAsync(
+            dbContext.DownloadTaskPhotoImageFiles.IgnoreQueryFilters(["IsEnabled"]),
+            DownloadTaskType.PhotoImage
+        );
         await AddFilesAsync(dbContext.DownloadTaskMusicTrackFiles, DownloadTaskType.MusicTrackData);
         await AddFilesAsync(dbContext.DownloadTaskOtherVideoFiles, DownloadTaskType.OtherVideoData);
 
@@ -781,7 +788,7 @@ public static partial class DbContextExtensions
         var files = new List<DownloadTaskFileBase>();
         await AddFilesAsync(dbContext.DownloadTaskMovieFile);
         await AddFilesAsync(dbContext.DownloadTaskTvShowEpisodeFile);
-        await AddFilesAsync(dbContext.DownloadTaskPhotoImageFiles);
+        await AddFilesAsync(dbContext.DownloadTaskPhotoImageFiles.IgnoreQueryFilters(["IsEnabled"]));
         await AddFilesAsync(dbContext.DownloadTaskMusicTrackFiles);
         await AddFilesAsync(dbContext.DownloadTaskOtherVideoFiles);
 
@@ -2219,7 +2226,8 @@ public static partial class DbContextExtensions
     {
         var tracking = asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking;
         var folders = await dbContext
-            .DownloadTaskPhotoFolders.AsTracking(tracking)
+            .DownloadTaskPhotoFolders.IgnoreQueryFilters(["IsEnabled"])
+            .AsTracking(tracking)
             .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
             .Include(x => x.PlexServer)
             .Include(x => x.PlexLibrary)
@@ -2228,7 +2236,8 @@ public static partial class DbContextExtensions
             return [];
 
         var files = await dbContext
-            .DownloadTaskPhotoImageFiles.AsTracking(tracking)
+            .DownloadTaskPhotoImageFiles.IgnoreQueryFilters(["IsEnabled"])
+            .AsTracking(tracking)
             .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
             .Include(x => x.PlexServer)
             .Include(x => x.PlexLibrary)
@@ -2252,14 +2261,16 @@ public static partial class DbContextExtensions
             return null;
 
         var folders = await dbContext
-            .DownloadTaskPhotoFolders.Where(x =>
+            .DownloadTaskPhotoFolders.IgnoreQueryFilters(["IsEnabled"])
+            .Where(x =>
                 x.PlexServerId == scope.PlexServerId && x.PlexLibraryId == scope.PlexLibraryId
             )
             .Include(x => x.PlexServer)
             .Include(x => x.PlexLibrary)
             .ToListAsync(cancellationToken);
         var files = await dbContext
-            .DownloadTaskPhotoImageFiles.Where(x =>
+            .DownloadTaskPhotoImageFiles.IgnoreQueryFilters(["IsEnabled"])
+            .Where(x =>
                 x.PlexServerId == scope.PlexServerId && x.PlexLibraryId == scope.PlexLibraryId
             )
             .Include(x => x.PlexServer)

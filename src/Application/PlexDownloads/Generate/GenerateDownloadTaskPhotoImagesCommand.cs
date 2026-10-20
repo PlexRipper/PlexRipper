@@ -80,17 +80,23 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
                     return new DownloadTaskCreationReport();
 
                 var existingFolderByKey = existingFolders
-                    .GroupBy(x =>
-                        new FolderKey(
-                            x.PlexServerId,
-                            x.PlexLibraryId,
-                            x.ParentId,
-                            x.RelativePath,
-                            PhotoDownloadSelector.NormalizeRootPath(x.DownloadRootPath),
-                            PhotoDownloadSelector.NormalizeRootPath(x.DestinationRootPath)
-                        )
+                    .GroupBy(
+                        x =>
+                            new FolderKey(
+                                x.PlexServerId,
+                                x.PlexLibraryId,
+                                x.ParentId,
+                                x.RelativePath,
+                                PhotoDownloadSelector.NormalizeRootPath(x.DownloadRootPath),
+                                PhotoDownloadSelector.NormalizeRootPath(x.DestinationRootPath)
+                            ),
+                        FolderKeyComparer.Instance
                     )
-                    .ToDictionary(x => x.Key, x => x.OrderBy(y => y.CreatedAt).First());
+                    .ToDictionary(
+                        x => x.Key,
+                        x => x.OrderBy(y => y.CreatedAt).First(),
+                        FolderKeyComparer.Instance
+                    );
                 var createdFolders = 0;
                 var filesToCreate = new List<DownloadTaskPhotoImageFile>();
                 DownloadTaskPhotoFolder GetOrCreateFolder(
@@ -195,4 +201,27 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
         string DownloadRootPath,
         string DestinationRootPath
     );
+
+    private sealed class FolderKeyComparer : IEqualityComparer<FolderKey>
+    {
+        public static FolderKeyComparer Instance { get; } = new();
+
+        public bool Equals(FolderKey x, FolderKey y) =>
+            x.ServerId == y.ServerId
+            && x.LibraryId == y.LibraryId
+            && x.ParentId == y.ParentId
+            && PhotoDownloadSelector.DestinationPathComparer.Equals(x.RelativePath, y.RelativePath)
+            && PhotoDownloadSelector.DestinationPathComparer.Equals(x.DownloadRootPath, y.DownloadRootPath)
+            && PhotoDownloadSelector.DestinationPathComparer.Equals(x.DestinationRootPath, y.DestinationRootPath);
+
+        public int GetHashCode(FolderKey obj) =>
+            HashCode.Combine(
+                obj.ServerId,
+                obj.LibraryId,
+                obj.ParentId,
+                PhotoDownloadSelector.DestinationPathComparer.GetHashCode(obj.RelativePath),
+                PhotoDownloadSelector.DestinationPathComparer.GetHashCode(obj.DownloadRootPath),
+                PhotoDownloadSelector.DestinationPathComparer.GetHashCode(obj.DestinationRootPath)
+            );
+    }
 }

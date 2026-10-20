@@ -54,41 +54,56 @@ public class RefreshPlexPhotoLibraryCommandHandler : ICommandHandler<RefreshPlex
             return syncResult.ToResult().LogError();
         }
 
-        var optimizationResult = await _commandExecutor.Send(
-            new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },
-            ct
+        // The catalog transaction has committed; postcommit progress and maintenance are best effort.
+        var optimizationResult = await Result.Try(() =>
+            _commandExecutor.Send(
+                new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },
+                ct
+            )
         );
         optimizationResult.LogIfFailed();
 
-        await _librarySyncProgressStore.UpdateItemAsync(
-            library.Id,
-            new LibraryProgressItem
-            {
-                MediaType = PlexMediaType.PhotoAlbum,
-                Received = library.PhotoAlbums.Count,
-                Total = library.PhotoAlbums.Count,
-                TimeRemaining = TimeSpan.Zero,
-            },
-            ct
+        var albumProgressResult = await Result.Try(async Task () =>
+            await _librarySyncProgressStore.UpdateItemAsync(
+                library.Id,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.PhotoAlbum,
+                    Received = library.PhotoAlbums.Count,
+                    Total = library.PhotoAlbums.Count,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                ct
+            )
         );
-        await _librarySyncProgressStore.UpdateItemAsync(
-            library.Id,
-            new LibraryProgressItem
-            {
-                MediaType = PlexMediaType.PhotoImage,
-                Received = library.PhotoMediaData.Count,
-                Total = library.PhotoMediaData.Count,
-                TimeRemaining = TimeSpan.Zero,
-            },
-            ct
-        );
+        albumProgressResult.LogIfFailed();
 
-        var rebuildResult = await _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), ct);
+        var imageProgressResult = await Result.Try(async Task () =>
+            await _librarySyncProgressStore.UpdateItemAsync(
+                library.Id,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.PhotoImage,
+                    Received = library.PhotoMediaData.Count,
+                    Total = library.PhotoMediaData.Count,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                ct
+            )
+        );
+        imageProgressResult.LogIfFailed();
+
+        var rebuildResult = await Result.Try(() =>
+            _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), ct)
+        );
         rebuildResult.LogIfFailed();
 
         _log.Here().Information("Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}", library.Title, library.Id);
 
-        var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(library.Id, CancellationToken.None);
+        var plexLibraryDb = await _dbContext.PlexLibraries.FirstOrDefaultAsync(
+            x => x.Id == library.Id,
+            CancellationToken.None
+        );
         return plexLibraryDb is null
             ? ResultExtensions.EntityNotFound(nameof(PlexLibrary), library.Id)
             : Result.Ok(plexLibraryDb);

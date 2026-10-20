@@ -1,6 +1,8 @@
+using System.Globalization;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using LukeHagar.PlexAPI.SDK.Hooks;
 using Metadata = LukeHagar.PlexAPI.SDK.Models.Components.Metadata;
 
 namespace Reaparr.PlexApi;
@@ -76,13 +78,22 @@ internal static class PlexLibraryMediaApi
             "photo media"
         );
 
-    public static Task<Result<List<PlexLibraryMediaItem>>> GetPhotoFolderItemsAsync(
+    public static async Task<Result<List<PlexLibraryMediaItem>>> GetPhotoFolderItemsAsync(
         this IPlexAPI client,
         long libraryKey,
         string? parent,
+        IReadOnlyList<KeyValuePair<string, string>> additionalQuery,
         CancellationToken cancellationToken
-    ) =>
-        ReadPhotoPagesAsync(
+    )
+    {
+        if (additionalQuery.Count > 0 && client is not PlexAPI)
+            return Result
+                .Fail<List<PlexLibraryMediaItem>>(
+                    "The Plex SDK client cannot preserve returned photo folder query arguments"
+                )
+                .LogError();
+
+        var readPage = new Func<int, Task<Result<GetSectionFolderResponse>>>(
             offset =>
                 client.Library.GetSectionFolderAsync(
                         new GetSectionFolderRequest
@@ -94,18 +105,50 @@ internal static class PlexLibraryMediaApi
                             IncludeMeta = BoolInt.True,
                         }
                     )
-                    .ToResponse(cancellationToken),
-            response => response.MediaContainerWithMetadata?.MediaContainer,
-            PlexMediaType.PhotoImage,
-            "photo folder"
+                    .ToResponse(cancellationToken)
         );
 
-    public static Task<Result<List<PlexLibraryMediaItem>>> GetPhotoAlbumChildrenAsync(
+        if (additionalQuery.Count == 0)
+            return await ReadPhotoPagesAsync(
+                readPage,
+                response => response.MediaContainerWithMetadata?.MediaContainer,
+                PlexMediaType.PhotoImage,
+                "photo folder"
+            );
+
+        var sdk = (PlexAPI)client;
+        var hook = new AddQueryParametersHook("getSectionFolder", $"/library/sections/{libraryKey}/folder", additionalQuery);
+        sdk.SDKConfiguration.Hooks.RegisterBeforeRequestHook(hook);
+        try
+        {
+            return await ReadPhotoPagesAsync(
+                readPage,
+                response => response.MediaContainerWithMetadata?.MediaContainer,
+                PlexMediaType.PhotoImage,
+                "photo folder"
+            );
+        }
+        finally
+        {
+            sdk.SDKConfiguration.Hooks.beforeRequestHooks.Remove(hook);
+        }
+    }
+
+    public static async Task<Result<List<PlexLibraryMediaItem>>> GetPhotoAlbumChildrenAsync(
         this IPlexAPI client,
         int albumKey,
+        IReadOnlyList<KeyValuePair<string, string>> additionalQuery,
         CancellationToken cancellationToken
-    ) =>
-        ReadPhotoPagesAsync(
+    )
+    {
+        if (additionalQuery.Count > 0 && client is not PlexAPI)
+            return Result
+                .Fail<List<PlexLibraryMediaItem>>(
+                    "The Plex SDK client cannot preserve returned photo album query arguments"
+                )
+                .LogError();
+
+        var readPage = new Func<int, Task<Result<GetMetadataChildrenResponse>>>(
             offset =>
                 client.Library.GetMetadataChildrenAsync(
                         new GetMetadataChildrenRequest
@@ -116,12 +159,94 @@ internal static class PlexLibraryMediaApi
                             IncludeMeta = BoolInt.True,
                         }
                     )
-                    .ToResponse(cancellationToken),
-            response => response.MediaContainerWithMetadata?.MediaContainer,
-            PlexMediaType.PhotoImage,
-            "photo album children"
+                    .ToResponse(cancellationToken)
         );
 
+        if (additionalQuery.Count == 0)
+            return await ReadPhotoPagesAsync(
+                readPage,
+                response => response.MediaContainerWithMetadata?.MediaContainer,
+                PlexMediaType.PhotoImage,
+                "photo album children"
+            );
+
+        var sdk = (PlexAPI)client;
+        var hook = new AddQueryParametersHook("getMetadataChildren", $"/library/metadata/{albumKey}/children", additionalQuery);
+        sdk.SDKConfiguration.Hooks.RegisterBeforeRequestHook(hook);
+        try
+        {
+            return await ReadPhotoPagesAsync(
+                readPage,
+                response => response.MediaContainerWithMetadata?.MediaContainer,
+                PlexMediaType.PhotoImage,
+                "photo album children"
+            );
+        }
+        finally
+        {
+            sdk.SDKConfiguration.Hooks.beforeRequestHooks.Remove(hook);
+        }
+    }
+
+    private sealed class AddQueryParametersHook(
+        string operationId,
+        string expectedPath,
+        IReadOnlyList<KeyValuePair<string, string>> additionalQuery
+    ) : IBeforeRequestHook
+    {
+        public Task<HttpRequestMessage> BeforeRequestAsync(
+            BeforeRequestContext context,
+            HttpRequestMessage request
+        )
+        {
+            if (
+                !string.Equals(context.OperationID, operationId, StringComparison.Ordinal)
+                || request.RequestUri is null
+                || !string.Equals(request.RequestUri.AbsolutePath, expectedPath, StringComparison.Ordinal)
+            )
+                return Task.FromResult(request);
+
+            var uriBuilder = new UriBuilder(request.RequestUri);
+            var returnedNames = additionalQuery.Select(x => x.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var parameters = ParseQueryParameters(uriBuilder.Query.TrimStart('?'))
+                .Where(x => !returnedNames.Contains(x.Key))
+                .Concat(additionalQuery);
+            uriBuilder.Query = string.Join(
+                "&",
+                parameters.Select(x => $"{Uri.EscapeDataString(x.Key)}={Uri.EscapeDataString(x.Value)}")
+            );
+            request.RequestUri = uriBuilder.Uri;
+
+            return Task.FromResult(request);
+        }
+
+        private static List<KeyValuePair<string, string>> ParseQueryParameters(string query)
+        {
+            var parameters = new List<KeyValuePair<string, string>>();
+            foreach (var rawParameter in query.Split('&', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var parts = rawParameter.Split('=', 2);
+                try
+                {
+                    parameters.Add(
+                        new KeyValuePair<string, string>(
+                            Uri.UnescapeDataString(parts[0]),
+                            parts.Length == 1 ? string.Empty : Uri.UnescapeDataString(parts[1])
+                        )
+                    );
+                }
+                catch (UriFormatException)
+                {
+                    // SDK-generated requests are valid; leave malformed external values untouched.
+                }
+            }
+
+            return parameters;
+        }
+
+
+
+    }
     private static ListContentRequest CreateListContentRequest(
         long libraryKey,
         PlexMediaType mediaType,
@@ -269,6 +394,7 @@ internal static class PlexLibraryMediaApi
     private sealed class PhotoPageState
     {
         private long? _total;
+        private readonly HashSet<string> _windows = [];
 
         public Result<PhotoPageResult> Validate(
             MediaContainerWithMetadataMediaContainer container,
@@ -281,17 +407,23 @@ internal static class PlexLibraryMediaApi
             if (container.Offset is < 0 || container.Size is < 0 || container.TotalSize is < 0)
                 return Result.Fail<PhotoPageResult>($"Plex returned invalid {description} pagination values").LogError();
 
+            var isUnpaged = container.Offset is null && container.TotalSize is null;
             var offset = container.Offset ?? requestedOffset;
             if (offset != requestedOffset)
                 return Result.Fail<PhotoPageResult>(
                     $"Plex returned {description} offset {offset} for requested offset {requestedOffset}"
                 ).LogError();
             if (container.Size is { } size && size != items.Count)
-                return Result.Fail<PhotoPageResult>($"Plex returned a {description} size inconsistent with its item window").LogError();
+                return Result.Fail<PhotoPageResult>(
+                    $"Plex returned a {description} size inconsistent with its item window"
+                ).LogError();
             if (_total.HasValue && container.TotalSize is null)
                 return Result.Fail<PhotoPageResult>($"Plex omitted the {description} total during pagination").LogError();
             if (_total.HasValue && container.TotalSize != _total)
                 return Result.Fail<PhotoPageResult>($"Plex changed the reported {description} total during enumeration").LogError();
+            if (items.Count > 0 && !_windows.Add(GetWindowIdentity(items)))
+                return Result.Fail<PhotoPageResult>($"Plex returned a repeated nonempty {description} window").LogError();
+
             _total ??= container.TotalSize;
 
             var total = _total;
@@ -300,6 +432,10 @@ internal static class PlexLibraryMediaApi
                 return Result.Fail<PhotoPageResult>(
                     $"Plex returned a {description} window beyond its reported total"
                 ).LogError();
+            if (isUnpaged && requestedOffset > 0)
+                return Result.Fail<PhotoPageResult>($"Plex returned unpaged {description} metadata after pagination started").LogError();
+            if (isUnpaged)
+                return Result.Ok(new PhotoPageResult(items, true, requestedOffset));
             if (items.Count == 0)
             {
                 if (total is { } knownEmptyTotal && requestedOffset != knownEmptyTotal)
@@ -308,7 +444,25 @@ internal static class PlexLibraryMediaApi
             }
             if (total is { } knownTotalAtEnd && end == knownTotalAtEnd)
                 return Result.Ok(new PhotoPageResult(items, true, requestedOffset));
-            return Result.Ok(new PhotoPageResult(items, false, checked((int)end)));
+            if (end > int.MaxValue)
+                return Result.Fail<PhotoPageResult>($"Plex returned an unadvanceable {description} page").LogError();
+            return Result.Ok(new PhotoPageResult(items, false, (int)end));
+        }
+
+        private static string GetWindowIdentity(IReadOnlyList<PlexLibraryMediaItem> items) =>
+            string.Join(
+                "\u001f",
+                items.Select(GetWindowItemIdentity).OrderBy(x => x, StringComparer.Ordinal)
+            );
+
+        private static string GetWindowItemIdentity(PlexLibraryMediaItem item)
+        {
+            var media = item.Metadata.Media?.FirstOrDefault();
+            var part = media?.Part?.FirstOrDefault();
+            return string.Create(
+                CultureInfo.InvariantCulture,
+                $"{item.Origin}\u001e{item.Metadata.RatingKey}\u001e{item.Metadata.Key}\u001e{item.Metadata.Type}\u001e{item.Metadata.Subtype}\u001e{item.Metadata.Media?.Count}\u001e{media?.Id}\u001e{part?.Id}\u001e{part?.Key}"
+            );
         }
     }
 

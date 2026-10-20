@@ -5,6 +5,12 @@ internal sealed class PhotoDownloadSelector
     private readonly IReaparrDbContext _dbContext;
     private readonly ILogger _log;
 
+    internal static StringComparer DestinationPathComparer { get; } =
+        OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+
+    internal static StringComparison DestinationPathComparison { get; } =
+        OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
     public PhotoDownloadSelector(IReaparrDbContext dbContext, ILogger log)
     {
         _dbContext = dbContext;
@@ -113,14 +119,15 @@ internal sealed class PhotoDownloadSelector
         var rootNames = ResolveQueueRootNames(selections, existingFolders);
         var existing = existingFiles
             .Select(x =>
-                (
+                new QueuedPhotoContext(
                     GetIdentity(x),
-                    DownloadRoot: NormalizeRootPath(x.DirectoryMeta.DownloadRootPath),
-                    DestinationRoot: NormalizeRootPath(x.DirectoryMeta.DestinationRootPath)
+                    NormalizeRootPath(x.DirectoryMeta.DownloadRootPath),
+                    NormalizeRootPath(x.DirectoryMeta.DestinationRootPath)
                 )
             )
-            .ToHashSet();
-        var pathOwners = new Dictionary<string, HashSet<PhotoIdentity>>(StringComparer.OrdinalIgnoreCase);
+            .ToHashSet(QueuedPhotoContextComparer.Instance);
+        var pathOwners = new Dictionary<string, HashSet<PhotoIdentity>>(DestinationPathComparer);
+
         foreach (var file in existingFiles.Where(x => x.DownloadStatus != DownloadStatus.Deleted))
         {
             if (!TryGetDestinationPath(file.DirectoryMeta, file.FileName, out var path))
@@ -137,7 +144,7 @@ internal sealed class PhotoDownloadSelector
             var namedSelection = selection.RootName == rootName ? selection : selection with { RootName = rootName };
             var identity = GetIdentity(namedSelection.MediaData);
             if (existing.Contains(
-                    (
+                    new QueuedPhotoContext(
                         identity,
                         namedSelection.DownloadRootPath,
                         namedSelection.DestinationRootPath
@@ -153,7 +160,7 @@ internal sealed class PhotoDownloadSelector
         }
 
         var accepted = new List<PhotoDownloadCandidate>();
-        foreach (var group in candidates.GroupBy(x => x.Path, StringComparer.OrdinalIgnoreCase))
+        foreach (var group in candidates.GroupBy(x => x.Path, DestinationPathComparer))
         {
             // All new participants are rejected when different assets target the same path.
             var identity = group.First().Identity;
@@ -214,8 +221,15 @@ internal sealed class PhotoDownloadSelector
         var directIds = selections.Where(x => x.Type == PlexMediaType.PhotoImage)
             .SelectMany(x => x.MediaIds).Distinct().ToList();
         var directFiles = await _dbContext.PlexPhotoMediaData
-            .Where(x => directIds.Contains(x.Id) && x.PlexServerId == serverId && x.PlexLibraryId == libraryId)
+            .Where(x => directIds.Contains(x.Id)
+                && x.PlexServerId == serverId
+                && x.PlexLibraryId == libraryId)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
+        if (directFiles.Count != directIds.Count)
+            return ResultExtensions.Create400BadRequestResult(
+                "Every selected photo file must belong to the requested library and server."
+            );
+
         var choices = new List<(PlexPhotoMediaData File, bool KeepCompleted, bool Direct)>();
         foreach (var selection in selections)
         {
@@ -224,8 +238,8 @@ internal sealed class PhotoDownloadSelector
                 if (selection.Type == PlexMediaType.PhotoAlbum)
                     choices.AddRange(filesByAlbum[id].Select(file =>
                         (file, selection.KeepCompletedInDownloadFolder, Direct: false)));
-                else if (directFiles.TryGetValue(id, out var file))
-                    choices.Add((file, selection.KeepCompletedInDownloadFolder, Direct: true));
+                else
+                    choices.Add((directFiles[id], selection.KeepCompletedInDownloadFolder, Direct: true));
             }
         }
 
@@ -276,34 +290,43 @@ internal sealed class PhotoDownloadSelector
         IEnumerable<DownloadTaskPhotoFolder> folders
     )
     {
-        var existing = folders.Where(x => x.ParentId is null)
-            .GroupBy(x => (
+        var existing = folders
+            .Where(x => x.ParentId is null)
+            .Select(x => new
+            {
                 x.PlexServerId,
                 x.PlexLibraryId,
-                DownloadRoot: NormalizeRootPath(x.DownloadRootPath),
-                DestinationRoot: NormalizeRootPath(x.DestinationRootPath)))
-            .ToDictionary(x => x.Key, x => x.OrderBy(y => y.CreatedAt).First().Title);
+                DownloadRoot = NormalizeRootPath(x.DownloadRootPath),
+                DestinationRoot = NormalizeRootPath(x.DestinationRootPath),
+                x.Title,
+                x.CreatedAt,
+            })
+            .OrderBy(x => x.CreatedAt)
+            .ToList();
         var libraries = selections.DistinctBy(x => (x.MediaData.PlexServerId, x.MediaData.PlexLibraryId)).ToList();
         var names = new Dictionary<(int ServerId, int LibraryId), string>();
         foreach (var selection in libraries)
         {
             var scope = (selection.MediaData.PlexServerId, selection.MediaData.PlexLibraryId);
-            if (existing.TryGetValue((scope.PlexServerId, scope.PlexLibraryId,
-                    selection.DownloadRootPath, selection.DestinationRootPath), out var captured))
+            var captured = existing.FirstOrDefault(x =>
+                x.PlexServerId == scope.PlexServerId
+                && x.PlexLibraryId == scope.PlexLibraryId
+                && DestinationPathComparer.Equals(x.DownloadRoot, selection.DownloadRootPath)
+                && DestinationPathComparer.Equals(x.DestinationRoot, selection.DestinationRootPath));
+            if (captured is not null)
             {
-                names[scope] = captured;
+                names[scope] = captured.Title;
                 continue;
             }
 
             var selectedCollision = libraries.Any(x =>
                 (x.MediaData.PlexServerId, x.MediaData.PlexLibraryId) != scope
-                && x.DestinationRootPath == selection.DestinationRootPath
-                && string.Equals(x.RootName, selection.RootName, StringComparison.OrdinalIgnoreCase));
+                && DestinationPathComparer.Equals(x.DestinationRootPath, selection.DestinationRootPath)
+                && DestinationPathComparer.Equals(x.RootName, selection.RootName));
             var existingCollision = existing.Any(x =>
-                string.Equals(x.Key.DestinationRoot, selection.DestinationRootPath, StringComparison.OrdinalIgnoreCase)
-                && x.Key.DownloadRoot == selection.DownloadRootPath
-                && string.Equals(x.Value, selection.RootName, StringComparison.OrdinalIgnoreCase)
-                && (x.Key.PlexServerId, x.Key.PlexLibraryId) != scope);
+                DestinationPathComparer.Equals(x.DestinationRoot, selection.DestinationRootPath)
+                && DestinationPathComparer.Equals(x.Title, selection.RootName)
+                && (x.PlexServerId, x.PlexLibraryId) != scope);
             names[scope] = selectedCollision || existingCollision
                 ? $"{selection.RootName} [{scope.PlexServerId}-{scope.PlexLibraryId}]"
                 : selection.RootName;
@@ -340,7 +363,7 @@ internal sealed class PhotoDownloadSelector
             var full = Path.GetFullPath(
                 directory.GetDestinationFilePath(DownloadTaskType.PhotoImage, fileName));
             var prefix = Path.EndsInDirectorySeparator(root) ? root : root + Path.DirectorySeparatorChar;
-            if (!full.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            if (!full.StartsWith(prefix, DestinationPathComparison))
                 return false;
             path = full.Replace(Path.DirectorySeparatorChar, '/');
             return true;
@@ -378,6 +401,28 @@ internal sealed class PhotoDownloadSelector
         new(file.PlexServerId, file.PlexLibraryId, file.PlexApiRatingKey, file.PlexApiMediaId, file.PlexApiPartId);
 
     private readonly record struct SelectedPhoto(PlexPhotoMediaData MediaData, bool KeepCompleted);
+
+    private readonly record struct QueuedPhotoContext(
+        PhotoIdentity Identity,
+        string DownloadRootPath,
+        string DestinationRootPath
+    );
+
+    private sealed class QueuedPhotoContextComparer : IEqualityComparer<QueuedPhotoContext>
+    {
+        public static QueuedPhotoContextComparer Instance { get; } = new();
+        public bool Equals(QueuedPhotoContext x, QueuedPhotoContext y) =>
+            x.Identity == y.Identity
+            && DestinationPathComparer.Equals(x.DownloadRootPath, y.DownloadRootPath)
+            && DestinationPathComparer.Equals(x.DestinationRootPath, y.DestinationRootPath);
+
+        public int GetHashCode(QueuedPhotoContext obj) =>
+            HashCode.Combine(
+                obj.Identity,
+                DestinationPathComparer.GetHashCode(obj.DownloadRootPath),
+                DestinationPathComparer.GetHashCode(obj.DestinationRootPath)
+            );
+    }
 
     private readonly record struct PhotoIdentity(int ServerId, int LibraryId, int RatingKey, int MediaId, int PartId);
 }

@@ -30,7 +30,7 @@ Keep one compact working record in host session/artifact storage. It holds:
 - **Candidates:** trigger evidence, wrong result, existing protections, confidence, consumers, and unresolved assumptions.
 - **Decisions:** stable ID -> approved/deferred/denied/details/pending; exact remedy, dependencies, agreed checks/limits, review mode, execution status, observed issue links and commit hashes.
 
-Use todos for investigation, decisions, and one item per approved fix through its commit. Do not duplicate these records in several repository documents. When repository rules require a written plan, create **one compact batch plan after selection** in the prescribed location, with a section per selected ID. Update the current section as needed rather than routinely creating a plan file for each small fix. README and CHANGELOG files remain untouched unless explicitly requested.
+Use todos for investigation, decisions, and one item per approved fix through its commit. Do not duplicate these records in several repository documents. When repository rules require a written plan, create **one compact temporary batch plan after selection** in the prescribed location, with a section per selected ID. Update the current section as needed rather than routinely creating a plan file for each small fix. **Never stage or commit generated workflow plans.** Retain them while the batch is in progress or blocked; clean them up at batch completion as described in section 6. README and CHANGELOG files remain untouched unless explicitly requested.
 
 **Done when:** scope, exclusions, known tool limits, and the working record are explicit. Missing access is a coverage limit, not evidence of a defect.
 
@@ -149,7 +149,7 @@ Address relevant review findings and rerun only affected checks before committin
 
 ### Commit and advance
 
-When verified, technically reviewed and commit-authorized, follow `reaparr-git-commit`. Stage only the current ID's implementation and regression coverage, plus directly relevant approved plan content. Keep unrelated work and denial records out. Create its own local commit, record the **observed hash**, mark its todo done, then start the next ID. No combined-ID commits, speculative later-fix edits, automatic pushes or history rewriting.
+When verified, technically reviewed and commit-authorized, follow `reaparr-git-commit`. Stage only the current ID's implementation and regression coverage. Keep generated workflow plans, unrelated work and denial records out of staging and commits. Create its own local commit, record the **observed hash** in the host working record, mark its todo done, then start the next ID. No combined-ID commits, speculative later-fix edits, automatic pushes or history rewriting.
 
 ## Stop conditions and execution status
 
@@ -164,6 +164,8 @@ When verified, technically reviewed and commit-authorized, follow `reaparr-git-c
 A blocked item never authorizes starting the next fix; pause any todo the tool advances automatically. Report what was tried and the exact required action. If a final composition check reveals a gap after commits, pause batch completion, identify the owning remedy, and obtain any necessary scope/commit-plan approval; do not silently combine fixes or rewrite history.
 
 ## 6. Close the batch and decide whether to continue
+
+After all selected fixes are verified, reviewed, committed and their todos done, preserve the final decisions, proof, limits and commit hashes in the host working record. Then **trash this batch's generated plan** using repository-approved trash tooling and verify the file is gone before asking whether to continue. Keep plans for blocked or unfinished batches and leave unrelated plans untouched. Report a cleanup failure rather than claiming the batch plan was removed.
 
 Report briefly:
 

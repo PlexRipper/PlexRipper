@@ -34,6 +34,28 @@ jobs:
         steps:
             -   run: echo "PR is not in draft, proceeding with tests"
 
+    Qodana:
+        needs: [ Check-PR-Status ]
+        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            pull-requests: write
+            checks: write
+        steps:
+            -   uses: actions/checkout@v7
+                with:
+                    ref: ${{ github.event.pull_request.head.sha }}
+                    fetch-depth: 0
+                    persist-credentials: false
+            -   name: Qodana Scan
+                uses: JetBrains/qodana-action@v2026.1
+                with:
+                    pr-mode: false
+                env:
+                    QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+                    QODANA_ENDPOINT: 'https://qodana.cloud'
+
     Actionlint:
         needs: [ Check-PR-Status, Check-Github-Changes ]
         if: needs.Check-Github-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')

@@ -1,3 +1,7 @@
+import { PlexServerPaths } from '@api-urls';
+import { headers } from '@fixtures';
+import { generateFailedResultDTO, generateResultDTO } from '@mock';
+
 describe('Reaparr Server Dialog', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
@@ -43,6 +47,63 @@ describe('Reaparr Server Dialog', () => {
 		cy.getCy('server-stats-export-image').should('be.visible');
 		cy.getCy('server-dialog-close-btn').click();
 		cy.getCy('server-dialog-cy').should('not.exist');
+	});
+
+	it('Should keep server settings and confirmation open after disabling fails and recover on retry', () => {
+		// Arrange: keep subsequent reads consistent with the successful retry.
+		cy.getPageData().then((data) => {
+			let servers = data.plexServers;
+			const target = servers.find((server) => server.isEnabled);
+			expect(target, 'enabled fixture server').not.to.equal(undefined);
+			const serverId = target!.id;
+			let attempts = 0;
+			cy.intercept('GET', PlexServerPaths.getAllPlexServersEndpoint(), (request) => {
+				request.reply({ statusCode: 200, body: generateResultDTO(servers), ...headers });
+			});
+			cy.intercept('PUT', PlexServerPaths.setServerEnabledEndpoint(serverId), (request) => {
+				expect(request.body).to.deep.equal({ isEnabled: false });
+				attempts++;
+				if (attempts === 1) {
+					request.reply({
+						statusCode: 500,
+						body: generateFailedResultDTO({
+							statusCode: 500,
+							errors: [{ message: 'Disabling failed', metadata: {}, reasons: [] }],
+						}),
+						...headers,
+					});
+					return;
+				}
+				servers = servers.map((server) => server.id === serverId ? { ...server, isEnabled: false } : server);
+				request.reply({
+					statusCode: 200, body: generateResultDTO(servers.find((server) => server.id === serverId)!), ...headers,
+				});
+			}).as('disableServer');
+
+			cy.getCy(`server-drawer-item-${serverId}`).filter(':visible').first()
+				.closest('.q-expansion-item').find('[data-cy^="server-dialog-"]').click();
+			cy.getCy('server-dialog-tab-3').click();
+			cy.getCy('server-enabled-toggle').should('have.attr', 'aria-checked', 'true').click();
+
+			// Act
+			cy.getCy('confirmation-dialog-confirmation-button').click();
+			cy.wait('@disableServer').its('response.statusCode').should('equal', 500);
+			cy.getCy('alert-dialog').should('be.visible').and('contain.text', 'Disabling failed');
+			cy.getCy('close-alert-dialog').click();
+
+			// Assert: failure leaves both dialogs available and retry enabled.
+			cy.getCy('confirmation-dialog').should('be.visible');
+			// Settings stay mounted behind the foreground confirmation modal.
+			cy.getCy('server-dialog-cy').should('exist');
+			cy.getCy('server-enabled-toggle').should('have.attr', 'aria-checked', 'true');
+			cy.getCy('confirmation-dialog-confirmation-button').should('not.be.disabled').click();
+			cy.wait('@disableServer').its('response.statusCode').should('equal', 200);
+			cy.getCy('confirmation-dialog').should('not.exist');
+			cy.getCy('server-dialog-cy').should('not.exist');
+			cy.reload();
+			cy.getCy('page-load-completed', { timeout: 20000 }).should('be.visible');
+			cy.getCy(`server-drawer-item-${serverId}`).should('not.exist');
+		});
 	});
 
 	const responsiveViewports = [

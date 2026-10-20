@@ -7,6 +7,7 @@
 			title="Enable this Plex server"
 			text="Disabled servers are excluded from queries/syncs and hidden from normal views.">
 			<QToggle
+				data-cy="server-enabled-toggle"
 				size="lg"
 				:model-value="serverStore.getServer(plexServer.id)!.isEnabled"
 				@click="dialogStore.openDialog(DialogType.ServerHideConfirmationDialog)" />
@@ -65,6 +66,7 @@
 import Log from 'consola';
 import type { PlexServerDTO } from '@dto';
 import { set } from '@vueuse/core';
+import { useSubscription } from '@vueuse/rxjs';
 import { useDialogStore, useServerStore, useSettingsStore } from '@store';
 import { DialogType } from '@enums';
 
@@ -98,8 +100,10 @@ function onDisableServer() {
 
 	set(confirmHideDialog, true);
 
-	useSubscription(serverStore.setServerEnabled(props.plexServer.id, false).subscribe(() => {
+	useSubscription(serverStore.setServerEnabled(props.plexServer.id, false).subscribe((result) => {
 		set(confirmHideDialog, false);
+		if (!result.isSuccess)
+			return;
 		dialogStore.closeDialog(DialogType.ServerHideConfirmationDialog);
 		dialogStore.closeDialog(DialogType.ServerSettingsDialog);
 	}));

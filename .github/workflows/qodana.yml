@@ -23,18 +23,19 @@ jobs:
                 with:
                     fetch-depth: 0
                     persist-credentials: false
-            -   name: Prepare frontend dependencies
-                uses: ./.github/actions/client-app-install/
             -   name: Prepare backend solution
                 uses: ./.github/actions/dotnet-setup/
                 with:
                     project-path: Reaparr.sln
+                    build: false
             -   name: Qodana Scan
                 uses: JetBrains/qodana-action@v2026.2
                 with:
                     pr-mode: false
                     post-pr-comment: false
                     push-fixes: none
+                    args: --no-build
+                    upload-result: true
                 env:
                     QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
                     QODANA_ENDPOINT: 'https://qodana.cloud'

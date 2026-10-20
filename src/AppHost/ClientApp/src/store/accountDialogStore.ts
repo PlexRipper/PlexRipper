@@ -206,6 +206,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 						updateStateWithAccountData(value);
 						state.hasValidationErrors = false;
 					} else {
+						state.hasValidationErrors = true;
 						Log.error('Validate Error', value);
 					}
 					state.verificationCode = '';

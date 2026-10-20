@@ -99,28 +99,63 @@ describe('AccountDialogStore.validateVerificationCode()', () => {
 		expect(closeDialogSpy).not.toHaveBeenCalled();
 	});
 
-	test('Should keep verification dialog open and log error when API returns unsuccessful result', async () => {
+	test('Should expose a failed verification after the initial challenge and accept a corrected retry', async () => {
 		// Arrange
-		const dialogStore = useDialogStore();
-		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		const accountDialogStore = openNewCredentialAccount();
-		accountDialogStore.username = 'user';
-		accountDialogStore.password = 'pass';
-		accountDialogStore.clientId = 'client-id';
-		accountDialogStore.verificationCode = '123456';
-		accountDialogStore.hasValidationErrors = true;
-		accountDialogStore.isValidated = false;
-
-		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(200, generateFailedResultDTO());
+		const close = vi.spyOn(useDialogStore(), 'closeDialog');
+		const store = openNewCredentialAccount();
+		store.displayName = 'Retry account';
+		store.username = 'user';
+		store.password = 'pass';
+		const challenge = {
+			is2Fa: true, authenticationToken: '', clientId: 'client-id', email: 'user@test.dev',
+			isUnAuthorized: true, isValidated: false, password: 'pass', plexId: 99,
+			title: 'User Title', username: 'user', uuid: 'account-uuid', validatedAt: null,
+		};
+		const path = PlexAccountPaths.validatePlexCredentialsEndpoint();
+		mock.onPost(path).replyOnce(200, generateResultDTO(challenge))
+			.onPost(path).replyOnce(500, generateFailedResultDTO({ statusCode: 500 }))
+			.onPost(path).replyOnce(200, generateResultDTO({
+				...challenge, isUnAuthorized: false, isValidated: true,
+				authenticationToken: 'valid-token', validatedAt: '2026-04-03T00:00:00Z',
+			}));
 
 		// Act
-		const result = subscribeSpyTo(accountDialogStore.validateVerificationCode());
-		await result.onComplete();
+		await subscribeSpyTo(store.validatePlexAccount()).onComplete();
 
 		// Assert
-		expect(accountDialogStore.isValidated).toEqual(false);
-		expect(accountDialogStore.hasValidationErrors).toEqual(true);
-		expect(closeDialogSpy).not.toHaveBeenCalled();
+		expect(store.hasValidationErrors).toBe(false);
+		expect(store.clientId).toBe('client-id');
+		expect(store.isAllowedToSave).toBe(false);
+
+		// Act
+		store.verificationCode = '111111';
+		const failure = subscribeSpyTo(store.validateVerificationCode());
+		await failure.onComplete();
+
+		// Assert
+		expect(failure.getFirstValue()?.isSuccess).toBe(false);
+		expect(store.hasValidationErrors).toBe(true);
+		expect(store.validateLoading).toBe(false);
+		expect(store.verificationCode).toBe('');
+		expect([store.username, store.password, store.clientId]).toEqual(['user', 'pass', 'client-id']);
+		expect(store.isAllowedToSave).toBe(false);
+		expect(close).not.toHaveBeenCalled();
+
+		// Act
+		store.verificationCode = '123456';
+		await subscribeSpyTo(store.validateVerificationCode()).onComplete();
+
+		// Assert
+		expect(store.hasValidationErrors).toBe(false);
+		expect(store.validateLoading).toBe(false);
+		expect(store.verificationCode).toBe('');
+		expect(store.isValidated).toBe(true);
+		expect(store.authenticationToken).toBe('valid-token');
+		expect(store.isAllowedToSave).toBe(true);
+		expect([store.username, store.password, store.clientId]).toEqual(['user', 'pass', 'client-id']);
+		expect(close).toHaveBeenCalledTimes(1);
+		expect(close).toHaveBeenCalledWith('account-verification-code-dialog');
+		expect(mock.history.post.map((request) => JSON.parse(request.data).verificationCode)).toEqual(['', '111111', '123456']);
 	});
 
 	test('Should preserve account credentials in state after successful verification code submission', async () => {

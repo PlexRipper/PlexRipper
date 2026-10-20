@@ -16,8 +16,12 @@ exclude:
             - "file:**/*.DotSettings"
             - "file:src/Data/Migrations/*.cs"
             - "file:**/*.g.cs"
+            - "file:**/*.g.i.cs"
             - "file:**/.editorconfig"
             - "file:**/*.globalconfig"
+            - "file:**/*.AssemblyInfo.cs"
+            - "file:**/AssemblyInfo.cs"
+            - "file:**/*.json"
             - src/AppHost/ClientApp/node_modules
             - src/AppHost/ClientApp/.nuxt
             - src/AppHost/ClientApp/.output

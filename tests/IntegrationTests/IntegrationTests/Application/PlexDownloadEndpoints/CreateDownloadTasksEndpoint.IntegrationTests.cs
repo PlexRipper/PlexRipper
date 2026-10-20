@@ -269,14 +269,11 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                 PlexLibraryId = artist.PlexLibraryId,
                 Qualities = [],
             },
-            new()
-            {
-                Type = PlexMediaType.PhotoAlbum,
-                MediaIds = [photoAlbum.Id],
-                PlexServerId = photoAlbum.PlexServerId,
-                PlexLibraryId = photoAlbum.PlexLibraryId,
-                Qualities = [],
-            },
+            CreatePhotoSelection(
+                PlexMediaType.PhotoAlbum,
+                PhotoItemKind.Album,
+                (photoAlbum.Id, photoAlbum.PlexServerId, photoAlbum.PlexLibraryId)
+            ),
             new()
             {
                 Type = PlexMediaType.OtherVideos,
@@ -482,31 +479,30 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                         Content = new ByteArrayContent(expectedContent),
                     }
             );
-        var selection = new DownloadMediaDTO
-        {
-            Type = PlexMediaType.PhotoImage,
-            MediaIds = [assets[0].Id],
-            PlexServerId = library.PlexServerId,
-            PlexLibraryId = library.Id,
-            Qualities = [],
-        };
-        var albumSelection = new DownloadMediaDTO
-        {
-            Type = PlexMediaType.PhotoAlbum,
-            MediaIds = [album.Id],
-            PlexServerId = library.PlexServerId,
-            PlexLibraryId = library.Id,
-            Qualities = [],
-        };
+        var selection = CreatePhotoSelection(
+            PlexMediaType.PhotoImage,
+            PhotoItemKind.Asset,
+            (assets[0].Id, assets[0].PlexServerId, assets[0].PlexLibraryId)
+        );
+        var albumSelection = CreatePhotoSelection(
+            PlexMediaType.PhotoAlbum,
+            PhotoItemKind.Album,
+            (album.Id, album.PlexServerId, album.PlexLibraryId)
+        );
         using var client = container.GetApiClient();
         await client.SignIn();
 
         // Act
         var preview = await client.POSTAsync<
             GetDownloadPreviewEndpoint,
-            List<DownloadMediaDTO>,
+            DownloadPreviewRequest,
             ResultDTO<DownloadPreviewContainerDTO>
-        >([albumSelection, selection]);
+        >(
+            new DownloadPreviewRequest
+            {
+                DownloadMedias = [albumSelection, selection],
+            }
+        );
         var create = await client.POSTAsync<
             CreateDownloadTasksEndpoint,
             CreateDownloadTasksEndpointRequest,
@@ -625,6 +621,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.PhotoImage,
+            SelectionKind = PhotoItemKind.Asset,
             MediaIds = filesToSelect.Select(x => x.Id).ToList(),
             PlexServerId = library.PlexServerId,
             PlexLibraryId = library.Id,
@@ -678,14 +675,11 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         var library = await context.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.PhotoAlbum, CancellationToken);
         var originalLibraryTitle = library.Title;
         var file = await context.PlexPhotoMediaData.SingleAsync(x => x.PlexLibraryId == library.Id, CancellationToken);
-        var selection = new DownloadMediaDTO
-        {
-            Type = PlexMediaType.PhotoImage,
-            MediaIds = [file.Id],
-            PlexServerId = library.PlexServerId,
-            PlexLibraryId = library.Id,
-            Qualities = [],
-        };
+        var selection = CreatePhotoSelection(
+            PlexMediaType.PhotoImage,
+            PhotoItemKind.Asset,
+            (file.Id, file.PlexServerId, file.PlexLibraryId)
+        );
         using var client = container.GetApiClient();
         await client.SignIn();
 
@@ -763,6 +757,21 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         );
     }
 
+    private static DownloadMediaDTO CreatePhotoSelection(
+        PlexMediaType type,
+        PhotoItemKind selectionKind,
+        (int Id, int ServerId, int LibraryId) identity
+    ) =>
+        new()
+        {
+            Type = type,
+            SelectionKind = selectionKind,
+            MediaIds = [identity.Id],
+            PlexServerId = identity.ServerId,
+            PlexLibraryId = identity.LibraryId,
+            Qualities = [],
+        };
+
     private static DownloadTaskCreationReportDTO PhotoReport(int folders = 0, int images = 0) =>
         new()
         {
@@ -777,4 +786,5 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             MusicTracks = 0,
             OtherVideos = 0,
         };
+
 }

@@ -1,3 +1,5 @@
+using System.Net.Http.Json;
+
 namespace Reaparr.IntegrationTests;
 
 public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTests
@@ -7,40 +9,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
     {
         // Arrange
         var seed = new Seed(9625);
-        using var container = await CreateContainer(
-            seed,
-            config =>
-            {
-                config.HttpClientOptions = (http, _) => http.SetupIdentityRequest(seed);
-                config.DatabaseOptions = database =>
-                {
-                    database.PlexAccountCount = 1;
-                    database.PlexServerCount = 1;
-                    database.PlexMusicLibraryCount = 1;
-                    database.PlexPhotoLibraryCount = 1;
-                    database.PlexOtherVideoLibraryCount = 1;
-                    database.MusicArtistCount = 2;
-                    database.MusicAlbumCount = 2;
-                    database.MusicTrackCount = 2;
-                    database.OtherVideoCount = 3;
-                };
-                config.BaseMockHttpClientOptions = plex =>
-                {
-                    plex.GenerateFromDatabase = true;
-                    plex.PlexServerAccessCount = 1;
-                    plex.MusicLibraryCount = 1;
-                    plex.PhotoLibraryCount = 1;
-                    plex.OtherVideoLibraryCount = 1;
-                    plex.ArtistsPerLibraryCount = 2;
-                    plex.AlbumsPerArtistCount = 2;
-                    plex.TracksPerAlbumCount = 2;
-                    plex.PhotoAlbumsPerLibraryCount = 2;
-                    plex.PhotosPerAlbumCount = 2;
-                    plex.PhotoClipsPerAlbumCount = 1;
-                    plex.PhotoAlbumsOverlap = true;
-                };
-            }
-        );
+        using var container = await CreatePhotoRefreshContainer(seed);
         using var client = container.GetApiClient();
         await client.SignIn();
         var factory = container.Resolve<IReaparrDbContextFactory>();
@@ -104,6 +73,10 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         ).ShouldBe((2, 4, 8, 8, 3, 3));
         (await beforeContext.PlexPhotoAlbums.CountAsync(CancellationToken)).ShouldBe(0);
         (await beforeContext.PlexPhotoMediaData.CountAsync(CancellationToken)).ShouldBe(0);
+
+        var beforeBrowse = await ReadBrowseAssetsAsync(client, photoLibrary.Id);
+        beforeBrowse.Items.ShouldBeEmpty();
+        (beforeBrowse.TotalCount, beforeBrowse.TotalBytes).ShouldBe((0, 0L));
 
         // Act
         var refresh = await client.POSTAsync<
@@ -182,6 +155,11 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         firstFiles.Select(x => x.AssetKind).ShouldContain(PhotoAssetKind.VideoClip);
         firstFolders.ShouldAllBe(x => x.ParentId == null || x.RelativePath.Length > 0);
         firstFolders.Where(x => x.ParentId == null).ShouldAllBe(x => x.RootIdentityKey != null && x.SourceRootPath != null);
+
+        var publishedBrowse = await ReadBrowseAssetsAsync(client, photoLibrary.Id);
+        publishedBrowse.Items.Select(x => x.Id).Order().ShouldBe(firstFiles.Select(x => x.Id).Order());
+        publishedBrowse.Items.ShouldAllBe(x => x.PlexLibraryId == photoLibrary.Id);
+        (publishedBrowse.TotalCount, publishedBrowse.TotalBytes).ShouldBe((5, firstFiles.Sum(x => x.Size)));
         (await firstContext.PlexMusicArtists.OrderBy(x => x.PlexApiRatingKey).Select(x => new { x.Id, x.PlexApiRatingKey }).ToListAsync(CancellationToken))
             .ShouldBe(firstArtists);
         (await firstContext.PlexOtherVideos.OrderBy(x => x.PlexApiRatingKey).Select(x => new { x.Id, x.PlexApiRatingKey }).ToListAsync(CancellationToken))
@@ -350,6 +328,12 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         disable.Result.IsSuccess.ShouldBeTrue();
         disable.Result.Errors.Count.ShouldBe(0);
 
+        using var disabledBrowseResponse = await client.GetAsync(
+            $"{ApiRoutes.PlexPhotoController}/assets?plexLibraryId={photoLibrary.Id}",
+            CancellationToken
+        );
+        disabledBrowseResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
         using var disabledContext = await factory.CreateAsync();
         var disabledLibrary = await disabledContext.PlexLibraries.IgnoreIsEnabledFilter().SingleAsync(x => x.Id == photoLibrary.Id, CancellationToken);
         disabledLibrary.IsEnabled.ShouldBeFalse();
@@ -452,6 +436,11 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         using var enabledContext = await factory.CreateAsync();
         (await enabledContext.PlexPhotoFolders.CountAsync(x => x.PlexLibraryId == photoLibrary.Id && x.ParentId == null && x.IsActive == true, CancellationToken)).ShouldBe(1);
         (await enabledContext.PlexPhotoMediaData.CountAsync(x => x.PlexLibraryId == photoLibrary.Id, CancellationToken)).ShouldBe(5);
+
+        var enabledBrowse = await ReadBrowseAssetsAsync(client, photoLibrary.Id);
+        enabledBrowse.Items.Select(x => x.PlexApiRatingKey).Order()
+            .ShouldBe(firstFiles.Select(x => x.PlexApiRatingKey).Order());
+        (enabledBrowse.TotalCount, enabledBrowse.TotalBytes).ShouldBe((5, firstFiles.Sum(x => x.Size)));
         (await enabledContext.PlexMusicArtists
                 .OrderBy(x => x.PlexApiRatingKey)
                 .Select(x => new { x.Id, x.PlexApiRatingKey })
@@ -506,5 +495,55 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
                 })
                 .ToListAsync(CancellationToken))
             .ShouldBe(firstVideoData);
+    }
+
+    private Task<BaseContainer> CreatePhotoRefreshContainer(Seed seed) =>
+        CreateContainer(seed, config =>
+        {
+            config.HttpClientOptions = (http, _) => http.SetupIdentityRequest(seed);
+            config.DatabaseOptions = database =>
+            {
+                database.PlexAccountCount = 1;
+                database.PlexServerCount = 1;
+                database.PlexMusicLibraryCount = 1;
+                database.PlexPhotoLibraryCount = 1;
+                database.PlexOtherVideoLibraryCount = 1;
+                database.MusicArtistCount = 2;
+                database.MusicAlbumCount = 2;
+                database.MusicTrackCount = 2;
+                database.OtherVideoCount = 3;
+            };
+            config.BaseMockHttpClientOptions = plex =>
+            {
+                plex.GenerateFromDatabase = true;
+                plex.PlexServerAccessCount = 1;
+                plex.MusicLibraryCount = 1;
+                plex.PhotoLibraryCount = 1;
+                plex.OtherVideoLibraryCount = 1;
+                plex.ArtistsPerLibraryCount = 2;
+                plex.AlbumsPerArtistCount = 2;
+                plex.TracksPerAlbumCount = 2;
+                plex.PhotoAlbumsPerLibraryCount = 2;
+                plex.PhotosPerAlbumCount = 2;
+                plex.PhotoClipsPerAlbumCount = 1;
+                plex.PhotoAlbumsOverlap = true;
+            };
+        });
+
+    private async Task<PhotoAssetPageDTO> ReadBrowseAssetsAsync(HttpClient client, int libraryId)
+    {
+        using var response = await client.GetAsync(
+            $"{ApiRoutes.PlexPhotoController}/assets?plexLibraryId={libraryId}",
+            CancellationToken
+        );
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<ResultDTO<PhotoAssetPageDTO>>(
+            cancellationToken: CancellationToken
+        );
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldNotBeNull();
+        return result.Value;
     }
 }

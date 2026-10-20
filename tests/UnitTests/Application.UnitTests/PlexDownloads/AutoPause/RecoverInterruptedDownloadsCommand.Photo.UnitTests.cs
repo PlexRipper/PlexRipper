@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class RecoverInterruptedDownloadsCommandPhotoUnitTests : BaseCommandUnitTest<RecoverInterruptedDownloadsCommand>
+public class RecoverInterruptedDownloadsCommandPhotoUnitTests : BaseUnitTest<RecoverInterruptedDownloadsCommandHandler>
 {
     [Test]
     public async Task ShouldRecoverInterruptedPhotoFilesWithoutChangingIdleSiblings_WhenRecovering()
@@ -44,7 +44,7 @@ public class RecoverInterruptedDownloadsCommandPhotoUnitTests : BaseCommandUnitT
             .Verifiable(Times.Once());
 
         // Act
-        var result = await TestHandlerExecuteAsync(new RecoverInterruptedDownloadsCommand());
+        var result = await Sut.ExecuteAsync(new RecoverInterruptedDownloadsCommand(), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -114,7 +114,7 @@ public class RecoverInterruptedDownloadsCommandPhotoUnitTests : BaseCommandUnitT
             .Verifiable(Times.Once());
 
         // Act
-        var result = await TestHandlerExecuteAsync(new RecoverInterruptedDownloadsCommand());
+        var result = await Sut.ExecuteAsync(new RecoverInterruptedDownloadsCommand(), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

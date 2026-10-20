@@ -18,16 +18,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
         var dbContext = IDbContext;
         var media = await dbContext.PlexPhotoMediaData.SingleAsync(CancellationToken);
         var request = new CreateDownloadTasksRequest(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoImage,
-                    PlexServerId = media.PlexServerId,
-                    PlexLibraryId = media.PlexLibraryId,
-                    MediaIds = [media.Id],
-                    Qualities = [],
-                },
-            ],
+            [CreatePhotoAssetSelection(media)],
             customDestinationFolderPath: "/create-target"
         );
         var command = new CreateDownloadTasksCommand(request);
@@ -95,13 +86,8 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
         var command = new CreateDownloadTasksCommand(
             new CreateDownloadTasksRequest(
                 [
-                    new DownloadMediaDTO
-                    {
-                        Type = PlexMediaType.PhotoImage,
-                        PlexServerId = media.PlexServerId,
-                        PlexLibraryId = media.PlexLibraryId,
-                        MediaIds = [media.Id],
-                        Qualities =
+                    CreatePhotoAssetSelection(
+                        media,
                         [
                             new PlexMediaQualityDTO
                             {
@@ -110,8 +96,8 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                                 MediaDataType = PlexMediaType.PhotoImage,
                                 VideoQuality = VideoQuality.Unknown,
                             },
-                        ],
-                    },
+                        ]
+                    ),
                     new DownloadMediaDTO
                     {
                         Type = PlexMediaType.Movie,
@@ -154,14 +140,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
         var media = await IDbContext.PlexPhotoMediaData.SingleAsync(CancellationToken);
         var request = new CreateDownloadTasksRequest(
             [
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoImage,
-                    PlexServerId = media.PlexServerId,
-                    PlexLibraryId = media.PlexLibraryId,
-                    MediaIds = [media.Id],
-                    Qualities = [],
-                },
+                CreatePhotoAssetSelection(media),
             ]
         );
         Mock.Mock<ICommandExecutor>()
@@ -364,14 +343,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                     MediaIds = [artist.Id],
                     Qualities = [],
                 },
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoImage,
-                    PlexServerId = photo.PlexServerId,
-                    PlexLibraryId = photo.PlexLibraryId,
-                    MediaIds = [photo.Id],
-                    Qualities = [],
-                },
+                CreatePhotoAssetSelection(photo),
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.OtherVideos,
@@ -507,4 +479,19 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
         Mock.Mock<IEventPublisher>().Verify();
         Mock.Mock<INotificationHubService>().Verify();
     }
+
+    private static DownloadMediaDTO CreatePhotoAssetSelection(
+        PlexPhotoMediaData media,
+        List<PlexMediaQualityDTO>? qualities = null
+    ) =>
+        new()
+        {
+            Type = PlexMediaType.PhotoImage,
+            SelectionKind = PhotoItemKind.Asset,
+            PlexServerId = media.PlexServerId,
+            PlexLibraryId = media.PlexLibraryId,
+            MediaIds = [media.Id],
+            Qualities = qualities ?? [],
+        };
+
 }

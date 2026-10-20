@@ -96,9 +96,9 @@ public class PauseDownloadTaskCommandPhotoUnitTests : BaseCommandUnitTest<PauseD
             CancellationToken
         );
         afterTarget.DownloadStatus.ShouldBe(expected);
-        afterTarget.DataReceived.ShouldBe(before == DownloadStatus.Moving ? 0 : 512);
-        afterTarget.FileDataTransferred.ShouldBe(before == DownloadStatus.Moving ? 0 : 256);
-        afterTarget.CurrentFileTransferBytesOffset.ShouldBe(before == DownloadStatus.Moving ? 0 : 256);
+        afterTarget.DataReceived.ShouldBe(512);
+        afterTarget.FileDataTransferred.ShouldBe(256);
+        afterTarget.CurrentFileTransferBytesOffset.ShouldBe(256);
         var afterSibling = await dbContext.DownloadTaskPhotoImageFiles.SingleAsync(
             x => x.Id == sibling.Id,
             CancellationToken

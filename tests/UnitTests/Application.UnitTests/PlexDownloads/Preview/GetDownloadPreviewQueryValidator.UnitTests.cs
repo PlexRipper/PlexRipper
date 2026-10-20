@@ -9,18 +9,7 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
     public async Task ShouldAcceptPhotoSelection_WhenQualitiesAreEmpty(PlexMediaType type)
     {
         // Arrange
-        var query = new GetDownloadPreviewQuery(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = type,
-                    PlexServerId = 1,
-                    PlexLibraryId = 2,
-                    MediaIds = [3],
-                    Qualities = [],
-                },
-            ]
-        );
+        var query = CreateQuery([CreateSelection(type)]);
 
         // Act
         var result = await Sut.ValidateAsync(query, CancellationToken);
@@ -36,26 +25,8 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
     public async Task ShouldRejectPhotoSelection_WhenQualitySelectorIsPresent(PlexMediaType type)
     {
         // Arrange
-        var query = new GetDownloadPreviewQuery(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = type,
-                    PlexServerId = 1,
-                    PlexLibraryId = 2,
-                    MediaIds = [3],
-                    Qualities =
-                    [
-                        new PlexMediaQualityDTO
-                        {
-                            MediaId = 3,
-                            DataId = 4,
-                            MediaDataType = PlexMediaType.PhotoImage,
-                            VideoQuality = VideoQuality.Unknown,
-                        },
-                    ],
-                },
-            ]
+        var query = CreateQuery(
+            [CreateSelection(type, qualities: [CreateQuality(PlexMediaType.PhotoImage)])]
         );
 
         // Act
@@ -71,26 +42,8 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
     public async Task ShouldStillAcceptMovieQualitySelector_WhenPhotoRuleDoesNotApply()
     {
         // Arrange
-        var query = new GetDownloadPreviewQuery(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.Movie,
-                    PlexServerId = 1,
-                    PlexLibraryId = 2,
-                    MediaIds = [3],
-                    Qualities =
-                    [
-                        new PlexMediaQualityDTO
-                        {
-                            MediaId = 3,
-                            DataId = 4,
-                            MediaDataType = PlexMediaType.Movie,
-                            VideoQuality = VideoQuality.Unknown,
-                        },
-                    ],
-                },
-            ]
+        var query = CreateQuery(
+            [CreateSelection(PlexMediaType.Movie, qualities: [CreateQuality(PlexMediaType.Movie)])]
         );
 
         // Act
@@ -118,30 +71,16 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
         // Arrange
         var selections = new List<DownloadMediaDTO>
         {
-            new()
-            {
-                Type = type,
-                PlexServerId = 1,
-                PlexLibraryId = 11,
-                MediaIds = [101],
-                Qualities = [],
-            },
+            CreateSelection(type, ids: (1, 11, 101)),
         };
         if (mixedWithMovie)
             selections.Insert(
                 0,
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.Movie,
-                    PlexServerId = 1,
-                    PlexLibraryId = 11,
-                    MediaIds = [102],
-                    Qualities = [],
-                }
+                CreateSelection(PlexMediaType.Movie, ids: (1, 11, 102))
             );
 
         // Act
-        var result = await Sut.ValidateAsync(new GetDownloadPreviewQuery(selections), CancellationToken);
+        var result = await Sut.ValidateAsync(CreateQuery(selections), CancellationToken);
 
         // Assert
         result.IsValid.ShouldBeTrue();
@@ -165,19 +104,11 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
             PlexMediaType.PhotoImage,
             PlexMediaType.OtherVideos,
         };
-        var query = new GetDownloadPreviewQuery(
+        var query = CreateQuery(
             supportedTypes
-                .Select(
-                    (type, index) => new DownloadMediaDTO
-                    {
-                        Type = type,
-                        PlexServerId = index + 1,
-                        PlexLibraryId = index + 11,
-                        MediaIds = [index + 101],
-                        Qualities = [],
-                    }
+                .Select((type, index) =>
+                    CreateSelection(type, ids: (index + 1, index + 11, index + 101))
                 )
-                .ToList()
         );
 
         // Act
@@ -196,25 +127,90 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
     public async Task ShouldRejectUnsupportedMediaType_WhenSelectionIsOtherwiseValid(PlexMediaType type)
     {
         // Arrange
-        var query = new GetDownloadPreviewQuery(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = type,
-                    PlexServerId = 1,
-                    PlexLibraryId = 11,
-                    MediaIds = [101],
-                    Qualities = [],
-                },
-            ]
-        );
-
+        var query = CreateQuery([CreateSelection(type, ids: (1, 11, 101))]);
         // Act
         var result = await Sut.ValidateAsync(query, CancellationToken);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBe(1);
-        result.Errors.Single().PropertyName.ShouldBe("DownloadMedias[0].Type");
+        result.Errors.Single().PropertyName.ShouldBe("Request.DownloadMedias[0].Type");
     }
+    [Test]
+    public async Task ShouldAcceptFolderSelection_WhenSelectionKindIsNumericZero()
+    {
+        // Arrange
+        var query = CreateQuery([CreateSelectionWithKind(PlexMediaType.PhotoImage, PhotoItemKind.Folder)]);
+
+        // Act
+        var result = await Sut.ValidateAsync(query, CancellationToken);
+
+        // Assert
+        result.IsValid.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldRejectPhotoSelectionWithoutExplicitKind()
+    {
+        // Arrange
+        var query = CreateQuery([CreateSelectionWithoutKind(PlexMediaType.PhotoImage)]);
+
+        // Act
+        var result = await Sut.ValidateAsync(query, CancellationToken);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldContain(x => x.ErrorMessage.Contains("Photo album selections"));
+    }
+
+    private static GetDownloadPreviewQuery CreateQuery(IEnumerable<DownloadMediaDTO> selections) =>
+        new(new DownloadPreviewRequest { DownloadMedias = selections.ToList() });
+
+    private static DownloadMediaDTO CreateSelection(
+        PlexMediaType type,
+        List<PlexMediaQualityDTO>? qualities = null,
+        (int ServerId, int LibraryId, int MediaId)? ids = null
+    ) =>
+        CreateSelectionWithKind(type, GetDefaultSelectionKind(type), qualities, ids);
+
+    private static DownloadMediaDTO CreateSelectionWithKind(
+        PlexMediaType type,
+        PhotoItemKind? selectionKind,
+        List<PlexMediaQualityDTO>? qualities = null,
+        (int ServerId, int LibraryId, int MediaId)? ids = null
+    )
+    {
+        var (serverId, libraryId, mediaId) = ids ?? (1, 2, 3);
+        return new DownloadMediaDTO
+        {
+            Type = type,
+            SelectionKind = selectionKind,
+            PlexServerId = serverId,
+            PlexLibraryId = libraryId,
+            MediaIds = [mediaId],
+            Qualities = qualities ?? [],
+        };
+    }
+
+    private static DownloadMediaDTO CreateSelectionWithoutKind(PlexMediaType type) =>
+        CreateSelectionWithKind(type, selectionKind: null);
+
+    private static PhotoItemKind? GetDefaultSelectionKind(PlexMediaType type) =>
+        type switch
+        {
+            PlexMediaType.PhotoAlbum => PhotoItemKind.Album,
+            PlexMediaType.PhotoImage => PhotoItemKind.Asset,
+            _ => null,
+        };
+
+    private static PlexMediaQualityDTO CreateQuality(PlexMediaType type) =>
+        new()
+        {
+            MediaId = 3,
+            DataId = 4,
+            MediaDataType = type,
+            VideoQuality = VideoQuality.Unknown,
+        };
+
 }

@@ -92,7 +92,7 @@ public class StartDownloadTaskCommandPhotoUnitTests : BaseCommandUnitTest<StartD
     [Arguments(true, false, true)]
     [Arguments(true, true, false)]
     [Arguments(true, true, true)]
-    public async Task ShouldStartOnlyNextPhotoMoveAndRestoreRejectedMove_WhenStartingPhotos(
+    public async Task ShouldStartOnlyNextPhotoMoveAndPreserveStatuses_WhenStartingPhotos(
         bool selectFolder,
         bool includeDownloads,
         bool failMove
@@ -180,11 +180,7 @@ public class StartDownloadTaskCommandPhotoUnitTests : BaseCommandUnitTest<StartD
             .Select(x => new { x.Id, x.DownloadStatus, x.DataReceived })
             .ToListAsync(CancellationToken);
         after.Select(x => x.Id).ShouldBe(orderedFiles.Select(x => x.Id));
-        after.Select(x => x.DownloadStatus).ShouldBe(
-            statuses.Select((status, index) => index == 0
-                ? failMove ? DownloadStatus.MovePaused : DownloadStatus.DownloadFinished
-                : status)
-        );
+        after.Select(x => x.DownloadStatus).ShouldBe(statuses);
         after.ShouldAllBe(x => x.DataReceived == 512);
         (await dbContext.DownloadTaskPhotoImageFiles.SingleAsync(x => x.Id == directRootFile.Id, CancellationToken)).DownloadStatus.ShouldBe(
             DownloadStatus.Queued

@@ -18,16 +18,13 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         var dbContext = IDbContext;
         var media = await dbContext.PlexPhotoMediaData.SingleAsync(CancellationToken);
         var query = new GetPhotoDownloadPreviewCommand(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoImage,
-                    PlexServerId = media.PlexServerId,
-                    PlexLibraryId = media.PlexLibraryId,
-                    MediaIds = [media.Id],
-                    Qualities = [],
-                },
-            ]
+            new DownloadPreviewRequest
+            {
+                DownloadMedias =
+                [
+                    CreatePhotoSelection(PhotoItemKind.Asset, (media.PlexServerId, media.PlexLibraryId), [media.Id]),
+                ],
+            }
         );
 
         // Act
@@ -70,16 +67,17 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         var target = files[0];
         var foreign = files[1];
         var query = new GetPhotoDownloadPreviewCommand(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoImage,
-                    PlexServerId = target.PlexServerId,
-                    PlexLibraryId = target.PlexLibraryId,
-                    MediaIds = [target.Id, foreign.Id, int.MaxValue],
-                    Qualities = [],
-                },
-            ]
+            new DownloadPreviewRequest
+            {
+                DownloadMedias =
+                [
+                    CreatePhotoSelection(
+                        PhotoItemKind.Asset,
+                        (target.PlexServerId, target.PlexLibraryId),
+                        [target.Id, foreign.Id, int.MaxValue]
+                    ),
+                ],
+            }
         );
 
         // Act
@@ -122,16 +120,13 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         media.PlexPhotoFolder = child;
         await dbContext.SaveChangesAsync(CancellationToken);
         var query = new GetPhotoDownloadPreviewCommand(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoImage,
-                    PlexServerId = media.PlexServerId,
-                    PlexLibraryId = media.PlexLibraryId,
-                    MediaIds = [media.Id],
-                    Qualities = [],
-                },
-            ]
+            new DownloadPreviewRequest
+            {
+                DownloadMedias =
+                [
+                    CreatePhotoSelection(PhotoItemKind.Asset, (media.PlexServerId, media.PlexLibraryId), [media.Id]),
+                ],
+            }
         );
 
         // Act
@@ -166,24 +161,14 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         var album = await dbContext.PlexPhotoAlbums.SingleAsync(CancellationToken);
         var media = await dbContext.PlexPhotoMediaData.SingleAsync(CancellationToken);
         var query = new GetPhotoDownloadPreviewCommand(
-            [
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoAlbum,
-                    PlexServerId = album.PlexServerId,
-                    PlexLibraryId = album.PlexLibraryId,
-                    MediaIds = [album.Id],
-                    Qualities = [],
-                },
-                new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoImage,
-                    PlexServerId = media.PlexServerId,
-                    PlexLibraryId = media.PlexLibraryId,
-                    MediaIds = [media.Id],
-                    Qualities = [],
-                },
-            ]
+            new DownloadPreviewRequest
+            {
+                DownloadMedias =
+                [
+                    CreatePhotoSelection(PhotoItemKind.Album, (album.PlexServerId, album.PlexLibraryId), [album.Id]),
+                    CreatePhotoSelection(PhotoItemKind.Asset, (media.PlexServerId, media.PlexLibraryId), [media.Id]),
+                ],
+            }
         );
 
         // Act
@@ -223,19 +208,20 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         );
         await dbContext.SaveChangesAsync(CancellationToken);
         var query = new GetPhotoDownloadPreviewCommand(
-            albums
-                .Select(
-                    (album, index) => new DownloadMediaDTO
-                    {
-                        Type = PlexMediaType.PhotoAlbum,
-                        PlexServerId = album.PlexServerId,
-                        PlexLibraryId = album.PlexLibraryId,
-                        MediaIds = [album.Id],
-                        Qualities = [],
-                        KeepCompletedInDownloadFolder = index == 0,
-                    }
-                )
-                .ToList()
+            new DownloadPreviewRequest
+            {
+                DownloadMedias = albums
+                    .Select(
+                        (album, index) =>
+                            CreatePhotoSelection(
+                                PhotoItemKind.Album,
+                                (album.PlexServerId, album.PlexLibraryId),
+                                [album.Id],
+                                index == 0
+                            )
+                    )
+                    .ToList(),
+            }
         );
 
         // Act
@@ -274,7 +260,8 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         {
             PlexServerId = server.Id,
             PlexLibraryId = library.Id,
-            RelativePath = "",
+            ParentId = null,
+            RelativePath = string.Empty,
             Title = "Second source",
             RootIdentityKey = "fixture:second-source",
             SourceRootPath = "/second-source",
@@ -304,24 +291,20 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
             PlexPhotoMediaDataId = media[0].Id,
         });
         await dbContext.SaveChangesAsync(CancellationToken);
-        var selections = albums.Select((album, index) => new DownloadMediaDTO
-        {
-            Type = PlexMediaType.PhotoAlbum,
-            PlexServerId = server.Id,
-            PlexLibraryId = library.Id,
-            MediaIds = [album.Id],
-            Qualities = [],
-            KeepCompletedInDownloadFolder = index == 0,
-        }).ToList();
-        selections.Add(new DownloadMediaDTO
-        {
-            Type = PlexMediaType.PhotoImage,
-            PlexServerId = server.Id,
-            PlexLibraryId = library.Id,
-            MediaIds = [media[0].Id],
-            Qualities = [],
-            KeepCompletedInDownloadFolder = false,
-        });
+        var selections = albums
+            .Select(
+                (album, index) =>
+                    CreatePhotoSelection(
+                        PhotoItemKind.Album,
+                        (server.Id, library.Id),
+                        [album.Id],
+                        index == 0
+                    )
+            )
+            .ToList();
+        selections.Add(
+            CreatePhotoSelection(PhotoItemKind.Asset, (server.Id, library.Id), [media[0].Id])
+        );
         if (reverseSelections)
             selections.Reverse();
         var creationCommand = new GenerateDownloadTaskPhotoImagesCommand(new CreateDownloadTasksRequest(selections));
@@ -331,7 +314,9 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         var creator = Mock.Create<GenerateDownloadTaskPhotoImagesCommandHandler>();
 
         // Act
-        var preview = await TestHandlerExecuteAsync<IEnumerable<DownloadPreview>>(new(selections));
+        var preview = await TestHandlerExecuteAsync<IEnumerable<DownloadPreview>>(
+            new(new DownloadPreviewRequest { DownloadMedias = selections })
+        );
         var created = await creator.ExecuteAsync(creationCommand, CancellationToken);
 
         // Assert
@@ -407,14 +392,11 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         await dbContext.SaveChangesAsync(CancellationToken);
         var media = await dbContext.PlexPhotoMediaData.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         media.Count.ShouldBe(3);
-        var firstSelection = new DownloadMediaDTO
-        {
-            Type = PlexMediaType.PhotoImage,
-            PlexServerId = server.Id,
-            PlexLibraryId = library.Id,
-            MediaIds = queueCollisionOwner ? [media[0].Id, media[1].Id] : [media[0].Id],
-            Qualities = [],
-        };
+        var firstSelection = CreatePhotoSelection(
+            PhotoItemKind.Asset,
+            (server.Id, library.Id),
+            queueCollisionOwner ? [media[0].Id, media[1].Id] : [media[0].Id]
+        );
         var initialCommand = new GenerateDownloadTaskPhotoImagesCommand([firstSelection]);
         (await new GenerateDownloadTaskPhotoImagesCommandValidator()
             .ValidateAsync(initialCommand, CancellationToken)).IsValid.ShouldBeTrue();
@@ -462,7 +444,9 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         var selection = firstSelection with { MediaIds = [.. media.Select(x => x.Id), collision.Id, invalid.Id] };
 
         // Act
-        var result = await TestHandlerExecuteAsync<IEnumerable<DownloadPreview>>(new([selection]));
+        var result = await TestHandlerExecuteAsync<IEnumerable<DownloadPreview>>(
+            new(new DownloadPreviewRequest { DownloadMedias = [selection] })
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -482,4 +466,22 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
         (await dbContext.DownloadTaskPhotoImageFileLogs.Select(x => x.Id).ToListAsync(CancellationToken))
             .Order().ShouldBe(originalLogs.Order());
     }
+
+    private static DownloadMediaDTO CreatePhotoSelection(
+        PhotoItemKind selectionKind,
+        (int ServerId, int LibraryId) scope,
+        IEnumerable<int> mediaIds,
+        bool keepCompleted = false
+    ) =>
+        new()
+        {
+            Type = selectionKind == PhotoItemKind.Album ? PlexMediaType.PhotoAlbum : PlexMediaType.PhotoImage,
+            SelectionKind = selectionKind,
+            PlexServerId = scope.ServerId,
+            PlexLibraryId = scope.LibraryId,
+            MediaIds = mediaIds.ToList(),
+            Qualities = [],
+            KeepCompletedInDownloadFolder = keepCompleted,
+        };
+
 }

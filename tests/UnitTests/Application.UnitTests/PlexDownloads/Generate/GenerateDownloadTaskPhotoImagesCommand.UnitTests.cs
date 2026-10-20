@@ -24,6 +24,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.PhotoImage,
+            SelectionKind = PhotoItemKind.Asset,
             PlexServerId = media.PlexServerId,
             PlexLibraryId = media.PlexLibraryId,
             MediaIds = [media.Id],
@@ -91,6 +92,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                     new DownloadMediaDTO
                     {
                         Type = PlexMediaType.PhotoImage,
+                        SelectionKind = PhotoItemKind.Asset,
                         PlexServerId = target.PlexServerId,
                         PlexLibraryId = target.PlexLibraryId,
                         MediaIds = [target.Id, foreign.Id, int.MaxValue],
@@ -138,6 +140,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
             new()
             {
                 Type = PlexMediaType.PhotoAlbum,
+                SelectionKind = PhotoItemKind.Album,
                 PlexServerId = albums[0].PlexServerId,
                 PlexLibraryId = albums[0].PlexLibraryId,
                 MediaIds = [albums[0].Id, albums[1].Id],
@@ -146,6 +149,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
             new()
             {
                 Type = PlexMediaType.PhotoImage,
+                SelectionKind = PhotoItemKind.Asset,
                 PlexServerId = files[0].PlexServerId,
                 PlexLibraryId = files[0].PlexLibraryId,
                 MediaIds = [files[0].Id],
@@ -181,49 +185,8 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
     public async Task ShouldResolveOverlappingAlbumOptions_AccordingToDirectSelectionPrecedence(
         bool includeDirectSelection, bool reverseSelections)
     {
-        // Arrange
-        await SetupDatabase(
-            62306,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.PlexPhotoLibraryCount = 1;
-                config.PhotoAlbumCount = 2;
-                config.PhotoCount = 1;
-            }
-        );
+        var (selections, files) = await CreateOverlappingAlbumSelectionsAsync(includeDirectSelection);
         var dbContext = IDbContext;
-        var albums = await dbContext.PlexPhotoAlbums.OrderBy(x => x.Id).ToListAsync(CancellationToken);
-        var files = await dbContext.PlexPhotoMediaData.OrderBy(x => x.Id).ToListAsync(CancellationToken);
-        var file = files[0];
-        dbContext.PlexPhotoAlbumMemberships.Add(
-            new PlexPhotoAlbumMembership { PlexPhotoAlbumId = albums[1].Id, PlexPhotoMediaDataId = file.Id }
-        );
-        await dbContext.SaveChangesAsync(CancellationToken);
-        var selections = albums
-            .Select(
-                (album, index) => new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.PhotoAlbum,
-                    PlexServerId = album.PlexServerId,
-                    PlexLibraryId = album.PlexLibraryId,
-                    MediaIds = [album.Id],
-                    Qualities = [],
-                    KeepCompletedInDownloadFolder = index == 0,
-                }
-            )
-            .ToList();
-
-        if (includeDirectSelection)
-            selections.Add(new DownloadMediaDTO
-            {
-                Type = PlexMediaType.PhotoImage,
-                PlexServerId = file.PlexServerId,
-                PlexLibraryId = file.PlexLibraryId,
-                MediaIds = [file.Id],
-                Qualities = [],
-                KeepCompletedInDownloadFolder = false,
-            });
         if (reverseSelections)
             selections.Reverse();
         // Act
@@ -267,6 +230,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                     new DownloadMediaDTO
                     {
                         Type = PlexMediaType.PhotoImage,
+                        SelectionKind = PhotoItemKind.Asset,
                         PlexServerId = 1,
                         PlexLibraryId = 2,
                         MediaIds = [3],
@@ -321,6 +285,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.PhotoImage,
+                    SelectionKind = PhotoItemKind.Asset,
                     PlexServerId = media.PlexServerId,
                     PlexLibraryId = media.PlexLibraryId,
                     MediaIds = [media.Id],
@@ -379,6 +344,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                             new DownloadMediaDTO
                             {
                                 Type = PlexMediaType.PhotoImage,
+                                SelectionKind = PhotoItemKind.Asset,
                                 PlexServerId = media.PlexServerId,
                                 PlexLibraryId = media.PlexLibraryId,
                                 MediaIds = [media.Id],
@@ -452,6 +418,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                         new DownloadMediaDTO
                         {
                             Type = PlexMediaType.PhotoImage,
+                            SelectionKind = PhotoItemKind.Asset,
                             PlexServerId = media.PlexServerId,
                             PlexLibraryId = media.PlexLibraryId,
                             MediaIds = [media.Id],
@@ -525,6 +492,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                         new DownloadMediaDTO
                         {
                             Type = PlexMediaType.PhotoImage,
+                            SelectionKind = PhotoItemKind.Asset,
                             PlexServerId = media.PlexServerId,
                             PlexLibraryId = media.PlexLibraryId,
                             MediaIds = [media.Id, duplicate.Id],
@@ -566,6 +534,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.PhotoImage,
+            SelectionKind = PhotoItemKind.Asset,
             PlexServerId = files[0].PlexServerId,
             PlexLibraryId = files[0].PlexLibraryId,
             MediaIds = files.Select(x => x.Id).ToList(),
@@ -591,8 +560,10 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
         else
         {
             result.Value.ShouldBe(new DownloadTaskCreationReport { PhotoFolders = 1, PhotoImages = 2 });
-            (await dbContext.DownloadTaskPhotoImageFiles.Select(x => x.FileName).OrderBy(x => x)
-                .ToListAsync(CancellationToken)).ShouldBe(["A.jpg", "a.jpg"]);
+            (await dbContext.DownloadTaskPhotoImageFiles.Select(x => x.FileName)
+                .ToListAsync(CancellationToken))
+                .OrderBy(x => x, StringComparer.Ordinal)
+                .ShouldBe(["A.jpg", "a.jpg"]);
         }
     }
 
@@ -616,6 +587,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.PhotoImage,
+                    SelectionKind = PhotoItemKind.Asset,
                     PlexServerId = media.PlexServerId,
                     PlexLibraryId = media.PlexLibraryId,
                     MediaIds = [media.Id],
@@ -690,6 +662,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                             new DownloadMediaDTO
                             {
                                 Type = PlexMediaType.PhotoImage,
+                                SelectionKind = PhotoItemKind.Asset,
                                 PlexServerId = file.PlexServerId,
                                 PlexLibraryId = file.PlexLibraryId,
                                 MediaIds = [file.Id],
@@ -748,6 +721,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.PhotoImage,
+                    SelectionKind = PhotoItemKind.Asset,
                     PlexServerId = media.PlexServerId,
                     PlexLibraryId = media.PlexLibraryId,
                     MediaIds = [media.Id],
@@ -783,4 +757,57 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
             new[] { firstDownloadRoot, Path.TrimEndingDirectorySeparator(Path.GetFullPath("/fixture/downloads/second")) }.Order()
         );
     }
+
+    private async Task<(List<DownloadMediaDTO> Selections, List<PlexPhotoMediaData> Files)> CreateOverlappingAlbumSelectionsAsync(
+        bool includeDirectSelection
+    )
+    {
+        await SetupDatabase(
+            62306,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 2;
+                config.PhotoCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var albums = await dbContext.PlexPhotoAlbums.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var files = await dbContext.PlexPhotoMediaData.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var file = files[0];
+        dbContext.PlexPhotoAlbumMemberships.Add(
+            new PlexPhotoAlbumMembership { PlexPhotoAlbumId = albums[1].Id, PlexPhotoMediaDataId = file.Id }
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var selections = albums
+            .Select(
+                (album, index) => new DownloadMediaDTO
+                {
+                    Type = PlexMediaType.PhotoAlbum,
+                    SelectionKind = PhotoItemKind.Album,
+                    PlexServerId = album.PlexServerId,
+                    PlexLibraryId = album.PlexLibraryId,
+                    MediaIds = [album.Id],
+                    Qualities = [],
+                    KeepCompletedInDownloadFolder = index == 0,
+                }
+            )
+            .ToList();
+        if (includeDirectSelection)
+            selections.Add(
+                new DownloadMediaDTO
+                {
+                    Type = PlexMediaType.PhotoImage,
+                    SelectionKind = PhotoItemKind.Asset,
+                    PlexServerId = file.PlexServerId,
+                    PlexLibraryId = file.PlexLibraryId,
+                    MediaIds = [file.Id],
+                    Qualities = [],
+                    KeepCompletedInDownloadFolder = false,
+                }
+            );
+        return (selections, files);
+    }
+
 }

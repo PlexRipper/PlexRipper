@@ -31,16 +31,22 @@ public class GetDownloadPreviewQueryCommandUnitTests : BaseCommandUnitTest<GetDo
             .PlexServers.Where(x => x.Id != target.PlexServerId)
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
-        var query = new GetDownloadPreviewQuery([
-            new DownloadMediaDTO
+        var query = new GetDownloadPreviewQuery(
+            new DownloadPreviewRequest
             {
-                Type = type,
-                PlexServerId = foreignServerId,
-                PlexLibraryId = target.PlexLibraryId,
-                MediaIds = [target.Id],
-                Qualities = [],
-            },
-        ]);
+                DownloadMedias =
+                [
+                    new DownloadMediaDTO
+                    {
+                        Type = type,
+                        PlexServerId = foreignServerId,
+                        PlexLibraryId = target.PlexLibraryId,
+                        MediaIds = [target.Id],
+                        Qualities = [],
+                    },
+                ],
+            }
+        );
         SetupFamilyCommandExecutor();
 
         // Act
@@ -60,7 +66,7 @@ public class GetDownloadPreviewQueryCommandUnitTests : BaseCommandUnitTest<GetDo
 
         // Act
         var result = await new GetDownloadPreviewQueryHandler(Mock.Mock<ICommandExecutor>().Object, Log).ExecuteAsync(
-            new GetDownloadPreviewQuery([]),
+            new GetDownloadPreviewQuery(new DownloadPreviewRequest { DownloadMedias = [] }),
             CancellationToken
         );
 
@@ -88,24 +94,30 @@ public class GetDownloadPreviewQueryCommandUnitTests : BaseCommandUnitTest<GetDo
         var dbContext = IDbContext;
         var movies = await dbContext.PlexMovies.ToListAsync(CancellationToken);
         var shows = await dbContext.PlexTvShows.ToListAsync(CancellationToken);
-        var query = new GetDownloadPreviewQuery([
-            new DownloadMediaDTO
+        var query = new GetDownloadPreviewQuery(
+            new DownloadPreviewRequest
             {
-                Type = PlexMediaType.Movie,
-                PlexServerId = movies[0].PlexServerId,
-                PlexLibraryId = movies[0].PlexLibraryId,
-                MediaIds = movies.Select(x => x.Id).ToList(),
-                Qualities = [],
-            },
-            new DownloadMediaDTO
-            {
-                Type = PlexMediaType.TvShow,
-                PlexServerId = shows[0].PlexServerId,
-                PlexLibraryId = shows[0].PlexLibraryId,
-                MediaIds = shows.Select(x => x.Id).ToList(),
-                Qualities = [],
-            },
-        ]);
+                DownloadMedias =
+                [
+                    new DownloadMediaDTO
+                    {
+                        Type = PlexMediaType.Movie,
+                        PlexServerId = movies[0].PlexServerId,
+                        PlexLibraryId = movies[0].PlexLibraryId,
+                        MediaIds = movies.Select(x => x.Id).ToList(),
+                        Qualities = [],
+                    },
+                    new DownloadMediaDTO
+                    {
+                        Type = PlexMediaType.TvShow,
+                        PlexServerId = shows[0].PlexServerId,
+                        PlexLibraryId = shows[0].PlexLibraryId,
+                        MediaIds = shows.Select(x => x.Id).ToList(),
+                        Qualities = [],
+                    },
+                ],
+            }
+        );
         SetupFamilyCommandExecutor();
 
         // Act
@@ -136,17 +148,20 @@ public class GetDownloadPreviewQueryCommandUnitTests : BaseCommandUnitTest<GetDo
         );
         var movies = await IDbContext.PlexMovies.AsNoTracking().ToListAsync(CancellationToken);
         var query = new GetDownloadPreviewQuery(
-            movies
-                .GroupBy(x => (x.PlexServerId, x.PlexLibraryId))
-                .Select(group => new DownloadMediaDTO
-                {
-                    Type = PlexMediaType.Movie,
-                    PlexServerId = group.Key.PlexServerId,
-                    PlexLibraryId = group.Key.PlexLibraryId,
-                    MediaIds = group.Select(x => x.Id).ToList(),
-                    Qualities = [],
-                })
-                .ToList()
+            new DownloadPreviewRequest
+            {
+                DownloadMedias = movies
+                    .GroupBy(x => (x.PlexServerId, x.PlexLibraryId))
+                    .Select(group => new DownloadMediaDTO
+                    {
+                        Type = PlexMediaType.Movie,
+                        PlexServerId = group.Key.PlexServerId,
+                        PlexLibraryId = group.Key.PlexLibraryId,
+                        MediaIds = group.Select(x => x.Id).ToList(),
+                        Qualities = [],
+                    })
+                    .ToList(),
+            }
         );
         SetupFamilyCommandExecutor();
 

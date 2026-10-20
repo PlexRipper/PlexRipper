@@ -30,6 +30,10 @@ describe('Desktop update availability refresh', () => {
 				isDevRelease: false,
 			}],
 		};
+		const [releaseNote] = availableUpdate.releaseNotes;
+		if (!releaseNote) {
+			throw new Error('Expected update response to contain a release note');
+		}
 		const noUpdate = {
 			currentVersion: '1.0.0',
 			newestVersion: '1.0.0',
@@ -71,7 +75,7 @@ describe('Desktop update availability refresh', () => {
 				.click();
 			cy.getCy('updatedialog-cy').should('be.visible').within(() => {
 				cy.get('.update-dialog__tab-version').should('have.length', 1).and('have.text', availableUpdate.newestVersion);
-				cy.get('.update-dialog__notes').should('contain.text', availableUpdate.releaseNotes[0].notes);
+				cy.get('.update-dialog__notes').should('contain.text', releaseNote.notes);
 				cy.contains('button', 'Download').should('be.visible');
 			});
 		});

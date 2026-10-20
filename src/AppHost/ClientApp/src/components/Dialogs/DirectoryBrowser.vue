@@ -241,13 +241,14 @@ function confirm(): void {
 	emit('confirm', cloneDeep(selectedPath));
 }
 
-function updateCurrentPath(newPath: string): void {
+function updateCurrentPath(newPath: string | undefined): void {
 	if (props.saving) {
 		return;
 	}
 
-	set(currentPath, newPath);
-	requestDirectories(newPath);
+	const pathValue = newPath ?? '';
+	set(currentPath, pathValue);
+	requestDirectories(pathValue);
 }
 
 function requestDirectories(newPath?: string): void {

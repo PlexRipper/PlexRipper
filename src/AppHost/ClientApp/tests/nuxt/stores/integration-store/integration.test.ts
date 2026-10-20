@@ -801,6 +801,7 @@ describe('IntegrationStore', () => {
 		const store = useIntegrationStore();
 		const saveSonarr = vi.spyOn(integrationApi, 'createSonarrIntegrationEndpoint');
 		store.openAdd('Lidarr' as IntegrationType);
+		store.draft.url = 'http://lidarr';
 
 		// Act
 		const save = () => store.save();

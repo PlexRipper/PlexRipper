@@ -1,6 +1,7 @@
+import { PlexServerConnectionPaths } from '@api-urls';
 import { route } from '@fixtures';
-import { JobStatus, MessageTypes, type ServerConnectionCheckStatusProgressDTO } from '@dto';
-import { generatePlexServer } from '@mock';
+import { JobStatus, MessageTypes, PlexConnectionTypes, type PlexServerConnectionDTO, type ServerConnectionCheckStatusProgressDTO, type UpdatePlexServerConnectionEndpointRequest } from '@dto';
+import { generatePlexServer, generatePlexServerConnection, generateResultDTO } from '@mock';
 
 describe('Check server connections dialog', () => {
 	before(() => {
@@ -154,5 +155,139 @@ describe('Check server connections dialog', () => {
 
 			cy.getCy(`check-server-connections-dialog-result-text-completed-${loadingServer.id}`).should('exist');
 		});
+	});
+});
+
+type CustomUrlMutation = 'create' | 'update';
+
+const customUrlActions: Record<CustomUrlMutation, { label: string; alias: string; method: string }> = {
+	create: { label: 'Create Connection', alias: '@createConnection', method: 'POST' },
+	update: { label: 'Update Connection', alias: '@updateConnection', method: 'PATCH' },
+};
+
+interface CustomUrlScenario {
+	invalidUrls: readonly string[];
+	createInputUrl: string;
+	createUrl: string;
+	updateInputUrl: string;
+	updateUrl: string;
+	connectionId: number;
+	serverId: number;
+	connections: PlexServerConnectionDTO[];
+	calls: Record<CustomUrlMutation | 'validate', number>;
+}
+
+function createCustomUrlScenario(): CustomUrlScenario {
+	return {
+		invalidUrls: ['ftp://plex.example.test:32400/path', 'not-a-valid-url'],
+		createInputUrl: 'https://plex.example.test:32400/path',
+		createUrl: 'https://plex.example.test:32400',
+		updateInputUrl: 'https://plex.example.test:32401/edited-path',
+		updateUrl: 'https://plex.example.test:32401',
+		connectionId: 9001,
+		serverId: 0,
+		connections: [],
+		calls: { create: 0, update: 0, validate: 0 },
+	};
+}
+
+function installCustomUrlApis(scenario: CustomUrlScenario): void {
+	cy.basePageSetup({ plexAccountCount: 1, plexServerCount: 1, maxServerConnections: 0 });
+	cy.intercept('GET', PlexServerConnectionPaths.getAllPlexServerConnectionsEndpoint(), (request) => {
+		request.reply({ statusCode: 200, body: generateResultDTO(scenario.connections) });
+	}).as('getConnections');
+	cy.intercept('POST', PlexServerConnectionPaths.createPlexServerConnectionEndpoint(), (request) => {
+		scenario.calls.create++;
+		const connection = generatePlexServerConnection({
+			id: scenario.connectionId,
+			plexServerId: scenario.serverId,
+			partialData: {
+				protocol: 'https', address: 'plex.example.test', port: 32400,
+				url: scenario.createUrl, isCustom: true, type: PlexConnectionTypes.Public,
+			},
+		});
+		scenario.connections = [connection];
+		request.reply({ statusCode: 200, body: generateResultDTO(connection) });
+	}).as('createConnection');
+	cy.intercept('PATCH', PlexServerConnectionPaths.updatePlexServerConnectionEndpoint(), (request) => {
+		const body = request.body as UpdatePlexServerConnectionEndpointRequest;
+		scenario.calls.update++;
+		const connection = generatePlexServerConnection({
+			id: body.id,
+			plexServerId: body.plexServerId,
+			partialData: { ...body, isCustom: true, type: PlexConnectionTypes.Public },
+		});
+		scenario.connections = [connection];
+		request.reply({ statusCode: 200, body: generateResultDTO(connection) });
+	}).as('updateConnection');
+	cy.intercept('POST', PlexServerConnectionPaths.validatePlexServerConnectionEndpoint(), (request) => {
+		scenario.calls.validate++;
+		request.reply({ statusCode: 200, body: generateResultDTO({ version: '1.0.0', machineIdentifier: 'machine-id' }) });
+	}).as('validateConnection');
+}
+
+function openCustomUrlCreateDialog(scenario: CustomUrlScenario): void {
+	cy.visitEmptyPage();
+	cy.getPageData().then(({ plexServers }) => {
+		scenario.serverId = plexServers[0]!.id;
+	});
+	cy.wait('@getConnections');
+	cy.getCy('server-dialog-0').filter(':visible').first().click();
+	cy.getCy('server-dialog-cy').should('be.visible');
+	cy.getCy('server-dialog-tab-2').click();
+	cy.getCy('server-dialog-tab-content-2').should('be.visible');
+	cy.contains('button', 'Add connection').click();
+	cy.getCy('q-card-dialog-cy').should('be.visible');
+}
+
+function assertInvalidCustomUrls(scenario: CustomUrlScenario, mutation: CustomUrlMutation): void {
+	const { label } = customUrlActions[mutation];
+	for (const invalidUrl of scenario.invalidUrls) {
+		cy.getCy('q-card-dialog-cy').find('input').first().clear().type(invalidUrl).blur();
+		cy.getCy('q-card-dialog-cy').find('.invalid-icon').should('be.visible');
+		cy.getCy('q-card-dialog-cy').contains('button', label).should('be.disabled');
+		cy.then(() => expect(scenario.calls[mutation]).to.equal(0));
+	}
+}
+
+function saveCustomUrl(scenario: CustomUrlScenario, mutation: CustomUrlMutation): void {
+	const isCreate = mutation === 'create';
+	const action = customUrlActions[mutation];
+	const inputUrl = isCreate ? scenario.createInputUrl : scenario.updateInputUrl;
+	const savedUrl = isCreate ? scenario.createUrl : scenario.updateUrl;
+	cy.getCy('q-card-dialog-cy').find('input').first().clear().type(inputUrl).blur();
+	cy.getCy('q-card-dialog-cy').find('input').first().should('have.value', inputUrl);
+	cy.getCy('q-card-dialog-cy').find('.valid-icon').should('be.visible');
+	cy.getCy('q-card-dialog-cy').contains('button', action.label)
+		.should('not.be.disabled').click();
+	cy.wait(action.alias).then(({ request, response }) => {
+		const expectedBody = isCreate
+			? { protocol: 'https', address: 'plex.example.test', port: 32400, url: savedUrl, plexServerId: scenario.serverId }
+			: { id: scenario.connectionId, protocol: 'https', address: 'plex.example.test', port: 32401, url: savedUrl, plexServerId: scenario.serverId };
+		expect(request.method).to.equal(action.method);
+		expect(request.body).to.deep.equal(expectedBody);
+		expect(response?.statusCode).to.equal(200);
+		expect(response?.body.value).to.deep.include({ id: scenario.connectionId, url: savedUrl, isCustom: true });
+	});
+	cy.then(() => {
+		expect(scenario.calls[mutation]).to.equal(1);
+		expect(scenario.calls.validate).to.equal(0);
+	});
+	cy.getCy('q-card-dialog-cy').should('not.exist');
+	cy.getCy('server-dialog-cy').should('be.visible').and('contain.text', savedUrl);
+}
+
+describe('Custom Plex connection URL validation', () => {
+	it('rejects invalid protocols on add and edit, then saves valid HTTPS origins offline', () => {
+		const scenario = createCustomUrlScenario();
+		installCustomUrlApis(scenario);
+		openCustomUrlCreateDialog(scenario);
+		assertInvalidCustomUrls(scenario, 'create');
+		saveCustomUrl(scenario, 'create');
+		cy.contains('.server-connection-row', scenario.createUrl).find('.server-connection-row__edit button').click();
+		cy.getCy('q-card-dialog-cy').should('be.visible');
+		assertInvalidCustomUrls(scenario, 'update');
+		saveCustomUrl(scenario, 'update');
+		cy.getCy('server-dialog-cy').should('not.contain.text', scenario.createUrl);
 	});
 });

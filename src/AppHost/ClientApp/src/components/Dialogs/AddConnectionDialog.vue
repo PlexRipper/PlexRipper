@@ -149,7 +149,8 @@ const response = ref<ServerIdentityDTO | null>(null);
 
 const parsedUrl = computed((): URL | null => {
 	try {
-		return new URL(get(url));
+		const parsed = new URL(get(url));
+		return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed : null;
 	} catch (e) {
 		return e === 'TypeError' ? null : null;
 	}

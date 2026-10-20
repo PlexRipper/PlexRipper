@@ -235,6 +235,7 @@ const isSavingForSetup = ref(false);
 const requiredRules = [(value: string | number) => (typeof value === 'number' ? value > 0 : Boolean(value?.trim())) || 'Required'];
 const baseUrlRules = [
 	...requiredRules,
+	(value: string) => store.isHttpUrl(value) || 'URL must be an absolute http/https URL.',
 	(value: string) => store.isUrlUnique(value)
 		|| $t('help.settings.integrations.validation.base-url-unique', { type: store.draft.type }),
 ];

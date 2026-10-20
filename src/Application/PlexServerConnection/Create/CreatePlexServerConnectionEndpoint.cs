@@ -17,7 +17,11 @@ public class CreatePlexServerConnectionEndpointRequestValidator : Validator<Crea
 {
     public CreatePlexServerConnectionEndpointRequestValidator()
     {
-        RuleFor(x => x.Url).NotEmpty();
+        RuleFor(x => x.Url)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .Must(url => url is not null && url.Trim().IsValidHttpUrl())
+            .WithMessage("string is not a valid URL");
         RuleFor(x => x.Protocol).NotEmpty();
         RuleFor(x => x.Address).NotEmpty();
         RuleFor(x => x.Port).GreaterThan(0);

@@ -188,7 +188,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		save() {
-			if (!isEditTargetReady()) return EMPTY;
+			if (!isEditTargetReady() || !isHttpUrl(state.draft.url)) return EMPTY;
 			const ownsRequest = beginRequest('mutation');
 			let expectedTarget = captureDraftTarget();
 			const isCurrent = () => ownsRequest() && isEqual(expectedTarget, captureDraftTarget());
@@ -477,11 +477,20 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			|| state.draft.downloadFolderId !== state.detail.downloadFolderId;
 	}
 
+	function isHttpUrl(value: string): boolean {
+		try {
+			const { protocol } = new URL(value.trim());
+			return protocol === 'http:' || protocol === 'https:';
+		} catch {
+			return false;
+		}
+	}
+
 	function isDraftValid(): boolean {
 		if (!isEditTargetReady()) return false;
 		return Boolean(
 			state.draft.name.trim()
-			&& state.draft.url.trim()
+			&& isHttpUrl(state.draft.url)
 			&& state.draft.apiKey.trim()
 			&& state.draft.category.trim()
 			&& state.draft.downloadFolderId > 0
@@ -491,6 +500,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 	}
 
 	const getters = {
+		isHttpUrl,
 		isCategoryUnique,
 		isUrlUnique,
 		isDraftDirty: computed(isDraftDirty),

@@ -9,6 +9,7 @@ import {
 	type IntegrationSetupProgressDTO,
 	type IntegrationSummary,
 	type RadarrIntegrationDTO,
+	type CreateRadarrIntegrationRequest,
 } from '@dto';
 import { generateResultDTO } from '@mock';
 
@@ -82,7 +83,143 @@ const setupStages = [
 	},
 ] as const;
 
+interface RadarrUrlScenario {
+	invalidUrls: readonly string[];
+	enteredValidUrl: string;
+	persistedUrl: string;
+	integrations: IntegrationSummary[];
+	detail: RadarrIntegrationDTO;
+	summary: IntegrationSummary;
+	calls: Record<'create' | 'test' | 'setup', number>;
+}
+
+function createRadarrUrlScenario(): RadarrUrlScenario {
+	const persistedUrl = 'https://radarr.example.test:7979/radarr';
+	return {
+		invalidUrls: ['ftp://radarr.example.test:7979/radarr', 'not-a-valid-url'],
+		enteredValidUrl: '  https://radarr.example.test:7979/radarr/  ',
+		persistedUrl,
+		integrations: [],
+		detail: {
+			...createRequest,
+			id: createdIntegrationId,
+			url: persistedUrl,
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+		},
+		summary: {
+			id: createdIntegrationId,
+			type: IntegrationType.Radarr,
+			name: createRequest.name,
+			baseUrl: persistedUrl,
+			category: createRequest.category,
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			downloadFolderId: createRequest.downloadFolderId,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+		},
+		calls: { create: 0, test: 0, setup: 0 },
+	};
+}
+
+function installRadarrUrlApis(scenario: RadarrUrlScenario): void {
+	cy.basePageSetup({ plexAccountCount: 0, plexServerCount: 0 });
+	cy.intercept('GET', IntegrationPaths.getIntegrationsEndpoint(), (request) => {
+		request.reply({ statusCode: 200, body: generateResultDTO(scenario.integrations) });
+	}).as('getIntegrations');
+	cy.intercept('GET', IntegrationPaths.getRadarrIntegrationEndpoint(createdIntegrationId), (request) => {
+		request.reply({ statusCode: 200, body: generateResultDTO(scenario.detail) });
+	}).as('getRadarr');
+	cy.intercept({ method: 'GET', pathname: IntegrationPaths.testConnectionToRadarrEndpoint() }, (request) => {
+		scenario.calls.test++;
+		request.reply({
+			statusCode: 200,
+			body: generateResultDTO({ result: TestConnectionStatus.Success, errorMessage: null, httpStatusCode: 200, testedAt }),
+		});
+	}).as('testRadarrConnection');
+	cy.intercept('POST', IntegrationPaths.createRadarrIntegrationEndpoint(), (request) => {
+		const body = request.body as CreateRadarrIntegrationRequest;
+		const normalizedUrl = body.url.trim().replace(/\/+$/, '');
+		scenario.calls.create++;
+		scenario.detail = { ...scenario.detail, url: normalizedUrl };
+		scenario.summary = { ...scenario.summary, baseUrl: normalizedUrl };
+		scenario.integrations = [scenario.summary];
+		request.reply({ statusCode: 200, body: generateResultDTO(scenario.detail) });
+	}).as('createRadarr');
+	cy.intercept('POST', IntegrationPaths.setupRadarrIntegrationEndpoint(createdIntegrationId), (request) => {
+		scenario.calls.setup++;
+		request.reply({ statusCode: 200, body: generateResultDTO(scenario.detail) });
+	}).as('setupRadarr');
+}
+
+function openRadarrUrlCreateDialog(): void {
+	cy.visit(route('/settings/integrations'));
+	cy.getPageData();
+	cy.wait('@getIntegrations');
+	cy.getCy('add-integration').click();
+	cy.getCy('integration-dialog').should('be.visible');
+	cy.getCy('integration-type-radarr').click();
+	cy.getCy('integration-name').type(createRequest.name);
+	cy.getCy('integration-arr-key').type(createRequest.apiKey);
+	cy.getCy('integration-category').clear().type(createRequest.category);
+	cy.getCy('integration-download-folder').click();
+	cy.get('.q-menu').contains('.q-item', '/Downloads').click();
+}
+
+function assertInvalidRadarrUrls(scenario: RadarrUrlScenario): void {
+	for (const invalidUrl of scenario.invalidUrls) {
+		cy.getCy('integration-base-url').clear().type(invalidUrl).blur();
+		cy.getCy('integration-base-url').closest('.q-field').should('contain.text', 'URL must be an absolute http/https URL.');
+		cy.getCy('integration-save').should('be.disabled');
+		cy.getCy('integration-test').should('be.disabled');
+		cy.getCy('integration-setup').should('be.disabled');
+		cy.then(() => expect(scenario.calls).to.deep.equal({ create: 0, test: 0, setup: 0 }));
+	}
+}
+
+function saveValidRadarrUrl(scenario: RadarrUrlScenario): void {
+	cy.getCy('integration-base-url').clear().type(scenario.enteredValidUrl).blur();
+	cy.getCy('integration-base-url').should('have.value', scenario.enteredValidUrl);
+	cy.getCy('integration-base-url').closest('.q-field').should('not.contain.text', 'URL must be an absolute http/https URL.');
+	cy.getCy('integration-save').should('not.be.disabled');
+	cy.getCy('integration-test').should('not.be.disabled');
+	cy.getCy('integration-setup').should('be.disabled');
+	cy.getCy('integration-save').click();
+	cy.wait('@createRadarr').then(({ request, response }) => {
+		expect(request.method).to.equal('POST');
+		expect(request.body).to.deep.equal({ ...createRequest, url: scenario.enteredValidUrl });
+		expect(response?.statusCode).to.equal(200);
+		expect(response?.body.value).to.deep.include(scenario.detail);
+	});
+	cy.wait('@getIntegrations');
+	cy.then(() => expect(scenario.calls).to.deep.equal({ create: 1, test: 0, setup: 0 }));
+}
+
+function assertSavedRadarrUrl(scenario: RadarrUrlScenario): void {
+	cy.getCy('integration-dialog').should('not.exist');
+	cy.getCy('integration-card')
+		.should('have.length', 1)
+		.and('be.visible')
+		.and('contain.text', createRequest.name)
+		.and('contain.text', scenario.persistedUrl)
+		.and('contain.text', IntegrationProvisioningState.Unconfigured);
+	cy.getCy('integration-card').click();
+	cy.wait('@getRadarr');
+	cy.getCy('integration-base-url').should('have.value', scenario.persistedUrl);
+	cy.getCy('integration-dialog').find('[data-cy="dialog-close-button"]').click();
+}
+
 describe('Radarr integrations', () => {
+	it('rejects non-http and malformed Radarr URLs before creating, then saves a valid offline URL', () => {
+		const scenario = createRadarrUrlScenario();
+		installRadarrUrlApis(scenario);
+		openRadarrUrlCreateDialog();
+		assertInvalidRadarrUrls(scenario);
+		saveValidRadarrUrl(scenario);
+		assertSavedRadarrUrl(scenario);
+	});
+
 	it('checks and saves a new Radarr integration as explicit separate actions', () => {
 		let integrations: IntegrationSummary[] = [];
 		let saveCallCount = 0;

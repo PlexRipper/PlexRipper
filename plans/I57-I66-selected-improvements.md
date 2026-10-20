@@ -24,7 +24,7 @@ Implemented recorded account/server/library grouping and row identity, preservin
 
 ## I61 — Validate saved HTTP(S) URLs
 
-Use existing shared HTTP(S) validation at four Arr save endpoints and custom Plex create/update, with corresponding form guards. Preserve trimming, valid ports/base paths and offline saves. No mandatory connection test or API/schema change. Required validator/SQLite unchanged-state and actual form browser proof; independent review. If I59 selected, include composition here.
+Implemented the existing shared HTTP(S) validator at all four Arr save endpoints and custom Plex create/update, plus form and direct-store guards. Preserved server-owned trimming, valid ports/base paths, offline saves and the custom dialog's origin-only payload; no API/schema/local-classification change. Final proof: six valid hosted HTTP/SQLite controls passed, then all six rejection cases passed with exact existing metadata.url messages and full unchanged-state snapshots. All54 integration-store tests and all17 actual Firefox scenarios passed, including I59 request ownership and Sonarr successful-test invalidation. Changed-file ESLint passed. Production, final backend proof and final browser/store proof independently reviewed clear0.94 each. Every changed source reviewed by CodeScene; new backend proof10, browser scores7.78/7.82/9.04 contain only pre-existing findings. Safeguard passed15/15 eligible files, with Sonarr proof improved and no introduced regressions. Accepted unrelated full-typecheck and no-live-third-party limits remain. Verified and reviewed for the separate local commit.
 
 ## I62 — Classify custom LAN connections
 

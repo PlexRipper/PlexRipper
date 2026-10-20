@@ -1,0 +1,27 @@
+version: '1.0'
+
+linter: qodana-cdnet
+withinDocker: true
+
+dotnet:
+    solution: Reaparr.sln
+
+profile:
+    name: qodana.recommended
+
+exclude:
+    -   name: RedundantUsingDirective.Global
+    -   name: All
+        paths:
+            - "file:**/*.DotSettings"
+            - "file:src/Data/Migrations/*.cs"
+            - src/AppHost/ClientApp/node_modules
+            - src/AppHost/ClientApp/.nuxt
+            - src/AppHost/ClientApp/.output
+            - src/AppHost/ClientApp/src/types/api/generated
+    -   name: ArrangeTrailingCommaInMultilineLists
+    -   name: SuggestDiscardDeclarationVarStyle
+    -   name: XmlHighlighting
+    -   name: ExplicitCallerInfoArgument
+
+fixesStrategy: none

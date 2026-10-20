@@ -67,6 +67,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 	const originalAuthentication = shallowRef<{ input: AuthenticationInput; isValidated: boolean } | null>(null);
 	const validatedAuthentication = shallowRef<AuthenticationInput | null>(null);
 	let validationSequence = 0;
+	let dialogSession = 0;
 	let applyingAccountState = false;
 	const dialogStore = useDialogStore();
 	const accountStore = useAccountStore();
@@ -273,25 +274,34 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 			state.isValidated = false;
 		},
 		deleteAccount() {
+			const session = dialogSession;
+			const accountId = state.id;
 			state.deleteLoading = true;
 			return accountStore
-				.deleteAccount(state.id)
+				.deleteAccount(accountId)
 				.pipe(
 					tap((res) => {
-						if (res.isSuccess) {
+						if (res.isSuccess && ownsDialog(session, accountId)) {
 							dialogStore.closeDialog(DialogType.AccountDialog);
 						}
 					}),
-					finalize(() => state.deleteLoading = false),
+					finalize(() => {
+						if (ownsDialog(session, accountId)) state.deleteLoading = false;
+					}),
 				);
 		},
 		$reset() {
 			validationSequence++;
+			dialogSession++;
 			applyAccountState(cloneDeep(defaultState));
 			set(originalAuthentication, null);
 			set(validatedAuthentication, null);
 		},
 	};
+	function ownsDialog(session: number, accountId: number): boolean {
+		return session === dialogSession && accountId === state.id;
+	}
+
 	// Helper function to update state with validated account data
 	function updateStateWithAccountData(accountData: {
 		clientId: string;

@@ -36,7 +36,7 @@ Implemented the one-line failed-result conversion only at the authoritative GitH
 
 ## I64 — Preserve committed account deletion result
 
-Return successful DELETE independently of follow-up refresh failure, remove only its ID locally, and scope dialog/loading completion to the owning account/session. Failed DELETE preserves state. No backend deletion/cascade/transaction changes or automatic retry. Required real-store pipeline and browser DELETE-success/GET-failure proof; independent review.
+Implemented original successful DELETE-result preservation across refresh responses/errors, removing only its captured ID from the current local list. Captured account/dialog-session ownership gates close and loading completion; credential edits do not invalidate deletion completion, while reset/reopen does. Failed DELETE retains all rows and skips refresh. Real-store/dialog/open/I58 composition25 passed; actual Firefox3 passed, including DELETE200/GET500 with target removal, account modal closure and retained card after acknowledging the unchanged existing API-error alert. Focused ESLint passed. Self-review and independent review clear0.94; all five changed sources reviewed by CodeScene with only baseline findings. No backend deletion/cascade/transaction, retry or general refresh ownership change. Safeguard precedes the separate local commit.
 
 ## I65 — Retryable notification actions
 

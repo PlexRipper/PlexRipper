@@ -2,7 +2,7 @@ import { reactive, computed, toRefs } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
-import { concatMap, finalize, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, concatMap, finalize, map, switchMap, tap } from 'rxjs/operators';
 import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
 import { StoreNames, type ISetupResult, type ResultDTO } from '@interfaces';
@@ -128,7 +128,14 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 		deleteAccount(accountId: number) {
 			return plexAccountApi
 				.deletePlexAccountByIdEndpoint(accountId)
-				.pipe(switchMap((result) => result.isSuccess ? actions.refreshAccounts() : of(result)));
+				.pipe(switchMap((result) => {
+					if (!result.isSuccess) return of(result);
+					state.accounts = state.accounts.filter((account) => account.id !== accountId);
+					return actions.refreshAccounts().pipe(
+						map(() => result),
+						catchError(() => of(result)),
+					);
+				}));
 		},
 		getAccount(id: number): PlexAccountDTO | undefined {
 			return state.accounts.find((x) => x.id === id);

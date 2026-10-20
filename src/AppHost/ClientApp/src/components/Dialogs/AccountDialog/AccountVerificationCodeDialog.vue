@@ -56,7 +56,7 @@
 				<QCol cols="auto">
 					<ConfirmButton
 						cy="2fa-code-verification-confirm-button"
-						:loading="loading"
+						:loading="accountDialogStore.validateLoading"
 						:disabled="accountDialogStore.verificationCode.length < 6"
 						@click="onComplete" />
 				</QCol>
@@ -70,7 +70,7 @@ import VOtpInput from 'vue3-otp-input';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { DialogType } from '@enums';
-import { useAccountDialogStore, useI18n } from '#imports';
+import { useAccountDialogStore } from '@store';
 import type { ErrorDTO } from '@dto';
 
 const { t } = useI18n();
@@ -79,19 +79,16 @@ const accountDialogStore = useAccountDialogStore();
 
 const otpInput = ref<InstanceType<typeof VOtpInput>>();
 
-const loading = ref(false);
 const errors = ref<ErrorDTO[]>([]);
 
 function onComplete() {
 	set(errors, []);
-	set(loading, true);
 	useSubscription(
 		accountDialogStore.validateVerificationCode().subscribe({
 			error(err) {
 				set(errors, err);
 			},
-			complete: () => {
-				set(loading, false);
+			next: () => {
 				if (accountDialogStore.hasValidationErrors) {
 					set(errors, [
 						{

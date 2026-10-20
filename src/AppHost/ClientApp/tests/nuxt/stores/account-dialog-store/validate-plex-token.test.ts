@@ -17,11 +17,18 @@ describe('AccountDialogStore.validatePlexToken()', () => {
 		setActivePinia(createPinia());
 	});
 
+	function openNewTokenAccount() {
+		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.openDialog({ accountId: 0 });
+		accountDialogStore.switchInputMode(true);
+		return accountDialogStore;
+	}
+
 	test('Should open token validate dialog and update state on successful token validation', async () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewTokenAccount();
 		accountDialogStore.displayName = 'Test User';
 		accountDialogStore.authenticationToken = 'existing-authentication-token';
 		accountDialogStore.customAuthenticationToken = 'valid-token';
@@ -51,8 +58,8 @@ describe('AccountDialogStore.validatePlexToken()', () => {
 		expect(accountDialogStore.plexId).toEqual(42);
 		expect(accountDialogStore.title).toEqual('User Title');
 		expect(accountDialogStore.email).toEqual('user@test.dev');
-		expect(accountDialogStore.authenticationToken).toEqual('existing-authentication-token');
-		expect(accountDialogStore.getAccountData.authenticationToken).toEqual('existing-authentication-token');
+		expect(accountDialogStore.authenticationToken).toEqual('');
+		expect(accountDialogStore.getAccountData.authenticationToken).toEqual('');
 		expect(mock.history.post[0]?.data).toContain('"plexAccountId":0');
 		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
 	});
@@ -61,7 +68,7 @@ describe('AccountDialogStore.validatePlexToken()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewTokenAccount();
 		accountDialogStore.displayName = '';
 		accountDialogStore.customAuthenticationToken = 'valid-token';
 
@@ -90,15 +97,8 @@ describe('AccountDialogStore.validatePlexToken()', () => {
 		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
 	});
 
-	test('Should open token validate dialog and set error state when token is unauthorized', async () => {
-		// Arrange
-		const dialogStore = useDialogStore();
-		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
-		accountDialogStore.displayName = 'Test User';
-		accountDialogStore.customAuthenticationToken = 'bad-token';
-
-		mock.onPost(PlexAccountPaths.validatePlexTokenEndpoint()).reply(200, generateResultDTO({
+	test.each([
+		['unauthorized token', 200, generateResultDTO({
 			is2Fa: false,
 			clientId: '',
 			customAuthenticationToken: '',
@@ -110,49 +110,17 @@ describe('AccountDialogStore.validatePlexToken()', () => {
 			username: '',
 			uuid: '',
 			validatedAt: null,
-		}));
-
-		// Act
-		const result = subscribeSpyTo(accountDialogStore.validatePlexToken());
-		await result.onComplete();
-
-		// Assert
-		expect(accountDialogStore.isValidated).toEqual(false);
-		expect(accountDialogStore.hasValidationErrors).toEqual(true);
-		expect(accountDialogStore.validateLoading).toEqual(false);
-		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
-	});
-
-	test('Should open token validate dialog when API returns unsuccessful result', async () => {
+		})],
+		['unsuccessful result', 200, generateFailedResultDTO()],
+		['network error', 500, undefined],
+	] as const)('Should keep token invalid and show retry feedback for %s', async (_name, statusCode, response) => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewTokenAccount();
 		accountDialogStore.displayName = 'Test User';
-		accountDialogStore.customAuthenticationToken = 'token';
-
-		mock.onPost(PlexAccountPaths.validatePlexTokenEndpoint()).reply(200, generateFailedResultDTO());
-
-		// Act
-		const result = subscribeSpyTo(accountDialogStore.validatePlexToken());
-		await result.onComplete();
-
-		// Assert
-		expect(accountDialogStore.isValidated).toEqual(false);
-		expect(accountDialogStore.hasValidationErrors).toEqual(true);
-		expect(accountDialogStore.validateLoading).toEqual(false);
-		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
-	});
-
-	test('Should open token validate dialog and show validation errors on network error', async () => {
-		// Arrange
-		const dialogStore = useDialogStore();
-		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
-		accountDialogStore.displayName = 'Test User';
-		accountDialogStore.customAuthenticationToken = 'token';
-
-		mock.onPost(PlexAccountPaths.validatePlexTokenEndpoint()).reply(500);
+		accountDialogStore.customAuthenticationToken = 'bad-token';
+		mock.onPost(PlexAccountPaths.validatePlexTokenEndpoint()).reply(statusCode, response);
 
 		// Act
 		const result = subscribeSpyTo(accountDialogStore.validatePlexToken());

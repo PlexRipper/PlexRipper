@@ -4,7 +4,7 @@ import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-tes
 import { PlexAccountPaths, PlexLibraryPaths, PlexServerPaths } from '@api-urls';
 import { generateFailedResultDTO, generatePlexAccount, generateResultDTO } from '@mock';
 import { DialogType } from '@enums';
-import { useAccountDialogStore, useDialogStore } from '@store';
+import { useAccountDialogStore, useAccountStore, useDialogStore } from '@store';
 
 describe('AccountDialogStore.saveAccount()', () => {
 	let { mock } = baseVars();
@@ -24,13 +24,34 @@ describe('AccountDialogStore.saveAccount()', () => {
 			id: 99,
 			partialData: {
 				displayName: 'Retry account',
+				is2Fa: false,
 				isValidated: true,
+				password: 'create-password',
+				username: 'create-user',
 			},
 		});
 		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.openDialog({ accountId: 0 });
+		accountDialogStore.displayName = account.displayName;
+		accountDialogStore.username = account.username;
+		accountDialogStore.password = account.password;
 		const dialogStore = useDialogStore();
 		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		Object.assign(accountDialogStore, account, { isNewAccount: true });
+		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(200, generateResultDTO({
+			is2Fa: false,
+			authenticationToken: account.authenticationToken,
+			clientId: account.clientId,
+			email: account.email,
+			isUnAuthorized: false,
+			isValidated: true,
+			password: account.password,
+			plexId: account.plexId,
+			title: account.title,
+			username: account.username,
+			uuid: account.uuid,
+			validatedAt: account.validatedAt,
+		}));
+		await subscribeSpyTo(accountDialogStore.validatePlexAccount()).onComplete();
 
 		const failedResult = generateFailedResultDTO({ statusCode: 409 });
 		const successfulResult = generateResultDTO(account);
@@ -75,10 +96,12 @@ describe('AccountDialogStore.saveAccount()', () => {
 				isValidated: true,
 			},
 		});
+		const accountStore = useAccountStore();
+		accountStore.accounts = [account];
 		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.openDialog({ accountId: account.id });
 		const dialogStore = useDialogStore();
 		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		Object.assign(accountDialogStore, account, { isNewAccount: false });
 
 		const failedResult = generateFailedResultDTO({ statusCode: 422 });
 		const successfulResult = generateResultDTO(account);

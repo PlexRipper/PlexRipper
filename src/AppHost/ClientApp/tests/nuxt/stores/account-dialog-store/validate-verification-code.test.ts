@@ -17,11 +17,17 @@ describe('AccountDialogStore.validateVerificationCode()', () => {
 		setActivePinia(createPinia());
 	});
 
+	function openNewCredentialAccount() {
+		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.openDialog({ accountId: 0 });
+		return accountDialogStore;
+	}
+
 	test('Should close verification dialog, update state, and reset validation errors on success', async () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewCredentialAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 		accountDialogStore.clientId = 'client-id';
@@ -60,7 +66,7 @@ describe('AccountDialogStore.validateVerificationCode()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewCredentialAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 		accountDialogStore.clientId = 'client-id';
@@ -97,7 +103,7 @@ describe('AccountDialogStore.validateVerificationCode()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewCredentialAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 		accountDialogStore.clientId = 'client-id';
@@ -121,7 +127,7 @@ describe('AccountDialogStore.validateVerificationCode()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewCredentialAccount();
 		accountDialogStore.username = 'preserved-user';
 		accountDialogStore.password = 'preserved-pass';
 		accountDialogStore.clientId = 'preserved-client-id';
@@ -162,7 +168,7 @@ describe('AccountDialogStore.validateVerificationCode()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewCredentialAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 		accountDialogStore.clientId = 'client-id';
@@ -197,7 +203,7 @@ describe('AccountDialogStore.validateVerificationCode()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const closeDialogSpy = vi.spyOn(dialogStore, 'closeDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewCredentialAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 		accountDialogStore.clientId = 'client-id';

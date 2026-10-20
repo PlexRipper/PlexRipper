@@ -69,6 +69,178 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
     }
 
     [Test]
+    public async Task ShouldQueueUnmappedUnalbumedAssetAtLibraryRoot_WithoutCreatingCatalogFolders()
+    {
+        // Arrange
+        await SetupDatabase(
+            62319,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var media = await dbContext.PlexPhotoMediaData.AsTracking().SingleAsync(CancellationToken);
+        var server = await dbContext.PlexServers.AsTracking().SingleAsync(CancellationToken);
+        var library = await dbContext.PlexLibraries.AsTracking().SingleAsync(CancellationToken);
+        await dbContext.PlexServers.Where(x => x.Id == server.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Name, "Home Plex"), CancellationToken);
+        library.Title = "Photos";
+        media.PlexPhotoFolderId = null;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        media.PlexPhotoFolderId.ShouldBeNull();
+        var expectedRootName = "Home Plex - Photos";
+        var selection = new DownloadMediaDTO
+        {
+            Type = PlexMediaType.PhotoImage,
+            SelectionKind = PhotoItemKind.Asset,
+            PlexServerId = media.PlexServerId,
+            PlexLibraryId = media.PlexLibraryId,
+            MediaIds = [media.Id],
+            Qualities = [],
+        };
+
+        // Act
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(
+            new GenerateDownloadTaskPhotoImagesCommand(
+                new CreateDownloadTasksRequest([selection], customDestinationFolderPath: "/unmapped-target")
+            )
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldBe(new DownloadTaskCreationReport { PhotoFolders = 1, PhotoImages = 1 });
+        (await dbContext.PlexPhotoAlbumMemberships.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.PlexPhotoFolders.Select(x => x.RelativePath).ToListAsync(CancellationToken))
+            .ShouldBe([""]);
+        var folder = await dbContext.DownloadTaskPhotoFolders.Include(x => x.Files).SingleAsync(CancellationToken);
+        folder.ParentId.ShouldBeNull();
+        folder.RelativePath.ShouldBeEmpty();
+        folder.Title.ShouldBe(expectedRootName);
+        folder.Files.Count.ShouldBe(1);
+        var file = folder.Files.Single();
+        file.ParentId.ShouldBe(folder.Id);
+        file.FileName.ShouldBe(media.OriginalFilename.GetFileName());
+        file.DirectoryMeta.PhotoFolder.ShouldBe(expectedRootName);
+    }
+
+    [Test]
+    public async Task ShouldQueueMappedAndUnmappedAssetsAtLibraryRoot_WhenAllCatalogRootsAreInactive()
+    {
+        // Arrange
+        await SetupDatabase(
+            62320,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoCount = 2;
+            }
+        );
+        var dbContext = IDbContext;
+        var root = await dbContext.PlexPhotoFolders.AsTracking().SingleAsync(x => x.ParentId == null, CancellationToken);
+        var files = await dbContext.PlexPhotoMediaData.AsTracking().OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var inactiveChild = new PlexPhotoFolder
+        {
+            PlexServerId = root.PlexServerId,
+            PlexLibraryId = root.PlexLibraryId,
+            ParentId = root.Id,
+            RelativePath = "Old",
+            Title = "Old",
+        };
+        dbContext.PlexPhotoFolders.Add(inactiveChild);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        root.IsActive = false;
+        files[0].PlexPhotoFolderId = inactiveChild.Id;
+        files[1].PlexPhotoFolderId = null;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        files[0].PlexPhotoFolderId.ShouldBe(inactiveChild.Id);
+        files[1].PlexPhotoFolderId.ShouldBeNull();
+        (await dbContext.PlexPhotoFolders.CountAsync(x => x.ParentId == null && x.IsActive == true, CancellationToken))
+            .ShouldBe(0);
+        var selection = new DownloadMediaDTO
+        {
+            Type = PlexMediaType.PhotoImage,
+            SelectionKind = PhotoItemKind.Asset,
+            PlexServerId = files[0].PlexServerId,
+            PlexLibraryId = files[0].PlexLibraryId,
+            MediaIds = files.Select(x => x.Id).ToList(),
+            Qualities = [],
+        };
+
+        // Act
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(
+            new GenerateDownloadTaskPhotoImagesCommand(
+                new CreateDownloadTasksRequest([selection], customDestinationFolderPath: "/inactive-target")
+            )
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldBe(new DownloadTaskCreationReport { PhotoFolders = 1, PhotoImages = 2 });
+        (await dbContext.PlexPhotoFolders.Select(x => x.RelativePath).OrderBy(x => x).ToListAsync(CancellationToken))
+            .ShouldBe(["", "Old"]);
+        var folder = await dbContext.DownloadTaskPhotoFolders.Include(x => x.Files).SingleAsync(CancellationToken);
+        folder.RelativePath.ShouldBeEmpty();
+        folder.Files.Select(x => (x.PlexApiPartId, x.DirectoryMeta.PhotoFolder, x.FileName))
+            .OrderBy(x => x.PlexApiPartId)
+            .ShouldBe(
+                files.Select(x => (x.PlexApiPartId, folder.Title, x.OriginalFilename.GetFileName()))
+                    .OrderBy(x => x.PlexApiPartId)
+            );
+    }
+
+    [Test]
+    public async Task ShouldQueueMappedAndUnmappedAlbumMembersAtTheirExpectedPaths()
+    {
+        // Arrange
+        var (album, child, files) = await CreateMappedAndUnmappedAlbumAsync();
+        var dbContext = IDbContext;
+        files[0].PlexPhotoFolderId.ShouldBe(child.Id);
+        files[1].PlexPhotoFolderId.ShouldBeNull();
+        var selection = new DownloadMediaDTO
+        {
+            Type = PlexMediaType.PhotoAlbum,
+            SelectionKind = PhotoItemKind.Album,
+            PlexServerId = album.PlexServerId,
+            PlexLibraryId = album.PlexLibraryId,
+            MediaIds = [album.Id],
+            Qualities = [],
+        };
+        (await dbContext.PlexPhotoAlbumMemberships.CountAsync(x => x.PlexPhotoAlbumId == album.Id, CancellationToken))
+            .ShouldBe(2);
+
+        // Act
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(
+            new GenerateDownloadTaskPhotoImagesCommand(
+                new CreateDownloadTasksRequest([selection], customDestinationFolderPath: "/album-target")
+            )
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.ShouldBe(new DownloadTaskCreationReport { PhotoFolders = 2, PhotoImages = 2 });
+        (await dbContext.PlexPhotoFolders.Select(x => x.RelativePath).OrderBy(x => x).ToListAsync(CancellationToken))
+            .ShouldBe(["", "Trips"]);
+        var taskFolders = await dbContext.DownloadTaskPhotoFolders.Include(x => x.Files).ToListAsync(CancellationToken);
+        taskFolders.Select(x => x.RelativePath).OrderBy(x => x).ShouldBe(["", "Trips"]);
+        var expectedPaths = new[]
+        {
+            ($"Home Plex - Photos/Trips/{files[0].OriginalFilename.GetFileName()}", files[0].Size),
+            ($"Home Plex - Photos/{files[1].OriginalFilename.GetFileName()}", files[1].Size),
+        };
+        taskFolders.SelectMany(x => x.Files)
+            .Select(x => ($"{x.DirectoryMeta.PhotoFolder}/{x.FileName}", x.DataTotal))
+            .OrderBy(x => x.Item1)
+            .ShouldBe(expectedPaths.OrderBy(x => x.Item1));
+    }
+
+    [Test]
     public async Task ShouldRejectMissingOrForeignDirectFileIds_WithoutCreatingPartialTasks()
     {
         // Arrange
@@ -248,6 +420,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
                     new DownloadMediaDTO
                     {
                         Type = PlexMediaType.Movie,
+                        SelectionKind = null,
                         PlexServerId = 1,
                         PlexLibraryId = 2,
                         MediaIds = [5],
@@ -756,6 +929,43 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
         directoryMetadata.Select(x => x.DownloadRootPath).Order().ShouldBe(
             new[] { firstDownloadRoot, Path.TrimEndingDirectorySeparator(Path.GetFullPath("/fixture/downloads/second")) }.Order()
         );
+    }
+
+    private async Task<(PlexPhotoAlbum Album, PlexPhotoFolder Child, List<PlexPhotoMediaData> Files)> CreateMappedAndUnmappedAlbumAsync()
+    {
+        await SetupDatabase(
+            62321,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 1;
+                config.PhotoCount = 2;
+            }
+        );
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.AsTracking().SingleAsync(CancellationToken);
+        var library = await dbContext.PlexLibraries.AsTracking().SingleAsync(CancellationToken);
+        await dbContext.PlexServers.Where(x => x.Id == server.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Name, "Home Plex"), CancellationToken);
+        library.Title = "Photos";
+        var root = await dbContext.PlexPhotoFolders.SingleAsync(x => x.ParentId == null, CancellationToken);
+        var child = new PlexPhotoFolder
+        {
+            PlexServerId = root.PlexServerId,
+            PlexLibraryId = root.PlexLibraryId,
+            ParentId = root.Id,
+            RelativePath = "Trips",
+            Title = "Trips",
+        };
+        dbContext.PlexPhotoFolders.Add(child);
+        var album = await dbContext.PlexPhotoAlbums.SingleAsync(CancellationToken);
+        var files = await dbContext.PlexPhotoMediaData.AsTracking().OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        files[0].PlexPhotoFolderId = child.Id;
+        files[1].PlexPhotoFolderId = null;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        return (album, child, files);
     }
 
     private async Task<(List<DownloadMediaDTO> Selections, List<PlexPhotoMediaData> Files)> CreateOverlappingAlbumSelectionsAsync(

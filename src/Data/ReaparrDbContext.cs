@@ -234,6 +234,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         CancellationToken cancellationToken = default
     ) => Database.ExecuteSqlInterpolatedAsync(sql, cancellationToken);
 
+    /// <inheritdoc/>
+    public IQueryable<T> SqlQuery<T>(FormattableString sql) => Database.SqlQuery<T>(sql);
+
     private async Task<T> ExecuteTransactionWithRetryAsync<T>(
         Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
         CancellationToken cancellationToken

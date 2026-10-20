@@ -290,4 +290,12 @@ public interface IReaparrDbContext : IDisposable
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The number of rows affected.</returns>
     Task<int> ExecuteSqlInterpolatedAsync(FormattableString sql, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a query for unmapped result types using parameterized interpolated SQL.
+    /// </summary>
+    /// <typeparam name="T">The result type returned by the query.</typeparam>
+    /// <param name="sql">The interpolated SQL query with parameters.</param>
+    /// <returns>The queryable results.</returns>
+    IQueryable<T> SqlQuery<T>(FormattableString sql);
 }

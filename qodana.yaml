@@ -1,0 +1,20 @@
+version: '1.0'
+
+linter: qodana-cdnet
+withinDocker: true
+
+dotnet:
+    solution: Reaparr.sln
+
+profile:
+    name: qodana.recommended
+
+exclude:
+    -   name: All
+        paths:
+            - src/AppHost/ClientApp/node_modules
+            - src/AppHost/ClientApp/.nuxt
+            - src/AppHost/ClientApp/.output
+            - src/AppHost/ClientApp/src/types/api/generated
+
+fixesStrategy: none

@@ -34,6 +34,55 @@ jobs:
         steps:
             -   run: echo "PR is not in draft, proceeding with tests"
 
+    Qodana:
+        needs: [ Check-PR-Status ]
+        if: github.event_name == 'pull_request' && needs.Check-PR-Status.result == 'success'
+        runs-on: ubuntu-latest
+        env:
+            QODANA_TRUSTED_EVENT: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') }}
+        permissions:
+            contents: read
+            pull-requests: write
+            checks: write
+        steps:
+            -   name: Explain unavailable Qodana analysis
+                if: env.QODANA_TRUSTED_EVENT != 'true'
+                run: echo 'Qodana was not run. Fork and Dependabot pull requests cannot use the QODANA_TOKEN secret. The trusted dev branch is scanned after merge.' >> "$GITHUB_STEP_SUMMARY"
+            -   uses: actions/checkout@v7
+                if: env.QODANA_TRUSTED_EVENT == 'true'
+                with:
+                    ref: ${{ github.event.pull_request.head.sha }}
+                    fetch-depth: 0
+                    persist-credentials: false
+            -   name: Resolve pull request comparison base
+                if: env.QODANA_TRUSTED_EVENT == 'true'
+                id: qodana_diff
+                env:
+                    BASE_SHA: ${{ github.event.pull_request.base.sha }}
+                    HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+                run: |
+                    set -euo pipefail
+                    base=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+                    echo "base=$base" >> "$GITHUB_OUTPUT"
+            -   name: Prepare frontend dependencies
+                if: env.QODANA_TRUSTED_EVENT == 'true'
+                uses: ./.github/actions/client-app-install/
+            -   name: Prepare backend solution
+                if: env.QODANA_TRUSTED_EVENT == 'true'
+                uses: ./.github/actions/dotnet-setup/
+                with:
+                    project-path: Reaparr.sln
+            -   name: Qodana Scan
+                if: env.QODANA_TRUSTED_EVENT == 'true'
+                uses: JetBrains/qodana-action@v2026.2
+                with:
+                    pr-mode: true
+                    push-fixes: none
+                env:
+                    QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+                    QODANA_ENDPOINT: 'https://qodana.cloud'
+                    QODANA_PR_SHA: ${{ steps.qodana_diff.outputs.base }}
+
     Actionlint:
         needs: [ Check-PR-Status, Check-Github-Changes ]
         if: needs.Check-Github-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')

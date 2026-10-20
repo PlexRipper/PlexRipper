@@ -122,8 +122,6 @@ public class GeneratePlexTokenEndpoint
             return;
         }
 
-        var result = Result.Ok();
-        result.WithErrors(validateResult.Errors.Where(x => x.GetType() == typeof(PlexError)));
-        await Send.FluentResult(result, ct);
+        await Send.FluentResult(validateResult.ToResult(), ct);
     }
 }

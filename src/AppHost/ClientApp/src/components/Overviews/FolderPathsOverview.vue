@@ -99,21 +99,33 @@
 		:name="DialogType.FolderPathDeleteConfirmationDialog"
 		:title="$t('confirmation.delete-folder-path.title')"
 		:text="$t('confirmation.delete-folder-path.text', { displayName: pendingDeleteFolderPath?.displayName ?? '' })"
+		:warning="deleteFolderPathError"
 		:confirm-label="$t('general.commands.delete')"
+		:confirm-loading="deleteFolderPathSaving"
+		:disable-cancel="deleteFolderPathSaving"
 		@cancel="cancelDeleteFolderPath"
 		@confirm="confirmDeleteFolderPath" />
 
 	<!--	Directory Browser	-->
-	<DirectoryBrowser @confirm="confirmDirectoryBrowser" />
+	<DirectoryBrowser
+		:saving="directoryBrowserSaving"
+		:error-message="directoryBrowserError"
+		@opened="onDirectoryBrowserOpened"
+		@closed="onDirectoryBrowserClosed"
+		@confirm="confirmDirectoryBrowser" />
 </template>
 
 <script lang="ts" setup>
 import { get, set } from '@vueuse/core';
+import { finalize } from 'rxjs';
 import { type FolderPathDTO, FolderType } from '@dto';
-import type { IFolderPathGroup, IHelp } from '@interfaces';
+import type { IFolderPathGroup, IHelp, ResultDTO } from '@interfaces';
 import { DialogType, ValidationLevel } from '@enums';
 import { kebabCase, orderBy } from 'lodash-es';
-import { showErrorNotification, useDialogStore, useFolderPathStore, useI18n, useSubscription } from '#imports';
+import { formatErrorResponse } from '@composables/common';
+import { showErrorNotification, useI18n } from '#imports';
+import { useDialogStore, useFolderPathStore } from '@store';
+import { useSubscription } from '@vueuse/rxjs';
 
 const { t } = useI18n();
 
@@ -121,6 +133,18 @@ const dialogStore = useDialogStore();
 const folderPathStore = useFolderPathStore();
 const activeFolderType = ref(FolderType.DownloadFolder);
 const pendingDeleteFolderPath = ref<FolderPathDTO | null>(null);
+const directoryBrowserSaving = ref(false);
+const directoryBrowserError = ref('');
+const deleteFolderPathSaving = ref(false);
+const deleteFolderPathError = ref('');
+let directoryWriteSession = 0;
+let deleteWriteSession = 0;
+let displayNameWriteSession = 0;
+onBeforeUnmount(() => {
+	directoryWriteSession += 1;
+	deleteWriteSession += 1;
+	displayNameWriteSession += 1;
+});
 
 const props = withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
@@ -144,27 +168,62 @@ const visibleFolderPaths = computed(() => {
 	);
 });
 
-const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
-	if (path.id === 0) {
-		// New folder path — create with the confirmed directory
-		useSubscription(
-			folderPathStore.createFolderPath(path).subscribe({
-				error(err) {
-					showErrorNotification(err);
-				},
-			}),
-		);
-	} else {
-		// Existing folder path — update the directory
-		useSubscription(
-			folderPathStore.setFolderPathDirectory(path.id, path.directory).subscribe({
-				error(err) {
-					showErrorNotification(err);
-				},
-			}),
-		);
+function onDirectoryBrowserOpened(): void {
+	directoryWriteSession += 1;
+	set(directoryBrowserSaving, false);
+	set(directoryBrowserError, '');
+}
+
+function onDirectoryBrowserClosed(): void {
+	directoryWriteSession += 1;
+	set(directoryBrowserSaving, false);
+	set(directoryBrowserError, '');
+}
+
+function completeDirectoryWrite(result: ResultDTO<FolderPathDTO>, session: number): void {
+	if (session !== directoryWriteSession) {
+		return;
 	}
-};
+
+	if (result.isSuccess && result.value) {
+		set(directoryBrowserError, '');
+		dialogStore.closeDialog(DialogType.DirectoryBrowserDialog);
+		return;
+	}
+
+	set(directoryBrowserError, formatErrorResponse(result));
+}
+
+function confirmDirectoryBrowser(path: FolderPathDTO): void {
+	if (get(directoryBrowserSaving)) {
+		return;
+	}
+
+	const session = directoryWriteSession;
+	set(directoryBrowserSaving, true);
+	set(directoryBrowserError, '');
+
+	const request$ = path.id === 0
+		? folderPathStore.createFolderPath(path)
+		: folderPathStore.setFolderPathDirectory(path.id, path.directory);
+
+	useSubscription(
+		request$
+			.pipe(finalize(() => {
+				if (session === directoryWriteSession) {
+					set(directoryBrowserSaving, false);
+				}
+			}))
+			.subscribe({
+				next: (result: ResultDTO<FolderPathDTO>) => completeDirectoryWrite(result, session),
+				error: (error: unknown) => {
+					if (session === directoryWriteSession) {
+						set(directoryBrowserError, formatErrorResponse(error));
+					}
+				},
+			}),
+	);
+}
 
 function addFolderPath(folderGroup: IFolderPathGroup): void {
 	let displayName = '';
@@ -203,36 +262,67 @@ function addFolderPath(folderGroup: IFolderPathGroup): void {
 }
 
 function deleteFolderPath(folderPath: FolderPathDTO): void {
-	if (folderPath.isDefault) {
+	if (folderPath.isDefault || get(deleteFolderPathSaving)) {
 		return;
 	}
 
+	deleteWriteSession += 1;
 	set(pendingDeleteFolderPath, folderPath);
+	set(deleteFolderPathError, '');
 	dialogStore.openDialog(DialogType.FolderPathDeleteConfirmationDialog);
 }
 
 function cancelDeleteFolderPath(): void {
+	if (get(deleteFolderPathSaving)) {
+		return;
+	}
+
+	deleteWriteSession += 1;
 	set(pendingDeleteFolderPath, null);
+	set(deleteFolderPathError, '');
 }
 
 function confirmDeleteFolderPath(): void {
+	if (get(deleteFolderPathSaving)) {
+		return;
+	}
+
 	const folderPath = get(pendingDeleteFolderPath);
 	if (!folderPath) {
 		return;
 	}
 
+	const session = deleteWriteSession;
+	set(deleteFolderPathSaving, true);
+	set(deleteFolderPathError, '');
 	useSubscription(
-		folderPathStore.deleteFolderPath(folderPath.id).subscribe({
-			next: (result) => {
-				if (result.isSuccess) {
-					dialogStore.closeDialog(DialogType.FolderPathDeleteConfirmationDialog);
-					set(pendingDeleteFolderPath, null);
+		folderPathStore.deleteFolderPath(folderPath.id)
+			.pipe(finalize(() => {
+				if (session === deleteWriteSession) {
+					set(deleteFolderPathSaving, false);
 				}
-			},
-			error(err) {
-				showErrorNotification(err);
-			},
-		}),
+			}))
+			.subscribe({
+				next: (result: ResultDTO) => {
+					if (session !== deleteWriteSession) {
+						return;
+					}
+
+					if (result.isSuccess) {
+						dialogStore.closeDialog(DialogType.FolderPathDeleteConfirmationDialog);
+						set(pendingDeleteFolderPath, null);
+						set(deleteFolderPathError, '');
+						return;
+					}
+
+					set(deleteFolderPathError, formatErrorResponse(result));
+				},
+				error: (error: unknown) => {
+					if (session === deleteWriteSession) {
+						set(deleteFolderPathError, formatErrorResponse(error));
+					}
+				},
+			}),
 	);
 }
 
@@ -283,11 +373,22 @@ function toTranslation(type: FolderType): IHelp {
 	}
 }
 
-function saveDisplayName(id: number, value: string) {
+function saveDisplayName(id: number, value: string): void {
+	const session = ++displayNameWriteSession;
 	useSubscription(
 		folderPathStore.setFolderPathDisplayName(id, value).subscribe({
-			error(err) {
-				showErrorNotification(err);
+			next: (result: ResultDTO<FolderPathDTO>) => {
+				if (session !== displayNameWriteSession) {
+					return;
+				}
+				if (!result.isSuccess || !result.value) {
+					showErrorNotification(formatErrorResponse(result));
+				}
+			},
+			error: (error: unknown) => {
+				if (session === displayNameWriteSession) {
+					showErrorNotification(formatErrorResponse(error));
+				}
 			},
 		}),
 	);

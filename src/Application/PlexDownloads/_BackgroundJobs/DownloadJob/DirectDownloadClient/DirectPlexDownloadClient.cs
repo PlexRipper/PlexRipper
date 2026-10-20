@@ -116,10 +116,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         // Ensure the download directory exists and has enough disk space
         var ensureDirectoryStopwatch = Stopwatch.StartNew();
-        var ensureDirectoryResult = await _commandExecutor.Send(
-            new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, downloadTask.DataTotal),
-            cancellationToken
-        );
+        var ensureDirectoryResult = await EnsureDownloadDirectoryAsync(downloadTask, cancellationToken);
         _log.Here()
             .Debug(
                 "Ensured download directory for {MediaFileName} in {ElapsedMilliseconds} ms",
@@ -222,34 +219,9 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                                 snapshot?.SaveProgress ?? 0,
                                 snapshot?.Chunks.Count ?? 0
                             );
-                        if (snapshot is { Chunks.Count: > 0 })
-                        {
-                            await SendDownloadClientLog(
-                                NotificationLevel.Information,
-                                Domain.DownloadStatus.Downloading,
-                                $"Resuming {_filename} download from pause"
-                            );
-                            var progress = snapshot.ToDownloadPackage();
-                            progress.Urls = [attemptDownloadUrl]; // Ensure we use the latest connection string
-                            await _downloader.DownloadFileTaskAsync(progress, token);
-                        }
-                        else
-                        {
-                            if (snapshot is not null)
-                            {
-                                _log.Here()
-                                    .Warning(
-                                        "Ignoring invalid resume snapshot without chunks for {MediaFileName}; starting a fresh download",
-                                        _filename
-                                    );
-                            }
-
-                            var downloaderTargetPath = Path.Combine(
-                                downloadTask.DownloadDirectory,
-                                downloadTask.FileName
-                            );
-                            await _downloader.DownloadFileTaskAsync(attemptDownloadUrl, downloaderTargetPath, token);
-                        }
+                        var downloadResult = await DownloadAttemptAsync(downloadTask, snapshot, attemptDownloadUrl, token);
+                        if (downloadResult.IsCancelledOrFailed)
+                            return downloadResult;
 
                         if (completionSource.Task.IsCompleted)
                         {
@@ -313,6 +285,114 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         return Result.Ok();
     }
+
+    private async Task<Result> EnsureDownloadDirectoryAsync(
+        DownloadTaskFileBase downloadTask,
+        CancellationToken cancellationToken
+    )
+    {
+        var requiredBytes = downloadTask.DataTotal;
+        if (
+            downloadTask.DirectDownloadSnapshot is { Chunks.Count: > 0, IsSupportDownloadInRange: true } snapshot
+            && snapshot.TotalFileSize == downloadTask.DataTotal
+        )
+        {
+            var artifactResult = ValidateResumeArtifact(snapshot);
+            if (artifactResult.IsFailed)
+                return artifactResult;
+
+            requiredBytes = GetRemainingDownloadBytes(snapshot);
+        }
+
+        // A fully persisted resume already has its directory and needs no more file data.
+        if (requiredBytes == 0 && downloadTask.DataTotal > 0)
+            return Result.Ok();
+
+        return await _commandExecutor.Send(
+            new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, requiredBytes),
+            cancellationToken
+        );
+    }
+
+    private static long GetRemainingDownloadBytes(DirectDownloadSnapshot snapshot)
+    {
+        var remaining = snapshot.TotalFileSize;
+        var nextStart = 0L;
+        foreach (var chunk in snapshot.Chunks)
+        {
+            if (chunk.Start != nextStart || !HasValidSavedPosition(chunk, snapshot.TotalFileSize))
+                return snapshot.TotalFileSize;
+
+            remaining -= chunk.Position;
+            nextStart = chunk.End + 1;
+        }
+
+        return nextStart == snapshot.TotalFileSize ? remaining : snapshot.TotalFileSize;
+    }
+
+    private static bool HasValidSavedPosition(DirectDownloadSnapshotChunk chunk, long totalBytes) =>
+        chunk.End >= chunk.Start
+        && chunk.End < totalBytes
+        && chunk.Position >= 0
+        && chunk.Position <= chunk.End - chunk.Start + 1;
+
+    private async Task<Result> DownloadAttemptAsync(
+        DownloadTaskFileBase downloadTask,
+        DirectDownloadSnapshot? snapshot,
+        string downloadUrl,
+        CancellationToken cancellationToken
+    )
+    {
+        if (snapshot is { Chunks.Count: > 0 })
+        {
+            var artifactResult = ValidateResumeArtifact(snapshot);
+            if (artifactResult.IsCancelledOrFailed)
+            {
+                await SetDownloadStatusAsync(Domain.DownloadStatus.StorageError, artifactResult);
+                return artifactResult;
+            }
+
+            await SendDownloadClientLog(
+                NotificationLevel.Information,
+                Domain.DownloadStatus.Downloading,
+                $"Resuming {_filename} download from pause"
+            );
+            var progress = snapshot.ToDownloadPackage();
+            progress.Urls = [downloadUrl]; // Ensure we use the latest connection string
+            await _downloader.DownloadFileTaskAsync(progress, cancellationToken);
+            return Result.Ok();
+        }
+
+        if (snapshot is not null)
+            _log.Here().Warning(
+                "Ignoring invalid resume snapshot without chunks for {MediaFileName}; starting a fresh download",
+                _filename
+            );
+
+        var downloaderTargetPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
+        await _downloader.DownloadFileTaskAsync(downloadUrl, downloaderTargetPath, cancellationToken);
+        return Result.Ok();
+    }
+
+    private Result ValidateResumeArtifact(DirectDownloadSnapshot snapshot) =>
+        Result.Try(() =>
+        {
+            var requiredLength = 0L;
+            foreach (var chunk in snapshot.Chunks)
+                if (chunk.Position > 0)
+                    requiredLength = Math.Max(requiredLength, chunk.Start + chunk.Position);
+
+            if (requiredLength == 0)
+                return Result.Ok();
+
+            // The downloader can recreate a missing file without resetting valid saved offsets.
+            var partialPath = snapshot.FileName + snapshot.DownloadingFileExtension;
+            if (!_file.Exists(partialPath) || _fileInfoFactory.New(partialPath).Length < requiredLength)
+                return Result.Fail(new ExceptionalError(
+                    new IOException("The partial download file is missing or shorter than its saved progress.")));
+
+            return Result.Ok();
+        });
 
     /// <inheritdoc/>
     public async Task<Result> StopAsync()

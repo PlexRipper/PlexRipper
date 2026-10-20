@@ -1,5 +1,5 @@
 import { headers, route } from '@fixtures';
-import { generateResultDTO } from '@mock';
+import { generateFailedResultDTO, generateResultDTO } from '@mock';
 import { FolderPathPaths } from '@api/api-paths';
 import { FolderType, PlexMediaType, type FolderPathDTO } from '@dto';
 import { kebabCase } from 'lodash-es';
@@ -191,6 +191,130 @@ describe('Change Folder Paths', () => {
 		cy.get<{ request: { body: FolderPathDTO } }[]>('@saveFolderPath.all').then((calls) => {
 			expect(calls.map(({ request }) => request.body.id)).to.deep.equal([4, 5, 6, 11, 11]);
 		});
+	});
+	function createCustomMusicDestination() {
+		cy.getCy('folder-path-tab-music-folder').click();
+		cy.getCy('music-folder-add-button').click();
+		chooseRootDirectory('Music');
+		cy.wait('@createFolderPath');
+	}
+
+	function failedWrite(message: string) {
+		return generateFailedResultDTO({
+			statusCode: 500,
+			errors: [{ message, reasons: [], metadata: {} }],
+		});
+	}
+
+	const directoryWrites = [
+		{
+			operation: 'update',
+			method: 'PUT',
+			url: FolderPathPaths.updateFolderPathEndpoint(),
+			openButton: 'default-music-folder-edit-button',
+			navigateToRoot: true,
+			directory: 'Photos',
+			resultInput: 'default-music-folder-input',
+			resultPath: '/Photos',
+			successAlias: '@saveFolderPath',
+		},
+		{
+			operation: 'create',
+			method: 'POST',
+			url: FolderPathPaths.createFolderPathEndpoint(),
+			openButton: 'music-folder-add-button',
+			navigateToRoot: false,
+			directory: 'Music',
+			resultInput: 'custom-music-folder-input',
+			resultPath: '/Music',
+			successAlias: '@createFolderPath',
+		},
+	];
+
+	for (const scenario of directoryWrites) {
+		it(`retains a failed ${scenario.operation} directory draft until its retry succeeds`, () => {
+			cy.getPageData();
+			const message = `${scenario.operation} persistence unavailable`;
+			cy.getCy('folder-path-tab-music-folder').click();
+			cy.getCy(scenario.openButton).click();
+			if (scenario.navigateToRoot) {
+				cy.getCy('directory-browser-row-return').click();
+			}
+			cy.intercept({ method: scenario.method, url: scenario.url, times: 1 }, {
+				statusCode: 500,
+				body: failedWrite(message),
+				...headers,
+			}).as('failedDirectoryWrite');
+			chooseRootDirectory(scenario.directory);
+			cy.wait('@failedDirectoryWrite').its('response.statusCode').should('eq', 500);
+			cy.getCy('alert-dialog').should('be.visible').within(() => {
+				cy.getCy('api-error').should('contain.text', message);
+				cy.getCy('close-alert-dialog').click();
+			});
+			cy.getCy('alert-dialog').should('not.exist');
+			cy.getCy('directory-browser-save-error').should('be.visible').and('contain.text', message);
+			if (scenario.operation === 'create') {
+				cy.getCy(scenario.resultInput).should('not.exist');
+			} else {
+				cy.getCy(scenario.resultInput).should('have.value', '/WRONG-PATH');
+			}
+			cy.getCy('directory-browser-confirm-button').should('not.be.disabled').click();
+			cy.wait(scenario.successAlias);
+			cy.getCy('directory-browser-confirm-button').should('not.exist');
+			cy.getCy(scenario.resultInput).should('have.value', scenario.resultPath);
+		});
+	}
+
+	it('keeps the persisted name after failure and applies a successful rename retry', () => {
+		cy.getPageData();
+		createCustomMusicDestination();
+		const row = 'custom-music-folder-row';
+		const message = 'Name persistence unavailable';
+		cy.getCy(row).parents('.folder-path-row').find('.editable-text-item').click();
+		cy.get('.q-popup-edit input').clear().type('Retry Music Name');
+		cy.intercept({ method: 'PUT', url: FolderPathPaths.updateFolderPathEndpoint(), times: 1 }, {
+			statusCode: 500,
+			body: failedWrite(message),
+			...headers,
+		}).as('failedName');
+		cy.get('.q-popup-edit input').type('{enter}');
+		cy.wait('@failedName');
+		cy.getCy('alert-dialog').should('be.visible').within(() => {
+			cy.getCy('api-error').should('contain.text', message);
+			cy.getCy('close-alert-dialog').click();
+		});
+		cy.getCy('alert-dialog').should('not.exist');
+		cy.contains('[role="alert"]', message).should('be.visible');
+		cy.getCy(row).parents('.folder-path-row').should('not.contain.text', 'Retry Music Name');
+		cy.getCy(row).parents('.folder-path-row').find('.editable-text-item').click();
+		cy.get('.q-popup-edit input').clear().type('Retry Music Name{enter}');
+		cy.wait('@saveFolderPath');
+		cy.getCy(row).parents('.folder-path-row').should('contain.text', 'Retry Music Name');
+	});
+
+	it('retains the selected row and failed delete confirmation until a retry succeeds', () => {
+		cy.getPageData();
+		createCustomMusicDestination();
+		const message = 'Delete persistence unavailable';
+		cy.getCy('custom-music-folder-delete-button').click();
+		cy.intercept({ method: 'DELETE', url: '**/api/FolderPath/*', times: 1 }, {
+			statusCode: 500,
+			body: failedWrite(message),
+			...headers,
+		}).as('failedDelete');
+		cy.getCy('confirmation-dialog-confirmation-button').click();
+		cy.wait('@failedDelete');
+		cy.getCy('alert-dialog').should('be.visible').within(() => {
+			cy.getCy('api-error').should('contain.text', message);
+			cy.getCy('close-alert-dialog').click();
+		});
+		cy.getCy('alert-dialog').should('not.exist');
+		cy.getCy('confirmation-dialog').should('be.visible').and('contain.text', message);
+		cy.getCy('custom-music-folder-input').should('have.value', '/Music');
+		cy.getCy('confirmation-dialog-confirmation-button').click();
+		cy.wait('@deleteFolderPath');
+		cy.getCy('confirmation-dialog').should('not.exist');
+		cy.getCy('custom-music-folder-row').should('not.exist');
 	});
 
 	it('keeps all destination tabs and controls reachable on a 320px phone', () => {

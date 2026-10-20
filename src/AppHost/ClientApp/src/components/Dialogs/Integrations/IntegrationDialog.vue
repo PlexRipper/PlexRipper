@@ -186,7 +186,7 @@
 						block
 						icon="mdi-cog-sync"
 						:disable="store.isSetupDisabled"
-						:loading="isSavingForSetup || store.isSettingUp"
+						:loading="(isSavingForSetup && store.isSaving) || store.isSettingUp"
 						data-cy="integration-setup"
 						@click="setup" />
 				</QCol>
@@ -235,6 +235,7 @@ const isSavingForSetup = ref(false);
 const requiredRules = [(value: string | number) => (typeof value === 'number' ? value > 0 : Boolean(value?.trim())) || 'Required'];
 const baseUrlRules = [
 	...requiredRules,
+	(value: string) => store.isHttpUrl(value) || 'URL must be an absolute http/https URL.',
 	(value: string) => store.isUrlUnique(value)
 		|| $t('help.settings.integrations.validation.base-url-unique', { type: store.draft.type }),
 ];
@@ -324,6 +325,7 @@ const integrationHelp = computed(() => {
 
 function open(event: unknown): void {
 	const integration = event as IntegrationSummary | null;
+	set(isSavingForSetup, false);
 	set(isEditMode, Boolean(integration));
 	set(stage, integration ? 2 : 1);
 	if (integration)
@@ -362,6 +364,7 @@ function test(): void {
 }
 
 function save(): void {
+	set(isSavingForSetup, false);
 	useSubscription(store.save().subscribe((result) => {
 		if (result?.isSuccess && result.value) dialogStore.closeDialog(DialogType.IntegrationDialog);
 	}));

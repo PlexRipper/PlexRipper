@@ -14,7 +14,12 @@ public class CreateRadarrIntegrationRequestValidator : Validator<CreateRadarrInt
     public CreateRadarrIntegrationRequestValidator()
     {
         RuleFor(x => x.Name).NotEmpty();
-        RuleFor(x => x.Url).NotEmpty().WithMessage("URL must be an absolute http/https URL.");
+        RuleFor(x => x.Url)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .WithMessage("URL must be an absolute http/https URL.")
+            .Must(url => url is not null && url.Trim().IsValidHttpUrl())
+            .WithMessage("URL must be an absolute http/https URL.");
         RuleFor(x => x.ApiKey).NotEmpty();
         RuleFor(x => x.Category).NotEmpty();
         RuleFor(x => x.DownloadFolderId).GreaterThan(0);

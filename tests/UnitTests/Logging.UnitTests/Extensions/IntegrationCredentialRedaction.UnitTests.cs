@@ -1,4 +1,6 @@
 using Autofac;
+using Microsoft.AspNetCore.Http;
+using Reaparr.Application;
 using Reaparr.Environment;
 using Serilog.Sinks.TestCorrelator;
 
@@ -50,5 +52,77 @@ public class IntegrationCredentialRedactionUnitTests : BaseUnitTest
         {
             LogFactory.CloseAndFlush();
         }
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public void ShouldRespectMaskingModeForPlexTokenFields_WhenLoggingNestedAccountRequests(bool unmasked)
+    {
+        // Arrange
+        SetAppRuntimeInfo(x => x.IsUnmasked = unmasked);
+        var runtimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
+        var pathProvider = Mock.Container.Resolve<IPathProvider>();
+        using var log = new TestLogConfig(runtimeInfo, pathProvider).GetLogger();
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Method = HttpMethods.Post;
+        httpContext.Request.Scheme = "http";
+        httpContext.Request.Host = new HostString("localhost", 5000);
+        httpContext.Request.Path = "/api/PlexAccount";
+        var request = new
+        {
+            Validation = new ValidatePlexTokenEndpointRequest
+            {
+                PlexAccountId = 0,
+                DisplayName = "Visible-account-label",
+                ManualAuthenticationToken = "manual-plex-secret-41",
+            },
+            Account = new CreatePlexAccountEndpointRequest
+            {
+                DisplayName = "Visible-account-label",
+                Username = "account-user",
+                Password = "Password-secret-41!",
+                IsEnabled = true,
+                IsMain = true,
+                IsValidated = true,
+                ValidatedAt = new DateTime(2026, 10, 19, 0, 0, 0, DateTimeKind.Utc),
+                Uuid = "account-uuid",
+                PlexId = 41,
+                Email = "account@example.test",
+                Title = "Account",
+                ClientId = "account-client",
+                Is2Fa = false,
+                CustomAuthenticationToken = "custom-plex-secret-41",
+                AuthenticationToken = "automatic-plex-secret-41",
+            },
+        };
+        var secrets = new[]
+        {
+            request.Validation.ManualAuthenticationToken,
+            request.Account.AuthenticationToken,
+            request.Account.CustomAuthenticationToken,
+            request.Account.Password,
+        };
+        using var context = TestCorrelator.CreateContext();
+
+        // Act
+        log.Here().DebugApiCall(httpContext, request);
+
+        // Assert
+        var logEvent = TestCorrelator.GetLogEventsFromContextId(context.Id).Single();
+        var message = logEvent.RenderMessage();
+        message.ShouldContain("POST");
+        message.ShouldContain("/api/PlexAccount");
+        message.ShouldContain("Visible-account-label");
+        foreach (var secret in secrets)
+        {
+            if (unmasked)
+                message.ShouldContain(secret);
+            else
+                message.ShouldNotContain(secret);
+        }
+
+        if (!unmasked)
+            message.ShouldContain("***MASKED***");
     }
 }

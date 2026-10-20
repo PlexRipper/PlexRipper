@@ -1,5 +1,5 @@
 import { route } from '@fixtures';
-import { generateResultDTO } from '@mock';
+import { generateFailedResultDTO, generateResultDTO } from '@mock';
 import { PlexAccountPaths } from '@api-urls';
 
 describe('Remove Plex account from Reaparr', () => {
@@ -44,6 +44,31 @@ describe('Remove Plex account from Reaparr', () => {
 			cy.getCy('account-dialog-form').should('not.exist');
 
 			cy.getCy(`account-card-id-${plexAccount.id}`).should('not.exist');
+		});
+	});
+
+	it('Should close the account dialog and retain other cards when deletion succeeds but refresh fails', () => {
+		cy.getPageData().then(({ plexAccounts }) => {
+			const target = plexAccounts[1];
+			const retained = plexAccounts[0];
+			if (!target || !retained) throw new Error('Expected two accounts in test setup');
+			cy.getCy(`account-card-id-${target.id}`).click();
+			cy.getCy('account-dialog-delete-button').click();
+			cy.intercept('DELETE', PlexAccountPaths.deletePlexAccountByIdEndpoint(target.id), {
+				statusCode: 200, body: generateResultDTO(true),
+			}).as('committedDelete');
+			cy.intercept('GET', PlexAccountPaths.getAllPlexAccountsEndpoint(), {
+				statusCode: 500, body: generateFailedResultDTO({ statusCode: 500 }),
+			}).as('failedRefresh');
+
+			cy.getCy('confirmation-dialog-confirmation-button').click();
+			cy.wait('@committedDelete').its('response.statusCode').should('eq', 200);
+			cy.wait('@failedRefresh').its('response.statusCode').should('eq', 500);
+			cy.getCy('account-dialog-form').should('not.exist');
+			cy.getCy(`account-card-id-${target.id}`).should('not.exist');
+			cy.getCy('api-error').should('contain.text', 'HTTP 500');
+			cy.getCy('close-alert-dialog').click();
+			cy.getCy(`account-card-id-${retained.id}`).should('be.visible');
 		});
 	});
 

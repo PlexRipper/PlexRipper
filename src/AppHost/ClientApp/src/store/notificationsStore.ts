@@ -42,22 +42,25 @@ export const useNotificationsStore = defineStore(StoreNames.NotificationsStore, 
 		setNotification(notification: NotificationDTO) {
 			state.notifications.push(notification);
 		},
-		hideNotification(id: number): void {
-			const i = state.notifications.findIndex((x) => x.id === id);
-			if (i > -1) {
-				const current = state.notifications[i]!;
-				state.notifications.splice(i, 1, { ...current, hidden: true });
-			}
-			notificationApi
-				.setNotificationVisibilityEndpoint({
-					id,
-					hidden: true,
-				})
-				.subscribe();
+		hideNotification(id: number) {
+			return notificationApi.setNotificationVisibilityEndpoint({ id, hidden: true }).pipe(
+				tap(({ isSuccess }) => {
+					if (!isSuccess) return;
+					const index = state.notifications.findIndex((notification) => notification.id === id);
+					if (index >= 0) {
+						const current = state.notifications[index]!;
+						state.notifications.splice(index, 1, { ...current, hidden: true });
+					}
+				}),
+			);
 		},
-		clearAllNotifications(): void {
-			state.notifications = [];
-			notificationApi.clearAllNotificationsEndpoint().subscribe();
+		clearAllNotifications() {
+			const ids = new Set(state.notifications.map((notification) => notification.id));
+			return notificationApi.clearAllNotificationsEndpoint().pipe(
+				tap(({ isSuccess }) => {
+					if (isSuccess) state.notifications = state.notifications.filter((notification) => !ids.has(notification.id));
+				}),
+			);
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));

@@ -1,10 +1,11 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, toRefs, watch } from 'vue';
+import { computed, reactive, toRefs, watch, shallowRef } from 'vue';
+import { get, set } from '@vueuse/core';
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
-import { cloneDeep } from 'lodash-es';
+import { of, EMPTY } from 'rxjs';
+import { catchError, finalize, filter, map, switchMap, tap } from 'rxjs/operators';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { integrationApi } from '@api';
 import {
 	IntegrationProvisioningState,
@@ -73,6 +74,9 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 	};
 
 	const state = reactive<IIntegrationStoreState>(cloneDeep(defaultState));
+	const editTarget = shallowRef<Pick<IntegrationSummary, 'id' | 'type'> | null>(null);
+	let dialogSession = 0;
+	const requestVersions = { load: 0, mutation: 0, test: 0 };
 	let observedDraftUrl = state.draft.url.trim().replace(/\/+$/, '');
 	let observedDraftApiKey = state.draft.apiKey.trim();
 	watch(
@@ -112,12 +116,16 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		openAdd(type = IntegrationType.Sonarr): void {
+			resetOperationState();
 			state.detail = null;
 			state.draft = { ...emptyDraft(type), category: getUniqueCategory(type) };
-			resetOperationState();
 		},
 		openEdit(item: IntegrationSummary) {
 			resetOperationState();
+			set(editTarget, { id: item.id, type: item.type });
+			state.detail = null;
+			state.draft = emptyDraft(item.type);
+			const ownsRequest = beginRequest('load');
 			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
 			switch (item.type) {
 				case IntegrationType.Radarr:
@@ -130,16 +138,19 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					throw new Error(`Unsupported integration type: ${String(item.type)}`);
 			}
 			return request.pipe(
+				filter(ownsRequest),
 				tap((result) => {
 					if (result.isSuccess && result.value) setDetail(item.type, result.value);
 					else state.error = result;
 				}),
-				catchError(handleError),
+				catchError((error) => ownsRequest() ? handleError(error) : EMPTY),
 			);
 		},
 		test() {
 			const testedDraft = { ...state.draft };
 			const testedIntegrationId = state.detail?.id;
+			const ownsRequest = beginRequest('test');
+			const isCurrent = () => ownsRequest() && isTestTargetCurrent(testedDraft, testedIntegrationId);
 			const query = {
 				apiKey: testedDraft.apiKey,
 				url: testedDraft.url,
@@ -161,72 +172,70 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			state.error = null;
 			state.saveError = null;
 			return request.pipe(
+				filter(isCurrent),
 				tap((result) => {
 					if (!result.value) {
 						state.error = result;
 						return;
 					}
-					if (!isTestTargetCurrent(testedDraft, testedIntegrationId)) return;
 					state.testResult = result.value;
 					updateSummaryConnectionStatus(result.value);
 				}),
-				catchError(handleError),
-				finalize(() => (state.isTesting = false)),
+				catchError((error) => isCurrent() ? handleError(error) : EMPTY),
+				finalize(() => {
+					if (ownsRequest()) state.isTesting = false;
+				}),
 			);
 		},
 		save() {
-			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
-			switch (state.draft.type) {
-				case IntegrationType.Radarr:
-					request = saveRadarr();
-					break;
-				case IntegrationType.Sonarr:
-					request = saveSonarr();
-					break;
-				default:
-					throw new Error(`Unsupported integration type: ${String(state.draft.type)}`);
-			}
+			if (!isEditTargetReady() || !isHttpUrl(state.draft.url)) return EMPTY;
+			const ownsRequest = beginRequest('mutation');
+			let expectedTarget = captureDraftTarget();
+			const isCurrent = () => ownsRequest() && isEqual(expectedTarget, captureDraftTarget());
+			const type = state.draft.type;
+			const request = createSaveRequest(type);
+			state.isSettingUp = false;
 			state.isSaving = true;
 			state.error = null;
 			state.saveError = null;
 			return request.pipe(
+				tap((result) => {
+					if (!isCurrent()) return;
+					handleSaveResult(type, result);
+					expectedTarget = captureDraftTarget();
+				}),
 				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
-				catchError(handleSaveError),
-				finalize(() => (state.isSaving = false)),
+				filter(isCurrent),
+				catchError((error) => isCurrent() ? handleSaveError(error) : EMPTY),
+				finalize(() => {
+					if (ownsRequest()) state.isSaving = false;
+				}),
 			);
 		},
 		setupIntegration() {
 			const detail = state.detail;
 			if (!detail) return of(null);
-			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
-			switch (detail.type) {
-				case IntegrationType.Radarr:
-					request = integrationApi.setupRadarrIntegrationEndpoint(detail.id);
-					break;
-				case IntegrationType.Sonarr:
-					request = integrationApi.setupSonarrIntegrationEndpoint(detail.id);
-					break;
-				default:
-					throw new Error(`Unsupported integration type: ${String(detail.type)}`);
-			}
+			const ownsRequest = beginRequest('mutation');
+			let expectedTarget = captureDraftTarget();
+			const isCurrent = () => ownsRequest() && isEqual(expectedTarget, captureDraftTarget());
+			const request = createSetupRequest(detail);
+			state.isSaving = false;
 			state.isSettingUp = true;
 			state.error = null;
 			state.setupError = null;
 			state.testResult = null;
 			return request.pipe(
 				tap((result) => {
-					if (result.isSuccess && result.value) {
-						setDetail(state.detail!.type, result.value);
-						state.requiresSetupPrompt = false;
-					} else state.setupError = result;
+					if (!isCurrent()) return;
+					handleSetupResult(detail.type, result);
+					expectedTarget = captureDraftTarget();
 				}),
 				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
-				catchError((error) => {
-					state.setupError = error;
-					Log.error('Integration setup request failed', error);
-					return of(null);
+				filter(isCurrent),
+				catchError((error) => isCurrent() ? handleSetupError(error) : EMPTY),
+				finalize(() => {
+					if (ownsRequest()) state.isSettingUp = false;
 				}),
-				finalize(() => (state.isSettingUp = false)),
 			);
 		},
 		delete() {
@@ -259,14 +268,30 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		close(): void {
+			resetOperationState();
 			state.detail = null;
 			state.draft = emptyDraft();
-			resetOperationState();
 		},
 		$reset(): void {
+			resetOperationState();
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+
+	function beginRequest(operation: keyof typeof requestVersions): () => boolean {
+		const session = dialogSession;
+		const version = ++requestVersions[operation];
+		return () => session === dialogSession && version === requestVersions[operation];
+	}
+
+	function captureDraftTarget() {
+		return { ...state.draft, integrationId: state.detail?.id };
+	}
+
+	function isEditTargetReady(): boolean {
+		const target = get(editTarget);
+		return target === null || (state.detail?.id === target.id && state.detail.type === target.type);
+	}
 
 	function getUniqueCategory(type: IntegrationType): string {
 		let baseCategory: string;
@@ -291,6 +316,11 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 	}
 
 	function resetOperationState(): void {
+		dialogSession++;
+		set(editTarget, null);
+		state.isTesting = false;
+		state.isSaving = false;
+		state.isSettingUp = false;
 		state.error = null;
 		state.saveError = null;
 		state.setupError = null;
@@ -341,20 +371,32 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		};
 	}
 
-	function saveRadarr() {
+	function createSaveRequest(type: IntegrationType): Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>> {
 		const request = toRequest();
-		const observable = state.detail
-			? integrationApi.updateRadarrIntegrationEndpoint(state.detail.id, request)
-			: integrationApi.createRadarrIntegrationEndpoint(request);
-		return observable.pipe(tap((result) => handleSaveResult(IntegrationType.Radarr, result)));
+		switch (type) {
+			case IntegrationType.Radarr:
+				return state.detail
+					? integrationApi.updateRadarrIntegrationEndpoint(state.detail.id, request)
+					: integrationApi.createRadarrIntegrationEndpoint(request);
+			case IntegrationType.Sonarr:
+				return state.detail
+					? integrationApi.updateSonarrIntegrationEndpoint(state.detail.id, request)
+					: integrationApi.createSonarrIntegrationEndpoint(request);
+			default:
+				throw new Error(`Unsupported integration type: ${String(type)}`);
+		}
 	}
 
-	function saveSonarr() {
-		const request = toRequest();
-		const observable = state.detail
-			? integrationApi.updateSonarrIntegrationEndpoint(state.detail.id, request)
-			: integrationApi.createSonarrIntegrationEndpoint(request);
-		return observable.pipe(tap((result) => handleSaveResult(IntegrationType.Sonarr, result)));
+	function createSetupRequest(detail: IntegrationDetail): Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>> {
+		if (!isEditTargetReady()) return EMPTY;
+		switch (detail.type) {
+			case IntegrationType.Radarr:
+				return integrationApi.setupRadarrIntegrationEndpoint(detail.id);
+			case IntegrationType.Sonarr:
+				return integrationApi.setupSonarrIntegrationEndpoint(detail.id);
+			default:
+				throw new Error(`Unsupported integration type: ${String(detail.type)}`);
+		}
 	}
 
 	function toRequest() {
@@ -378,6 +420,19 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			state.error = result;
 			state.saveError = result;
 		}
+	}
+
+	function handleSetupResult(type: IntegrationType, result: ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>): void {
+		if (result.isSuccess && result.value) {
+			setDetail(type, result.value);
+			state.requiresSetupPrompt = false;
+		} else state.setupError = result;
+	}
+
+	function handleSetupError(error: unknown) {
+		state.setupError = error;
+		Log.error('Integration setup request failed', error);
+		return of(null);
 	}
 
 	function handleError(error: unknown) {
@@ -422,10 +477,20 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			|| state.draft.downloadFolderId !== state.detail.downloadFolderId;
 	}
 
+	function isHttpUrl(value: string): boolean {
+		try {
+			const { protocol } = new URL(value.trim());
+			return protocol === 'http:' || protocol === 'https:';
+		} catch {
+			return false;
+		}
+	}
+
 	function isDraftValid(): boolean {
+		if (!isEditTargetReady()) return false;
 		return Boolean(
 			state.draft.name.trim()
-			&& state.draft.url.trim()
+			&& isHttpUrl(state.draft.url)
 			&& state.draft.apiKey.trim()
 			&& state.draft.category.trim()
 			&& state.draft.downloadFolderId > 0
@@ -435,6 +500,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 	}
 
 	const getters = {
+		isHttpUrl,
 		isCategoryUnique,
 		isUrlUnique,
 		isDraftDirty: computed(isDraftDirty),

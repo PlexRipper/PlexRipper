@@ -168,7 +168,7 @@ function renderGanttChart() {
 	}
 	ganttChart.Draw();
 	bindHeaderScrollSync(ganttContainer);
-	bindTaskSelection(ganttContainer);
+	bindTaskSelection();
 	applyPostDrawViewportAdjustments(ganttContainer);
 }
 
@@ -560,9 +560,17 @@ function alignCurrentTimeMarkerToActiveBars(ganttContainer: HTMLElement) {
 	grid.classList.add('has-library-access-current-time-marker');
 }
 
-function bindTaskSelection(ganttContainer: HTMLElement) {
+type GanttTask = {
+	getOriginalID(): string;
+	getListChildRow(): HTMLTableRowElement | null;
+};
+
+function bindTaskSelection() {
+	const tasksById = new Map<string, GanttTask>(
+		ganttChart!.getList().map((task) => [task.getOriginalID(), task as GanttTask] as const),
+	);
 	for (const interval of get(sortedIntervals)) {
-		const taskElement = ganttContainer.querySelector(`[id*="${CSS.escape(interval.id)}"]`);
+		const taskElement = tasksById.get(interval.id)?.getListChildRow();
 		if (!taskElement) {
 			continue;
 		}

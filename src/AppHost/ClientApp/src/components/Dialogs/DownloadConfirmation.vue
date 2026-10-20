@@ -165,7 +165,10 @@
 				</q-btn-dropdown>
 			</div>
 			<!--	Directory Browser	-->
-			<DirectoryBrowser @confirm="onCustomDirectorySelected" />
+			<DirectoryBrowser
+				:saving="false"
+				:error-message="''"
+				@confirm="onCustomDirectorySelected" />
 		</template>
 	</QCardDialog>
 </template>
@@ -307,6 +310,7 @@ useSubscription(
 function onCustomDirectorySelected(path: FolderPathDTO): void {
 	set(customDirectory, path);
 	set(selectedFolderPath, get(customDirectory));
+	dialogStore.closeDialog(DialogType.DirectoryBrowserDialog);
 }
 
 function onDownload(close: () => void) {

@@ -1,7 +1,7 @@
 namespace Reaparr.Application;
 
 /// <summary>
-/// Checks whether a desktop application update is available via Velopack and notifies the front-end when one is found.
+/// Checks whether an application update is available via Velopack or the GitHub fallback.
 /// </summary>
 public record CheckForUpdatesCommand : ICommand<Result<AppUpdateCheckResult>>;
 
@@ -11,7 +11,6 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
     private readonly ICommandExecutor _commandExecutor;
     private readonly IAppBuildInfo _appBuildInfo;
     private readonly UpdateManager _velopackManager;
-    private readonly INotificationHubService _notificationHubService;
 
     private AppUpdateCheckResult NoUpdate() =>
         new()
@@ -26,15 +25,13 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         ILogger log,
         ICommandExecutor commandExecutor,
         IAppBuildInfo appBuildInfo,
-        UpdateManager velopackManager,
-        INotificationHubService notificationHubService
+        UpdateManager velopackManager
     )
     {
         _log = log.ForContext<CheckForUpdatesCommandHandler>();
         _commandExecutor = commandExecutor;
         _appBuildInfo = appBuildInfo;
         _velopackManager = velopackManager;
-        _notificationHubService = notificationHubService;
     }
 
     public async Task<Result<AppUpdateCheckResult>> ExecuteAsync(
@@ -113,7 +110,6 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
                     _appBuildInfo.InformationalVersion
                 );
 
-            await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable);
             return Result.Ok(
                 new AppUpdateCheckResult
                 {
@@ -131,7 +127,6 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
             var targetVersion = nonDesktopUpdateResult.Value.TargetFullRelease.Version.ToString();
             _log.Here().Information("Update available: {Version}", targetVersion);
 
-            await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable);
             return Result.Ok(
                 new AppUpdateCheckResult
                 {
@@ -144,7 +139,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         }
 
         if (releasesResult.IsFailed)
-            return Result.Ok(NoUpdate());
+            return releasesResult.ToResult<AppUpdateCheckResult>();
 
         // Docker Mode
         var isDevRelease = _appBuildInfo.IsDevRelease;
@@ -159,7 +154,6 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
 
         _log.Here().Information("Update available: {Version}", latestVersion);
 
-        await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable);
         return Result.Ok(
             new AppUpdateCheckResult
             {

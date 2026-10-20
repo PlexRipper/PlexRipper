@@ -21,6 +21,9 @@ public class DownloadTorrentEndpointRequestValidator : Validator<DownloadTorrent
         RuleFor(x => x)
             .Must(r => r.PartId > 0 && r.PlexApiPartId > 0)
             .WithMessage($"Both PartId and {nameof(TorrentMetadataDTO.PlexApiPartId)} must be provided.");
+        RuleFor(x => x)
+            .Must(r => r.DataId == r.PartId)
+            .WithMessage($"{nameof(TorrentMetadataDTO.DataId)} and {nameof(TorrentMetadataDTO.PartId)} must match.");
     }
 }
 
@@ -111,26 +114,35 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         await Send.BytesAsync(torrent.EncodeAsBytes(), fileName, "application/x-bittorrent", cancellation: ct);
     }
 
-    private async Task<MediaFileInfo?> GetFileInfoAsync(DownloadTorrentEndpointRequest req, CancellationToken ct)
-    {
-        if (req.Type == PlexMediaType.Episode)
+    private Task<MediaFileInfo?> GetFileInfoAsync(DownloadTorrentEndpointRequest req, CancellationToken ct) =>
+        req.Type switch
         {
-            return await _dbContext
-                .PlexTvShowEpisodeData.Where(p => p.Id == req.PartId && p.PlexApiPartId == req.PlexApiPartId)
-                .Select(p => new MediaFileInfo { FileName = p.GetFileName, Size = p.Size })
-                .SingleOrDefaultAsync(ct);
-        }
+            PlexMediaType.Episode => GetFileInfoAsync(
+                _dbContext.PlexTvShowEpisodeData.Where(p =>
+                    p.PlexTvShowEpisodeId == req.MediaId
+                    && p.PlexTvShowEpisode!.PlexLibraryId == req.LibraryId
+                    && p.PlexTvShowEpisode.PlexServerId == req.ServerId),
+                req, ct),
+            PlexMediaType.Movie => GetFileInfoAsync(
+                _dbContext.PlexMovieData.Where(p =>
+                    p.PlexMovieId == req.MediaId
+                    && p.PlexMovie!.PlexLibraryId == req.LibraryId
+                    && p.PlexMovie.PlexServerId == req.ServerId),
+                req, ct),
+            _ => Task.FromResult<MediaFileInfo?>(null),
+        };
 
-        if (req.Type == PlexMediaType.Movie)
-        {
-            return await _dbContext
-                .PlexMovieData.Where(p => p.Id == req.PartId && p.PlexApiPartId == req.PlexApiPartId)
-                .Select(p => new MediaFileInfo { FileName = p.GetFileName, Size = p.Size })
-                .SingleOrDefaultAsync(ct);
-        }
-
-        return null;
-    }
+    private static Task<MediaFileInfo?> GetFileInfoAsync<T>(
+        IQueryable<T> parts,
+        TorrentMetadataDTO metadata,
+        CancellationToken ct
+    ) where T : BasePlexMediaData =>
+        parts.Where(p => p.Id == metadata.DataId
+                && p.PlexApiPartId == metadata.PlexApiPartId
+                && p.PlexLibraryId == metadata.LibraryId
+                && p.PlexServerId == metadata.ServerId)
+            .Select(p => new MediaFileInfo { FileName = p.GetFileName, Size = p.Size })
+            .SingleOrDefaultAsync(ct);
 
     private record MediaFileInfo
     {

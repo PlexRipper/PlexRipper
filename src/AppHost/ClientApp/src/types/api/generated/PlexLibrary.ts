@@ -109,6 +109,10 @@ export class PlexLibrary {
   getLibraryMediaMetadata = (
     plexLibraryId: number,
     query: {
+      /** @default false */
+      filterOfflineMedia?: boolean | null;
+      /** @default false */
+      filterOwnedMedia?: boolean | null;
       /** @default 0 */
       mediaType: PlexMediaType;
     },
@@ -133,6 +137,10 @@ export class PlexLibrary {
   getMetadataFilter = (
     plexLibraryId: number,
     query: {
+      /** @default false */
+      filterOfflineMedia?: boolean | null;
+      /** @default false */
+      filterOwnedMedia?: boolean | null;
       /** @default 0 */
       mediaType: PlexMediaType;
     },
@@ -245,6 +253,10 @@ export class PlexLibraryPaths {
   static getLibraryMediaMetadata = (
     plexLibraryId: number,
     query: {
+      /** @default false */
+      filterOfflineMedia?: boolean | null;
+      /** @default false */
+      filterOwnedMedia?: boolean | null;
       /** @default 0 */
       mediaType: PlexMediaType;
     },
@@ -257,6 +269,10 @@ export class PlexLibraryPaths {
   static getMetadataFilter = (
     plexLibraryId: number,
     query: {
+      /** @default false */
+      filterOfflineMedia?: boolean | null;
+      /** @default false */
+      filterOwnedMedia?: boolean | null;
       /** @default 0 */
       mediaType: PlexMediaType;
     },

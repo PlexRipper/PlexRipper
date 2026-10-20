@@ -28,7 +28,9 @@ Native repository tooling is mandatory for frontend work. Use these tools direct
 - `lsp` for symbol inspection, references, refactors, and diagnostics;
 - short `bash` commands for Bun, Vitest, Cypress, and factual checks.
 
-Retry a failed native tool once with a narrower request before changing approach. Do not treat an external editor integration as a prerequisite for frontend work.
+Retry a failed native tool once with a narrower request before changing approach. Source editing and isolated unit checks do not require an IDE.
+
+For application start, restart, and stop instructions, see **Running Reaparr** in the project root `AGENTS.md`.
 
 ## Secondary Skill Routing
 

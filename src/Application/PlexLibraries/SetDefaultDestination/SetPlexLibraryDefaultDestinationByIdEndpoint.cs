@@ -33,6 +33,8 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
@@ -42,6 +44,35 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
         CancellationToken ct
     )
     {
+        var libraryType = await _dbContext
+            .PlexLibraries.Where(x => x.Id == req.PlexLibraryId)
+            .Select(x => (PlexMediaType?)x.Type)
+            .SingleOrDefaultAsync(ct);
+        if (libraryType is null)
+        {
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
+            return;
+        }
+
+        var folder = await _dbContext
+            .FolderPaths.Where(x => x.Id == req.FolderPathId)
+            .Select(x => new { x.MediaType, x.FolderType })
+            .SingleOrDefaultAsync(ct);
+        if (folder is null)
+        {
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), req.FolderPathId), ct);
+            return;
+        }
+
+        if (folder.MediaType != libraryType.Value || !IsDestinationFolderType(libraryType.Value, folder.FolderType))
+        {
+            await Send.FluentResult(
+                ResultExtensions.Create400BadRequestResult("The selected folder is not a compatible media destination."),
+                ct
+            );
+            return;
+        }
+
         var plexLibraryDb = await _dbContext
             .PlexLibraries.Where(x => x.Id == req.PlexLibraryId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.DefaultDestinationId, req.FolderPathId), ct);
@@ -59,4 +90,13 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
         else
             await Send.FluentResult(Result.Ok(), ct);
     }
+
+    private static bool IsDestinationFolderType(PlexMediaType mediaType, FolderType folderType) =>
+        (mediaType, folderType) is
+            (PlexMediaType.Movie, FolderType.MovieFolder)
+            or (PlexMediaType.TvShow, FolderType.TvShowFolder)
+            or (PlexMediaType.MusicArtist, FolderType.MusicFolder)
+            or (PlexMediaType.PhotoAlbum, FolderType.PhotosFolder)
+            or (PlexMediaType.OtherVideos, FolderType.OtherVideosFolder)
+            or (PlexMediaType.Games, FolderType.GamesVideosFolder);
 }

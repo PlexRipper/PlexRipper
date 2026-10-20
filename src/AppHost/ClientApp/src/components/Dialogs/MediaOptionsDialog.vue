@@ -22,7 +22,8 @@
 				:text="$t('help.media-options.hide-offline-servers.text')">
 				<q-toggle
 					v-model="settingsStore.generalSettings.hideMediaFromOfflineServers"
-					color="red" />
+					color="red"
+					data-cy="media-options-hide-offline-toggle" />
 			</HelpRow>
 			<HelpRow
 				:col-label="colLabel"
@@ -33,7 +34,8 @@
 				:text="$t('help.media-options.hide-owned-media.text')">
 				<q-toggle
 					v-model="settingsStore.generalSettings.hideMediaFromOwnedServers"
-					color="red" />
+					color="red"
+					data-cy="media-options-hide-owned-toggle" />
 			</HelpRow>
 			<HelpRow
 				:col-label="colLabel"
@@ -59,7 +61,7 @@ import type { ColLevels } from '@props';
 const settingsStore = useSettingsStore();
 const originalValues: Record<string, boolean> = {};
 const emits = defineEmits<{
-	(e: 'closed', hasChanged: boolean): void;
+	(e: 'closed', hasChanged: boolean, visibilityChanged: boolean): void;
 }>();
 
 const breakpoints = useBreakpoints(breakpointsQuasar);
@@ -85,12 +87,15 @@ function onOpen() {
 }
 
 function onClosing() {
-	const hasChanged = (
+	const visibilityChanged = (
 		originalValues.hideMediaFromOfflineServers !== settingsStore.generalSettings.hideMediaFromOfflineServers
 		|| originalValues.hideMediaFromOwnedServers !== settingsStore.generalSettings.hideMediaFromOwnedServers
+	);
+	const hasChanged = (
+		visibilityChanged
 		|| originalValues.useLowQualityPosterImages !== settingsStore.generalSettings.useLowQualityPosterImages
 	);
 
-	emits('closed', hasChanged);
+	emits('closed', hasChanged, visibilityChanged);
 }
 </script>

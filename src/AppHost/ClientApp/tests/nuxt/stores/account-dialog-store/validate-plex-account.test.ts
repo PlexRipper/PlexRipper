@@ -17,11 +17,17 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		setActivePinia(createPinia());
 	});
 
+	function openNewAccount() {
+		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.openDialog({ accountId: 0 });
+		return accountDialogStore;
+	}
+
 	test('Should keep account validated and not open verification dialog when account is validated with 2FA', async () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 		accountDialogStore.username = 'valid-user';
 		accountDialogStore.password = 'valid-pass';
 
@@ -54,7 +60,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 
 		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(200, generateResultDTO({
 			is2Fa: true,
@@ -84,7 +90,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 		accountDialogStore.username = 'wrong-user';
 		accountDialogStore.password = 'wrong-pass';
 
@@ -118,7 +124,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 		accountDialogStore.hasValidationErrors = true;
 
 		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(200, generateResultDTO({
@@ -151,7 +157,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 		accountDialogStore.username = '2fa-user';
 		accountDialogStore.password = '2fa-pass';
 
@@ -187,7 +193,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 
@@ -208,7 +214,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 
@@ -229,7 +235,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 
@@ -263,7 +269,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		// Arrange
 		const dialogStore = useDialogStore();
 		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
-		const accountDialogStore = useAccountDialogStore();
+		const accountDialogStore = openNewAccount();
 		accountDialogStore.username = 'user';
 		accountDialogStore.password = 'pass';
 

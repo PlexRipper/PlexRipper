@@ -75,29 +75,25 @@ public class RefreshLibraryAccessHandler
         }
 
         // Refresh Plex libraries
-        var failedServers = new List<int>();
-
         var libraryResults = await Task.WhenAll(
-            plexServers.Select(async server =>
-            {
-                var refreshResult = await RefreshLibrary(server.Id, plexAccountId, cancellationToken);
-                if (refreshResult.ToResult().Has504GatewayTimeoutError())
-                {
-                    failedServers.Add(server.Id);
-                }
-
-                return refreshResult;
-            })
+            plexServers.Select(async server => (
+                ServerId: server.Id,
+                Result: await RefreshLibrary(server.Id, plexAccountId, cancellationToken)
+            ))
         );
 
-        var cancelledResults = libraryResults.Where(x => x.IsCancelled).ToList();
-        if (cancelledResults.Any())
-            return Result.Merge(cancelledResults.ToResult()).ToResult();
+        var cancelledResults = libraryResults.Where(x => x.Result.IsCancelled).Select(x => x.Result).ToArray();
+        if (cancelledResults.Length > 0)
+            return Result.Merge(cancelledResults).ToResult();
 
-        if (libraryResults.All(x => x.IsFailed))
-            return Result.Merge(libraryResults).ToResult();
+        if (libraryResults.All(x => x.Result.IsFailed))
+            return Result.Merge(libraryResults.Select(x => x.Result).ToArray()).ToResult();
 
-        var plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
+        var plexLibraries = libraryResults.Where(x => x.Result.IsSuccess).SelectMany(x => x.Result.Value).ToList();
+        var failedServers = libraryResults
+            .Where(x => x.Result.Has504GatewayTimeoutError())
+            .Select(x => x.ServerId)
+            .ToList();
 
         var updateResult = await _commandExecutor.Send(
             new AddOrUpdatePlexLibrariesCommand { PlexAccountId = plexAccountId, PlexLibraries = plexLibraries },

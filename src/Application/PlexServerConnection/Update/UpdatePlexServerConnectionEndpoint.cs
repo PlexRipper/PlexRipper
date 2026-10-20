@@ -21,7 +21,11 @@ public class UpdatePlexServerConnectionEndpointRequestValidator : Validator<Upda
     {
         RuleFor(x => x.Id).GreaterThan(0);
         RuleFor(x => x.PlexServerId).GreaterThan(0);
-        RuleFor(x => x.Url).NotEmpty();
+        RuleFor(x => x.Url)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .Must(url => url is not null && url.Trim().IsValidHttpUrl())
+            .WithMessage("string is not a valid URL");
         RuleFor(x => x.Protocol).NotEmpty();
         RuleFor(x => x.Address).NotEmpty();
         RuleFor(x => x.Port).GreaterThan(0);
@@ -52,18 +56,39 @@ public class UpdatePlexServerConnectionEndpoint
 
     public override async Task HandleAsync(UpdatePlexServerConnectionEndpointRequest req, CancellationToken ct)
     {
+        var existing = await _dbContext.PlexServerConnections.GetAsync(req.Id, ct);
+        if (existing is null)
+        {
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.Id), ct);
+            return;
+        }
+
+        if (!existing.IsCustom)
+        {
+            await Send.FluentResult(ResultExtensions.Create400BadRequestResult("Only custom connections can be edited"), ct);
+            return;
+        }
+
+        if (existing.PlexServerId != req.PlexServerId)
+        {
+            await Send.FluentResult(
+                ResultExtensions.Create400BadRequestResult("A connection cannot be moved to another Plex server"), ct);
+            return;
+        }
+
+        var url = req.Url.Trim();
         var connection = new PlexServerConnection
         {
-            Id = req.Id,
+            Id = existing.Id,
             Protocol = req.Protocol.ToLower(),
             Address = req.Address,
             Port = req.Port,
-            Url = req.Url,
-            Local = req.Address.IsLocalUrl(),
+            Url = url,
+            Local = url.IsLocalUrl(),
             Relay = req.Address.Contains("plex.direct"),
             IPv4 = req.Address.IsIpv4(),
             IPv6 = req.Address.IsIPv6(),
-            PlexServerId = req.PlexServerId,
+            PlexServerId = existing.PlexServerId,
             IsCustom = true,
         };
 

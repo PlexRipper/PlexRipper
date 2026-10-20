@@ -85,7 +85,7 @@ public class UpdateSonarrIntegrationEndpointUnitTests
         {
             IntegrationId = integration.Id,
             Name = "Sonarr",
-            Url = "sonarr-instance",
+            Url = "https://updated-sonarr.example.com",
             ApiKey = "old-key",
             Category = "category",
             DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
@@ -101,7 +101,7 @@ public class UpdateSonarrIntegrationEndpointUnitTests
         endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-        updated.BaseUrl.ShouldBe("sonarr-instance");
+        updated.BaseUrl.ShouldBe("https://updated-sonarr.example.com");
         updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.ChangesPending);
         updated.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Unknown);
         updated.LastConnectionTestHttpStatusCode.ShouldBeNull();

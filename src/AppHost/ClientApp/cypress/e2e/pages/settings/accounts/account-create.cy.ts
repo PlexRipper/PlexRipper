@@ -4,6 +4,19 @@ import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { PlexAccountPaths, PlexLibraryPaths, PlexServerPaths } from '@api-urls';
 
 describe('Add Plex account to Reaparr', () => {
+	const manualToken = 'manual-token-1234567';
+	function createManualTokenAccount(partialData: Partial<PlexAccountDTO> = {}): PlexAccountDTO {
+		return generatePlexAccount({
+			id: 99,
+			partialData: {
+				authenticationToken: '',
+				customAuthenticationToken: manualToken,
+				isValidated: false,
+				is2Fa: false,
+				...partialData,
+			},
+		});
+	}
 	beforeEach(() => {
 		cy.basePageSetup({
 			plexAccountCount: 2,
@@ -200,16 +213,7 @@ describe('Add Plex account to Reaparr', () => {
 
 	it('Should create an Account when a valid token is added manually', () => {
 		cy.getPageData().then(() => {
-			const account: PlexAccountDTO = generatePlexAccount({
-				id: 99,
-				partialData: {
-					username: '',
-					password: '',
-					isValidated: false,
-					is2Fa: false,
-					hasPassword: true,
-				},
-			});
+			const account: PlexAccountDTO = createManualTokenAccount({ username: '', password: '' });
 
 			cy.getCy('account-overview-add-account').click();
 			cy.getCy('account-dialog-form').should('be.visible');
@@ -222,13 +226,13 @@ describe('Add Plex account to Reaparr', () => {
 
 			// Fill in credentials
 			cy.getCy('account-form-display-name-input').type(account.displayName);
-			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
+			cy.getCy('account-form-auth-token-input').type(account.customAuthenticationToken);
 
 			// Validate Action
 			cy.validatePlexTokenEndpoint({
 				partialData: {
 					id: 0, // Id is not created on validation
-					authenticationToken: account.authenticationToken,
+					customAuthenticationToken: account.customAuthenticationToken,
 					clientId: account.clientId,
 					email: account.email,
 					is2Fa: false,
@@ -294,15 +298,7 @@ describe('Add Plex account to Reaparr', () => {
 
 	it('Should show failed validation dialog when a invalid token is added manually, and then allow for another validation and succeed', () => {
 		cy.getPageData().then(() => {
-			const account: PlexAccountDTO = generatePlexAccount({
-				id: 99,
-				partialData: {
-					username: '',
-					password: '',
-					isValidated: false,
-					is2Fa: false,
-				},
-			});
+			const account: PlexAccountDTO = createManualTokenAccount({ username: '', password: '' });
 
 			cy.getCy('account-overview-add-account').click();
 			cy.getCy('account-dialog-form').should('be.visible');
@@ -315,13 +311,13 @@ describe('Add Plex account to Reaparr', () => {
 
 			// Fill in credentials
 			cy.getCy('account-form-display-name-input').type(account.displayName);
-			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
+			cy.getCy('account-form-auth-token-input').type(account.customAuthenticationToken);
 
 			// Validate Action, failed
 			cy.validatePlexTokenEndpoint({
 				isUnAuthorized: true,
 				partialData: {
-					authenticationToken: account.authenticationToken,
+					customAuthenticationToken: account.customAuthenticationToken,
 					clientId: account.clientId,
 					email: account.email,
 					is2Fa: false,
@@ -348,7 +344,7 @@ describe('Add Plex account to Reaparr', () => {
 			cy.validatePlexTokenEndpoint({
 				isUnAuthorized: false,
 				partialData: {
-					authenticationToken: account.authenticationToken,
+					customAuthenticationToken: account.customAuthenticationToken,
 					clientId: account.clientId,
 					email: account.email,
 					is2Fa: false,
@@ -605,13 +601,7 @@ describe('Add Plex account to Reaparr', () => {
 
 	it('Should preserve display name when switching between validation modes', () => {
 		cy.getPageData().then(() => {
-			const account: PlexAccountDTO = generatePlexAccount({
-				id: 99,
-				partialData: {
-					isValidated: false,
-					is2Fa: false,
-				},
-			});
+			const account: PlexAccountDTO = createManualTokenAccount();
 
 			const displayName = 'My Preserved Display Name';
 
@@ -643,11 +633,11 @@ describe('Add Plex account to Reaparr', () => {
 			cy.getCy('account-form-display-name-input').should('have.value', displayName);
 
 			// Enter token and validate
-			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
+			cy.getCy('account-form-auth-token-input').type(account.customAuthenticationToken);
 
 			cy.validatePlexTokenEndpoint({
 				partialData: {
-					authenticationToken: account.authenticationToken,
+					customAuthenticationToken: account.customAuthenticationToken,
 					clientId: account.clientId,
 					email: account.email,
 					is2Fa: false,

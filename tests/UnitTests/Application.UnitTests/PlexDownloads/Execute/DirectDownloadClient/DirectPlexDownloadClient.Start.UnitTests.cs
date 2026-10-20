@@ -1075,6 +1075,10 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     return Task.FromResult(Stream.Null);
                 }
             );
+        if (shouldResume)
+            SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(),
+                snapshot.FileName + snapshot.DownloadingFileExtension, downloadTask.DataTotal / 2);
+
 
         SetupCommandExecutor();
 
@@ -2305,6 +2309,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         var package = MakeDownloadPackage(downloadTask.DataTotal);
         package.SaveProgress = 60;
         package.Chunks = [new Chunk(0, downloadTask.DataTotal) { Position = downloadTask.DataTotal * 3 / 5 }];
+        SetupVerifiedFile(fileMock, fileInfoFactoryMock,
+            package.FileName + package.DownloadingFileExtension, downloadTask.DataTotal * 3 / 5);
         var resumedPackages = new List<DownloadPackage>();
         var attempt = 0;
 

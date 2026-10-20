@@ -69,7 +69,10 @@
 							data-cy="directory-browser-dialog-button"
 							:label="$t('pages.debug.dialogs.buttons.directory-browser')"
 							@click="dialogStore.openDirectoryBrowserDialog(folderPath)" />
-						<DirectoryBrowser />
+						<DirectoryBrowser
+							:saving="false"
+							:error-message="''"
+							@confirm="dialogStore.closeDialog(DialogType.DirectoryBrowserDialog)" />
 					</q-td>
 				</q-tr>
 
@@ -79,7 +82,10 @@
 							data-cy="directory-browser-dialog-button"
 							:label="$t('pages.debug.dialogs.buttons.discord-invite')"
 							@click="dialogStore.openDialog(DialogType.DiscordServerInviteDialog)" />
-						<DirectoryBrowser />
+						<DirectoryBrowser
+							:saving="false"
+							:error-message="''"
+							@confirm="dialogStore.closeDialog(DialogType.DirectoryBrowserDialog)" />
 					</q-td>
 				</q-tr>
 
@@ -89,7 +95,10 @@
 							data-cy="sync-server-media-dialog-button"
 							:label="$t('pages.debug.dialogs.buttons.sync-server-media-dialog')"
 							@click="dialogStore.openDialog(DialogType.SyncServerMediaDialog)" />
-						<DirectoryBrowser />
+						<DirectoryBrowser
+							:saving="false"
+							:error-message="''"
+							@confirm="dialogStore.closeDialog(DialogType.DirectoryBrowserDialog)" />
 					</q-td>
 				</q-tr>
 
@@ -99,7 +108,10 @@
 							data-cy="refresh-plex-account-access-dialog"
 							:label="$t('pages.debug.dialogs.buttons.refresh-plex-account-access-dialog')"
 							@click="dialogStore.openRefreshPlexAccountAccessDialog([])" />
-						<DirectoryBrowser />
+						<DirectoryBrowser
+							:saving="false"
+							:error-message="''"
+							@confirm="dialogStore.closeDialog(DialogType.DirectoryBrowserDialog)" />
 					</q-td>
 				</q-tr>
 			</q-markup-table>

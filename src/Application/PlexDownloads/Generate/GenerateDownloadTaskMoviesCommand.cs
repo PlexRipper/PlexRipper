@@ -102,17 +102,17 @@ public class GenerateDownloadTaskMoviesCommandHandler
                     .Create400BadRequestResult("Every selected Movie must belong to the requested library and server.")
                     .LogError();
 
+            var movieRatingKeys = plexMovies.Select(x => x.PlexApiRatingKey).ToArray();
+            var existingMovieRatingKeys = await _dbContext
+                .DownloadTaskMovie.WhereIntegrationOwnershipMatches(request.Integration)
+                .Where(x => x.PlexServerId == plexServer.Id && movieRatingKeys.Contains(x.PlexApiRatingKey))
+                .Select(x => x.PlexApiRatingKey)
+                .Distinct()
+                .ToHashSetAsync(cancellationToken);
+
             foreach (var plexMovie in plexMovies)
             {
-                var downloadTaskAlreadyExists = await _dbContext
-                    .DownloadTaskMovie.WhereIntegrationOwnershipMatches(request.Integration)
-                    .AnyAsync(
-                        x =>
-                            x.PlexServerId == plexMovie.PlexServerId
-                            && x.PlexApiRatingKey == plexMovie.PlexApiRatingKey,
-                        cancellationToken
-                    );
-                if (downloadTaskAlreadyExists)
+                if (existingMovieRatingKeys.Contains(plexMovie.PlexApiRatingKey))
                 {
                     _log.Here()
                         .Debug(

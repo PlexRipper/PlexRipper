@@ -5,7 +5,7 @@ import { tap, map } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { throwError } from 'rxjs';
 import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
-import { StoreNames, type ISetupResult, type IFolderPathGroup } from '@interfaces';
+import { StoreNames, type ISetupResult, type IFolderPathGroup, type ResultDTO } from '@interfaces';
 import { folderPathApi } from '@api';
 import { useI18n } from 'vue-i18n';
 import { cloneDeep, orderBy } from 'lodash-es';
@@ -56,7 +56,7 @@ export const useFolderPathStore = defineStore(StoreNames.FolderPathStore, () => 
 				}),
 			);
 		},
-		setFolderPathDirectory(folderPathId: number, directory: string): Observable<FolderPathDTO> {
+		setFolderPathDirectory(folderPathId: number, directory: string): Observable<ResultDTO<FolderPathDTO>> {
 			let folderPath = getters.getFolderPath(folderPathId);
 			if (folderPath) {
 				folderPath = { ...folderPath, directory };
@@ -64,7 +64,7 @@ export const useFolderPathStore = defineStore(StoreNames.FolderPathStore, () => 
 			}
 			return throwError(() => 'Could not find folderPath with id: ' + folderPathId);
 		},
-		setFolderPathDisplayName(folderPathId: number, displayName: string): Observable<FolderPathDTO> {
+		setFolderPathDisplayName(folderPathId: number, displayName: string): Observable<ResultDTO<FolderPathDTO>> {
 			let folderPath = getters.getFolderPath(folderPathId);
 			if (folderPath) {
 				folderPath = { ...folderPath, displayName };
@@ -72,14 +72,13 @@ export const useFolderPathStore = defineStore(StoreNames.FolderPathStore, () => 
 			}
 			return throwError(() => 'Could not find folderPath with id: ' + folderPathId);
 		},
-		updateFolderPath(folderPath: FolderPathDTO): Observable<FolderPathDTO> {
+		updateFolderPath(folderPath: FolderPathDTO): Observable<ResultDTO<FolderPathDTO>> {
 			return folderPathApi.updateFolderPathEndpoint(folderPath).pipe(
 				tap((x) => {
-					if (x.value) {
+					if (x.isSuccess && x.value) {
 						updateFolderPathInState(x.value);
 					}
 				}),
-				map((x) => x.value!),
 			);
 		},
 		deleteFolderPath(folderPathId: number) {

@@ -87,11 +87,10 @@ import { useSubscription } from '@vueuse/rxjs';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { orderBy } from 'lodash-es';
-import { useAccountStore, useLibraryAccessTimelineStore, useLibraryStore, useServerStore } from '@store';
+import { useLibraryAccessTimelineStore, useLibraryStore, useServerStore } from '@store';
 import type { LibraryAccessTimelineZoomPreset } from '@store';
 
 const { t } = useI18n();
-const accountStore = useAccountStore();
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
 const timelineStore = useLibraryAccessTimelineStore();
@@ -168,20 +167,9 @@ useSubscription(refreshTimeline$.pipe(
 ).subscribe());
 
 onMounted(() => {
-	if (accountStore.getAccounts.length > 0 && !timelineStore.filters.plexAccountId) {
-		timelineStore.setAccount(accountStore.getAccounts[0]!.id);
-	}
-
 	refreshTimeline$.next();
 	applyZoomPreset(timelineStore.zoomPreset);
 });
-
-watch(() => accountStore.getAccounts, (accounts) => {
-	if (accounts.length > 0 && !timelineStore.filters.plexAccountId) {
-		timelineStore.setAccount(accounts[0]!.id);
-		refreshTimeline$.next();
-	}
-}, { deep: true });
 
 function applyZoomPreset(zoomPreset: LibraryAccessTimelineZoomPreset) {
 	if (zoomPreset === 'All') {

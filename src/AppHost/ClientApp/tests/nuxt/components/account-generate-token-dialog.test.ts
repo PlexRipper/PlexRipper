@@ -146,7 +146,6 @@ describe('AccountGenerateTokenDialog', () => {
 		expect(rendered.get('[data-cy="generate-token-error"]').text()).toBe(errorMessage);
 	});
 
-
 	test.each([
 		{ kind: 'failure', status: 500 },
 		{ kind: 'success', status: 200 },

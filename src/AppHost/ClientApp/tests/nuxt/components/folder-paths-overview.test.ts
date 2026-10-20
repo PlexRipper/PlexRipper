@@ -363,5 +363,4 @@ describe('FolderPathsOverview persistence ownership', () => {
 		nameReply.resolve([200, generateResultDTO({ ...customDownloadPath, displayName: 'Renamed downloads' })]);
 		await flushPromises();
 	});
-
 });

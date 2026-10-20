@@ -32,7 +32,7 @@ Implemented only Local = req.Url.IsLocalUrl() in custom create/update; ownership
 
 ## I63 — Preserve authoritative update-check failures
 
-Propagate failed/cancelled GitHub fallback instead of successful NoUpdate. Preserve legitimate empty success and desktop Velopack success without release notes. No retry/cache/banner/install changes. Required failure/cancellation/control tests and last-good frontend state proof; independent review. If I57 selected, include updater composition before this commit.
+Implemented the one-line failed-result conversion only at the authoritative GitHub fallback after both Velopack success branches. Failed/cancelled reasons remain intact; successful empty responses and desktop/non-desktop updates without notes retain their existing behavior. Native command class5 passed; actual hosted endpoint class6 passed, including GitHub503 -> failed HTTP500 with no value/notification and successful read-twice I57 composition; unchanged job class6 passed failure/cancellation/notification controls. Real Axios/Pinia last-good/recovery proof2 passed and focused ESLint passed. All four changed sources reviewed by CodeScene with no introduced findings. No retry/cache/banner/install change or live GitHub/packaged-updater compatibility claim. Independent review and safeguard precede the separate local commit.
 
 ## I64 — Preserve committed account deletion result
 

@@ -139,7 +139,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         }
 
         if (releasesResult.IsFailed)
-            return Result.Ok(NoUpdate());
+            return releasesResult.ToResult<AppUpdateCheckResult>();
 
         // Docker Mode
         var isDevRelease = _appBuildInfo.IsDevRelease;

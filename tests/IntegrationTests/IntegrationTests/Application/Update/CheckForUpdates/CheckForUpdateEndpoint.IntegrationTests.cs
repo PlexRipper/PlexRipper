@@ -129,6 +129,55 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     }
 
     [Test]
+    public async Task ShouldReturnFailureWithoutUpdateValueOrNotification_WhenActualGitHubFallbackFails()
+    {
+        // Arrange
+        var githubHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+        githubHandler.SetupRequest(HttpMethod.Get, "https://api.github.com/repos/Reaparr/Reaparr/releases")
+            .ReturnsAsync((HttpRequestMessage request, CancellationToken _) => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)
+            {
+                RequestMessage = request,
+            })
+            .Verifiable(Times.Once());
+        var githubClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);
+        githubClientFactory.Setup(x => x.CreateClient("GitHub"))
+            .Returns(() => new HttpClient(githubHandler.Object, disposeHandler: false)
+            {
+                BaseAddress = new Uri("https://api.github.com/"),
+            })
+            .Verifiable(Times.Once());
+        var manager = new Mock<UpdateManager>(
+            new Mock<IUpdateSource>().Object, null!, new Mock<IVelopackLocator>(MockBehavior.Loose).Object);
+        manager.Setup(x => x.CheckForUpdatesAsync()).ReturnsAsync((UpdateInfo?)null).Verifiable(Times.Once());
+        using var container = await CreateContainer(new Seed(11006), config =>
+        {
+            config.OverrideAppBuildInfo = new MockAppBuildInfo
+            {
+                RuntimeMode = "docker", Version = "0.38.0", InformationalVersion = "0.38.0",
+                RuntimeIdentifier = "linux-x64", CurrentOS = OperatingSystemPlatform.Linux,
+            };
+            config.OverrideServices = builder => RegisterUpdateServices(builder, githubClientFactory.Object, manager.Object);
+        });
+        var notifications = container.Resolve<MockNotificationHubService>();
+        using var client = container.GetApiClient();
+
+        // Act
+        var response = await client.GETAsync<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>();
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        response.Result.IsSuccess.ShouldBeFalse();
+        response.Result.StatusCode.ShouldBe(StatusCodes.Status500InternalServerError);
+        response.Result.Errors.Count.ShouldBe(1);
+        response.Result.Successes.Count.ShouldBe(0);
+        response.Result.Value.ShouldBeNull();
+        notifications.RefreshNotificationList.ShouldNotContain(RefreshDataType.UpdateAvailable);
+        githubHandler.Verify();
+        githubClientFactory.Verify();
+        manager.Verify();
+    }
+
+    [Test]
     public async Task ShouldReturnUpdateAvailable_WhenDockerModeAndCommandExecutorReturnsDevUpdate()
     {
         // Arrange

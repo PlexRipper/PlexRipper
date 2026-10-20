@@ -5,7 +5,7 @@ import { flushPromises } from '@vue/test-utils';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import { UpdatePaths } from '@api-urls';
 import { generateResultDTO } from '@mock';
-import { MessageTypes, RefreshDataType } from '@dto';
+import { MessageTypes, RefreshDataType, type BaseResultDTO } from '@dto';
 import { useSignalrStore, useUpdateStore } from '@store';
 
 type HubName = 'progress' | 'download' | 'notifications' | 'logs';
@@ -91,6 +91,49 @@ describe('UpdateStore refresh notification consumer', () => {
 		expect(mock.history.get.filter((request) => request.url === UpdatePaths.checkForUpdateEndpoint())).toHaveLength(1);
 		expect(updateStore.isUpdateAvailable).toBe(true);
 		expect(updateStore.releaseNotes).toEqual(releaseNotes);
+	});
+
+	test('Should retain the last successful update after a failed check and accept a later successful no-update', async () => {
+		// Arrange
+		const path = UpdatePaths.checkForUpdateEndpoint();
+		const releaseNotes = [{
+			version: '1.0.1', releaseDate: '2026-10-18T00:00:00Z',
+			notes: 'Last successful release', isDevRelease: false,
+		}];
+		const failure: BaseResultDTO = {
+			isSuccess: false, statusCode: 500, successes: [],
+			errors: [{ message: 'GitHub unavailable', reasons: [], metadata: {} }],
+		};
+		mock.onGet(path).replyOnce(200, generateResultDTO({
+			currentVersion: '1.0.0', newestVersion: '1.0.1', isUpdateAvailable: true, releaseNotes,
+		})).onGet(path).replyOnce(500, failure).onGet(path).replyOnce(200, generateResultDTO({
+			currentVersion: '1.0.0', newestVersion: '1.0.0', isUpdateAvailable: false, releaseNotes: [],
+		}));
+		const store = useUpdateStore();
+
+		// Act
+		await subscribeSpyTo(store.checkForUpdate()).onComplete();
+
+		// Assert
+		expect(store.isUpdateAvailable).toBe(true);
+		expect(store.releaseNotes).toEqual(releaseNotes);
+
+		// Act
+		const failedCheck = subscribeSpyTo(store.checkForUpdate());
+		await failedCheck.onComplete();
+
+		// Assert
+		expect(failedCheck.getValues().map((result) => result.isSuccess)).toEqual([false]);
+		expect(store.isUpdateAvailable).toBe(true);
+		expect(store.releaseNotes).toEqual(releaseNotes);
+
+		// Act
+		await subscribeSpyTo(store.checkForUpdate()).onComplete();
+
+		// Assert
+		expect(store.isUpdateAvailable).toBe(false);
+		expect(store.releaseNotes).toEqual([]);
+		expect(mock.history.get.map((request) => request.url)).toEqual([path, path, path]);
 	});
 });
 

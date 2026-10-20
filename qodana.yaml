@@ -1,19 +1,13 @@
 version: '1.0'
 
-linter: qodana-dotnet
-withinDocker: false
+linter: qodana-cdnet
+withinDocker: true
 
 dotnet:
     solution: Reaparr.sln
 
 profile:
     name: qodana.recommended
-
-plugins:
-    -   id: CyclomaticComplexity
-
-include:
-    -   name: CyclomaticComplexity
 
 exclude:
     -   name: All
@@ -23,7 +17,4 @@ exclude:
             - src/AppHost/ClientApp/.output
             - src/AppHost/ClientApp/src/types/api/generated
 
-# The plugin's default complexity threshold is 20. Keep findings report-only
-# until the full dev scan is reviewed and its baseline is committed to
-# .qodana/baseline.sarif.json; do not automatically accept new findings as debt.
 fixesStrategy: none

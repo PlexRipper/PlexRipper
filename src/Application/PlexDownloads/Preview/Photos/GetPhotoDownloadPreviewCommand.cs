@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public record GetPhotoDownloadPreviewCommand(List<DownloadMediaDTO> DownloadMedias)
+public record GetPhotoDownloadPreviewCommand(DownloadPreviewRequest Request)
     : ICommand<Result<IEnumerable<DownloadPreview>>>;
 
 public class GetPhotoDownloadPreviewCommandValidator : AbstractValidator<GetPhotoDownloadPreviewCommand>
@@ -8,14 +8,14 @@ public class GetPhotoDownloadPreviewCommandValidator : AbstractValidator<GetPhot
     public GetPhotoDownloadPreviewCommandValidator()
     {
         RuleFor(x => x).NotNull();
-        RuleFor(x => x.DownloadMedias).NotNull();
-        RuleForEach(x => x.DownloadMedias)
+        RuleFor(x => x.Request).NotNull();
+        RuleForEach(x => x.Request.DownloadMedias)
             .NotNull()
             .SetValidator(new DownloadMediaDTOValidator());
-        RuleForEach(x => x.DownloadMedias)
+        RuleForEach(x => x.Request.DownloadMedias)
             .Must(x => x is null || x.Type is PlexMediaType.PhotoAlbum or PlexMediaType.PhotoImage)
             .WithMessage("Photo preview selections must contain only photo media.");
-        RuleForEach(x => x.DownloadMedias)
+        RuleForEach(x => x.Request.DownloadMedias)
             .Must(x => x is null || x.Qualities is { Count: 0 })
             .WithMessage("Photo selections must not include quality or part selectors.");
     }
@@ -27,7 +27,10 @@ public class GetPhotoDownloadPreviewCommandHandler
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public GetPhotoDownloadPreviewCommandHandler(ILogger log, IReaparrDbContext dbContext)
+    public GetPhotoDownloadPreviewCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext
+    )
     {
         _log = log.ForContext<GetPhotoDownloadPreviewCommandHandler>();
         _dbContext = dbContext;
@@ -38,11 +41,13 @@ public class GetPhotoDownloadPreviewCommandHandler
         CancellationToken cancellationToken
     )
     {
-        if (command.DownloadMedias.Count == 0)
+        if (command.Request.DownloadMedias.Count == 0)
             return Result.Ok(Enumerable.Empty<DownloadPreview>());
         var selector = new PhotoDownloadSelector(_dbContext, _log);
         var selectionResult = await selector.ResolveSelectedFilesAsync(
-            new CreateDownloadTasksRequest(command.DownloadMedias),
+            command.Request.DownloadMedias,
+            command.Request.DestinationFolderPathId,
+            command.Request.CustomDestinationFolderPath,
             cancellationToken
         );
         if (selectionResult.IsCancelledOrFailed)

@@ -12,5 +12,11 @@ public record DownloadMediaDTO
 
     public required int PlexLibraryId { get; init; }
 
+    /// <summary>
+    /// For photo selectors, identifies whether <see cref="MediaIds"/> contains album, folder, or asset IDs.
+    /// This is null for every non-photo media family.
+    /// </summary>
+    public required PhotoItemKind? SelectionKind { get; init; }
+
     public bool KeepCompletedInDownloadFolder { get; init; }
 }

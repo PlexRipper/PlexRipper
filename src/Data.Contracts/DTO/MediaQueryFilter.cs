@@ -28,7 +28,7 @@ public record MediaQueryFilter
     public int Page => Parameters.Page ?? 1;
     public int PageSize => Parameters.PageSize ?? MaximumPageSize;
 
-    public static readonly int MaximumPageSize = 100;
+    public const int MaximumPageSize = 100;
 
     private string BuildHashInput()
     {

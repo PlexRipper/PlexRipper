@@ -1,16 +1,21 @@
 ﻿namespace Reaparr.Application;
 
-public record GetDownloadPreviewQuery(List<DownloadMediaDTO> DownloadMedias) : ICommand<Result<List<DownloadPreview>>>;
+public record GetDownloadPreviewQuery(DownloadPreviewRequest Request) : ICommand<Result<List<DownloadPreview>>>;
 
 public class GetDownloadPreviewQueryValidator : AbstractValidator<GetDownloadPreviewQuery>
 {
     public GetDownloadPreviewQueryValidator()
     {
-        RuleFor(x => x.DownloadMedias).NotNull().NotEmpty();
-        RuleForEach(x => x.DownloadMedias).NotNull().SetValidator(new DownloadMediaDTOValidator());
-        RuleForEach(x => x.DownloadMedias)
-            .Must(x => x is null || !x.Type.IsPhotoType() || x.Qualities is { Count: 0 })
-            .WithMessage("Photo selections must not include quality or part selectors.");
+        RuleFor(x => x.Request)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Request.DownloadMedias).NotNull().NotEmpty();
+                RuleForEach(x => x.Request.DownloadMedias).NotNull().SetValidator(new DownloadMediaDTOValidator());
+                RuleForEach(x => x.Request.DownloadMedias)
+                    .Must(x => x is null || !x.Type.IsPhotoType() || x.Qualities is { Count: 0 })
+                    .WithMessage("Photo selections must not include quality or part selectors.");
+            });
     }
 }
 
@@ -35,10 +40,10 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
     {
         var downloadPreviews = new List<DownloadPreview>();
 
-        if (!request.DownloadMedias.Any())
+        if (!request.Request.DownloadMedias.Any())
             return Result.Ok(downloadPreviews);
 
-        var movieSelections = request.DownloadMedias.Where(x => x.Type.IsMovieType()).ToList();
+        var movieSelections = request.Request.DownloadMedias.Where(x => x.Type.IsMovieType()).ToList();
         var movieResult = await _commandExecutor.Send(
             new GetMovieDownloadPreviewCommand(movieSelections),
             cancellationToken
@@ -47,7 +52,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
             return movieResult.ToResult();
         downloadPreviews.AddRange(movieResult.Value);
 
-        var tvSelections = request.DownloadMedias.Where(x => x.Type.IsTvType()).ToList();
+        var tvSelections = request.Request.DownloadMedias.Where(x => x.Type.IsTvType()).ToList();
         var tvResult = await _commandExecutor.Send(
             new GetTvShowDownloadPreviewCommand(tvSelections),
             cancellationToken
@@ -56,7 +61,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
             return tvResult.ToResult();
         downloadPreviews.AddRange(tvResult.Value);
 
-        var musicSelections = request.DownloadMedias.Where(x => x.Type.IsMusicType()).ToList();
+        var musicSelections = request.Request.DownloadMedias.Where(x => x.Type.IsMusicType()).ToList();
         var musicResult = await _commandExecutor.Send(
             new GetMusicDownloadPreviewCommand(musicSelections),
             cancellationToken
@@ -65,7 +70,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
             return musicResult.ToResult().LogIfFailed();
         downloadPreviews.AddRange(musicResult.Value);
 
-        var otherVideoSelections = request.DownloadMedias.Where(x => x.Type.IsOtherVideosType()).ToList();
+        var otherVideoSelections = request.Request.DownloadMedias.Where(x => x.Type.IsOtherVideosType()).ToList();
         var otherVideoResult = await _commandExecutor.Send(
             new GetOtherVideoDownloadPreviewCommand(otherVideoSelections),
             cancellationToken
@@ -74,9 +79,15 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
             return otherVideoResult.ToResult().LogIfFailed();
         downloadPreviews.AddRange(otherVideoResult.Value);
 
-        var photoSelections = request.DownloadMedias.Where(x => x.Type.IsPhotoType()).ToList();
+        var photoSelections = request.Request.DownloadMedias.Where(x => x.Type.IsPhotoType()).ToList();
+        var photoRequest = new DownloadPreviewRequest
+        {
+            DownloadMedias = photoSelections,
+            DestinationFolderPathId = request.Request.DestinationFolderPathId,
+            CustomDestinationFolderPath = request.Request.CustomDestinationFolderPath,
+        };
         var photoResult = await _commandExecutor.Send(
-            new GetPhotoDownloadPreviewCommand(photoSelections),
+            new GetPhotoDownloadPreviewCommand(photoRequest),
             cancellationToken
         );
         if (photoResult.IsCancelledOrFailed)

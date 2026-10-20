@@ -10,8 +10,7 @@ public record GenerateDownloadTaskPhotoImagesCommand : ICommand<Result<DownloadT
     public CreateDownloadTasksRequest Request { get; }
 }
 
-public class GenerateDownloadTaskPhotoImagesCommandValidator
-    : AbstractValidator<GenerateDownloadTaskPhotoImagesCommand>
+public class GenerateDownloadTaskPhotoImagesCommandValidator : AbstractValidator<GenerateDownloadTaskPhotoImagesCommand>
 {
     public GenerateDownloadTaskPhotoImagesCommandValidator()
     {
@@ -20,9 +19,7 @@ public class GenerateDownloadTaskPhotoImagesCommandValidator
             .DependentRules(() =>
             {
                 RuleFor(x => x.Request.DownloadMedias).NotNull().NotEmpty();
-                RuleForEach(x => x.Request.DownloadMedias)
-                    .NotNull()
-                    .SetValidator(new DownloadMediaDTOValidator());
+                RuleForEach(x => x.Request.DownloadMedias).NotNull().SetValidator(new DownloadMediaDTOValidator());
                 RuleForEach(x => x.Request.DownloadMedias)
                     .Must(x =>
                         x is null
@@ -55,9 +52,9 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
         if (!request.DownloadMedias.Any(x => x.Type is PlexMediaType.PhotoAlbum or PlexMediaType.PhotoImage))
             return ResultExtensions.IsEmpty("photoSelections").LogWarning();
         if (request.Integration is not null)
-            return ResultExtensions.Create400BadRequestResult(
-                "Photo downloads do not support Sonarr or Radarr integrations."
-            ).LogError();
+            return ResultExtensions
+                .Create400BadRequestResult("Photo downloads do not support Sonarr or Radarr integrations.")
+                .LogError();
 
         var selector = new PhotoDownloadSelector(_dbContext, _log);
         var selectionResult = await selector.ResolveSelectedFilesAsync(request, cancellationToken);
@@ -70,9 +67,11 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
         var transactionResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
-                var existingFolders = await ctx.DownloadTaskPhotoFolders.AsTracking()
+                var existingFolders = await ctx
+                    .DownloadTaskPhotoFolders.AsTracking()
                     .Where(x => libraryIds.Contains(x.PlexLibraryId) || x.ParentId == null)
-                    .OrderBy(x => x.CreatedAt).ToListAsync(txCt);
+                    .OrderBy(x => x.CreatedAt)
+                    .ToListAsync(txCt);
                 var existingFiles = await ctx.DownloadTaskPhotoImageFiles.ToListAsync(txCt);
                 // Queue eligibility is calculated inside the transaction, not reused from an earlier preview.
                 var accepted = selector.FilterQueueEligibleFiles(selectedPhotos, existingFolders, existingFiles);
@@ -81,30 +80,34 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
 
                 var existingFolderByKey = existingFolders
                     .GroupBy(
-                        x =>
-                            new FolderKey(
-                                x.PlexServerId,
-                                x.PlexLibraryId,
-                                x.ParentId,
-                                x.RelativePath,
-                                PhotoDownloadSelector.NormalizeRootPath(x.DownloadRootPath),
-                                PhotoDownloadSelector.NormalizeRootPath(x.DestinationRootPath)
-                            ),
+                        x => new FolderKey(
+                            x.PlexServerId,
+                            x.PlexLibraryId,
+                            x.ParentId,
+                            x.RelativePath,
+                            PhotoDownloadSelector.NormalizeRootPath(x.DownloadRootPath),
+                            PhotoDownloadSelector.NormalizeRootPath(x.DestinationRootPath)
+                        ),
                         FolderKeyComparer.Instance
                     )
-                    .ToDictionary(
-                        x => x.Key,
-                        x => x.OrderBy(y => y.CreatedAt).First(),
-                        FolderKeyComparer.Instance
-                    );
+                    .ToDictionary(x => x.Key, x => x.OrderBy(y => y.CreatedAt).First(), FolderKeyComparer.Instance);
                 var createdFolders = 0;
                 var filesToCreate = new List<DownloadTaskPhotoImageFile>();
                 DownloadTaskPhotoFolder GetOrCreateFolder(
-                    PhotoDownloadCandidate photo, DownloadTaskPhotoFolder? parent, string title, string relativePath)
+                    PhotoDownloadCandidate photo,
+                    DownloadTaskPhotoFolder? parent,
+                    string title,
+                    string relativePath
+                )
                 {
-                    var key = new FolderKey(photo.MediaData.PlexServerId, photo.MediaData.PlexLibraryId,
-                        parent?.Id, relativePath, photo.DirectoryMeta.DownloadRootPath,
-                        photo.DirectoryMeta.DestinationRootPath);
+                    var key = new FolderKey(
+                        photo.MediaData.PlexServerId,
+                        photo.MediaData.PlexLibraryId,
+                        parent?.Id,
+                        relativePath,
+                        photo.DirectoryMeta.DownloadRootPath,
+                        photo.DirectoryMeta.DestinationRootPath
+                    );
                     if (existingFolderByKey.TryGetValue(key, out var existing))
                         return existing;
                     var folder = new DownloadTaskPhotoFolder
@@ -142,9 +145,7 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
                 foreach (var photo in accepted)
                 {
                     var parent = GetOrCreateFolder(photo, null, photo.RootName, string.Empty);
-                    var relativeSegments = photo.PhotoFolder
-                        .Split('/', StringSplitOptions.RemoveEmptyEntries)
-                        .Skip(1);
+                    var relativeSegments = photo.PhotoFolder.Split('/', StringSplitOptions.RemoveEmptyEntries).Skip(1);
                     var cumulative = string.Empty;
                     foreach (var segment in relativeSegments)
                     {

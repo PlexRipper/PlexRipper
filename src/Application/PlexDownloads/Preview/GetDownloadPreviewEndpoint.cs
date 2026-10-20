@@ -1,14 +1,15 @@
 namespace Reaparr.Application;
 
-public class GetDownloadPreviewEndpointRequestValidator : Validator<List<DownloadMediaDTO>>
+public class GetDownloadPreviewEndpointRequestValidator : Validator<DownloadPreviewRequest>
 {
     public GetDownloadPreviewEndpointRequestValidator()
     {
-        RuleFor(x => x).NotEmpty();
+        RuleFor(x => x).NotNull();
+        RuleFor(x => x.DownloadMedias).NotEmpty();
     }
 }
 
-public class GetDownloadPreviewEndpoint : Endpoint<List<DownloadMediaDTO>, DownloadPreviewContainerDTO>
+public class GetDownloadPreviewEndpoint : Endpoint<DownloadPreviewRequest, DownloadPreviewContainerDTO>
 {
     private readonly ICommandExecutor _commandExecutor;
 
@@ -28,9 +29,9 @@ public class GetDownloadPreviewEndpoint : Endpoint<List<DownloadMediaDTO>, Downl
         );
     }
 
-    public override async Task HandleAsync(List<DownloadMediaDTO> downloadMedias, CancellationToken ct)
+    public override async Task HandleAsync(DownloadPreviewRequest request, CancellationToken ct)
     {
-        var result = await _commandExecutor.Send(new GetDownloadPreviewQuery(downloadMedias), ct);
+        var result = await _commandExecutor.Send(new GetDownloadPreviewQuery(request), ct);
 
         await Send.FluentResult(result, x => x.ToDTO(), ct);
     }

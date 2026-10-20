@@ -38,28 +38,22 @@ public class CheckForUpdatesCommandUnitTests : BaseUnitTest<CheckForUpdatesComma
             .Returns(new SemanticVersion(0, 36, 0, "dev.1"))
             .Verifiable(Times.Once());
         mockManager.Setup(m => m.CheckForUpdatesAsync()).ReturnsAsync(updateInfo).Verifiable(Times.Once());
-        Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable))
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
-
         // Act
         var sut = new CheckForUpdatesCommandHandler(
             Log,
             Mock.Mock<ICommandExecutor>().Object,
             appBuildInfo.Object,
-            mockManager.Object,
-            Mock.Mock<INotificationHubService>().Object
+            mockManager.Object
         );
         var result = await sut.ExecuteAsync(new CheckForUpdatesCommand(), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         result.Value.IsUpdateAvailable.ShouldBeTrue();
         result.Value.NewestVersion.ShouldBe("0.38.0-dev.10");
         result.Value.ReleaseNotes.ShouldBeEmpty();
         Mock.Mock<ICommandExecutor>().Verify();
-        Mock.Mock<INotificationHubService>().Verify();
         mockManager.Verify();
         mockSource.VerifyNoOtherCalls();
     }

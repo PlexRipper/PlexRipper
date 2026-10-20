@@ -20,7 +20,7 @@ Implemented private dialog-session/request ownership for load/test and shared sa
 
 ## I60 — Separate account history
 
-Group intervals/row identity by recorded account/server/library, preserve all-account presentation, and remove the unused account-selection/fetch gate and first-current-account dependency. Retained account IDs are required historical scalars without account FK. No selector/schema/API changes. Required interleaved-account and zero-current-account history tests/browser proof; independent review.
+Implemented recorded account/server/library grouping and row identity, preserving all-account presentation while removing the obsolete account-selection/fetch gate and first-current-account dependency. Retained account IDs remain required historical scalars; no selector/schema/API changes. User separately approved the runtime-exposed chart dependency: bind through public getList/getOriginalID/getListChildRow instead of raw DOM IDs that JSGantt hashes. Unexpected loss of the two data edits was preserved for a decision and restored only after explicit user approval. Final proof: all3 store regressions passed (interleaved same-name accounts, independent active/revoked state, server/library boundaries); actual Firefox workflow1 passed (zero current accounts, HTTP200, exact account/date notes and independent row selection); five-file ESLint passed. Independent core and incremental binding/proof reviews clear. CodeScene: store9.28 and chart8.79 retain existing complexity findings; overview and both proofs10. No formatting, unrelated type cleanup, full-typecheck or live Plex compatibility claim. Separate I60 commit follows the required safeguard.
 
 ## I61 — Validate saved HTTP(S) URLs
 

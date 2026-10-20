@@ -31,7 +31,6 @@ export interface LibraryAccessTimelineInterval {
 }
 
 interface ILibraryAccessTimelineFilters {
-	plexAccountId: number | null;
 	plexServerId: number | null;
 	plexLibraryId: number | null;
 	fromUtc: string | null;
@@ -49,7 +48,6 @@ interface ILibraryAccessTimelineStoreState {
 export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAccessTimelineStore, () => {
 	const defaultState: ILibraryAccessTimelineStoreState = {
 		filters: {
-			plexAccountId: null,
 			plexServerId: null,
 			plexLibraryId: null,
 			fromUtc: null,
@@ -72,9 +70,6 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 		setup(): Observable<ISetupResult> {
 			return of({ name: StoreNames.LibraryAccessTimelineStore, isSuccess: true });
 		},
-		setAccount(plexAccountId: number | null) {
-			state.filters.plexAccountId = plexAccountId;
-		},
 		setServer(plexServerId: number | null) {
 			state.filters.plexServerId = plexServerId;
 		},
@@ -92,11 +87,6 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 			state.selectedRowId = rowId;
 		},
 		refreshTimeline(): Observable<PlexLibraryAccessTimelineDTO> {
-			if (!state.filters.plexAccountId) {
-				state.timeline = cloneDeep(defaultState.timeline);
-				return of(state.timeline);
-			}
-
 			state.isLoading = true;
 
 			return plexLibraryApi.getPlexLibraryAccessTimelineEndpoint().pipe(
@@ -118,8 +108,8 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 		},
 	};
 
-	function buildRowId(plexServerId?: number | null, plexLibraryId?: number | null): string {
-		return `server-${plexServerId ?? 'unknown'}-library-${plexLibraryId ?? 'unknown'}`;
+	function buildRowId(plexAccountId: number, plexServerId?: number | null, plexLibraryId?: number | null): string {
+		return `account-${plexAccountId}-server-${plexServerId ?? 'unknown'}-library-${plexLibraryId ?? 'unknown'}`;
 	}
 
 	function getAccountName(event: PlexLibraryAccessTimelineEventDTO): string {
@@ -212,7 +202,10 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 			const fromMs = state.filters.fromUtc ? new Date(state.filters.fromUtc).getTime() : null;
 			const toMs = state.filters.toUtc ? new Date(state.filters.toUtc).getTime() : null;
 			const filteredEvents = getFilteredEvents({ ignoreDateFilter: true });
-			const groupedEvents = groupBy(orderBy(filteredEvents, (event) => event.createdAt, 'asc'), (event) => buildRowId(event.plexServerId, event.plexLibraryId));
+			const groupedEvents = groupBy(
+				orderBy(filteredEvents, (event) => event.createdAt, 'asc'),
+				(event) => buildRowId(event.plexAccountId, event.plexServerId, event.plexLibraryId),
+			);
 
 			return Object.entries(groupedEvents).flatMap(([rowId, events]) => {
 				const intervals: LibraryAccessTimelineInterval[] = [];

@@ -15,9 +15,37 @@ exclude:
         paths:
             - "file:**/*.DotSettings"
             - "file:src/Data/Migrations/*.cs"
-            - src/AppHost/ClientApp/node_modules
-            - src/AppHost/ClientApp/.nuxt
-            - src/AppHost/ClientApp/.output
+            - "file:**/bin/**"
+            - "file:**/obj/**"
+            - "file:**/*.g.cs"
+            - "file:**/*.g.i.cs"
+            - "file:**/.editorconfig"
+            - "file:**/*.globalconfig"
+            - "file:**/*.AssemblyInfo.cs"
+            - "file:**/AssemblyInfo.cs"
+            - "file:**/*.json"
+            - "file:**/node_modules/**"
+            - "file:**/.nuxt/**"
+            - "file:**/.output/**"
+            - "file:**/.nitro/**"
+            - "file:**/dist/**"
+            - "file:**/coverage/**"
+            - "file:**/.cache/**"
+            - "file:**/.eslintcache"
+            - "file:**/cypress/videos/**"
+            - "file:**/cypress/screenshots/**"
+            - "file:**/tsconfig.tsbuildinfo"
+            - "file:**/TestResults/**"
+            - "file:**/test-results/**"
+            - "file:**/.test-artifacts/**"
+            - "file:**/.artifacts/**"
+            - "file:**/.playwright-mcp/**"
+            - "file:**/.idea/**"
+            - "file:**/.vs/**"
+            - "file:**/.agentbridge/**"
+            - "file:**/.agent-work/**"
+            - "file:**/.codex/**"
+            - "file:**/.pi-subagents/**"
             - src/AppHost/ClientApp/src/types/api/generated
     -   name: ArrangeTrailingCommaInMultilineLists
     -   name: SuggestDiscardDeclarationVarStyle

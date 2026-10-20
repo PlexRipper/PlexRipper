@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.41.0-dev.6](https://github.com/Reaparr/Reaparr/compare/v0.41.0-dev.5...v0.41.0-dev.6) (2026-10-20)
+
+
+### Bug Fixes
+
+* **WebAPI:** Remove unsupported Community Qodana PR scan ([14e8d10](https://github.com/Reaparr/Reaparr/commit/14e8d101bff456ac19d4bfc7ac40d5ed441d7646))
+
 # [0.41.0-dev.5](https://github.com/Reaparr/Reaparr/compare/v0.41.0-dev.4...v0.41.0-dev.5) (2026-10-20)
 
 

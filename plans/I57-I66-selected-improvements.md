@@ -16,7 +16,7 @@ Implemented current-input validation snapshots and owned validation requests. Ac
 
 ## I59 — Integration dialog request ownership
 
-Scope load/save/setup/test results, errors, finalizers and dialog-closing callbacks to their current session/request. Preserve existing current-input guards and list-refresh contract. No rollback of completed server mutations or general request framework. Required deferred-response and browser A/close/B proofs; independent review.
+Implemented private dialog-session/request ownership for load/test and shared save/setup mutation ownership. Opening an edit clears the old record and blocks accidental create until its intended detail loads; failed loads stay invalid. Late results/errors/finalizers and post-refresh completions cannot replace, close or configure a newer dialog. Successful obsolete server mutations still refresh the list, while post-submit draft edits survive without a close emission; current canonical results still emit normally. Verification: maintained integration cases22 plus ownership cases31 passed; changed-file ESLint passed; actual Firefox workflows6 passed across Sonarr/Radarr for late detail, save/refresh/B-spinner and Save-and-setup callbacks. Fixed a test releasing the wrong Sonarr Subject, corrected modal-covered card assertions without increasing timeouts, and sequenced Vitest after Nuxt generation to avoid a shared-cache setup race. Independent source/proof reviews clear, including final corrections; all4 source files reviewed at Code Health10 after bounded adapter/test consolidation. No backend/URL/Delete/refresh-pipeline redesign or live-service claim. Precommit safeguard passed.
 
 ## I60 — Separate account history
 

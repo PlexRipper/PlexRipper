@@ -186,7 +186,7 @@
 						block
 						icon="mdi-cog-sync"
 						:disable="store.isSetupDisabled"
-						:loading="isSavingForSetup || store.isSettingUp"
+						:loading="(isSavingForSetup && store.isSaving) || store.isSettingUp"
 						data-cy="integration-setup"
 						@click="setup" />
 				</QCol>
@@ -324,6 +324,7 @@ const integrationHelp = computed(() => {
 
 function open(event: unknown): void {
 	const integration = event as IntegrationSummary | null;
+	set(isSavingForSetup, false);
 	set(isEditMode, Boolean(integration));
 	set(stage, integration ? 2 : 1);
 	if (integration)
@@ -362,6 +363,7 @@ function test(): void {
 }
 
 function save(): void {
+	set(isSavingForSetup, false);
 	useSubscription(store.save().subscribe((result) => {
 		if (result?.isSuccess && result.value) dialogStore.closeDialog(DialogType.IntegrationDialog);
 	}));

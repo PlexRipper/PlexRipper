@@ -14,13 +14,14 @@
 						v-for="notification in notificationsStore.getVisibleNotifications"
 						:key="notification.id"
 						:min-width="200"
+						:cy="`notification-${notification.id}`"
 						:max-width="450"
 						:type="notification.level"
 						dense
 						dismissible
 						outlined
 						elevation="10"
-						@click="notificationsStore.hideNotification(notification.id)">
+						@click="hideNotification(notification.id)">
 						<span
 							class="text-wrap"
 							style="overflow-wrap: anywhere">
@@ -50,6 +51,7 @@
 			<q-list>
 				<q-item
 					clickable
+					data-cy="clear-notifications"
 					@click="clearAllNotifications">
 					<q-item-section avatar>
 						<q-icon name="mdi-close-circle" />
@@ -66,6 +68,7 @@
 <script setup lang="ts">
 import { useNotificationsStore } from '@store';
 import { set } from '@vueuse/core';
+import { useSubscription } from '@vueuse/rxjs';
 
 const notificationsStore = useNotificationsStore();
 const { t } = useI18n();
@@ -84,9 +87,14 @@ useEventListener(document, 'keydown', (event) => {
 		set(showDrawer, false);
 });
 
+function hideNotification(id: number) {
+	useSubscription(notificationsStore.hideNotification(id).subscribe());
+}
+
 function clearAllNotifications() {
-	notificationsStore.clearAllNotifications();
-	set(showDrawer, false);
+	useSubscription(notificationsStore.clearAllNotifications().subscribe(({ isSuccess }) => {
+		if (isSuccess) set(showDrawer, false);
+	}));
 }
 </script>
 

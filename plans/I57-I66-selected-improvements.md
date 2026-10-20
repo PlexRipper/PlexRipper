@@ -40,7 +40,7 @@ Implemented original successful DELETE-result preservation across refresh respon
 
 ## I65 — Retryable notification actions
 
-Observe hide/clear results; mutate local rows and close the drawer only after success. Failed actions retain rows/retry. Scope clear completion to captured IDs rather than overwriting newer arrivals or rolling back a full snapshot. No server clear API/concurrency redesign, retries or new alert system. Required failed-result/error/retry/concurrent-arrival store and browser proof; independent review.
+Implemented success-only hide/clear mutations and observable drawer callers. Failed results/errors retain rows for user retry; clear closes the drawer only on success and filters the current list by captured IDs so later arrivals survive client-side completion. No optimistic rollback snapshot, automatic retry, new state/counters, alert system or server clear concurrency redesign. Real Axios/store6 passed, covering failed-result/raw-error retries and pending-clear arrival preservation; focused ESLint passed. Actual Firefox2 passed hide500/retry200 and clear500/still-open/retry200, using the unchanged API-error alert. Self-review and independent review clear0.94; all four changed source files CodeScene10. Safeguard precedes the separate local commit.
 
 ## I66 — Inline two-factor retry feedback
 

@@ -130,20 +130,20 @@ public class UrlValidationIntegrationTests : BaseIntegrationTests
         value.Address.ShouldBe(scenario.Valid.Address);
         value.Port.ShouldBe(scenario.Valid.Port);
         value.Url.ShouldBe(scenario.Valid.Url);
-        value.Local.ShouldBeFalse();
+        value.Local.ShouldBeTrue();
         value.Relay.ShouldBeFalse();
-        value.IPv4.ShouldBeFalse();
+        value.IPv4.ShouldBeTrue();
         value.IPv6.ShouldBeFalse();
         value.IsCustom.ShouldBeTrue();
         value.PlexServerId.ShouldBe(1);
         value.ChosenConnection.ShouldBeFalse();
         value.IsPlexTvConnection.ShouldBeFalse();
-        value.Type.ShouldBe(PlexConnectionTypes.Public);
+        value.Type.ShouldBe(PlexConnectionTypes.Local);
         value.LatestConnectionStatus.ShouldBeNull();
         (await ReadPlexSnapshotsAsync(container)).Single(x => x.Id == value.Id).ShouldBe(
             new PlexConnectionSnapshot(
                 value.Id, "https", scenario.Valid.Address, scenario.Valid.Port, scenario.Valid.Url,
-                false, false, false, false, true, 1
+                true, false, true, false, true, 1
             )
         );
     }
@@ -336,12 +336,12 @@ public class UrlValidationIntegrationTests : BaseIntegrationTests
         [SaveOperation.Create] = new(
             SaveOperation.Create, 60105,
             new("ftp://plex-invalid.example.com:32400", "ftp", "plex-invalid.example.com", 32400),
-            new("https://plex-valid.example.com:32400/plex/", "HTTPS", "plex-valid.example.com", 32400)
+            new("https://192.168.0.42:32400/plex/", "HTTPS", "192.168.0.42", 32400)
         ),
         [SaveOperation.Update] = new(
             SaveOperation.Update, 60106,
             new("not a url", "HTTPS", "custom-updated.example.test", 32401),
-            new("https://plex-updated.example.com:32401/plex/", "HTTPS", "plex-updated.example.com", 32401)
+            new("https://10.0.0.42:32401/plex/", "HTTPS", "10.0.0.42", 32401)
         ),
     };
 

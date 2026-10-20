@@ -28,7 +28,7 @@ Implemented the existing shared HTTP(S) validator at all four Arr save endpoints
 
 ## I62 — Classify custom LAN connections
 
-Derive Local from the complete submitted URL in custom create/update using the existing helper. Preserve ownership, other metadata, preference/HTTPS/local/public order and untouched records. No migration, retroactive repair or IPv6-range expansion. Required endpoint/DTO and chooser SQLite proof; local self-review.
+Implemented only Local = req.Url.IsLocalUrl() in custom create/update; ownership, other metadata, chooser precedence and existing records remain unchanged. Hosted create/update regressions now use recognized private IPv4 URLs with scheme-less addresses and assert Local/Local-type responses plus exact persisted metadata; both passed. Strengthened SQLite chooser proof with an actual public-address HTTP control, no preferred/HTTPS override, and exact selected private connection ID/URL; passed. Self-review confirmed the bounded four-source diff. Changed test diagnostics OK; CodeScene create/update/hosted proof10 and chooser7.55 with pre-existing unrelated findings only. No migration, retroactive repair, helper or IPv6-range expansion. Awaiting safeguard and separate local commit.
 
 ## I63 — Preserve authoritative update-check failures
 

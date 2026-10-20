@@ -83,7 +83,7 @@ public class UpdatePlexServerConnectionEndpoint
             Address = req.Address,
             Port = req.Port,
             Url = req.Url,
-            Local = req.Address.IsLocalUrl(),
+            Local = req.Url.IsLocalUrl(),
             Relay = req.Address.Contains("plex.direct"),
             IPv4 = req.Address.IsIpv4(),
             IPv6 = req.Address.IsIPv6(),

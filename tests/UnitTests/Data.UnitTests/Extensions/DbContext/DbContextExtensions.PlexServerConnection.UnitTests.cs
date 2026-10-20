@@ -301,9 +301,9 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         publicConn = new PlexServerConnection
         {
             Protocol = "http",
-            Address = publicConn.Address,
+            Address = server.PublicAddress,
             Port = publicConn.Port,
-            Url = $"http://{publicConn.Address}:{publicConn.Port}",
+            Url = $"http://{server.PublicAddress}:{publicConn.Port}",
             Local = false,
             Relay = false,
             IPv4 = true,
@@ -315,9 +315,9 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         var localConn = new PlexServerConnection
         {
             Protocol = "http",
-            Address = "127.0.0.1",
+            Address = "192.168.0.42",
             Port = 32400,
-            Url = "http://127.0.0.1:32400",
+            Url = "http://192.168.0.42:32400",
             Local = true,
             Relay = false,
             IPv4 = true,
@@ -340,12 +340,18 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         statusPublic.PlexServerConnectionId = publicConn.Id;
         statusLocal.PlexServerConnectionId = localConn.Id;
         await db.SaveChangesAsync(CancellationToken);
+        server.PreferredConnectionId.ShouldBe(0);
+        publicConn.Protocol.ShouldBe("http");
+        localConn.Protocol.ShouldBe("http");
 
         // Act
         var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.Id.ShouldBe(localConn.Id);
+        result.Value.Url.ShouldBe("http://192.168.0.42:32400");
         result.Value.Local.ShouldBeTrue();
     }
 

@@ -7,9 +7,9 @@ public sealed record GetPhotoAlbumsQueryCommand(
     string Sort = "title:asc"
 ) : ICommand<Result<PhotoAlbumPageDTO>>;
 
-public sealed class GetPhotoAlbumsQueryValidator : AbstractValidator<GetPhotoAlbumsQueryCommand>
+public sealed class GetPhotoAlbumsQueryCommandValidator : AbstractValidator<GetPhotoAlbumsQueryCommand>
 {
-    public GetPhotoAlbumsQueryValidator()
+    public GetPhotoAlbumsQueryCommandValidator()
     {
         RuleFor(x => x.PlexLibraryId).GreaterThan(0).When(x => x.PlexLibraryId.HasValue);
         RuleFor(x => x.Page).GreaterThan(0);
@@ -21,11 +21,12 @@ public sealed class GetPhotoAlbumsQueryValidator : AbstractValidator<GetPhotoAlb
     }
 }
 
-public sealed class GetPhotoAlbumsQueryHandler : ICommandHandler<GetPhotoAlbumsQueryCommand, Result<PhotoAlbumPageDTO>>
+public sealed class GetPhotoAlbumsQueryCommandHandler
+    : ICommandHandler<GetPhotoAlbumsQueryCommand, Result<PhotoAlbumPageDTO>>
 {
     private readonly IReaparrDbContextFactory _dbContextFactory;
 
-    public GetPhotoAlbumsQueryHandler(IReaparrDbContextFactory dbContextFactory)
+    public GetPhotoAlbumsQueryCommandHandler(IReaparrDbContextFactory dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
     }

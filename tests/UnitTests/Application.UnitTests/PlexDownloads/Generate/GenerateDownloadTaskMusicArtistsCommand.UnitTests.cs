@@ -44,6 +44,7 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.MusicArtist,
+                    SelectionKind = null,
                     PlexServerId = artist.PlexServerId,
                     PlexLibraryId = artist.PlexLibraryId,
                     MediaIds = [artist.Id],
@@ -53,6 +54,7 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.MusicTrack,
+                    SelectionKind = null,
                     PlexServerId = track.PlexServerId,
                     PlexLibraryId = track.PlexLibraryId,
                     MediaIds = [track.Id],
@@ -107,6 +109,7 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicArtist,
+            SelectionKind = null,
             PlexServerId = artists[0].PlexServerId,
             PlexLibraryId = artists[1].PlexLibraryId,
             MediaIds = [artists[0].Id],

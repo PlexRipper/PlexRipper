@@ -37,6 +37,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.OtherVideos,
+                    SelectionKind = null,
                     PlexServerId = source.PlexServerId,
                     PlexLibraryId = source.PlexLibraryId,
                     MediaIds = [source.Id, source.Id],
@@ -157,6 +158,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.OtherVideos,
+            SelectionKind = null,
             PlexServerId = source.PlexServerId,
             PlexLibraryId = source.PlexLibraryId,
             MediaIds = [source.Id],
@@ -240,6 +242,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.OtherVideos,
+                    SelectionKind = null,
                     PlexServerId = source.PlexServerId,
                     PlexLibraryId = source.PlexLibraryId,
                     MediaIds = [source.Id],
@@ -315,6 +318,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.OtherVideos,
+            SelectionKind = null,
             PlexServerId =
                 mismatch == 0 ? foreignServerId
                 : mismatch == 2 ? movieLibrary.PlexServerId
@@ -367,6 +371,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.OtherVideos,
+                    SelectionKind = null,
                     PlexServerId = source.PlexServerId,
                     PlexLibraryId = source.PlexLibraryId,
                     MediaIds = [source.Id],
@@ -408,6 +413,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.Movie,
+            SelectionKind = null,
             PlexServerId = source.PlexServerId,
             PlexLibraryId = source.PlexLibraryId,
             MediaIds = [source.Id],
@@ -449,6 +455,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.OtherVideos,
+            SelectionKind = null,
             PlexServerId = source.PlexServerId,
             PlexLibraryId = source.PlexLibraryId,
             MediaIds = [source.Id],
@@ -487,6 +494,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
             new DownloadMediaDTO
             {
                 Type = PlexMediaType.OtherVideos,
+                SelectionKind = null,
                 PlexServerId = source.PlexServerId,
                 PlexLibraryId = source.PlexLibraryId,
                 MediaIds = [source.Id],
@@ -535,6 +543,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
             new DownloadMediaDTO
             {
                 Type = PlexMediaType.Movie,
+                SelectionKind = null,
                 PlexServerId = movie.PlexServerId,
                 PlexLibraryId = movie.PlexLibraryId,
                 MediaIds = [movie.Id],
@@ -543,6 +552,7 @@ public class GenerateDownloadTaskOtherVideosCommandUnitTests
             new DownloadMediaDTO
             {
                 Type = PlexMediaType.OtherVideos,
+                SelectionKind = null,
                 PlexServerId = source.PlexServerId,
                 PlexLibraryId = source.PlexLibraryId,
                 MediaIds = [source.Id],

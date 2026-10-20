@@ -7,9 +7,9 @@ public sealed record GetPhotoSourceRootsQueryCommand(
     string Sort = "title:asc"
 ) : ICommand<Result<PhotoFolderPageDTO>>;
 
-public sealed class GetPhotoSourceRootsQueryValidator : AbstractValidator<GetPhotoSourceRootsQueryCommand>
+public sealed class GetPhotoSourceRootsQueryCommandValidator : AbstractValidator<GetPhotoSourceRootsQueryCommand>
 {
-    public GetPhotoSourceRootsQueryValidator()
+    public GetPhotoSourceRootsQueryCommandValidator()
     {
         RuleFor(x => x.PlexLibraryId).GreaterThan(0);
         RuleFor(x => x.Page).GreaterThan(0);
@@ -21,12 +21,12 @@ public sealed class GetPhotoSourceRootsQueryValidator : AbstractValidator<GetPho
     }
 }
 
-public sealed class GetPhotoSourceRootsQueryHandler
+public sealed class GetPhotoSourceRootsQueryCommandHandler
     : ICommandHandler<GetPhotoSourceRootsQueryCommand, Result<PhotoFolderPageDTO>>
 {
     private readonly IReaparrDbContextFactory _dbContextFactory;
 
-    public GetPhotoSourceRootsQueryHandler(IReaparrDbContextFactory dbContextFactory)
+    public GetPhotoSourceRootsQueryCommandHandler(IReaparrDbContextFactory dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
     }

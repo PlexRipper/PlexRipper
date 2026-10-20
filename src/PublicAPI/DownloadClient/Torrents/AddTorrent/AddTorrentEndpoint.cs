@@ -233,6 +233,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                 ],
                 MediaIds = [metadata.MediaId],
                 Type = metadata.Type,
+                SelectionKind = null,
                 PlexServerId = metadata.ServerId,
                 PlexLibraryId = metadata.LibraryId,
                 KeepCompletedInDownloadFolder = true,

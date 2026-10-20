@@ -134,7 +134,6 @@ public class PlexPhotoBrowseEndpointsIntegrationTests : BaseIntegrationTests
                 .Select(x => x.Id)
         );
         value.Items.ShouldAllBe(x => x.SourceRootTitle == fixture.Root.Title);
-        value.Items.ShouldAllBe(x => x.DownloadUnavailableReason == null);
     }
 
     private async Task AssertRootsAsync(BrowseFixture fixture)

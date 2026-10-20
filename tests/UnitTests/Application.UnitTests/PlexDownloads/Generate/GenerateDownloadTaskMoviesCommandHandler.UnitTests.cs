@@ -41,6 +41,7 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseCommandUnit
             new()
             {
                 Type = PlexMediaType.Movie,
+                SelectionKind = null,
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -102,6 +103,7 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseCommandUnit
             new()
             {
                 Type = PlexMediaType.Movie,
+                SelectionKind = null,
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -158,6 +160,7 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseCommandUnit
             new()
             {
                 Type = PlexMediaType.Movie,
+                SelectionKind = null,
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -231,6 +234,7 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseCommandUnit
             .Select(x => new DownloadMediaDTO
             {
                 Type = PlexMediaType.Movie,
+                SelectionKind = null,
                 MediaIds = [x.MovieId],
                 PlexServerId = 1,
                 PlexLibraryId = x.PlexLibraryId,
@@ -293,6 +297,7 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseCommandUnit
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.Movie,
+            SelectionKind = null,
             PlexServerId = target.PlexServerId,
             PlexLibraryId = target.PlexLibraryId,
             MediaIds = [target.Id],

@@ -38,6 +38,7 @@ public class GetMusicDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetMu
                 new DownloadMediaDTO
                 {
                     Type = type,
+                    SelectionKind = null,
                     PlexServerId = artist.PlexServerId,
                     PlexLibraryId = artist.PlexLibraryId,
                     MediaIds = [id],

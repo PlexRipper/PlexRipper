@@ -44,7 +44,8 @@ public class GetPhotoAssetInspectionQueryUnitTests : BaseCommandUnitTest<GetPhot
         result.Value.Size.ShouldBe(asset.Size);
         result.Value.Albums.TotalCount.ShouldBe(expectedAlbumCount);
         result.Value.Breadcrumbs.ShouldBeEmpty();
-        result.Value.DownloadUnavailableReason.ShouldBe(PhotoDownloadUnavailableReason.Unmapped);
+        result.Value.RelativeFolderPath.ShouldBeNull();
+        result.Value.SourceRootTitle.ShouldBeNull();
         var serialized = System.Text.Json.JsonSerializer.Serialize(result.Value);
         asset.SourcePath.ShouldNotBeNull();
         serialized.ShouldNotContain(asset.SourcePath);
@@ -159,7 +160,7 @@ public class GetPhotoAssetInspectionQueryUnitTests : BaseCommandUnitTest<GetPhot
     );
 
     [Test]
-    public async Task ShouldMarkDescendantOfInactiveRootAsUnmapped()
+    public async Task ShouldPreserveLocationMetadata_WhenSourceRootIsInactive()
     {
         // Arrange
         await SetupDatabase(71016, config =>
@@ -204,8 +205,8 @@ public class GetPhotoAssetInspectionQueryUnitTests : BaseCommandUnitTest<GetPhot
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         result.Value.SourceRootTitle.ShouldBe(inactiveRoot.Title);
         result.Value.Breadcrumbs.Select(x => x.Id).ShouldBe([inactiveRoot.Id, child.Id]);
-        result.Value.DownloadUnavailableReason.ShouldBe(PhotoDownloadUnavailableReason.Unmapped);
     }
 }

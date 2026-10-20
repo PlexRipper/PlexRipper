@@ -136,7 +136,7 @@ public class GetPhotoSourceRootsQueryUnitTests : BaseCommandUnitTest<GetPhotoSou
         dbContext.PlexPhotoFolders.AddRange(roots);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        var connectionString = dbContext.Database.GetConnectionString();
+        var connectionString = ((DbContext)dbContext).Database.GetConnectionString();
         var commands = new ConcurrentQueue<string>();
         using var commandSubscriptions = new System.Reactive.Disposables.CompositeDisposable();
         using var listeners = DiagnosticListener.AllListeners.Subscribe(listener =>

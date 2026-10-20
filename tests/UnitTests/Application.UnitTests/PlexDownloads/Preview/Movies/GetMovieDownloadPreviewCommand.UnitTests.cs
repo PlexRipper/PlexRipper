@@ -23,6 +23,7 @@ public class GetMovieDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetMo
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.Movie,
+                    SelectionKind = null,
                     PlexServerId = movies[0].PlexServerId,
                     PlexLibraryId = movies[0].PlexLibraryId,
                     MediaIds = movies.Select(x => x.Id).ToList(),

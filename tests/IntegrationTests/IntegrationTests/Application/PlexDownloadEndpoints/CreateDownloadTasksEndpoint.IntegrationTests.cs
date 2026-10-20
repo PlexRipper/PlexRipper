@@ -240,6 +240,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             new()
             {
                 Type = PlexMediaType.Movie,
+                SelectionKind = null,
                 MediaIds = movies.Select(x => x.Id).ToList(),
                 PlexServerId = movies[0].PlexServerId,
                 PlexLibraryId = movies[0].PlexLibraryId,
@@ -256,6 +257,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             new()
             {
                 Type = PlexMediaType.TvShow,
+                SelectionKind = null,
                 MediaIds = [show.Id],
                 PlexServerId = show.PlexServerId,
                 PlexLibraryId = show.PlexLibraryId,
@@ -264,6 +266,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             new()
             {
                 Type = PlexMediaType.MusicArtist,
+                SelectionKind = null,
                 MediaIds = [artist.Id],
                 PlexServerId = artist.PlexServerId,
                 PlexLibraryId = artist.PlexLibraryId,
@@ -277,6 +280,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             new()
             {
                 Type = PlexMediaType.OtherVideos,
+                SelectionKind = null,
                 MediaIds = [video.Id],
                 PlexServerId = video.PlexServerId,
                 PlexLibraryId = video.PlexLibraryId,

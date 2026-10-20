@@ -98,9 +98,6 @@ internal static class PhotoBrowseQuerySupport
         Duration = asset.Duration,
         RelativeFolderPath = folder?.RelativePath,
         SourceRootTitle = root?.Title,
-        DownloadUnavailableReason = folder is not null && root?.IsActive == true
-            ? null
-            : PhotoDownloadUnavailableReason.Unmapped,
     };
 
     public static PhotoAlbumBrowseDTO ToAlbumDTO(

@@ -175,9 +175,6 @@ public sealed class GetPhotoAssetInspectionQueryHandler
             OriginallyAvailableAt = asset.OriginallyAvailableAt,
             RelativeFolderPath = folder?.RelativePath,
             SourceRootTitle = details.Root?.Title,
-            DownloadUnavailableReason = folder is not null && details.Root?.IsActive == true
-                ? null
-                : PhotoDownloadUnavailableReason.Unmapped,
             Breadcrumbs = details.Breadcrumbs.Select(PhotoBrowseQuerySupport.ToBreadcrumbDTO).ToList(),
             Albums = new PhotoAlbumSummaryPageDTO
             {

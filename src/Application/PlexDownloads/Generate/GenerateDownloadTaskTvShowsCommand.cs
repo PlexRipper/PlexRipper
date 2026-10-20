@@ -105,6 +105,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler
                             PlexLibraryId = tvShow.PlexLibraryId,
                             PlexServerId = tvShow.PlexServerId,
                             Type = PlexMediaType.Season,
+                            SelectionKind = null,
                             Qualities = [],
                             KeepCompletedInDownloadFolder = downloadMediaDto.KeepCompletedInDownloadFolder,
                         }

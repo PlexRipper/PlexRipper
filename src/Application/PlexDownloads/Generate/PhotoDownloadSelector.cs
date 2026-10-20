@@ -98,15 +98,11 @@ internal sealed class PhotoDownloadSelector
         var rootsByFolder = new Dictionary<int, PlexPhotoFolder?>();
         var photos = new List<PhotoDownloadSelection>();
         foreach (var item in selected.OrderBy(x => x.MediaData.Id))
-        {
-            var photo = CreatePhotoSelection(item, context, rootsByFolder);
-            if (photo is not null)
-                photos.Add(photo);
-        }
+            photos.Add(CreatePhotoSelection(item, context, rootsByFolder));
         return photos;
     }
 
-    private PhotoDownloadSelection? CreatePhotoSelection(
+    private PhotoDownloadSelection CreatePhotoSelection(
         SelectedPhoto item,
         PhotoSelectionContext context,
         IDictionary<int, PlexPhotoFolder?> rootsByFolder
@@ -114,23 +110,23 @@ internal sealed class PhotoDownloadSelector
     {
         var media = item.MediaData;
         var scope = (media.PlexServerId, media.PlexLibraryId);
-        var scopeRoots = context.ActiveRoots[scope];
         var folder = media.PlexPhotoFolderId is int folderId ? context.Folders.GetValueOrDefault(folderId) : null;
         PlexPhotoFolder? root = null;
         if (folder is not null && !rootsByFolder.TryGetValue(folder.Id, out root))
             rootsByFolder[folder.Id] = root = FindRoot(folder, context.Folders);
-        if (!IsActivePhotoFolder(folder, root, scopeRoots))
+        var relativeDirectory = string.Empty;
+        if (folder is not null && root is not null)
         {
-            _log.Here()
-                .Warning(
-                    "Skipping photo {Title} (ID: {Id}) because it has no active catalog folder",
-                    media.Title,
-                    media.Id
-                );
-            return null;
+            var activeRootCount = 0;
+            var isActiveRoot = false;
+            foreach (var activeRoot in context.ActiveRoots[scope])
+            {
+                activeRootCount++;
+                isActiveRoot |= activeRoot.Id == root.Id;
+            }
+            if (isActiveRoot)
+                relativeDirectory = BuildRelativePhotoDirectory(folder, root, activeRootCount);
         }
-
-        var relativeDirectory = BuildRelativePhotoDirectory(folder, root, scopeRoots.Count());
         return new PhotoDownloadSelection(
             media,
             relativeDirectory,
@@ -140,19 +136,6 @@ internal sealed class PhotoDownloadSelector
             context.Destinations[media.PlexLibraryId],
             context.LibraryRootNames[scope]
         );
-    }
-
-    private static bool IsActivePhotoFolder(
-        [NotNullWhen(true)] PlexPhotoFolder? folder,
-        [NotNullWhen(true)] PlexPhotoFolder? root,
-        IEnumerable<PlexPhotoFolder> activeRoots
-    )
-    {
-        if (folder is null)
-            return false;
-        if (root is null)
-            return false;
-        return activeRoots.Any(x => x.Id == root.Id);
     }
 
     private static string BuildRelativePhotoDirectory(PlexPhotoFolder folder, PlexPhotoFolder root, int activeRootCount)

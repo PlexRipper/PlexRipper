@@ -45,6 +45,7 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.TvShow,
+                SelectionKind = null,
                 MediaIds = plexTvShows.Select(x => x.Id).ToList(),
                 PlexServerId = plexServerId,
                 PlexLibraryId = plexLibraryId,
@@ -115,6 +116,7 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.TvShow,
+                SelectionKind = null,
                 MediaIds = plexTvShows.Select(x => x.Id).ToList(),
                 PlexServerId = firstTvShow.PlexServerId,
                 PlexLibraryId = firstTvShow.PlexLibraryId,
@@ -172,6 +174,7 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.TvShow,
+                SelectionKind = null,
                 MediaIds = plexTvShows.Select(x => x.Id).ToList(),
                 PlexServerId = firstTvShow.PlexServerId,
                 PlexLibraryId = firstTvShow.PlexLibraryId,

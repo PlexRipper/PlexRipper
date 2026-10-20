@@ -39,6 +39,7 @@ public class GetDownloadPreviewQueryCommandUnitTests : BaseCommandUnitTest<GetDo
                     new DownloadMediaDTO
                     {
                         Type = type,
+                        SelectionKind = null,
                         PlexServerId = foreignServerId,
                         PlexLibraryId = target.PlexLibraryId,
                         MediaIds = [target.Id],
@@ -102,6 +103,7 @@ public class GetDownloadPreviewQueryCommandUnitTests : BaseCommandUnitTest<GetDo
                     new DownloadMediaDTO
                     {
                         Type = PlexMediaType.Movie,
+                        SelectionKind = null,
                         PlexServerId = movies[0].PlexServerId,
                         PlexLibraryId = movies[0].PlexLibraryId,
                         MediaIds = movies.Select(x => x.Id).ToList(),
@@ -110,6 +112,7 @@ public class GetDownloadPreviewQueryCommandUnitTests : BaseCommandUnitTest<GetDo
                     new DownloadMediaDTO
                     {
                         Type = PlexMediaType.TvShow,
+                        SelectionKind = null,
                         PlexServerId = shows[0].PlexServerId,
                         PlexLibraryId = shows[0].PlexLibraryId,
                         MediaIds = shows.Select(x => x.Id).ToList(),
@@ -155,6 +158,7 @@ public class GetDownloadPreviewQueryCommandUnitTests : BaseCommandUnitTest<GetDo
                     .Select(group => new DownloadMediaDTO
                     {
                         Type = PlexMediaType.Movie,
+                        SelectionKind = null,
                         PlexServerId = group.Key.PlexServerId,
                         PlexLibraryId = group.Key.PlexLibraryId,
                         MediaIds = group.Select(x => x.Id).ToList(),

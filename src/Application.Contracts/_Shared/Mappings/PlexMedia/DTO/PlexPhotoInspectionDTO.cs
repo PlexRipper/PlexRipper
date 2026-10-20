@@ -27,7 +27,6 @@ public sealed record PhotoAssetInspectionDTO
     public required DateTime? OriginallyAvailableAt { get; init; }
     public required string? RelativeFolderPath { get; init; }
     public required string? SourceRootTitle { get; init; }
-    public required PhotoDownloadUnavailableReason? DownloadUnavailableReason { get; init; }
     public required List<PhotoFolderBreadcrumbDTO> Breadcrumbs { get; init; } = [];
     public required PhotoAlbumSummaryPageDTO Albums { get; init; }
 }

@@ -101,6 +101,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                     new DownloadMediaDTO
                     {
                         Type = PlexMediaType.Movie,
+                        SelectionKind = null,
                         PlexServerId = media.PlexServerId,
                         PlexLibraryId = media.PlexLibraryId,
                         MediaIds = [media.Id],
@@ -215,6 +216,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                 new DownloadMediaDTO
                 {
                     Type = failedType,
+                    SelectionKind = null,
                     PlexServerId = 1,
                     PlexLibraryId = 11,
                     MediaIds = [101],
@@ -322,6 +324,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.Movie,
+                    SelectionKind = null,
                     PlexServerId = movie.PlexServerId,
                     PlexLibraryId = movie.PlexLibraryId,
                     MediaIds = [movie.Id],
@@ -330,6 +333,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.TvShow,
+                    SelectionKind = null,
                     PlexServerId = show.PlexServerId,
                     PlexLibraryId = show.PlexLibraryId,
                     MediaIds = [show.Id],
@@ -338,6 +342,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.MusicArtist,
+                    SelectionKind = null,
                     PlexServerId = artist.PlexServerId,
                     PlexLibraryId = artist.PlexLibraryId,
                     MediaIds = [artist.Id],
@@ -347,6 +352,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.OtherVideos,
+                    SelectionKind = null,
                     PlexServerId = video.PlexServerId,
                     PlexLibraryId = video.PlexLibraryId,
                     MediaIds = [video.Id],

@@ -49,6 +49,146 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
     }
 
     [Test]
+    public async Task ShouldPreviewUnmappedUnalbumedAssetAtLibraryRoot_WhenNoCatalogRootIsActive()
+    {
+        // Arrange
+        await SetupDatabase(
+            62411,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var root = await dbContext.PlexPhotoFolders.AsTracking().SingleAsync(x => x.ParentId == null, CancellationToken);
+        var media = await dbContext.PlexPhotoMediaData.AsTracking().SingleAsync(CancellationToken);
+        var server = await dbContext.PlexServers.AsTracking().SingleAsync(CancellationToken);
+        var library = await dbContext.PlexLibraries.AsTracking().SingleAsync(CancellationToken);
+        root.IsActive = false;
+        media.PlexPhotoFolderId = null;
+        await dbContext.PlexServers.Where(x => x.Id == server.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Name, "Home Plex"), CancellationToken);
+        library.Title = "Photos";
+        await dbContext.SaveChangesAsync(CancellationToken);
+        media.PlexPhotoFolderId.ShouldBeNull();
+        (await dbContext.PlexPhotoFolders.CountAsync(x => x.ParentId == null && x.IsActive == true, CancellationToken))
+            .ShouldBe(0);
+        (await dbContext.PlexPhotoAlbumMemberships.CountAsync(CancellationToken)).ShouldBe(0);
+        var query = new GetPhotoDownloadPreviewCommand(
+            new DownloadPreviewRequest
+            {
+                DownloadMedias =
+                [
+                    CreatePhotoSelection(PhotoItemKind.Asset, (media.PlexServerId, media.PlexLibraryId), [media.Id]),
+                ],
+                CustomDestinationFolderPath = "/unmapped-preview",
+            }
+        );
+
+        // Act
+        var result = await TestHandlerExecuteAsync<IEnumerable<DownloadPreview>>(query);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var preview = result.Value.Single();
+        preview.MediaType.ShouldBe(PlexMediaType.PhotoAlbum);
+        preview.ChildCount.ShouldBe(1);
+        preview.Children.Count.ShouldBe(1);
+        preview.Children.Single().MediaType.ShouldBe(PlexMediaType.PhotoImage);
+        preview.Children.Single().Id.ShouldBe(media.Id);
+        preview.Children.Single().Children.ShouldBeEmpty();
+        $"{preview.Title}/{preview.Children.Single().Title}"
+            .ShouldBe($"Home Plex - Photos/{media.OriginalFilename.GetFileName()}");
+    }
+
+    [Test]
+    public async Task ShouldPreviewMappedAndUnmappedAlbumMembersAtTheirExpectedPaths()
+    {
+        // Arrange
+        await SetupDatabase(
+            62412,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoAlbumCount = 1;
+                config.PhotoCount = 2;
+            }
+        );
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.AsTracking().SingleAsync(CancellationToken);
+        var library = await dbContext.PlexLibraries.AsTracking().SingleAsync(CancellationToken);
+        await dbContext.PlexServers.Where(x => x.Id == server.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Name, "Home Plex"), CancellationToken);
+        library.Title = "Photos";
+        var root = await dbContext.PlexPhotoFolders.SingleAsync(x => x.ParentId == null, CancellationToken);
+        var child = new PlexPhotoFolder
+        {
+            PlexServerId = root.PlexServerId,
+            PlexLibraryId = root.PlexLibraryId,
+            ParentId = root.Id,
+            RelativePath = "Trips",
+            Title = "Trips",
+        };
+        dbContext.PlexPhotoFolders.Add(child);
+        var album = await dbContext.PlexPhotoAlbums.SingleAsync(CancellationToken);
+        var files = await dbContext.PlexPhotoMediaData.AsTracking().OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        files[0].PlexPhotoFolderId = child.Id;
+        files[1].PlexPhotoFolderId = null;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        files[0].PlexPhotoFolderId.ShouldBe(child.Id);
+        files[1].PlexPhotoFolderId.ShouldBeNull();
+        (await dbContext.PlexPhotoAlbumMemberships.CountAsync(x => x.PlexPhotoAlbumId == album.Id, CancellationToken))
+            .ShouldBe(2);
+        var query = new GetPhotoDownloadPreviewCommand(
+            new DownloadPreviewRequest
+            {
+                DownloadMedias =
+                [
+                    CreatePhotoSelection(PhotoItemKind.Album, (album.PlexServerId, album.PlexLibraryId), [album.Id]),
+                ],
+                CustomDestinationFolderPath = "/album-preview",
+            }
+        );
+
+        // Act
+        var result = await TestHandlerExecuteAsync<IEnumerable<DownloadPreview>>(query);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var rootPreview = result.Value.Single();
+        rootPreview.Title.ShouldBe("Home Plex - Photos");
+        rootPreview.ChildCount.ShouldBe(2);
+        rootPreview.Children.Count.ShouldBe(2);
+        var actualPaths = new List<string>();
+        void CollectPaths(DownloadPreview node, string parentPath)
+        {
+            var path = string.IsNullOrEmpty(parentPath) ? node.Title : $"{parentPath}/{node.Title}";
+            if (node.MediaType == PlexMediaType.PhotoImage)
+                actualPaths.Add(path);
+            foreach (var childNode in node.Children)
+                CollectPaths(childNode, path);
+        }
+        CollectPaths(rootPreview, string.Empty);
+        actualPaths.Order(StringComparer.Ordinal).ShouldBe(
+            new[]
+            {
+                $"Home Plex - Photos/Trips/{files[0].OriginalFilename.GetFileName()}",
+                $"Home Plex - Photos/{files[1].OriginalFilename.GetFileName()}",
+            }.Order(StringComparer.Ordinal)
+        );
+        rootPreview.Children.Single(x => x.MediaType == PlexMediaType.PhotoImage)
+            .Title.ShouldBe(files[1].OriginalFilename.GetFileName());
+        rootPreview.Children.Single(x => x.MediaType == PlexMediaType.PhotoAlbum)
+            .Title.ShouldBe("Trips");
+    }
+
+    [Test]
     public async Task ShouldRejectMissingOrForeignDirectFileIds_BeforeBuildingPreview()
     {
         // Arrange

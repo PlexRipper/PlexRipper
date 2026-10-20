@@ -65,9 +65,6 @@ public class SearchPhotoAssetsQueryUnitTests : BaseCommandUnitTest<SearchPhotoAs
         result.Value.Items.Select(x => x.Id).Distinct().Count().ShouldBe(2);
         result.Value.Items.Select(x => x.Id).OrderBy(x => x).ShouldBe(selectedIds.OrderBy(x => x));
         result.Value.Items.Select(x => x.PlexLibraryId).Distinct().Count().ShouldBeGreaterThan(1);
-        result.Value.Items.Single(x => x.Id == inactiveAsset.Id).DownloadUnavailableReason.ShouldBe(
-            PhotoDownloadUnavailableReason.Unmapped
-        );
         result.Value.Items.Single(x => x.Id == inactiveAsset.Id).SourceRootTitle.ShouldBe(inactiveRoot.Title);
     }
  

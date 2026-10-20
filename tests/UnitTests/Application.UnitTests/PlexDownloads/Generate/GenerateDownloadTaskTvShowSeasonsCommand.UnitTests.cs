@@ -39,6 +39,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandUnitTests
             new()
             {
                 Type = PlexMediaType.Season,
+                SelectionKind = null,
                 MediaIds = plexSeasons.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,

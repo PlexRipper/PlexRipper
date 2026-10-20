@@ -25,20 +25,13 @@ public class GetPhotoAssetsQueryUnitTests : BaseCommandUnitTest<GetPhotoAssetsQu
         result.Value.TotalBytes.ShouldBe(fixture.ExpectedBytes);
         result.Value.Items.Select(x => x.Id).ShouldBe(fixture.Assets.Select(x => x.Id));
         result.Value.Items.Select(x => x.Id).Distinct().Count().ShouldBe(result.Value.Items.Count);
-        result.Value.Items.Where(x => x.Id == fixture.UnmappedAsset.Id).ShouldAllBe(
-            x => x.DownloadUnavailableReason == PhotoDownloadUnavailableReason.Unmapped
-        );
-        result.Value.Items.Single(x => x.Id == fixture.InactiveAsset.Id).DownloadUnavailableReason.ShouldBe(
-            PhotoDownloadUnavailableReason.Unmapped
-        );
+        result.Value.Items.Single(x => x.Id == fixture.UnmappedAsset.Id).RelativeFolderPath.ShouldBeNull();
+        result.Value.Items.Single(x => x.Id == fixture.UnmappedAsset.Id).SourceRootTitle.ShouldBeNull();
         result.Value.Items.Single(x => x.Id == fixture.InactiveAsset.Id).SourceRootTitle.ShouldBe(
             fixture.InactiveRoot.Title
         );
-        result.Value.Items
-            .Where(x => x.Id != fixture.UnmappedAsset.Id && x.Id != fixture.InactiveAsset.Id)
-            .ShouldAllBe(x => x.DownloadUnavailableReason == null);
-        scopedResult.Value.Items.Single(x => x.Id == fixture.InactiveAsset.Id).DownloadUnavailableReason.ShouldBe(
-            PhotoDownloadUnavailableReason.Unmapped
+        scopedResult.Value.Items.Single(x => x.Id == fixture.InactiveAsset.Id).SourceRootTitle.ShouldBe(
+            fixture.InactiveRoot.Title
         );
         result.Value.Items.Select(x => (x.PlexServerId, x.PlexLibraryId, x.Id)).Distinct().Count().ShouldBe(
             result.Value.Items.Count

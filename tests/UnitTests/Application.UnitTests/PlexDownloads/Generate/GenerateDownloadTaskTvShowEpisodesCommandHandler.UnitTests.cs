@@ -53,6 +53,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         var request = new DownloadMediaDTO
         {
             Type = PlexMediaType.Episode,
+            SelectionKind = null,
             MediaIds = [episode.Id, singlePartEpisode.Id],
             PlexServerId = episode.PlexServerId,
             PlexLibraryId = episode.PlexLibraryId,
@@ -154,6 +155,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.Episode,
+            SelectionKind = null,
             MediaIds = [episode.Id],
             PlexServerId = episode.PlexServerId,
             PlexLibraryId = episode.PlexLibraryId,
@@ -303,6 +305,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -378,6 +381,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -431,6 +435,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = validEpisodeIds.Concat(invalidEpisodeIds).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -479,6 +484,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = duplicatedEpisodeIds,
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -555,6 +561,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -609,6 +616,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -677,6 +685,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -685,6 +694,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Movie, // This should be ignored by the episode handler
+                SelectionKind = null,
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -738,6 +748,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -792,6 +803,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -826,6 +838,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = new List<int>(), // Empty list
                 PlexServerId = 1,
                 PlexLibraryId = 1,
@@ -866,6 +879,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             new()
             {
                 Type = PlexMediaType.Episode,
+                SelectionKind = null,
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,

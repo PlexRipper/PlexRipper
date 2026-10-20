@@ -80,9 +80,6 @@ public class GetPhotoAlbumMembersQueryUnitTests : BaseCommandUnitTest<GetPhotoAl
                     .Select(x => x.Id)
             );
         result.Value.Items.Select(x => x.Id).ShouldAllBe(id => expectedIds.Contains(id));
-        result
-            .Value.Items.Single(x => x.Id == inactiveAssetId)
-            .DownloadUnavailableReason.ShouldBe(PhotoDownloadUnavailableReason.Unmapped);
         result.Value.Items.Single(x => x.Id == inactiveAssetId).SourceRootTitle.ShouldBe(inactiveRoot.Title);
     }
 
@@ -153,9 +150,8 @@ public class GetPhotoAlbumMembersQueryUnitTests : BaseCommandUnitTest<GetPhotoAl
         var pagedItems = firstPage.Value.Items.Concat(secondPage.Value.Items).Concat(thirdPage.Value.Items).ToList();
         pagedItems.Select(x => x.Id).Distinct().Count().ShouldBe(expectedIds.Count);
         pagedItems.ShouldAllBe(x => expectedIds.Contains(x.Id));
-        pagedItems
-            .First(x => x.Id == overlapAssetId)
-            .DownloadUnavailableReason.ShouldBe(PhotoDownloadUnavailableReason.Unmapped);
+        pagedItems.First(x => x.Id == overlapAssetId).RelativeFolderPath.ShouldBeNull();
+        pagedItems.First(x => x.Id == overlapAssetId).SourceRootTitle.ShouldBeNull();
         foreignAlbum.Has404NotFoundError().ShouldBeTrue();
     }
 }

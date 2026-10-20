@@ -134,6 +134,7 @@ public class GetTvShowDownloadPreviewCommandHandler
                             MediaIds = missingEpisodeIds.Select(x => x.EpisodeId).ToList(),
                             Qualities = missingEpisodeIds.SelectMany(x => x.MediaDataList).ToPlexMediaQuality(),
                             Type = PlexMediaType.Episode,
+                            SelectionKind = null,
                             PlexServerId = episodeServerInfo?.PlexServerId ?? 0,
                             PlexLibraryId = episodeServerInfo?.PlexLibraryId ?? 0,
                         }

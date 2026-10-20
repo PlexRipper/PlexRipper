@@ -22,6 +22,7 @@ public class GetTvShowDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetT
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.Episode,
+                    SelectionKind = null,
                     PlexServerId = episode.PlexServerId,
                     PlexLibraryId = episode.PlexLibraryId,
                     MediaIds = [episode.Id],
@@ -30,6 +31,7 @@ public class GetTvShowDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetT
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.Episode,
+                    SelectionKind = null,
                     PlexServerId = episode.PlexServerId,
                     PlexLibraryId = episode.PlexLibraryId,
                     MediaIds = [episode.Id],

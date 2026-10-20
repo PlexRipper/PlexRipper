@@ -57,7 +57,6 @@ public sealed record PhotoAssetBrowseDTO
     public required int? Duration { get; init; }
     public required string? RelativeFolderPath { get; init; }
     public required string? SourceRootTitle { get; init; }
-    public required PhotoDownloadUnavailableReason? DownloadUnavailableReason { get; init; }
 }
 
 /// <summary>A page of physical folders. Asset totals are carried by each folder item and are recursive.</summary>

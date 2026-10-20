@@ -23,6 +23,7 @@ public class GetOtherVideoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<
                 new DownloadMediaDTO
                 {
                     Type = PlexMediaType.OtherVideos,
+                    SelectionKind = null,
                     PlexServerId = videos[0].PlexServerId,
                     PlexLibraryId = videos[0].PlexLibraryId,
                     MediaIds = videos.Select(x => x.Id).ToList(),

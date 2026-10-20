@@ -40,36 +40,39 @@ public class GetPhotoDownloadPreviewCommandHandler
     {
         if (command.DownloadMedias.Count == 0)
             return Result.Ok(Enumerable.Empty<DownloadPreview>());
-        var preparation = await PhotoDownloadPlanning.PrepareAsync(
-            _dbContext, new CreateDownloadTasksRequest(command.DownloadMedias), _log, cancellationToken);
-        if (preparation.IsCancelledOrFailed)
-            return preparation.ToResult<IEnumerable<DownloadPreview>>().LogIfFailed();
-        if (preparation.Value.Count == 0)
+        var selector = new PhotoDownloadSelector(_dbContext, _log);
+        var selectionResult = await selector.ResolveSelectedFilesAsync(
+            new CreateDownloadTasksRequest(command.DownloadMedias),
+            cancellationToken
+        );
+        if (selectionResult.IsCancelledOrFailed)
+            return selectionResult.ToResult<IEnumerable<DownloadPreview>>().LogIfFailed();
+        if (selectionResult.Value.Count == 0)
             return Result.Ok(Enumerable.Empty<DownloadPreview>());
 
         var roots = await _dbContext.DownloadTaskPhotoFolders
             .Where(x => x.ParentId == null).ToListAsync(cancellationToken);
         var files = await _dbContext.DownloadTaskPhotoImageFiles.ToListAsync(cancellationToken);
-        var accepted = PhotoDownloadPlanning.Accept(preparation.Value, roots, files, _log);
-        return Result.Ok(CreatePreviews(accepted));
+        var eligibleSelections = selector.FilterQueueEligibleFiles(selectionResult.Value, roots, files);
+        return Result.Ok(CreatePreviews(eligibleSelections));
     }
 
-    private static IEnumerable<DownloadPreview> CreatePreviews(IEnumerable<PhotoDownloadFile> files)
+    private static IEnumerable<DownloadPreview> CreatePreviews(IEnumerable<PhotoDownloadCandidate> candidates)
     {
         var roots = new Dictionary<(int ServerId, int LibraryId), DownloadPreview>();
         var folders = new Dictionary<(int ServerId, int LibraryId, string Path), DownloadPreview>();
-        foreach (var file in files)
+        foreach (var candidate in candidates)
         {
-            var media = file.Photo.MediaData;
+            var media = candidate.MediaData;
             var scope = (media.PlexServerId, media.PlexLibraryId);
             if (!roots.TryGetValue(scope, out var root))
             {
-                root = CreatePreview(media.PlexLibraryId, file.RootName, PlexMediaType.PhotoAlbum, 0);
+                root = CreatePreview(media.PlexLibraryId, candidate.RootName, PlexMediaType.PhotoAlbum, 0);
                 roots[scope] = root;
             }
             var parent = root;
             var path = string.Empty;
-            foreach (var segment in file.Photo.RelativeDirectory.Split('/', StringSplitOptions.RemoveEmptyEntries))
+            foreach (var segment in candidate.RelativeDirectory.Split('/', StringSplitOptions.RemoveEmptyEntries))
             {
                 path = string.IsNullOrEmpty(path) ? segment : $"{path}/{segment}";
                 var key = (scope.PlexServerId, scope.PlexLibraryId, path);
@@ -81,7 +84,7 @@ public class GetPhotoDownloadPreviewCommandHandler
                 }
                 parent = child;
             }
-            parent.Children.Add(CreatePreview(media.Id, file.Photo.FileName, PlexMediaType.PhotoImage, media.Size));
+            parent.Children.Add(CreatePreview(media.Id, candidate.FileName, PlexMediaType.PhotoImage, media.Size));
         }
         foreach (var root in roots.Values)
             AggregateAndSort(root);

@@ -126,7 +126,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
     private static string GetRootName(string path)
     {
         var trimmed = path.TrimEnd('/', '\\');
-        return trimmed.Length == 0 ? path : trimmed.GetPhotoSourceFileName();
+        return trimmed.Length == 0 ? path : trimmed.GetSourcePathLeafName();
     }
 }
 

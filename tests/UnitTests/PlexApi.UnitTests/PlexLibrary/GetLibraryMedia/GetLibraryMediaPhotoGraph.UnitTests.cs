@@ -13,6 +13,7 @@ public sealed class GetLibraryMediaPhotoGraphUnitTests : BaseUnitTest<GetLibrary
     [Arguments(PhotoResponseMode.Normal)]
     [Arguments(PhotoResponseMode.NoTotalChildren)]
     [Arguments(PhotoResponseMode.NoTotalPages)]
+    [Arguments(PhotoResponseMode.NoPagingMetadata)]
     [Arguments(PhotoResponseMode.UnmappedAsset)]
     [Arguments(PhotoResponseMode.MissingSource)]
     public async Task ShouldBuildCompleteTypedPhotoGraph_WhenAlbumsOverlapAndSourcesVary(PhotoResponseMode mode)
@@ -27,7 +28,7 @@ public sealed class GetLibraryMediaPhotoGraphUnitTests : BaseUnitTest<GetLibrary
         var expectedRequestCount = mode switch
         {
             PhotoResponseMode.NoTotalChildren => 11,
-            PhotoResponseMode.NoTotalPages => 18,
+            PhotoResponseMode.NoTotalPages or PhotoResponseMode.NoPagingMetadata => 18,
             _ => 7,
         };
 
@@ -91,14 +92,14 @@ public sealed class GetLibraryMediaPhotoGraphUnitTests : BaseUnitTest<GetLibrary
         var children = requests.Where(x => x.Path.EndsWith("/children", StringComparison.Ordinal)).ToList();
         var firstAlbumPath = "/library/metadata/501/children";
         var secondAlbumPath = "/library/metadata/502/children";
-        if (mode is PhotoResponseMode.NoTotalChildren or PhotoResponseMode.NoTotalPages)
+        if (mode is PhotoResponseMode.NoTotalChildren or PhotoResponseMode.NoTotalPages or PhotoResponseMode.NoPagingMetadata)
             children.ShouldBe([
                 (firstAlbumPath, 0, null), (firstAlbumPath, 1, null), (firstAlbumPath, 2, null),
                 (secondAlbumPath, 0, null), (secondAlbumPath, 1, null), (secondAlbumPath, 2, null),
             ]);
         else
             children.ShouldBe([(firstAlbumPath, 0, null), (secondAlbumPath, 0, null)]);
-        if (mode == PhotoResponseMode.NoTotalPages)
+        if (mode is PhotoResponseMode.NoTotalPages or PhotoResponseMode.NoPagingMetadata)
         {
             var allPath = $"/library/sections/{original.Key}/all";
             requests.Where(x => x.Path == allPath && x.Type is "13" or "photo")
@@ -271,7 +272,7 @@ public sealed class GetLibraryMediaPhotoGraphUnitTests : BaseUnitTest<GetLibrary
         }
         else
             throw new InvalidOperationException($"Unexpected SDK route {path}");
-        if (mode == PhotoResponseMode.NoTotalPages)
+        if (mode is PhotoResponseMode.NoTotalPages or PhotoResponseMode.NoPagingMetadata)
         {
             var remaining = offset;
             container.Directory = TakePage(container.Directory, ref remaining);
@@ -283,8 +284,10 @@ public sealed class GetLibraryMediaPhotoGraphUnitTests : BaseUnitTest<GetLibrary
             + (container.Photo?.Count ?? 0) + (container.Video?.Count ?? 0);
         if (!path.EndsWith("/children", StringComparison.Ordinal))
             container.TotalSize = container.Size;
-        if (mode == PhotoResponseMode.NoTotalPages)
+        if (mode is PhotoResponseMode.NoTotalPages or PhotoResponseMode.NoPagingMetadata)
             container.TotalSize = null;
+        if (mode == PhotoResponseMode.NoPagingMetadata)
+            container.Offset = null;
         if (mode == PhotoResponseMode.BadOffsetMedia && path.EndsWith("/all", StringComparison.Ordinal))
             container.Offset = offset + 1;
         if (mode == PhotoResponseMode.IncompleteFolder && path.EndsWith("/folder", StringComparison.Ordinal))
@@ -377,6 +380,7 @@ public sealed class GetLibraryMediaPhotoGraphUnitTests : BaseUnitTest<GetLibrary
         Normal,
         NoTotalChildren,
         NoTotalPages,
+        NoPagingMetadata,
         BadWindowChildren,
         IncompleteChildren,
         UnmappedAsset,

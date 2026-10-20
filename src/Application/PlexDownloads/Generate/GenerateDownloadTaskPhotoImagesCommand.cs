@@ -59,13 +59,14 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
                 "Photo downloads do not support Sonarr or Radarr integrations."
             ).LogError();
 
-        var preparation = await PhotoDownloadPlanning.PrepareAsync(_dbContext, request, _log, cancellationToken);
-        if (preparation.IsCancelledOrFailed)
-            return preparation.ToResult<DownloadTaskCreationReport>().LogIfFailed();
-        var photos = preparation.Value;
-        if (photos.Count == 0)
+        var selector = new PhotoDownloadSelector(_dbContext, _log);
+        var selectionResult = await selector.ResolveSelectedFilesAsync(request, cancellationToken);
+        if (selectionResult.IsCancelledOrFailed)
+            return selectionResult.ToResult<DownloadTaskCreationReport>().LogIfFailed();
+        var selectedPhotos = selectionResult.Value;
+        if (selectedPhotos.Count == 0)
             return Result.Ok(new DownloadTaskCreationReport());
-        var libraryIds = photos.Select(x => x.MediaData.PlexLibraryId).Distinct().ToList();
+        var libraryIds = selectedPhotos.Select(x => x.MediaData.PlexLibraryId).Distinct().ToList();
         var transactionResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
@@ -74,7 +75,7 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
                     .OrderBy(x => x.CreatedAt).ToListAsync(txCt);
                 var existingFiles = await ctx.DownloadTaskPhotoImageFiles.ToListAsync(txCt);
                 // Queue eligibility is calculated inside the transaction, not reused from an earlier preview.
-                var accepted = PhotoDownloadPlanning.Accept(photos, existingFolders, existingFiles, _log);
+                var accepted = selector.FilterQueueEligibleFiles(selectedPhotos, existingFolders, existingFiles);
                 if (accepted.Count == 0)
                     return new DownloadTaskCreationReport();
 
@@ -85,18 +86,19 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
                             x.PlexLibraryId,
                             x.ParentId,
                             x.RelativePath,
-                            PhotoDownloadPlanning.CanonicalizeRootPath(x.DownloadRootPath),
-                            PhotoDownloadPlanning.CanonicalizeRootPath(x.DestinationRootPath)
+                            PhotoDownloadSelector.NormalizeRootPath(x.DownloadRootPath),
+                            PhotoDownloadSelector.NormalizeRootPath(x.DestinationRootPath)
                         )
                     )
                     .ToDictionary(x => x.Key, x => x.OrderBy(y => y.CreatedAt).First());
                 var createdFolders = 0;
                 var filesToCreate = new List<DownloadTaskPhotoImageFile>();
                 DownloadTaskPhotoFolder GetOrCreateFolder(
-                    PhotoDownload photo, DownloadTaskPhotoFolder? parent, string title, string relativePath)
+                    PhotoDownloadCandidate photo, DownloadTaskPhotoFolder? parent, string title, string relativePath)
                 {
                     var key = new FolderKey(photo.MediaData.PlexServerId, photo.MediaData.PlexLibraryId,
-                        parent?.Id, relativePath, photo.DownloadRootPath, photo.DestinationRoot);
+                        parent?.Id, relativePath, photo.DirectoryMeta.DownloadRootPath,
+                        photo.DirectoryMeta.DestinationRootPath);
                     if (existingFolderByKey.TryGetValue(key, out var existing))
                         return existing;
                     var folder = new DownloadTaskPhotoFolder
@@ -113,8 +115,8 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
                         Parent = parent,
                         ParentId = parent?.Id,
                         RelativePath = relativePath,
-                        DownloadRootPath = photo.DownloadRootPath,
-                        DestinationRootPath = photo.DestinationRoot,
+                        DownloadRootPath = photo.DirectoryMeta.DownloadRootPath,
+                        DestinationRootPath = photo.DirectoryMeta.DestinationRootPath,
                         DataReceived = 0,
                         FileDataTransferred = 0,
                         DataTotal = 0,
@@ -131,11 +133,10 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
                     return folder;
                 }
 
-                foreach (var candidate in accepted)
+                foreach (var photo in accepted)
                 {
-                    var photo = candidate.Photo;
-                    var parent = GetOrCreateFolder(photo, null, candidate.RootName, string.Empty);
-                    var relativeSegments = candidate.PhotoFolder
+                    var parent = GetOrCreateFolder(photo, null, photo.RootName, string.Empty);
+                    var relativeSegments = photo.PhotoFolder
                         .Split('/', StringSplitOptions.RemoveEmptyEntries)
                         .Skip(1);
                     var cumulative = string.Empty;
@@ -145,14 +146,7 @@ public class GenerateDownloadTaskPhotoImagesCommandHandler
                         parent = GetOrCreateFolder(photo, parent, segment, cumulative);
                     }
 
-                    var file = photo.MediaData.MapToDownloadTask(
-                        parent,
-                        request,
-                        photo.DownloadRootPath,
-                        photo.DestinationRoot,
-                        candidate.PhotoFolder,
-                        photo.KeepCompletedInDownloadFolder
-                    );
+                    var file = photo.MediaData.MapToDownloadTask(parent, request, photo.DirectoryMeta);
                     parent.Files.Add(file);
                     UpdatePhotoFolderAggregates(parent, file.DataTotal);
                     ctx.DownloadTaskPhotoImageFiles.Add(file);

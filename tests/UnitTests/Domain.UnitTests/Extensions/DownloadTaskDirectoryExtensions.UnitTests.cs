@@ -23,11 +23,17 @@ public class DownloadTaskDirectoryExtensionsUnitTests : BaseUnitTest
         string relativeDirectory
     )
     {
+        // Arrange
         var directory = CreateDirectory();
 
+        // Act
+        var destinationFile = directory.GetDestinationFilePath(type, "media.ext");
+
+        // Assert
         directory.GetDownloadCategoryDirectory(type).ShouldBe(Path.Combine("/downloads", category));
         directory.GetDownloadDirectory(type).ShouldBe(Path.Combine("/downloads", category, relativeDirectory));
         directory.GetDestinationDirectory(type).ShouldBe(Path.Combine("/destination", relativeDirectory));
+        destinationFile.ShouldBe(Path.Combine("/destination", relativeDirectory, "media.ext"));
     }
 
     [Test]

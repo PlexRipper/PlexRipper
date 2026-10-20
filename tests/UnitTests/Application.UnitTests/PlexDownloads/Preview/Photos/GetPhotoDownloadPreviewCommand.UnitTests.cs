@@ -340,10 +340,12 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
     }
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
+    [Arguments(false, "CON.jpg")]
+    [Arguments(true, "CON.jpg")]
+    [Arguments(false, "back\\slash.jpg")]
+    [Arguments(true, "back\\slash.jpg")]
     public async Task ShouldReuseCapturedRootAndExcludeQueuedOrConflictingFiles_WithoutChangingTheQueue(
-        bool queueCollisionOwner)
+        bool queueCollisionOwner, string invalidFileName)
     {
         // Arrange
         await SetupDatabase(62406, config =>
@@ -411,7 +413,7 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
             PlexPhotoFolderId = media[1].PlexPhotoFolderId,
         };
         var collision = AdditionalFile(10000, media[1].OriginalFilename.ToUpperInvariant());
-        var invalid = AdditionalFile(20000, "CON.jpg");
+        var invalid = AdditionalFile(20000, invalidFileName);
         dbContext.PlexPhotoMediaData.AddRange(collision, invalid);
         await dbContext.SaveChangesAsync(CancellationToken);
         var selection = firstSelection with { MediaIds = [.. media.Select(x => x.Id), collision.Id, invalid.Id] };

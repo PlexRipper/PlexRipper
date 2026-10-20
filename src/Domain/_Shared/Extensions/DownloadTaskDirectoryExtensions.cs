@@ -80,6 +80,12 @@ public static class DownloadTaskDirectoryExtensions
         Path.Combine(task.GetDownloadDirectory(), task.FileName.AddReaparrTempSuffixToFileName());
 
     public static string GetDestinationFilePath(this DownloadTaskFileBase task) =>
-        Path.Join(task.GetDestinationDirectory(), task.FileName);
+        task.DirectoryMeta.GetDestinationFilePath(task.DownloadTaskType, task.FileName);
+
+    public static string GetDestinationFilePath(
+        this DownloadTaskDirectory directory,
+        DownloadTaskType type,
+        string fileName
+    ) => Path.Join(directory.GetDestinationDirectory(type), fileName);
 
 }

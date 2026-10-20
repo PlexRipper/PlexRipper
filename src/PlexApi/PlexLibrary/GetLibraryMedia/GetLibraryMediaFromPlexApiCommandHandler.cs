@@ -1,3 +1,9 @@
+using System.Globalization;
+using LukeHagar.PlexAPI.SDK;
+using Metadata = LukeHagar.PlexAPI.SDK.Models.Components.Metadata;
+using PhotoItem = Reaparr.PlexApi.PlexLibraryMediaApi.PlexLibraryMediaItem;
+using PhotoItemShape = Reaparr.PlexApi.PlexLibraryMediaApi.PlexLibraryMediaItemShape;
+
 namespace Reaparr.PlexApi;
 
 /// <summary>
@@ -77,7 +83,7 @@ public class GetLibraryMediaFromPlexApiCommandHandler
                 if (clientResult.IsFailed)
                     return clientResult.ToResult().LogIfFailed();
 
-                var populateResult = await PlexPhotoLibraryRetriever.PopulateAsync(clientResult.Value, library, _log, ct);
+                var populateResult = await PopulatePhotoLibraryAsync(clientResult.Value, library, _log, ct);
                 if (populateResult.IsFailed)
                     return populateResult.LogIfFailed();
 
@@ -162,5 +168,428 @@ public class GetLibraryMediaFromPlexApiCommandHandler
             await _librarySyncProgressStore.UpdateErrorAsync(plexLibrary.Id, result.ToResult(), ct);
 
         return result;
+    }
+
+    private static async Task<Result> PopulatePhotoLibraryAsync(
+        IPlexAPI client,
+        PlexLibrary library,
+        ILogger log,
+        CancellationToken ct
+    )
+    {
+        var roots = library.PhotoFolders.Where(x => x.ParentId is null).ToList();
+        var sectionIdResult = ParsePhotoSectionId(library.Key);
+        if (sectionIdResult.IsFailed)
+            return sectionIdResult.ToResult().LogIfFailed();
+
+        var state = new PhotoCatalogState(sectionIdResult.Value);
+        foreach (
+            var mediaType in new[] { PlexMediaType.PhotoImage, PlexMediaType.PhotoAlbum, PlexMediaType.OtherVideos }
+        )
+        {
+            var pageResult = await client.GetPhotoLibraryItemsAsync(sectionIdResult.Value, mediaType, ct);
+            if (pageResult.IsCancelledOrFailed)
+                return pageResult.ToResult().LogIfFailed();
+
+            foreach (var item in pageResult.Value)
+            {
+                var itemResult = await ProcessPhotoItemAsync(client, library, item, state, ct);
+                if (itemResult.IsCancelledOrFailed)
+                    return itemResult.LogIfFailed();
+            }
+        }
+
+        while (state.PendingFolderParents.Count > 0)
+        {
+            var identity = state.PendingFolderParents.First();
+            state.PendingFolderParents.Remove(identity);
+            var parent = identity == PhotoRootParentToken ? null : identity;
+            var folderResult = await ReadPhotoFolderTreeAsync(client, sectionIdResult.Value, parent, state, ct);
+            if (folderResult.IsCancelledOrFailed)
+                return folderResult.LogIfFailed();
+        }
+
+        var duplicatePart = state.Assets.Values.GroupBy(x => x.Entity.PlexApiPartId).FirstOrDefault(x => x.Count() > 1);
+        if (duplicatePart is not null)
+            return Result.Fail($"Plex returned duplicate photo part identity {duplicatePart.Key}").LogError();
+
+        foreach (var asset in state.Assets.Values)
+        {
+            asset.Entity.PlexLibraryId = library.Id;
+            asset.Entity.PlexServerId = library.PlexServerId;
+        }
+
+        var folders = BuildPhotoFolders(roots, state.Assets.Values.Select(x => x.Entity).ToList(), library, log);
+        foreach (var asset in state.Assets.Values)
+        {
+            foreach (var albumKey in asset.AlbumKeys)
+            {
+                var album = state.Albums[albumKey];
+                var membership = new PlexPhotoAlbumMembership
+                {
+                    PlexPhotoAlbumId = 0,
+                    PlexPhotoMediaDataId = 0,
+                    PlexPhotoAlbum = album,
+                    PlexPhotoMediaData = asset.Entity,
+                };
+                album.Memberships.Add(membership);
+                asset.Entity.AlbumMemberships.Add(membership);
+            }
+        }
+
+        foreach (var album in state.Albums.Values.OrderBy(x => x.PlexApiRatingKey))
+            library.PhotoAlbums.Add(album);
+        foreach (var asset in state.Assets.Values.OrderBy(x => x.Entity.PlexApiRatingKey))
+            library.PhotoMediaData.Add(asset.Entity);
+        foreach (var folder in folders)
+            library.PhotoFolders.Add(folder);
+        return Result.Ok();
+    }
+
+    private static async Task<Result> ProcessPhotoItemAsync(
+        IPlexAPI client,
+        PlexLibrary library,
+        PhotoItem item,
+        PhotoCatalogState state,
+        CancellationToken ct
+    )
+    {
+        var validationResult = ValidatePhotoItem(item, allowFolder: true, state.SectionId);
+        if (validationResult.IsFailed)
+            return validationResult.LogIfFailed();
+
+        switch (item.Shape)
+        {
+            case PhotoItemShape.Folder:
+                if (!TryGetPhotoFolderParent(item.Metadata.Key, out var parent))
+                    return Result.Fail("Plex returned a photo folder without a valid parent token").LogError();
+
+                state.PendingFolderParents.Add(parent);
+                return Result.Ok();
+            case PhotoItemShape.Asset:
+                return MergePhotoAsset(item, null, state.Assets);
+            case PhotoItemShape.Album:
+            {
+                var albumId = ParsePhotoRatingKey(item.Metadata);
+                if (state.Albums.ContainsKey(albumId))
+                    return Result.Ok();
+
+                var album = item.Metadata.ToPlexPhotoAlbum(item.MediaType ?? PlexMediaType.PhotoAlbum);
+                album.PlexLibraryId = library.Id;
+                album.PlexServerId = library.PlexServerId;
+                state.Albums.Add(albumId, album);
+
+                var childrenResult = await client.GetPhotoAlbumChildrenAsync(albumId, ct);
+                if (childrenResult.IsCancelledOrFailed)
+                    return childrenResult.ToResult().LogIfFailed();
+
+                foreach (var child in childrenResult.Value)
+                {
+                    var childValidation = ValidatePhotoItem(child, allowFolder: false, state.SectionId);
+                    if (childValidation.IsFailed)
+                        return childValidation.LogIfFailed();
+                    if (child.Shape != PhotoItemShape.Asset)
+                        return Result.Fail("Plex returned a nested photo album or folder in album children").LogError();
+                    var mergeResult = MergePhotoAsset(child, albumId, state.Assets);
+                    if (mergeResult.IsFailed)
+                        return mergeResult;
+                }
+
+                return Result.Ok();
+            }
+            default:
+                return Result.Fail("Plex returned an unsupported photo item shape").LogError();
+        }
+    }
+
+    private static async Task<Result> ReadPhotoFolderTreeAsync(
+        IPlexAPI client,
+        long sectionId,
+        string? parent,
+        PhotoCatalogState state,
+        CancellationToken ct
+    )
+    {
+        var identity = parent ?? PhotoRootParentToken;
+        if (state.CompletedFolderParents.Contains(identity))
+            return Result.Ok();
+        if (!state.ActiveFolderParents.Add(identity))
+            return Result.Fail($"Plex returned a cyclic photo folder navigation path at '{identity}'").LogError();
+
+        var pageResult = await client.GetPhotoFolderItemsAsync(sectionId, parent, ct);
+        if (pageResult.IsCancelledOrFailed)
+            return pageResult.ToResult().LogIfFailed();
+
+        foreach (var item in pageResult.Value)
+        {
+            var validationResult = ValidatePhotoItem(item, allowFolder: true, sectionId);
+            if (validationResult.IsFailed)
+                return validationResult.LogIfFailed();
+
+            if (item.Shape == PhotoItemShape.Asset)
+            {
+                var mergeResult = MergePhotoAsset(item, null, state.Assets);
+                if (mergeResult.IsFailed)
+                    return mergeResult;
+                continue;
+            }
+
+            if (item.Shape == PhotoItemShape.Album)
+                return Result.Fail("Plex returned a nested photo album in folder traversal").LogError();
+            if (!TryGetPhotoFolderParent(item.Metadata.Key, out var childParent))
+                return Result.Fail("Plex returned a photo folder without a valid parent token").LogError();
+
+            var childResult = await ReadPhotoFolderTreeAsync(client, sectionId, childParent, state, ct);
+            if (childResult.IsCancelledOrFailed)
+                return childResult.LogIfFailed();
+        }
+
+        state.ActiveFolderParents.Remove(identity);
+        state.CompletedFolderParents.Add(identity);
+        return Result.Ok();
+    }
+
+    private static Result MergePhotoAsset(PhotoItem item, int? albumKey, Dictionary<int, PhotoAssetState> assets)
+    {
+        var ratingKey = ParsePhotoRatingKey(item.Metadata);
+        if (!assets.TryGetValue(ratingKey, out var state))
+        {
+            state = new PhotoAssetState(item.Metadata.ToPlexPhotoMediaData(item.MediaType!.Value));
+            assets.Add(ratingKey, state);
+        }
+        else if (!AreEquivalentPhotoAssets(state.Entity, item))
+        {
+            return Result
+                .Fail($"Plex returned conflicting single-file representations for photo asset {ratingKey}")
+                .LogError();
+        }
+
+        if (albumKey is > 0)
+            state.AlbumKeys.Add(albumKey.Value);
+        return Result.Ok();
+    }
+
+    private static Result ValidatePhotoItem(PhotoItem item, bool allowFolder, long sectionId)
+    {
+        var metadata = item.Metadata;
+        if (metadata.LibrarySectionID is { } owner && owner != sectionId)
+            return Result.Fail("Plex returned photo metadata belonging to another library").LogError();
+
+        switch (item.Shape)
+        {
+            case PhotoItemShape.Folder:
+                return !allowFolder || string.IsNullOrWhiteSpace(metadata.Key)
+                    ? Result.Fail("Plex returned a photo navigation item without a key").LogError()
+                    : Result.Ok();
+            case PhotoItemShape.Album:
+                return !IsPositivePhotoRatingKey(metadata.RatingKey) || string.IsNullOrWhiteSpace(metadata.Key)
+                    ? Result.Fail("Plex returned metadata without an asset or album shape").LogError()
+                    : Result.Ok();
+            case PhotoItemShape.Asset:
+            {
+                var media = metadata.Media;
+                if (!IsPositivePhotoRatingKey(metadata.RatingKey))
+                    return Result.Fail("Plex returned a photo asset without a positive rating key").LogError();
+                if (media is not { Count: 1 } || media[0].Part?.Count != 1)
+                    return Result
+                        .Fail("Plex photo assets must contain exactly one Media item with exactly one Part")
+                        .LogError();
+
+                var mediaItem = media[0];
+                var part = mediaItem.Part![0];
+                if (
+                    Convert.ToInt32(mediaItem.Id) <= 0
+                    || Convert.ToInt32(part.Id) <= 0
+                    || string.IsNullOrWhiteSpace(part.Key)
+                )
+                    return Result
+                        .Fail("Plex returned a photo asset without valid single-file transfer identity")
+                        .LogError();
+                if (IsPhotoChildrenKey(metadata.Key) || item.MediaType == PlexMediaType.PhotoAlbum)
+                    return Result.Fail("Plex returned a photo album with asset parts").LogError();
+                return item.MediaType is PlexMediaType.PhotoImage or PlexMediaType.OtherVideos
+                    ? Result.Ok()
+                    : Result.Fail("Plex returned an unknown photo asset type").LogError();
+            }
+            default:
+                if (string.IsNullOrWhiteSpace(metadata.RatingKey))
+                    return !allowFolder || string.IsNullOrWhiteSpace(metadata.Key)
+                        ? Result.Fail("Plex returned a photo navigation item without a key").LogError()
+                        : Result.Fail("Plex returned a navigation item with an unsupported type").LogError();
+                return IsPositivePhotoRatingKey(metadata.RatingKey) && !string.IsNullOrWhiteSpace(metadata.Key)
+                    ? Result.Fail("Plex returned an unsupported photo album type").LogError()
+                    : Result.Fail("Plex returned metadata without an asset or album shape").LogError();
+        }
+    }
+
+    private static bool AreEquivalentPhotoAssets(PlexPhotoMediaData existing, PhotoItem observation)
+    {
+        var media = observation.Metadata.Media![0];
+        var part = media.Part![0];
+        var sourcePath = string.IsNullOrWhiteSpace(part.File) ? null : part.File;
+        var duration = (part.Duration, media.Duration) switch
+        {
+            (> 0, _) => part.Duration,
+            (_, > 0) => media.Duration,
+            _ => null,
+        };
+        var kind = observation.MediaType == PlexMediaType.OtherVideos ? PhotoAssetKind.VideoClip : PhotoAssetKind.Image;
+        return existing.PlexApiMediaId == Convert.ToInt32(media.Id)
+            && existing.PlexApiPartId == Convert.ToInt32(part.Id)
+            && existing.AssetKind == kind
+            && string.Equals(existing.SourcePath, sourcePath, StringComparison.Ordinal)
+            && string.Equals(existing.Key, part.Key, StringComparison.Ordinal)
+            && existing.Size == Math.Max(0, part.Size ?? 0)
+            && existing.Duration == duration;
+    }
+
+    private static List<PlexPhotoFolder> BuildPhotoFolders(
+        IReadOnlyCollection<PlexPhotoFolder> roots,
+        IReadOnlyCollection<PlexPhotoMediaData> assets,
+        PlexLibrary library,
+        ILogger log
+    )
+    {
+        var allFolders = new List<PlexPhotoFolder>();
+        foreach (var root in roots)
+        {
+            root.PlexLibraryId = library.Id;
+            root.PlexServerId = library.PlexServerId;
+        }
+
+        var foldersByIdentity = roots.ToDictionary(x => (x.RootIdentityKey!, x.RelativePath), x => x);
+        foreach (var asset in assets)
+        {
+            var sourcePath = asset.SourcePath;
+            if (string.IsNullOrWhiteSpace(sourcePath))
+            {
+                log.Here()
+                    .Debug(
+                        "Photo asset {PlexApiRatingKey} has no Plex source path; retaining it without a folder",
+                        asset.PlexApiRatingKey
+                    );
+                continue;
+            }
+
+            if (!sourcePath.TryResolvePhotoSourcePath(roots, out var match))
+            {
+                log.Here()
+                    .Warning(
+                        "Unable to map photo asset {PlexApiRatingKey} source path {SourcePath}; retaining it without a folder",
+                        asset.PlexApiRatingKey,
+                        sourcePath
+                    );
+                continue;
+            }
+
+            var relativeDirectorySeparator = match.RelativePath.LastIndexOf('/');
+            var canonicalDirectorySeparator = match.CanonicalRelativePath.LastIndexOf('/');
+            var relativeDirectory =
+                relativeDirectorySeparator < 0 ? string.Empty : match.RelativePath[..relativeDirectorySeparator];
+            var canonicalRelativeDirectory =
+                canonicalDirectorySeparator < 0
+                    ? string.Empty
+                    : match.CanonicalRelativePath[..canonicalDirectorySeparator];
+            var canonicalSegments = string.IsNullOrEmpty(canonicalRelativeDirectory)
+                ? []
+                : canonicalRelativeDirectory.Split('/');
+            var displaySegments = string.IsNullOrEmpty(relativeDirectory) ? [] : relativeDirectory.Split('/');
+            var current = match.Root;
+            for (var index = 0; index < canonicalSegments.Length; index++)
+            {
+                var relativePath = string.IsNullOrEmpty(current.RelativePath)
+                    ? canonicalSegments[index]
+                    : $"{current.RelativePath}/{canonicalSegments[index]}";
+                var key = (match.Root.RootIdentityKey!, relativePath);
+                if (!foldersByIdentity.TryGetValue(key, out var folder))
+                {
+                    folder = new PlexPhotoFolder
+                    {
+                        Id = 0,
+                        PlexLibraryId = library.Id,
+                        PlexServerId = library.PlexServerId,
+                        Parent = current,
+                        RelativePath = relativePath,
+                        Title = displaySegments[index],
+                    };
+                    current.Children.Add(folder);
+                    foldersByIdentity.Add(key, folder);
+                    allFolders.Add(folder);
+                }
+
+                current = folder;
+            }
+
+            asset.PlexPhotoFolder = current;
+            current.Files.Add(asset);
+        }
+
+        return allFolders;
+    }
+
+    private static Result<long> ParsePhotoSectionId(string key) =>
+        long.TryParse(key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0
+            ? Result.Ok(value)
+            : Result.Fail<long>($"Photo library key '{key}' is not numeric").LogError();
+
+    private static int ParsePhotoRatingKey(Metadata metadata) =>
+        int.TryParse(metadata.RatingKey, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0
+            ? value
+            : throw new InvalidOperationException("Validated photo metadata has no positive rating key");
+
+    private static bool IsPositivePhotoRatingKey(string? value) =>
+        int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) && parsed > 0;
+
+    private static bool IsPhotoChildrenKey(string? key) =>
+        !string.IsNullOrWhiteSpace(key)
+        && key.Split('?', 2)[0].TrimEnd('/').EndsWith("/children", StringComparison.OrdinalIgnoreCase);
+
+    private static bool TryGetPhotoFolderParent(string? key, out string parent)
+    {
+        parent = string.Empty;
+        if (string.IsNullOrWhiteSpace(key))
+            return false;
+
+        var queryIndex = key.IndexOf('?', StringComparison.Ordinal);
+        if (queryIndex <= 0 || !key[..queryIndex].TrimEnd('/').EndsWith("/folder", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        string? foundParent = null;
+        foreach (var parameter in key[(queryIndex + 1)..].Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = parameter.Split('=', 2);
+            if (!string.Equals(Uri.UnescapeDataString(parts[0]), "parent", StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (foundParent is not null || parts.Length == 1 || string.IsNullOrWhiteSpace(parts[1]))
+                return false;
+
+            foundParent = Uri.UnescapeDataString(parts[1]);
+            if (foundParent.Length == 0)
+                return false;
+        }
+
+        if (foundParent is null)
+            return false;
+
+        parent = foundParent;
+        return true;
+    }
+
+    private const string PhotoRootParentToken = "<root>";
+
+    private sealed class PhotoCatalogState(long sectionId)
+    {
+        public long SectionId { get; } = sectionId;
+        public Dictionary<int, PlexPhotoAlbum> Albums { get; } = [];
+        public Dictionary<int, PhotoAssetState> Assets { get; } = [];
+        public HashSet<string> PendingFolderParents { get; } = [PhotoRootParentToken];
+        public HashSet<string> ActiveFolderParents { get; } = [];
+        public HashSet<string> CompletedFolderParents { get; } = [];
+    }
+
+    private sealed class PhotoAssetState(PlexPhotoMediaData entity)
+    {
+        public PlexPhotoMediaData Entity { get; } = entity;
+        public HashSet<int> AlbumKeys { get; } = [];
     }
 }

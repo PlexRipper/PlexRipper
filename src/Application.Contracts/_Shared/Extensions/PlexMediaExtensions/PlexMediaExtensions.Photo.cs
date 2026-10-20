@@ -6,10 +6,7 @@ public static partial class PlexMediaExtensions
         this PlexPhotoMediaData mediaData,
         DownloadTaskPhotoFolder parent,
         CreateDownloadTasksRequest request,
-        string downloadRootPath,
-        string destinationRootPath,
-        string relativeDirectory,
-        bool keepCompletedInDownloadFolder
+        DownloadTaskDirectory directoryMeta
     ) =>
         new()
         {
@@ -31,27 +28,15 @@ public static partial class PlexMediaExtensions
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
             TimeRemaining = 0,
-            FileName = mediaData.OriginalFilename.GetFileName(),
+            FileName = mediaData.OriginalFilename,
             FileLocationUrl = mediaData.Key,
             VideoQuality = VideoQuality.Unknown,
-            DirectoryMeta = new DownloadTaskDirectory
-            {
-                DownloadRootPath = downloadRootPath,
-                DestinationRootPath = destinationRootPath,
-                MovieFolder = string.Empty,
-                TvShowFolder = string.Empty,
-                SeasonFolder = string.Empty,
-                MusicArtistFolder = string.Empty,
-                MusicAlbumFolder = string.Empty,
-                PhotoFolder = relativeDirectory,
-                OtherVideoFolder = string.Empty,
-                KeepCompletedInDownloadFolder = keepCompletedInDownloadFolder,
-            },
+            DirectoryMeta = directoryMeta,
             Parent = parent,
             ParentId = parent.Id,
             DestinationFolderPathId = request.DestinationFolderPathId,
-            FullTitle = $"{parent.FullTitle}/{mediaData.OriginalFilename.GetFileName()}",
-            Title = mediaData.OriginalFilename.GetFileName(),
+            FullTitle = $"{parent.FullTitle}/{mediaData.OriginalFilename}",
+            Title = mediaData.OriginalFilename,
             DirectDownloadSnapshot = null,
             DownloadClientType = PlexDownloadClientType.Direct,
             SonarrIntegrationId = request.Integration?.Type == IntegrationType.Sonarr ? request.Integration.Id : null,

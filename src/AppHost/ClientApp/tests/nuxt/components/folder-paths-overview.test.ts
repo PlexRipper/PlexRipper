@@ -298,4 +298,70 @@ describe('FolderPathsOverview persistence ownership', () => {
 		expect(useFolderPathStore().getFolderPath(customDownloadPath.id)).toBeUndefined();
 		expect(closeDialog).toHaveBeenCalledWith(DialogType.FolderPathDeleteConfirmationDialog);
 	});
+	test('Should keep display-name failures independent from directory browsing', async () => {
+		// Arrange
+		const message = 'The display name could not be saved.';
+		const nameReply = Promise.withResolvers<[number, ResultDTO<FolderPathDTO>]>();
+		mock.onPut(FolderPathPaths.updateFolderPathEndpoint()).reply(() => nameReply.promise);
+		const wrapper = await render([defaultDownloadPath, customDownloadPath]);
+		const browser = wrapper.getComponent(DirectoryBrowser);
+		const nameRow = wrapper.findAllComponents(HelpRow).find((row) => row.props('editModel') === customDownloadPath.displayName);
+		expect(nameRow).toBeDefined();
+
+		// Act
+		nameRow!.vm.$emit('update:editModel', 'Renamed downloads');
+		await flushPromises();
+		browser.vm.$emit('opened', customDownloadPath);
+		nameReply.resolve([200, failedResult(409, message)]);
+		await flushPromises();
+
+		// Assert
+		expect(notify).toHaveBeenCalledWith(expect.stringContaining(message));
+	});
+
+	test.each([
+		{ flow: 'directory', message: 'The directory could not be saved.', statusCode: 409 },
+		{ flow: 'delete', message: 'The folder path could not be deleted.', statusCode: 503 },
+	] as const)('Should keep $flow failures independent from display-name saves', async ({ flow, message, statusCode }) => {
+		// Arrange
+		const otherReply = Promise.withResolvers<[number, ResultDTO<FolderPathDTO>]>();
+		const nameReply = Promise.withResolvers<[number, ResultDTO<FolderPathDTO>]>();
+		if (flow === 'directory') {
+			mock.onPut(FolderPathPaths.updateFolderPathEndpoint())
+				.replyOnce(() => otherReply.promise)
+				.onPut(FolderPathPaths.updateFolderPathEndpoint())
+				.reply(() => nameReply.promise);
+		} else {
+			mock.onDelete(FolderPathPaths.deleteFolderPathEndpoint(customDownloadPath.id)).reply(() => otherReply.promise);
+			mock.onPut(FolderPathPaths.updateFolderPathEndpoint()).reply(() => nameReply.promise);
+		}
+		const wrapper = await render([defaultDownloadPath, customDownloadPath]);
+		const nameRow = wrapper.findAllComponents(HelpRow).find((row) => row.props('editModel') === customDownloadPath.displayName);
+		expect(nameRow).toBeDefined();
+
+		// Act
+		if (flow === 'directory') {
+			const browser = wrapper.getComponent(DirectoryBrowser);
+			browser.vm.$emit('opened', customDownloadPath);
+			browser.vm.$emit('confirm', { ...customDownloadPath, directory: '/current' });
+		} else {
+			wrapper.getComponent(DeleteIconButton).vm.$emit('click');
+			wrapper.getComponent(ConfirmationDialog).vm.$emit('confirm');
+		}
+		await flushPromises();
+		nameRow!.vm.$emit('update:editModel', 'Renamed downloads');
+		await flushPromises();
+		otherReply.resolve([200, failedResult(statusCode, message)]);
+		await flushPromises();
+
+		// Assert
+		if (flow === 'directory') {
+			expect(wrapper.getComponent(DirectoryBrowser).props('errorMessage')).toContain(message);
+		} else {
+			expect(wrapper.getComponent(ConfirmationDialog).props('warning')).toContain(message);
+		}
+		nameReply.resolve([200, generateResultDTO({ ...customDownloadPath, displayName: 'Renamed downloads' })]);
+		await flushPromises();
+	});
+
 });

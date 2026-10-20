@@ -76,14 +76,15 @@ public class UpdatePlexServerConnectionEndpoint
             return;
         }
 
+        var url = req.Url.Trim();
         var connection = new PlexServerConnection
         {
             Id = existing.Id,
             Protocol = req.Protocol.ToLower(),
             Address = req.Address,
             Port = req.Port,
-            Url = req.Url,
-            Local = req.Url.IsLocalUrl(),
+            Url = url,
+            Local = url.IsLocalUrl(),
             Relay = req.Address.Contains("plex.direct"),
             IPv4 = req.Address.IsIpv4(),
             IPv6 = req.Address.IsIPv6(),

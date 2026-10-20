@@ -116,6 +116,36 @@ describe('AccountGenerateTokenDialog', () => {
 		expect(rendered.find('[data-cy="generate-token-dialog-token-input"]').attributes('value')).toBe('retried-plex-token');
 		expect(rendered.find('[data-cy="generate-token-error"]').exists()).toBe(false);
 	});
+	test('Should clear a previous token when a later request fails', async () => {
+		// Arrange
+		const errorMessage = 'Plex token generation failed';
+		mock.onGet(endpoint)
+			.replyOnce(200, generateResultDTO<GeneratePlexTokenResponse>({
+				isUnAuthorized: false,
+				needsVerificationCode: false,
+				plexAuthToken: 'initial-plex-token',
+			}))
+			.onGet(endpoint)
+			.reply(500, generateFailedResultDTO({
+				statusCode: 500,
+				errors: [{ message: errorMessage, reasons: [], metadata: {} }],
+			}));
+		const rendered = await render();
+		const cardDialog = rendered.findComponent(cardDialogStub);
+		cardDialog.vm.$emit('opened');
+		await flushPromises();
+		expect(rendered.find('[data-cy="generate-token-dialog-token-input"]').attributes('value')).toBe('initial-plex-token');
+
+		// Act
+		cardDialog.vm.$emit('closed');
+		cardDialog.vm.$emit('opened');
+		await flushPromises();
+
+		// Assert
+		expect(rendered.find('[data-cy="generate-token-dialog-token-input"]').attributes('value')).toBe('');
+		expect(rendered.get('[data-cy="generate-token-error"]').text()).toBe(errorMessage);
+	});
+
 
 	test.each([
 		{ kind: 'failure', status: 500 },

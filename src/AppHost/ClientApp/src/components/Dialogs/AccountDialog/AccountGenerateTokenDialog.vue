@@ -98,6 +98,7 @@ function onComplete(verificationCode: string) {
 function requestToken(verificationCode: string = '') {
 	const requestId = ++latestRequestId;
 	set(errorMessage, '');
+	set(generatedToken, '');
 	useSubscription(accountDialogStore.generateToken(verificationCode).subscribe({
 		next({ isSuccess, value, errors }) {
 			if (requestId !== latestRequestId) {

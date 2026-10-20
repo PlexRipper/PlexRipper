@@ -129,7 +129,7 @@ public class UrlValidationIntegrationTests : BaseIntegrationTests
         value.Protocol.ShouldBe("https");
         value.Address.ShouldBe(scenario.Valid.Address);
         value.Port.ShouldBe(scenario.Valid.Port);
-        value.Url.ShouldBe(scenario.Valid.Url);
+        value.Url.ShouldBe(scenario.ExpectedUrl);
         value.Local.ShouldBeTrue();
         value.Relay.ShouldBeFalse();
         value.IPv4.ShouldBeTrue();
@@ -142,7 +142,7 @@ public class UrlValidationIntegrationTests : BaseIntegrationTests
         value.LatestConnectionStatus.ShouldBeNull();
         (await ReadPlexSnapshotsAsync(container)).Single(x => x.Id == value.Id).ShouldBe(
             new PlexConnectionSnapshot(
-                value.Id, "https", scenario.Valid.Address, scenario.Valid.Port, scenario.Valid.Url,
+                value.Id, "https", scenario.Valid.Address, scenario.Valid.Port, scenario.ExpectedUrl,
                 true, false, true, false, true, 1
             )
         );
@@ -334,14 +334,14 @@ public class UrlValidationIntegrationTests : BaseIntegrationTests
     private static readonly Dictionary<SaveOperation, PlexScenario> _plexScenarios = new()
     {
         [SaveOperation.Create] = new(
-            SaveOperation.Create, 60105,
+            SaveOperation.Create, 60105, "https://192.168.0.42:32400/plex/",
             new("ftp://plex-invalid.example.com:32400", "ftp", "plex-invalid.example.com", 32400),
-            new("https://192.168.0.42:32400/plex/", "HTTPS", "192.168.0.42", 32400)
+            new("  https://192.168.0.42:32400/plex/  ", "HTTPS", "192.168.0.42", 32400)
         ),
         [SaveOperation.Update] = new(
-            SaveOperation.Update, 60106,
+            SaveOperation.Update, 60106, "https://10.0.0.42:32401/plex/",
             new("not a url", "HTTPS", "custom-updated.example.test", 32401),
-            new("https://10.0.0.42:32401/plex/", "HTTPS", "10.0.0.42", 32401)
+            new("  https://10.0.0.42:32401/plex/  ", "HTTPS", "10.0.0.42", 32401)
         ),
     };
 
@@ -387,7 +387,7 @@ public class UrlValidationIntegrationTests : BaseIntegrationTests
 
     private sealed record ArrInput(string Name, string Url, string ApiKey, string Category);
 
-    private sealed record PlexScenario(SaveOperation Operation, int Seed, PlexInput Invalid, PlexInput Valid);
+    private sealed record PlexScenario(SaveOperation Operation, int Seed, string ExpectedUrl, PlexInput Invalid, PlexInput Valid);
 
     private sealed record PlexInput(string Url, string Protocol, string Address, int Port);
 

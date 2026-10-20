@@ -56,14 +56,15 @@ public class CreatePlexServerConnectionEndpoint
     public override async Task HandleAsync(CreatePlexServerConnectionEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
+        var url = req.Url.Trim();
         var connection = new PlexServerConnection
         {
             Id = 0,
             Protocol = req.Protocol.ToLower(),
             Address = req.Address,
             Port = req.Port,
-            Url = req.Url,
-            Local = req.Url.IsLocalUrl(),
+            Url = url,
+            Local = url.IsLocalUrl(),
             Relay = req.Address.Contains("plex.direct"),
             IPv4 = req.Address.IsIpv4(),
             IPv6 = req.Address.IsIPv6(),

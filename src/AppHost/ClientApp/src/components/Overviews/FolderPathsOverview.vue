@@ -137,9 +137,13 @@ const directoryBrowserSaving = ref(false);
 const directoryBrowserError = ref('');
 const deleteFolderPathSaving = ref(false);
 const deleteFolderPathError = ref('');
-let writeSession = 0;
+let directoryWriteSession = 0;
+let deleteWriteSession = 0;
+let displayNameWriteSession = 0;
 onBeforeUnmount(() => {
-	writeSession += 1;
+	directoryWriteSession += 1;
+	deleteWriteSession += 1;
+	displayNameWriteSession += 1;
 });
 
 const props = withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
@@ -165,19 +169,19 @@ const visibleFolderPaths = computed(() => {
 });
 
 function onDirectoryBrowserOpened(): void {
-	writeSession += 1;
+	directoryWriteSession += 1;
 	set(directoryBrowserSaving, false);
 	set(directoryBrowserError, '');
 }
 
 function onDirectoryBrowserClosed(): void {
-	writeSession += 1;
+	directoryWriteSession += 1;
 	set(directoryBrowserSaving, false);
 	set(directoryBrowserError, '');
 }
 
 function completeDirectoryWrite(result: ResultDTO<FolderPathDTO>, session: number): void {
-	if (session !== writeSession) {
+	if (session !== directoryWriteSession) {
 		return;
 	}
 
@@ -195,7 +199,7 @@ function confirmDirectoryBrowser(path: FolderPathDTO): void {
 		return;
 	}
 
-	const session = writeSession;
+	const session = directoryWriteSession;
 	set(directoryBrowserSaving, true);
 	set(directoryBrowserError, '');
 
@@ -206,14 +210,14 @@ function confirmDirectoryBrowser(path: FolderPathDTO): void {
 	useSubscription(
 		request$
 			.pipe(finalize(() => {
-				if (session === writeSession) {
+				if (session === directoryWriteSession) {
 					set(directoryBrowserSaving, false);
 				}
 			}))
 			.subscribe({
 				next: (result: ResultDTO<FolderPathDTO>) => completeDirectoryWrite(result, session),
 				error: (error: unknown) => {
-					if (session === writeSession) {
+					if (session === directoryWriteSession) {
 						set(directoryBrowserError, formatErrorResponse(error));
 					}
 				},
@@ -262,7 +266,7 @@ function deleteFolderPath(folderPath: FolderPathDTO): void {
 		return;
 	}
 
-	writeSession += 1;
+	deleteWriteSession += 1;
 	set(pendingDeleteFolderPath, folderPath);
 	set(deleteFolderPathError, '');
 	dialogStore.openDialog(DialogType.FolderPathDeleteConfirmationDialog);
@@ -273,7 +277,7 @@ function cancelDeleteFolderPath(): void {
 		return;
 	}
 
-	writeSession += 1;
+	deleteWriteSession += 1;
 	set(pendingDeleteFolderPath, null);
 	set(deleteFolderPathError, '');
 }
@@ -288,19 +292,19 @@ function confirmDeleteFolderPath(): void {
 		return;
 	}
 
-	const session = writeSession;
+	const session = deleteWriteSession;
 	set(deleteFolderPathSaving, true);
 	set(deleteFolderPathError, '');
 	useSubscription(
 		folderPathStore.deleteFolderPath(folderPath.id)
 			.pipe(finalize(() => {
-				if (session === writeSession) {
+				if (session === deleteWriteSession) {
 					set(deleteFolderPathSaving, false);
 				}
 			}))
 			.subscribe({
 				next: (result: ResultDTO) => {
-					if (session !== writeSession) {
+					if (session !== deleteWriteSession) {
 						return;
 					}
 
@@ -314,7 +318,7 @@ function confirmDeleteFolderPath(): void {
 					set(deleteFolderPathError, formatErrorResponse(result));
 				},
 				error: (error: unknown) => {
-					if (session === writeSession) {
+					if (session === deleteWriteSession) {
 						set(deleteFolderPathError, formatErrorResponse(error));
 					}
 				},
@@ -370,11 +374,11 @@ function toTranslation(type: FolderType): IHelp {
 }
 
 function saveDisplayName(id: number, value: string): void {
-	const session = ++writeSession;
+	const session = ++displayNameWriteSession;
 	useSubscription(
 		folderPathStore.setFolderPathDisplayName(id, value).subscribe({
 			next: (result: ResultDTO<FolderPathDTO>) => {
-				if (session !== writeSession) {
+				if (session !== displayNameWriteSession) {
 					return;
 				}
 				if (!result.isSuccess || !result.value) {
@@ -382,7 +386,7 @@ function saveDisplayName(id: number, value: string): void {
 				}
 			},
 			error: (error: unknown) => {
-				if (session === writeSession) {
+				if (session === displayNameWriteSession) {
 					showErrorNotification(formatErrorResponse(error));
 				}
 			},

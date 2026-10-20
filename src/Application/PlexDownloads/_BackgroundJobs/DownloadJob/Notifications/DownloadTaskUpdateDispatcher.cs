@@ -364,7 +364,6 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         if (nodeSnapshot.Count == 0)
             return;
 
-        using var dbContext = await _dbContextFactory.CreateAsync();
         var changedNodeIdsByScope = new Dictionary<ProgressScopeKey, HashSet<Guid>>();
         var bufferedEntriesByScope = new Dictionary<ProgressScopeKey, List<BufferedProgressUpdate>>();
 
@@ -373,6 +372,9 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             if (!_progressByNodeId.TryRemove(bufferedProgress.NodeId, out var latestBufferedProgress))
                 continue;
 
+            // TPC log tables generate IDs independently, so unrelated media families
+            // must not share a change tracker while inserting their progress logs.
+            using var dbContext = await _dbContextFactory.CreateAsync();
             var flushResult = await TryFlushBufferedProgressAsync(
                 dbContext,
                 latestBufferedProgress,
@@ -399,7 +401,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
         foreach (var pair in changedNodeIdsByScope)
         {
-            var sendResult = await SendPatchAsync(pair.Key, pair.Value.ToList(), cancellationToken, dbContext);
+            var sendResult = await SendPatchAsync(pair.Key, pair.Value.ToList(), cancellationToken);
             if (sendResult.IsFailed)
             {
                 sendResult.LogError();

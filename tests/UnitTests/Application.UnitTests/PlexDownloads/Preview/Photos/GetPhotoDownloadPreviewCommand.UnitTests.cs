@@ -52,6 +52,49 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
     }
 
     [Test]
+    public async Task ShouldRejectMissingOrForeignDirectFileIds_BeforeBuildingPreview()
+    {
+        // Arrange
+        await SetupDatabase(
+            62408,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var files = await dbContext.PlexPhotoMediaData.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        files.Count.ShouldBe(2);
+        var target = files[0];
+        var foreign = files[1];
+        var query = new GetPhotoDownloadPreviewCommand(
+            [
+                new DownloadMediaDTO
+                {
+                    Type = PlexMediaType.PhotoImage,
+                    PlexServerId = target.PlexServerId,
+                    PlexLibraryId = target.PlexLibraryId,
+                    MediaIds = [target.Id, foreign.Id, int.MaxValue],
+                    Qualities = [],
+                },
+            ]
+        );
+
+        // Act
+        var result = await TestHandlerExecuteAsync<IEnumerable<DownloadPreview>>(query);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        result.ValueOrDefault.ShouldBeNull();
+        (await dbContext.DownloadTaskPhotoFolders.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.DownloadTaskPhotoImageFiles.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.DownloadTaskPhotoImageFileLogs.CountAsync(CancellationToken)).ShouldBe(0);
+    }
+
+    [Test]
     public async Task ShouldPreservePhysicalFolderHierarchy_WhenAssetIsMappedToDescendantFolder()
     {
         // Arrange
@@ -412,7 +455,7 @@ public class GetPhotoDownloadPreviewCommandUnitTests : BaseCommandUnitTest<GetPh
             Container = media[1].Container,
             PlexPhotoFolderId = media[1].PlexPhotoFolderId,
         };
-        var collision = AdditionalFile(10000, media[1].OriginalFilename.ToUpperInvariant());
+        var collision = AdditionalFile(10000, media[1].OriginalFilename);
         var invalid = AdditionalFile(20000, invalidFileName);
         dbContext.PlexPhotoMediaData.AddRange(collision, invalid);
         await dbContext.SaveChangesAsync(CancellationToken);

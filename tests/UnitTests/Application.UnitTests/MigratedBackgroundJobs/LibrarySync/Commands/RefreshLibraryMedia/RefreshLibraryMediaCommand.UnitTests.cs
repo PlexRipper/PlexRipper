@@ -122,6 +122,10 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         await IDbContext
             .PlexLibraries.Where(x => x.Id == updatedLibrary.Id)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.Outdated, true), CancellationToken);
+        var beforeSyncState = await IDbContext.PlexLibraries
+            .Where(x => x.Id == updatedLibrary.Id)
+            .Select(x => new { x.SyncedAt, x.SyncedContentChangedAt, x.Outdated })
+            .SingleAsync();
 
         Mock.SetupCommand(() => It.Is<GetLibraryMediaFromPlexApiCommand>(c => c.PlexLibrary.Id == updatedLibrary.Id))
             .ReturnsAsync(
@@ -178,11 +182,105 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             .PlexLibraries.Where(x => x.Id == updatedLibrary.Id)
             .FirstOrDefaultAsync(CancellationToken);
         dbLibrary.ShouldNotBeNull();
-        dbLibrary.SyncedAt.ShouldNotBeNull();
-        dbLibrary.SyncedAt.Value.ShouldBeGreaterThan(updatedLibrary.UpdatedAt!.Value);
-        dbLibrary.Outdated.ShouldBeFalse();
-        dbLibrary.SyncedContentChangedAt.ShouldBe(updatedLibrary.ContentChangedAt);
-        result.Value.SyncedContentChangedAt.ShouldBe(updatedLibrary.ContentChangedAt);
+        if (libraryType == PlexMediaType.PhotoAlbum)
+        {
+            // Photo completion is committed by SyncPlexPhotosCommand; this mocked typed command cannot perform that write.
+            (dbLibrary.SyncedAt, dbLibrary.SyncedContentChangedAt, dbLibrary.Outdated)
+                .ShouldBe((beforeSyncState.SyncedAt, beforeSyncState.SyncedContentChangedAt, beforeSyncState.Outdated));
+            result.Value.SyncedContentChangedAt.ShouldBe(beforeSyncState.SyncedContentChangedAt);
+        }
+        else
+        {
+            dbLibrary.SyncedAt.ShouldNotBeNull();
+            dbLibrary.SyncedAt.Value.ShouldBeGreaterThan(updatedLibrary.UpdatedAt!.Value);
+            dbLibrary.Outdated.ShouldBeFalse();
+            dbLibrary.SyncedContentChangedAt.ShouldBe(updatedLibrary.ContentChangedAt);
+            result.Value.SyncedContentChangedAt.ShouldBe(updatedLibrary.ContentChangedAt);
+        }
+    }
+
+    [Test]
+    public async Task ShouldReturnPersistedPhotoCompletionState_WhenTrackedLibraryIsStale()
+    {
+        // Arrange
+        var seed = await SetupDatabase(1340, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexPhotoLibraryCount = 1;
+        });
+        var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.PhotoAlbum);
+        var trackedContext = IDbContext;
+        var staleLibrary = await trackedContext.PlexLibraries.GetAsync(updatedLibrary.Id, CancellationToken.None);
+        staleLibrary.ShouldNotBeNull();
+
+        var persistedSyncedAt = new DateTime(2026, 10, 20, 13, 0, 0, DateTimeKind.Utc);
+        var persistedSyncedContentChangedAt = 901_235L;
+        await IDbContext.PlexLibraries
+            .Where(x => x.Id == updatedLibrary.Id)
+            .ExecuteUpdateAsync(
+                setters =>
+                    setters
+                        .SetProperty(x => x.Title, "Completed Photos")
+                        .SetProperty(x => x.ContentChangedAt, persistedSyncedContentChangedAt)
+                        .SetProperty(x => x.PhotoAlbumCount, 1)
+                        .SetProperty(x => x.PhotoImageCount, 1)
+                        .SetProperty(x => x.PhotoClipCount, 0)
+                        .SetProperty(x => x.MediaSize, 20L)
+                        .SetProperty(x => x.SyncedAt, (DateTime?)persistedSyncedAt)
+                        .SetProperty(x => x.SyncedContentChangedAt, (long?)persistedSyncedContentChangedAt)
+                        .SetProperty(x => x.Outdated, false),
+                CancellationToken
+            );
+
+        SetupDependencies(builder => builder.RegisterInstance(trackedContext).As<IReaparrDbContext>().ExternallyOwned());
+
+        Mock.SetupCommand(() => It.Is<GetLibraryMediaFromPlexApiCommand>(c => c.PlexLibrary.Id == updatedLibrary.Id))
+            .ReturnsAsync(Result.Ok(new LibraryMetadata(updatedLibrary)))
+            .Verifiable(Times.Once());
+        Mock.SetupCommand(() => It.Is<InsertMediaMetaDataCommand>(c => c.LibraryMetadata.Library == updatedLibrary))
+            .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(updatedLibrary)))
+            .Verifiable(Times.Once());
+        Mock.SetupCommand(() => It.Is<SyncPlexLibraryMediaMetaDataCommand>(c => c.LibraryMetadata.PlexLibrary == updatedLibrary))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.SetupCommand(() => It.Is<RefreshPlexPhotoLibraryCommand>(c => c.LibraryMetadata.PlexLibrary == updatedLibrary))
+            .ReturnsAsync(Result.Ok(updatedLibrary))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(new RefreshLibraryMediaCommand(updatedLibrary.Id));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.ToString());
+        result.Errors.Count.ShouldBe(0);
+        var persisted = await IDbContext.PlexLibraries
+            .Where(x => x.Id == updatedLibrary.Id)
+            .Select(x => new
+            {
+                x.Title,
+                x.ContentChangedAt,
+                x.PhotoAlbumCount,
+                x.PhotoImageCount,
+                x.PhotoClipCount,
+                x.MediaSize,
+                x.SyncedAt,
+                x.SyncedContentChangedAt,
+                x.Outdated,
+            })
+            .SingleAsync(CancellationToken);
+        new
+        {
+            result.Value.Title,
+            result.Value.ContentChangedAt,
+            result.Value.PhotoAlbumCount,
+            result.Value.PhotoImageCount,
+            result.Value.PhotoClipCount,
+            result.Value.MediaSize,
+            result.Value.SyncedAt,
+            result.Value.SyncedContentChangedAt,
+            result.Value.Outdated,
+        }.ShouldBe(persisted);
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]

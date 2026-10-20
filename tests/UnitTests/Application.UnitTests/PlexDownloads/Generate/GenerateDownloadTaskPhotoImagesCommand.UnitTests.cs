@@ -68,6 +68,51 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
     }
 
     [Test]
+    public async Task ShouldRejectMissingOrForeignDirectFileIds_WithoutCreatingPartialTasks()
+    {
+        // Arrange
+        await SetupDatabase(
+            62316,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var files = await dbContext.PlexPhotoMediaData.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        files.Count.ShouldBe(2);
+        var target = files[0];
+        var foreign = files[1];
+        var command = new GenerateDownloadTaskPhotoImagesCommand(
+            new CreateDownloadTasksRequest(
+                [
+                    new DownloadMediaDTO
+                    {
+                        Type = PlexMediaType.PhotoImage,
+                        PlexServerId = target.PlexServerId,
+                        PlexLibraryId = target.PlexLibraryId,
+                        MediaIds = [target.Id, foreign.Id, int.MaxValue],
+                        Qualities = [],
+                    },
+                ]
+            )
+        );
+
+        // Act
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        result.ValueOrDefault.ShouldBeNull();
+        (await dbContext.DownloadTaskPhotoFolders.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.DownloadTaskPhotoImageFiles.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.DownloadTaskPhotoImageFileLogs.CountAsync(CancellationToken)).ShouldBe(0);
+    }
+
+    [Test]
     public async Task ShouldExpandAlbumMembershipsAndDeduplicateOverlap_WhenAlbumAndFileAreSelected()
     {
         // Arrange
@@ -499,6 +544,59 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
     }
 
     [Test]
+    public async Task ShouldHonorHostFilesystemCaseSemantics_WhenPhotoNamesDifferOnlyByCase()
+    {
+        // Arrange
+        await SetupDatabase(
+            62315,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoCount = 2;
+            }
+        );
+        var dbContext = IDbContext;
+        var files = await dbContext.PlexPhotoMediaData.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        files.Count.ShouldBe(2);
+        await dbContext.PlexPhotoMediaData.Where(x => x.Id == files[0].Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.OriginalFilename, "a.jpg"), CancellationToken);
+        await dbContext.PlexPhotoMediaData.Where(x => x.Id == files[1].Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.OriginalFilename, "A.jpg"), CancellationToken);
+        var selection = new DownloadMediaDTO
+        {
+            Type = PlexMediaType.PhotoImage,
+            PlexServerId = files[0].PlexServerId,
+            PlexLibraryId = files[0].PlexLibraryId,
+            MediaIds = files.Select(x => x.Id).ToList(),
+            Qualities = [],
+        };
+
+        // Act
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(
+            new GenerateDownloadTaskPhotoImagesCommand(
+                new CreateDownloadTasksRequest([selection], customDestinationFolderPath: "/case-target")
+            )
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        if (OperatingSystem.IsWindows())
+        {
+            result.Value.ShouldBe(new DownloadTaskCreationReport());
+            (await dbContext.DownloadTaskPhotoFolders.CountAsync(CancellationToken)).ShouldBe(0);
+            (await dbContext.DownloadTaskPhotoImageFiles.CountAsync(CancellationToken)).ShouldBe(0);
+        }
+        else
+        {
+            result.Value.ShouldBe(new DownloadTaskCreationReport { PhotoFolders = 1, PhotoImages = 2 });
+            (await dbContext.DownloadTaskPhotoImageFiles.Select(x => x.FileName).OrderBy(x => x)
+                .ToListAsync(CancellationToken)).ShouldBe(["A.jpg", "a.jpg"]);
+        }
+    }
+
+    [Test]
     public async Task ShouldRetainCapturedTaskPath_WhenCatalogFolderChanges()
     {
         // Arrange
@@ -559,7 +657,7 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
     }
 
     [Test]
-    public async Task ShouldSuffixRootName_WhenEqualNamedLibrariesAreQueuedSequentially()
+    public async Task ShouldSuffixRootName_WhenEqualNamedLibrariesAreQueuedWithDifferentDownloadRoots()
     {
         // Arrange
         await SetupDatabase(
@@ -607,6 +705,13 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
 
         // Act
         var first = await Queue(files[0]);
+        var downloadFolder = await dbContext.FolderPaths.AsTracking().SingleAsync(
+            x => x.Id == FolderTypeDefaults.DefaultDownloadFolderId,
+            CancellationToken
+        );
+        downloadFolder.DirectoryPath = "/fixture/downloads/different";
+        await dbContext.SaveChangesAsync(CancellationToken);
+
         var second = await Queue(files[^1]);
 
         // Assert
@@ -619,6 +724,8 @@ public class GenerateDownloadTaskPhotoImagesCommandUnitTests
         roots.Count.ShouldBe(2);
         roots[0].Title.ShouldNotBe(roots[1].Title);
         roots[1].Title.ShouldContain($"[{files[^1].PlexServerId}-{files[^1].PlexLibraryId}]");
+        roots[0].DestinationRootPath.ShouldBe(roots[1].DestinationRootPath);
+        roots[0].DownloadRootPath.ShouldNotBe(roots[1].DownloadRootPath);
     }
 
     [Test]

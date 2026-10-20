@@ -22,6 +22,11 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
 
         firstResult.IsSuccess.ShouldBeTrue(firstResult.ToString());
         firstResult.Value.CreatedPhotos.ShouldBe(2);
+        var firstLibrary = await IDbContext.PlexLibraries.SingleAsync(x => x.Id == library.Id, CancellationToken);
+        firstLibrary.SyncedAt.ShouldNotBeNull();
+        firstLibrary.SyncedContentChangedAt.ShouldBe(first.PlexLibrary.ContentChangedAt);
+        firstLibrary.Outdated.ShouldBeFalse();
+        (firstLibrary.PhotoAlbumCount, firstLibrary.PhotoImageCount, firstLibrary.PhotoClipCount).ShouldBe((2, 2, 0));
         var firstFile = await IDbContext.PlexPhotoMediaData.SingleAsync(x => x.PlexApiRatingKey == 201, CancellationToken);
         var secondFile = await IDbContext.PlexPhotoMediaData.SingleAsync(x => x.PlexApiRatingKey == 202, CancellationToken);
         var firstAlbum = await IDbContext.PlexPhotoAlbums.SingleAsync(x => x.PlexApiRatingKey == 101, CancellationToken);
@@ -120,6 +125,267 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
         (await IDbContext.PlexPhotoAlbums.CountAsync(CancellationToken)).ShouldBe(0);
         (await IDbContext.PlexPhotoMediaData.CountAsync(CancellationToken)).ShouldBe(1);
         (await IDbContext.PlexPhotoAlbumMemberships.CountAsync(CancellationToken)).ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldPreserveCatalogAndSyncCompletion_WhenPhotoReconciliationFails()
+    {
+        // Arrange
+        await SetupDatabase(73007, x => x.PlexPhotoLibraryCount = 1);
+        var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var initial = CreateMetadata(
+            library,
+            [new SourceRoot("/fixture/photos", null)],
+            [CreateFile(260, 360, "/fixture/photos/original.jpg")],
+            [new(160, "Original")],
+            [(160, 260)]
+        );
+        var seeded = await TestHandlerExecuteAsync<CrudPhotosReport>(new SyncPlexPhotosCommand(initial));
+        seeded.IsSuccess.ShouldBeTrue(seeded.ToString());
+
+        var originalSyncedAt = new DateTime(2026, 10, 20, 10, 0, 0, DateTimeKind.Utc);
+        var originalSyncedContentChangedAt = 456_789L;
+        await IDbContext.PlexLibraries
+            .Where(x => x.Id == library.Id)
+            .ExecuteUpdateAsync(
+                setters =>
+                    setters
+                        .SetProperty(x => x.SyncedAt, (DateTime?)originalSyncedAt)
+                        .SetProperty(x => x.SyncedContentChangedAt, (long?)originalSyncedContentChangedAt)
+                        .SetProperty(x => x.Outdated, true),
+                CancellationToken
+            );
+
+        var beforeAlbums = await IDbContext.PlexPhotoAlbums
+            .Where(x => x.PlexLibraryId == library.Id)
+            .OrderBy(x => x.PlexApiRatingKey)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.Title })
+            .ToListAsync(CancellationToken);
+        var beforeFiles = await IDbContext.PlexPhotoMediaData
+            .Where(x => x.PlexLibraryId == library.Id)
+            .OrderBy(x => x.PlexApiRatingKey)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.PlexApiPartId, x.PlexPhotoFolderId, x.Title })
+            .ToListAsync(CancellationToken);
+        var beforeFolders = await IDbContext.PlexPhotoFolders
+            .Where(x => x.PlexLibraryId == library.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.ParentId, x.RelativePath, x.IsActive })
+            .ToListAsync(CancellationToken);
+        var beforeMemberships = await IDbContext.PlexPhotoAlbumMemberships
+            .Where(x => x.PlexPhotoAlbum!.PlexLibraryId == library.Id)
+            .OrderBy(x => x.PlexPhotoAlbumId)
+            .ThenBy(x => x.PlexPhotoMediaDataId)
+            .Select(x => new { x.PlexPhotoAlbumId, x.PlexPhotoMediaDataId })
+            .ToListAsync(CancellationToken);
+        var beforeLibrary = await IDbContext.PlexLibraries
+            .Where(x => x.Id == library.Id)
+            .Select(x => new
+            {
+                x.Title,
+                x.ContentChangedAt,
+                x.UpdatedAt,
+                x.ScannedAt,
+                x.PhotoAlbumCount,
+                x.PhotoImageCount,
+                x.PhotoClipCount,
+                x.MediaSize,
+                x.SyncedAt,
+                x.SyncedContentChangedAt,
+                x.Outdated,
+            })
+            .SingleAsync(CancellationToken);
+
+        var invalid = CreateMetadata(
+            library,
+            [new SourceRoot("/fixture/photos", null)],
+            [
+                CreateFile(261, 361, "/fixture/photos/first.jpg"),
+                CreateFile(262, 361, "/fixture/photos/second.jpg"),
+            ],
+            [],
+            []
+        );
+
+        // Act
+        var result = await TestHandlerExecuteAsync<CrudPhotosReport>(new SyncPlexPhotosCommand(invalid));
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        (await IDbContext.PlexPhotoAlbums
+                .Where(x => x.PlexLibraryId == library.Id)
+                .OrderBy(x => x.PlexApiRatingKey)
+                .Select(x => new { x.Id, x.PlexApiRatingKey, x.Title })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(beforeAlbums);
+        (await IDbContext.PlexPhotoMediaData
+                .Where(x => x.PlexLibraryId == library.Id)
+                .OrderBy(x => x.PlexApiRatingKey)
+                .Select(x => new { x.Id, x.PlexApiRatingKey, x.PlexApiPartId, x.PlexPhotoFolderId, x.Title })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(beforeFiles);
+        (await IDbContext.PlexPhotoFolders
+                .Where(x => x.PlexLibraryId == library.Id)
+                .OrderBy(x => x.Id)
+                .Select(x => new { x.Id, x.ParentId, x.RelativePath, x.IsActive })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(beforeFolders);
+        (await IDbContext.PlexPhotoAlbumMemberships
+                .Where(x => x.PlexPhotoAlbum!.PlexLibraryId == library.Id)
+                .OrderBy(x => x.PlexPhotoAlbumId)
+                .ThenBy(x => x.PlexPhotoMediaDataId)
+                .Select(x => new { x.PlexPhotoAlbumId, x.PlexPhotoMediaDataId })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(beforeMemberships);
+        (await IDbContext.PlexLibraries
+                .Where(x => x.Id == library.Id)
+                .Select(x => new
+                {
+                    x.Title,
+                    x.ContentChangedAt,
+                    x.UpdatedAt,
+                    x.ScannedAt,
+                    x.PhotoAlbumCount,
+                    x.PhotoImageCount,
+                    x.PhotoClipCount,
+                    x.MediaSize,
+                    x.SyncedAt,
+                    x.SyncedContentChangedAt,
+                    x.Outdated,
+                })
+                .SingleAsync(CancellationToken))
+            .ShouldBe(beforeLibrary);
+    }
+
+    [Test]
+    public async Task ShouldPreserveCatalogAndSyncCompletion_WhenPhotoReconciliationIsCancelled()
+    {
+        // Arrange
+        await SetupDatabase(73008, x => x.PlexPhotoLibraryCount = 1);
+        var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var initial = CreateMetadata(
+            library,
+            [new SourceRoot("/fixture/photos", null)],
+            [CreateFile(270, 370, "/fixture/photos/original.jpg")],
+            [new(170, "Original")],
+            [(170, 270)]
+        );
+        var seeded = await TestHandlerExecuteAsync<CrudPhotosReport>(new SyncPlexPhotosCommand(initial));
+        seeded.IsSuccess.ShouldBeTrue(seeded.ToString());
+
+        var originalSyncedAt = new DateTime(2026, 10, 20, 11, 0, 0, DateTimeKind.Utc);
+        var originalSyncedContentChangedAt = 567_890L;
+        await IDbContext.PlexLibraries
+            .Where(x => x.Id == library.Id)
+            .ExecuteUpdateAsync(
+                setters =>
+                    setters
+                        .SetProperty(x => x.SyncedAt, (DateTime?)originalSyncedAt)
+                        .SetProperty(x => x.SyncedContentChangedAt, (long?)originalSyncedContentChangedAt)
+                        .SetProperty(x => x.Outdated, true),
+                CancellationToken
+            );
+
+        var beforeAlbums = await IDbContext.PlexPhotoAlbums
+            .Where(x => x.PlexLibraryId == library.Id)
+            .OrderBy(x => x.PlexApiRatingKey)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.Title })
+            .ToListAsync(CancellationToken);
+        var beforeFiles = await IDbContext.PlexPhotoMediaData
+            .Where(x => x.PlexLibraryId == library.Id)
+            .OrderBy(x => x.PlexApiRatingKey)
+            .Select(x => new { x.Id, x.PlexApiRatingKey, x.PlexApiPartId, x.PlexPhotoFolderId, x.Title })
+            .ToListAsync(CancellationToken);
+        var beforeFolders = await IDbContext.PlexPhotoFolders
+            .Where(x => x.PlexLibraryId == library.Id)
+            .OrderBy(x => x.Id)
+            .Select(x => new { x.Id, x.ParentId, x.RelativePath, x.IsActive })
+            .ToListAsync(CancellationToken);
+        var beforeMemberships = await IDbContext.PlexPhotoAlbumMemberships
+            .Where(x => x.PlexPhotoAlbum!.PlexLibraryId == library.Id)
+            .OrderBy(x => x.PlexPhotoAlbumId)
+            .ThenBy(x => x.PlexPhotoMediaDataId)
+            .Select(x => new { x.PlexPhotoAlbumId, x.PlexPhotoMediaDataId })
+            .ToListAsync(CancellationToken);
+        var beforeLibrary = await IDbContext.PlexLibraries
+            .Where(x => x.Id == library.Id)
+            .Select(x => new
+            {
+                x.Title,
+                x.ContentChangedAt,
+                x.UpdatedAt,
+                x.ScannedAt,
+                x.PhotoAlbumCount,
+                x.PhotoImageCount,
+                x.PhotoClipCount,
+                x.MediaSize,
+                x.SyncedAt,
+                x.SyncedContentChangedAt,
+                x.Outdated,
+            })
+            .SingleAsync(CancellationToken);
+
+        var cancelled = CreateMetadata(
+            library,
+            [new SourceRoot("/fixture/photos", null)],
+            [CreateFile(271, 371, "/fixture/photos/replacement.jpg")],
+            [],
+            []
+        );
+        var command = new SyncPlexPhotosCommand(cancelled);
+        (await new SyncPlexPhotosCommandValidator().ValidateAsync(command, CancellationToken)).IsValid.ShouldBeTrue();
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        // Act
+        var result = await Mock.Create<SyncPlexPhotosCommandHandler>().ExecuteAsync(command, cancellation.Token);
+
+        // Assert
+        result.IsCancelled.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        (await IDbContext.PlexPhotoAlbums
+                .Where(x => x.PlexLibraryId == library.Id)
+                .OrderBy(x => x.PlexApiRatingKey)
+                .Select(x => new { x.Id, x.PlexApiRatingKey, x.Title })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(beforeAlbums);
+        (await IDbContext.PlexPhotoMediaData
+                .Where(x => x.PlexLibraryId == library.Id)
+                .OrderBy(x => x.PlexApiRatingKey)
+                .Select(x => new { x.Id, x.PlexApiRatingKey, x.PlexApiPartId, x.PlexPhotoFolderId, x.Title })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(beforeFiles);
+        (await IDbContext.PlexPhotoFolders
+                .Where(x => x.PlexLibraryId == library.Id)
+                .OrderBy(x => x.Id)
+                .Select(x => new { x.Id, x.ParentId, x.RelativePath, x.IsActive })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(beforeFolders);
+        (await IDbContext.PlexPhotoAlbumMemberships
+                .Where(x => x.PlexPhotoAlbum!.PlexLibraryId == library.Id)
+                .OrderBy(x => x.PlexPhotoAlbumId)
+                .ThenBy(x => x.PlexPhotoMediaDataId)
+                .Select(x => new { x.PlexPhotoAlbumId, x.PlexPhotoMediaDataId })
+                .ToListAsync(CancellationToken))
+            .ShouldBe(beforeMemberships);
+        (await IDbContext.PlexLibraries
+                .Where(x => x.Id == library.Id)
+                .Select(x => new
+                {
+                    x.Title,
+                    x.ContentChangedAt,
+                    x.UpdatedAt,
+                    x.ScannedAt,
+                    x.PhotoAlbumCount,
+                    x.PhotoImageCount,
+                    x.PhotoClipCount,
+                    x.MediaSize,
+                    x.SyncedAt,
+                    x.SyncedContentChangedAt,
+                    x.Outdated,
+                })
+                .SingleAsync(CancellationToken))
+            .ShouldBe(beforeLibrary);
     }
 
     private static InsertMediaMetaDataCommandResponse CreateMetadata(

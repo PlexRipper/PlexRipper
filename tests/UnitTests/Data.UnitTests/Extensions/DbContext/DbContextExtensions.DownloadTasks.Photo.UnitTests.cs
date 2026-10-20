@@ -172,6 +172,20 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
         );
         var targetDetails = await disabledDbContext.GetDownloadTaskAsync(targetRootKey, CancellationToken);
         var targetFileDetails = await disabledDbContext.GetDownloadTaskAsync(targetChildFileKey, CancellationToken);
+        var targetTransfer = await disabledDbContext.GetDownloadTaskFileAsync(targetChildFileKey, CancellationToken);
+        var targetTransfers = await disabledDbContext.GetDownloadTaskFilesAsync(
+            [targetRootFileKey, targetChildFileKey],
+            CancellationToken
+        );
+        var interruptedTransfers = await disabledDbContext.GetDownloadTaskFilesByStatusAsync(
+            [DownloadStatus.Downloading],
+            CancellationToken
+        );
+        var trackedRoots = await disabledDbContext.GetAllDownloadTasksByServerAsync(
+            libraries[0].PlexServerId,
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
         var targetRoots = await disabledDbContext.GetAllDownloadTasksByServerAsync(
             libraries[0].PlexServerId,
             cancellationToken: CancellationToken
@@ -230,6 +244,12 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
         targetFileDetails.DownloadDirectory.ShouldBe(targetChildFile.DownloadDirectory);
         targetFileDetails.DestinationDirectory.ShouldBe(targetChildFile.DestinationDirectory);
         targetFileDetails.FileName.ShouldBe(targetChildFile.FileName);
+        targetTransfer.ShouldNotBeNull();
+        (targetTransfer.Id, targetTransfer.ToParentKey()!.Id, targetTransfer.DownloadDirectory, targetTransfer.DestinationDirectory)
+            .ShouldBe((targetChildFile.Id, targetChild.Id, targetChildFile.DownloadDirectory, targetChildFile.DestinationDirectory));
+        targetTransfers.Select(x => x.Id).Order().ShouldBe(new[] { targetRootFile.Id, targetChildFile.Id }.Order());
+        interruptedTransfers.Select(x => x.Id).Order().ShouldBe(new[] { targetRootFile.Id, targetChildFile.Id }.Order());
+        trackedRoots.Select(x => x.Id).ShouldBe([targetRoot.Id]);
         targetRoots.Select(x => x.Id).ShouldBe([targetRoot.Id]);
         targetRoots.Single().Children.Select(x => x.Id).Order().ShouldBe(
             targetDetails.Children.Select(x => x.Id).Order()

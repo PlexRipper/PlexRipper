@@ -124,8 +124,10 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
             refreshedLibrary.PhotoImageCount,
             refreshedLibrary.PhotoClipCount,
             refreshedLibrary.MediaCount,
-            refreshedLibrary.SyncedAt is not null
-        ).ShouldBe((2, 3, 2, 2, true));
+            refreshedLibrary.SyncedAt is not null,
+            refreshedLibrary.Outdated,
+            refreshedLibrary.SyncedContentChangedAt
+        ).ShouldBe((2, 3, 2, 2, true, false, refreshedLibrary.ContentChangedAt));
         var firstAlbums = await firstContext.PlexPhotoAlbums
             .Where(x => x.PlexLibraryId == photoLibrary.Id)
             .OrderBy(x => x.PlexApiRatingKey)

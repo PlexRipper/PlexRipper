@@ -161,19 +161,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         var source = await GetValidatedMediaSourceAsync(metadata, ct);
         if (source is null)
         {
-            _log.Here()
-                .Warning(
-                    "[Torrent/Add] Torrent metadata does not match a stored {MediaType} source: {MetaData}",
-                    metadata.Type,
-                    metadata
-                );
-            AddError(
-                new FluentValidation.Results.ValidationFailure(
-                    nameof(TorrentMetadataDTO.DataId),
-                    "DataId, PartId, MediaId, PlexApiPartId, LibraryId, and ServerId must identify the same media source."
-                )
-            );
-            await Send.ErrorsAsync(cancellation: ct);
+            await RespondToMissingSourceAsync(metadata, ct);
             return;
         }
 
@@ -191,6 +179,34 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
             FileName: req.TorrentFile.FileName
         );
         await CreateAndTrackDownloadAsync(torrentDetails, source, identity, ct);
+    }
+
+    private async Task RespondToMissingSourceAsync(TorrentMetadataDTO metadata, CancellationToken ct)
+    {
+        if (await HasStoredMediaIdentityAsync(metadata))
+        {
+            _log.Here()
+                .Warning(
+                    "[Torrent/Add] Torrent metadata does not match a stored {MediaType} source: {MetaData}",
+                    metadata.Type,
+                    metadata
+                );
+            AddError(
+                new FluentValidation.Results.ValidationFailure(
+                    nameof(TorrentMetadataDTO.DataId),
+                    "DataId, PartId, MediaId, PlexApiPartId, LibraryId, and ServerId must identify the same media source."
+                )
+            );
+            await Send.ErrorsAsync(cancellation: ct);
+            return;
+        }
+
+        _log.Here()
+            .Warning(
+                "[Torrent/Add] Torrent source no longer exists: {MetaData}",
+                metadata
+            );
+        await Send.StringAsync("Fails.", cancellation: ct);
     }
 
     private async Task CreateAndTrackDownloadAsync(
@@ -273,6 +289,18 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                 metadata, ct),
             _ => Task.FromResult<MediaSourceIdentity?>(null),
         };
+
+    private async Task<bool> HasStoredMediaIdentityAsync(TorrentMetadataDTO metadata)
+    {
+        if (metadata.Type == PlexMediaType.Movie)
+        {
+            return await _dbContext.PlexMovieData.AnyAsync(p => p.Id == metadata.DataId)
+                || await _dbContext.PlexMovies.AnyAsync(p => p.Id == metadata.MediaId);
+        }
+
+        return await _dbContext.PlexTvShowEpisodeData.AnyAsync(p => p.Id == metadata.DataId)
+            || await _dbContext.PlexTvShowEpisodes.AnyAsync(p => p.Id == metadata.MediaId);
+    }
 
     private static Task<MediaSourceIdentity?> GetValidatedMediaSourceAsync<T>(
         IQueryable<T> parts,

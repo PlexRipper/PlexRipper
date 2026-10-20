@@ -15,6 +15,9 @@ exclude:
         paths:
             - "file:**/*.DotSettings"
             - "file:src/Data/Migrations/*.cs"
+            - "file:**/*.g.cs"
+            - "file:**/.editorconfig"
+            - "file:**/*.globalconfig"
             - src/AppHost/ClientApp/node_modules
             - src/AppHost/ClientApp/.nuxt
             - src/AppHost/ClientApp/.output

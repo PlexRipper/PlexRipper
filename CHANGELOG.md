@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.41.0-dev.7](https://github.com/Reaparr/Reaparr/compare/v0.41.0-dev.6...v0.41.0-dev.7) (2026-10-20)
+
+
+### Bug Fixes
+
+* **WebAPI:** Prevent Qodana from analyzing generated files ([c5d0b7d](https://github.com/Reaparr/Reaparr/commit/c5d0b7d3dc7cce4a20c0869ed4f986001db7a3f8))
+
 # [0.41.0-dev.6](https://github.com/Reaparr/Reaparr/compare/v0.41.0-dev.5...v0.41.0-dev.6) (2026-10-20)
 
 

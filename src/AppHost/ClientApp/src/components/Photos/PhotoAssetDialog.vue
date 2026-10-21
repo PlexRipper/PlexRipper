@@ -82,84 +82,70 @@
 						</div>
 					</QCarouselSlide>
 					<template #control>
-					<QCarouselControl
-						position="top-left"
-						:offset="[16, 16]">
-						<QBtn
-							flat
-							round
-							dense
-							icon="mdi-close"
-							:aria-label="t('components.photo-browser.close-asset-viewer')"
-							data-cy="photo-asset-dialog-close"
-							@click="closeViewer" />
-					</QCarouselControl>
-					<QCarouselControl
-						position="top-right"
-						:offset="[16, 16]">
-						<div class="row q-gutter-xs">
+						<QCarouselControl
+							v-if="photoStore.count > 1"
+							position="top"
+							class="photo-asset-dialog__counter"
+							:offset="[0, 16]">
+							<span
+								class="photo-asset-dialog__counter-label"
+								data-cy="photo-viewer-counter"
+								role="status"
+								:aria-label="`${photoStore.index + 1} / ${photoStore.count}`">
+								{{ photoStore.index + 1 }} / {{ photoStore.count }}
+							</span>
+						</QCarouselControl>
+						<Dock
+							v-if="activeAsset"
+							position="bottom"
+							:model="dockItems"
+							class="photo-asset-dialog__dock"
+							:aria-label="t('components.photo-browser.asset-viewer')"
+							data-cy="photo-viewer-dock"
+							:pt="dockPassThrough">
+							<template #item="{ item, props }">
+								<button
+									type="button"
+									v-bind="props.action"
+									:aria-label="(item as PhotoDockItem).label"
+									:aria-pressed="item.dataCy === 'photo-viewer-zoom' ? photoStore.zoomed : undefined"
+									@click.stop="activateDockAction($event, item as PhotoDockItem)">
+									<span class="photo-asset-dialog__dock-icon">
+										<QIcon
+											:name="item.icon"
+											size="1.25rem"
+											aria-hidden="true" />
+										<QTooltip>{{ item.label }}</QTooltip>
+									</span>
+								</button>
+							</template>
+						</Dock>
+						<QCarouselControl
+							v-if="photoStore.count > 1"
+							position="left"
+							class="row items-center photo-asset-dialog__navigation"
+							:offset="[16, 0]">
 							<QBtn
-								v-if="activeAsset && !isClipAsset(activeAsset)"
 								flat
 								round
-								dense
-								:icon="photoStore.zoomed ? 'mdi-fit-to-screen-outline' : 'mdi-magnify-plus-outline'"
-								:aria-label="photoStore.zoomed ? t('components.photo-browser.zoom-fit') : t('components.photo-browser.zoom-native')"
-								:aria-pressed="photoStore.zoomed"
-								data-cy="photo-viewer-zoom"
-								@click="toggleZoom" />
+								icon="mdi-chevron-left"
+								:aria-label="t('components.photo-browser.previous-asset')"
+								data-cy="photo-viewer-previous"
+								@click="goPrevious" />
+						</QCarouselControl>
+						<QCarouselControl
+							v-if="photoStore.count > 1"
+							position="right"
+							class="row items-center photo-asset-dialog__navigation"
+							:offset="[16, 0]">
 							<QBtn
 								flat
 								round
-								dense
-								icon="mdi-dots-vertical"
-								:aria-label="t('components.photo-browser.open-details')"
-								data-cy="photo-viewer-menu">
-								<QMenu
-									@show="onDetailsMenuShow"
-									@hide="onDetailsMenuHide">
-									<QList dense>
-										<QItem
-											v-close-popup
-											clickable
-											data-cy="photo-viewer-details-action"
-											@click="openDetails">
-											<QItemSection avatar>
-												<QIcon name="mdi-information-outline" />
-											</QItemSection>
-											<QItemSection>{{ t('components.photo-browser.details') }}</QItemSection>
-										</QItem>
-									</QList>
-								</QMenu>
-							</QBtn>
-						</div>
-					</QCarouselControl>
-					<QCarouselControl
-						v-if="photoStore.count > 1"
-						position="left"
-						class="row items-center photo-asset-dialog__navigation"
-						:offset="[16, 0]">
-						<QBtn
-							flat
-							round
-							icon="mdi-chevron-left"
-							:aria-label="t('components.photo-browser.previous-asset')"
-							data-cy="photo-viewer-previous"
-							@click="goPrevious" />
-					</QCarouselControl>
-					<QCarouselControl
-						v-if="photoStore.count > 1"
-						position="right"
-						class="row items-center photo-asset-dialog__navigation"
-						:offset="[16, 0]">
-						<QBtn
-							flat
-							round
-							icon="mdi-chevron-right"
-							:aria-label="t('components.photo-browser.next-asset')"
-							data-cy="photo-viewer-next"
-							@click="goNext" />
-					</QCarouselControl>
+								icon="mdi-chevron-right"
+								:aria-label="t('components.photo-browser.next-asset')"
+								data-cy="photo-viewer-next"
+								@click="goNext" />
+						</QCarouselControl>
 					</template>
 				</QCarousel>
 			</div>
@@ -206,7 +192,7 @@
 		@update:model-value="onDetailsModelValue"
 		@hide="photoStore.closeDetails">
 		<QCard
-			class="photo-asset-dialog__details bg-dark text-white"
+			class="photo-asset-dialog__details dialog-container-background text-white"
 			role="dialog"
 			aria-modal="true"
 			:aria-labelledby="detailsTitleId"
@@ -406,20 +392,25 @@
 import { get, set, useEventListener, useSwipe } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { finalize } from 'rxjs/operators';
-import { PhotoAssetKind, type PhotoAssetBrowseDTO, type PhotoAssetInspectionDTO } from '@dto';
-import type { PhotoViewerSlide } from '@/store/photoBrowsingStore';
+import { clamp } from 'lodash-es';
+import type { DockPassThroughMethodOptions } from 'primevue/dock';
+import { PhotoAssetKind, PhotoItemKind, type PhotoAssetBrowseDTO, type PhotoAssetInspectionDTO } from '@dto';
+import type { PhotoOverviewItem, PhotoViewerSlide } from '@/store/photoBrowsingStore';
 import { usePhotoBrowsingStore } from '@store';
 
 const photoStore = usePhotoBrowsingStore();
 const { t } = useI18n();
 const detailsTitleId = 'photo-asset-details-title';
+const emit = defineEmits<{
+	(e: 'download', item: PhotoOverviewItem): void;
+}>();
 const carouselModel = ref('');
 const carouselSurface = shallowRef<HTMLElement | null>(null);
 const panOffset = reactive({ x: 0, y: 0 });
 const swipeOrigin = reactive({ x: 0, y: 0 });
 const nativeDimensions = reactive(new Map<string, { width: number; height: number }>());
 const membershipPageInFlight = ref<number | null>(null);
-const menuOpen = ref(false);
+const zoomScale = shallowRef(1);
 const pointerDrag = reactive({
 	active: false,
 	pointerId: -1,
@@ -433,6 +424,60 @@ const pointerCaptureTarget = shallowRef<HTMLElement | null>(null);
 const activeSlide = computed(() => photoStore.slides.find((slide) => slide.index === photoStore.index) ?? null);
 const activeAsset = computed<PhotoAssetBrowseDTO | null>(() => photoStore.current ?? get(activeSlide)?.asset ?? null);
 const detailsAsset = computed<PhotoAssetInspectionDTO | null>(() => photoStore.dialog.asset);
+type PhotoDockItem = {
+	label: string;
+	icon: string;
+	dataCy: string;
+	action: () => void;
+};
+
+const dockPassThrough = {
+	itemLink: ({ context }: DockPassThroughMethodOptions) => ({
+		'data-cy': context.item.dataCy,
+	}),
+};
+
+const dockItems = computed<PhotoDockItem[]>(() => {
+	const asset = get(activeAsset);
+	const items: PhotoDockItem[] = [{
+		label: t('components.photo-browser.close-asset-viewer'),
+		icon: 'mdi-close',
+		dataCy: 'photo-asset-dialog-close',
+		action: closeViewer,
+	}];
+
+	if (asset && !isClipAsset(asset)) {
+		items.push({
+			label: photoStore.zoomed ? t('components.photo-browser.zoom-fit') : t('components.photo-browser.zoom-native'),
+			icon: photoStore.zoomed ? 'mdi-fit-to-screen-outline' : 'mdi-magnify-plus-outline',
+			dataCy: 'photo-viewer-zoom',
+			action: toggleZoom,
+		});
+	}
+
+	if (asset) {
+		items.push({
+			label: t('general.commands.download'),
+			icon: 'mdi-download',
+			dataCy: 'photo-viewer-download',
+			action: downloadCurrentAsset,
+		});
+	}
+
+	items.push({
+		label: t('components.photo-browser.details'),
+		icon: 'mdi-information-outline',
+		dataCy: 'photo-viewer-details-action',
+		action: openDetails,
+	});
+
+	return items;
+});
+
+function activateDockAction(event: Event, item: PhotoDockItem): void {
+	event.preventDefault();
+	item.action();
+}
 
 function slideKey(slide: PhotoViewerSlide): string {
 	return `${slide.asset.plexLibraryId}:${slide.asset.id}`;
@@ -454,8 +499,8 @@ function imageStyle(slide: PhotoViewerSlide): Record<string, string> {
 	if (!photoStore.zoomed || isClip(slide)) return {};
 	const dimensions = nativeDimensions.get(slideKey(slide));
 	return {
-		width: dimensions ? `${dimensions.width}px` : 'auto',
-		height: dimensions ? `${dimensions.height}px` : 'auto',
+		width: dimensions ? `${dimensions.width * get(zoomScale)}px` : 'auto',
+		height: dimensions ? `${dimensions.height * get(zoomScale)}px` : 'auto',
 		transform: `translate3d(${panOffset.x}px, ${panOffset.y}px, 0)`,
 	};
 }
@@ -469,8 +514,8 @@ function setPanPosition(x: number, y: number): void {
 	if (!photoStore.zoomed || !slide || isClip(slide)) return;
 	const dimensions = nativeDimensions.get(slideKey(slide));
 	const bounds = get(carouselSurface)?.getBoundingClientRect();
-	const maxX = dimensions && bounds ? Math.max(0, (dimensions.width - bounds.width) / 2) : Number.POSITIVE_INFINITY;
-	const maxY = dimensions && bounds ? Math.max(0, (dimensions.height - bounds.height) / 2) : Number.POSITIVE_INFINITY;
+	const maxX = dimensions && bounds ? Math.max(0, (dimensions.width * get(zoomScale) - bounds.width) / 2) : Number.POSITIVE_INFINITY;
+	const maxY = dimensions && bounds ? Math.max(0, (dimensions.height * get(zoomScale) - bounds.height) / 2) : Number.POSITIVE_INFINITY;
 	panOffset.x = Math.max(-maxX, Math.min(maxX, x));
 	panOffset.y = Math.max(-maxY, Math.min(maxY, y));
 }
@@ -506,9 +551,45 @@ function goNext(): void {
 	goTo(photoStore.index + 1);
 }
 
+function downloadCurrentAsset(): void {
+	const asset = get(activeAsset);
+	if (asset) emit('download', { kind: PhotoItemKind.Asset, asset, index: photoStore.index });
+}
+
 function toggleZoom(): void {
 	resetPan();
+	set(zoomScale, 1);
 	photoStore.setZoomed(!photoStore.zoomed);
+}
+
+function onWheel(event: WheelEvent): void {
+	const slide = get(activeSlide);
+	if (!slide || isClip(slide)) return;
+	const frame = getWheelFrame(event);
+	const dimensions = nativeDimensions.get(slideKey(slide));
+	if (!frame || !dimensions) return;
+	const fitScale = getFitScale(frame, dimensions);
+	const currentScale = photoStore.zoomed ? get(zoomScale) : fitScale;
+	const nextScale = clamp(currentScale * (event.deltaY < 0 ? 1.2 : 1 / 1.2), fitScale, 4);
+	event.preventDefault();
+	endPointerDrag();
+	set(zoomScale, nextScale);
+	photoStore.setZoomed(nextScale > fitScale);
+	setPanPosition(panOffset.x, panOffset.y);
+}
+
+function getWheelFrame(event: WheelEvent): HTMLElement | null {
+	if (photoStore.detailsOpen || event.deltaY === 0) return null;
+	if (!(event.target instanceof HTMLElement)) return null;
+	return event.target.closest<HTMLElement>('.photo-asset-dialog__image-frame');
+}
+
+function getFitScale(frame: HTMLElement, dimensions: { width: number; height: number }): number {
+	const bounds = frame.getBoundingClientRect();
+	const style = getComputedStyle(frame);
+	const width = bounds.width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+	const height = bounds.height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+	return Math.min(1, width / dimensions.width, height / dimensions.height);
 }
 
 function closeViewer(): void {
@@ -526,13 +607,6 @@ function onDialogHide(): void {
 
 function openDetails(): void {
 	useSubscription(photoStore.openDetails().subscribe());
-}
-function onDetailsMenuShow(): void {
-	set(menuOpen, true);
-}
-
-function onDetailsMenuHide(): void {
-	set(menuOpen, false);
 }
 
 function onDetailsModelValue(value: boolean): void {
@@ -619,15 +693,14 @@ function onMembershipVirtualScroll(details: { to?: number }): void {
 	requestNextMembershipPage();
 }
 
-function isEditableTarget(target: EventTarget | null): boolean {
+function isViewerControlTarget(target: EventTarget | null): boolean {
 	if (!(target instanceof HTMLElement)) return false;
-	return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+	return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || Boolean(target.closest('.p-dock'));
 }
 
 function onKeyDown(event: KeyboardEvent): void {
 	if (!photoStore.dialog.open) return;
 	if (event.key === 'Escape') {
-		if (get(menuOpen)) return;
 		if (photoStore.detailsOpen) {
 			event.preventDefault();
 			event.stopPropagation();
@@ -635,17 +708,24 @@ function onKeyDown(event: KeyboardEvent): void {
 		}
 		return;
 	}
-	if (photoStore.detailsOpen || get(menuOpen) || isEditableTarget(event.target)) return;
+	if (photoStore.detailsOpen || isViewerControlTarget(event.target)) return;
 	if (event.key === 'ArrowLeft') {
 		event.preventDefault();
 		goPrevious();
 	} else if (event.key === 'ArrowRight') {
 		event.preventDefault();
 		goNext();
-	} else if (event.key === '+' || event.key === '=') {
+	} else {
+		onZoomKeyDown(event);
+	}
+}
+
+function onZoomKeyDown(event: KeyboardEvent): void {
+	if (event.key === '+' || event.key === '=') {
 		event.preventDefault();
 		const asset = get(activeAsset);
 		if (asset && !isClipAsset(asset)) {
+			set(zoomScale, 1);
 			photoStore.setZoomed(true);
 			resetPan();
 		}
@@ -678,6 +758,7 @@ const { lengthX, lengthY } = useSwipe(carouselSurface, {
 		if (direction === 'right' && currentPosition === 0) goPrevious();
 	},
 });
+useEventListener(carouselSurface, 'wheel', onWheel, { passive: false });
 useEventListener(carouselSurface, 'pointerdown', onPointerDown, { passive: false });
 useEventListener(carouselSurface, 'pointermove', onPointerMove, { passive: false });
 useEventListener(carouselSurface, 'pointerup', endPointerDrag);
@@ -698,6 +779,7 @@ watch(() => [photoStore.index, photoStore.slides], () => {
 watch(() => photoStore.zoomed, (zoomed) => {
 	if (!zoomed) {
 		endPointerDrag();
+		set(zoomScale, 1);
 		resetPan();
 	}
 });
@@ -715,6 +797,83 @@ watch(() => photoStore.zoomed, (zoomed) => {
 		> .q-btn {
 			pointer-events: auto;
 		}
+	}
+
+	&__counter {
+		pointer-events: none;
+	}
+
+	&__counter-label {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2rem;
+		padding: 0.25rem 0.75rem;
+		border: 1px solid rgba($primary, 0.55);
+		border-radius: 999px;
+		background: rgba(13, 13, 13, 0.72);
+		backdrop-filter: blur(12px);
+		color: var(--q-grey-2, #ddd);
+		font-variant-numeric: tabular-nums;
+	}
+
+	&__dock {
+		z-index: 5;
+		padding-inline: max(0.5rem, env(safe-area-inset-left)) max(0.5rem, env(safe-area-inset-right));
+		pointer-events: none;
+
+		&.p-dock-bottom {
+			bottom: calc(0.75rem + env(safe-area-inset-bottom));
+		}
+
+		:deep(.p-dock-list-container) {
+			pointer-events: auto;
+			padding: 0.35rem;
+			border: 1px solid rgba($primary, 0.65);
+			border-radius: 999px;
+			background: rgba(13, 13, 13, 0.78);
+			backdrop-filter: blur(16px);
+			box-shadow: $box-shadow;
+		}
+
+		:deep(.p-dock-list) {
+			gap: 0.25rem;
+		}
+
+		:deep(.p-dock-item) {
+			padding: 0.2rem;
+		}
+
+		:deep(.p-dock-item-link) {
+			width: 2.75rem;
+			height: 2.75rem;
+			border: 1px solid transparent;
+			border-radius: 50%;
+			background: rgba(0, 0, 0, 0.25);
+			color: var(--q-grey-2, #ddd);
+			cursor: pointer;
+			transition:
+				background-color 120ms ease,
+				border-color 120ms ease,
+				color 120ms ease,
+				box-shadow 120ms ease;
+		}
+
+		:deep(.p-dock-item-link:hover),
+		:deep(.p-dock-item-link:focus-visible),
+		:deep(.p-dock-item.p-focus .p-dock-item-link) {
+			border-color: rgba($primary, 0.85);
+			background: rgba($primary, 0.2);
+			box-shadow: 0 0 0 2px rgba($primary, 0.18);
+			color: #fff;
+		}
+	}
+
+	&__dock-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
 	}
 	&__surface,
 	&__carousel,

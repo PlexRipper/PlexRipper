@@ -1,11 +1,12 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Mock } from 'vitest';
-import { defineComponent, h, nextTick, reactive, type VNode } from 'vue';
+import { defineComponent, h, nextTick, reactive, type PropType, type VNode } from 'vue';
 import { mountSuspended } from '@nuxt/test-utils/runtime';
+import type { DOMWrapper, VueWrapper } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { of, type Observable } from 'rxjs';
 import { baseSetup } from '@services-test-base';
-import { PhotoAssetKind, type PhotoAssetBrowseDTO, type PhotoAssetInspectionDTO } from '@dto';
+import { PhotoAssetKind, PhotoItemKind, type PhotoAssetBrowseDTO, type PhotoAssetInspectionDTO } from '@dto';
 import messages from '@/lang/en-US.json';
 import PhotoAssetDialog from '@/components/Photos/PhotoAssetDialog.vue';
 
@@ -58,6 +59,7 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 	afterEach(() => {
 		mounted.forEach((wrapper) => wrapper.unmount());
 		mounted.length = 0;
+		vi.restoreAllMocks();
 		vi.clearAllMocks();
 	});
 
@@ -141,6 +143,10 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 			zoomed: false,
 			navigating: false,
 			slides,
+			closeAssetDialog: vi.fn(),
+			closeDetails: vi.fn(() => {
+				viewer.detailsOpen = false;
+			}),
 			showAsset: vi.fn(() => of(undefined)),
 			openDetails: vi.fn(() => {
 				viewer.detailsOpen = true;
@@ -156,12 +162,58 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 		viewer = reactive(raw) as unknown as ViewerStore;
 		return viewer;
 	}
+	const DockStub = defineComponent({
+		name: 'Dock',
+		inheritAttrs: false,
+		props: {
+			model: { type: Array as PropType<Array<{ label: string; dataCy: string; action: () => void }>>, default: () => [] },
+			position: { type: String, default: 'bottom' },
+			ariaLabel: { type: String, default: undefined },
+			pt: { type: Object, default: () => ({}) },
+		},
+		setup(props, { attrs, slots }) {
+			return () => h('nav', {
+				...attrs,
+				class: ['p-dock', attrs.class],
+				'data-position': props.position,
+			}, [
+				h('ul', { role: 'menu', 'aria-label': props.ariaLabel }, props.model.map((item, index) => {
+					const context = { item, index, active: false };
+					const resolvePassThrough = (section: string): Record<string, unknown> => {
+						const value = (props.pt as Record<string, unknown>)[section];
+						if (typeof value !== 'function') return (value as Record<string, unknown> | undefined) ?? {};
+						return (value as (options: { context: typeof context }) => Record<string, unknown>)({ context });
+					};
+					const actionProps = {
+						class: 'p-dock-item-link',
+						tabindex: -1,
+						'data-pc-section': 'itemlink',
+						...resolvePassThrough('itemLink'),
+					};
+					return h('li', {
+						...resolvePassThrough('item'),
+						role: 'menuitem',
+						'aria-label': item.label,
+					}, [
+						h('div', { class: 'p-dock-item-content' }, slots.item?.({
+							item,
+							index,
+							label: item.label,
+							props: { action: actionProps },
+						}) ?? []),
+					]);
+				})),
+			]);
+		},
+	});
 
 	const stubs = {
+		Dock: DockStub,
 		QDialog: { props: ['modelValue'], template: '<div v-if="modelValue"><slot /></div>' },
 		QCard: { template: '<div><slot /></div>' },
 		QCardSection: { template: '<div><slot /></div>' },
 		QSeparator: { template: '<hr />' },
+		QTooltip: { template: '<span class="q-tooltip"><slot /></span>' },
 		QCarousel: defineComponent({
 			name: 'QCarousel',
 			props: { modelValue: { type: [String, Number], default: '' } },
@@ -184,9 +236,9 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 			template: '<div><slot v-for="(item, index) in items" :item="item" :index="index" /></div>',
 		},
 		QBtn: {
-			props: ['label', 'ariaLabel'],
+			props: ['label', 'ariaLabel', 'ariaPressed'],
 			emits: ['click'],
-			template: '<button :aria-label="ariaLabel" @click="$emit(\'click\')"><slot />{{ label }}</button>',
+			template: '<button :aria-label="ariaLabel" :aria-pressed="ariaPressed" @click="$emit(\'click\')"><slot />{{ label }}</button>',
 		},
 		QMenu: { template: '<div class="q-menu"><slot /></div>' },
 		QList: { template: '<div><slot /></div>' },
@@ -228,6 +280,56 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 		expect(store.dialog.asset).toBeNull();
 	});
 
+	test('Should render viewer actions in a bottom Dock and execute each action once', async () => {
+		// Arrange
+		const wrapper = await render();
+		const dock = wrapper.get('[data-cy="photo-viewer-dock"]');
+		expect(dock.attributes('data-position')).toBe('bottom');
+		expect(dock.get('ul').attributes('aria-label')).toBe('Photo viewer');
+		expect(dock.get('ul').attributes('role')).toBe('menu');
+		expect(dock.findAll('[role="menuitem"]')).toHaveLength(4);
+		expect(wrapper.get('[data-cy="photo-asset-dialog-close"]').attributes('aria-label')).toBe('Close photo viewer');
+		expect(wrapper.get('[data-cy="photo-viewer-zoom"]').attributes('aria-label')).toBe('View at native size');
+		expect(wrapper.get('[data-cy="photo-viewer-download"]').attributes('aria-label')).toBe('Download');
+		expect(wrapper.get('[data-cy="photo-viewer-details-action"]').attributes('aria-label')).toBe('Details');
+
+		// Act
+		await wrapper.get('[data-cy="photo-viewer-zoom"]').trigger('click');
+		await wrapper.get('[data-cy="photo-viewer-download"]').trigger('click');
+		await wrapper.get('[data-cy="photo-viewer-details-action"]').trigger('click');
+		await wrapper.get('[data-cy="photo-asset-dialog-close"]').trigger('click');
+
+		// Assert
+		expect(store.setZoomed).toHaveBeenCalledTimes(1);
+		expect(store.openDetails).toHaveBeenCalledTimes(1);
+		expect(store.closeAssetDialog).toHaveBeenCalledTimes(1);
+		expect(wrapper.emitted('download')).toHaveLength(1);
+	});
+
+	test('Should keep the current counter and navigation outside the bottom Dock', async () => {
+		// Arrange
+		const wrapper = await render();
+
+		// Assert
+		expect(wrapper.get('[data-cy="photo-viewer-counter"]').text()).toBe('1 / 5');
+		expect(wrapper.get('[data-cy="photo-viewer-counter"]').element.closest('[data-cy="photo-viewer-dock"]')).toBeNull();
+		expect(wrapper.get('[data-cy="photo-viewer-previous"]').element.closest('[data-cy="photo-viewer-dock"]')).toBeNull();
+		expect(wrapper.get('[data-cy="photo-viewer-next"]').element.closest('[data-cy="photo-viewer-dock"]')).toBeNull();
+	});
+
+	test('Should leave directional keyboard navigation to the Dock while it is focused', async () => {
+		// Arrange
+		const wrapper = await render();
+		const dockMenu = wrapper.get('[data-cy="photo-viewer-dock"] ul');
+
+		// Act
+		dockMenu.element.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+		await nextTick();
+
+		// Assert
+		expect(store.showAsset).not.toHaveBeenCalled();
+	});
+
 	test('Should dispatch full-sequence navigation beyond the three-slide window and wrap at the sequence edge', async () => {
 		// Arrange
 		const wrapper = await render();
@@ -241,7 +343,7 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 		expect(store.showAsset).toHaveBeenNthCalledWith(3, 4);
 	});
 
-	test('Should load details only from the ellipsis action and render bounded memberships with real breadcrumbs', async () => {
+	test('Should open details directly and render bounded memberships with real breadcrumbs', async () => {
 		// Arrange
 		const wrapper = await render();
 		// Act
@@ -251,6 +353,7 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 		memberships.vm.$emit('virtual-scroll', { to: 0 });
 		// Assert
 		expect(store.openDetails).toHaveBeenCalledTimes(1);
+		expect(wrapper.find('.q-menu').exists()).toBe(false);
 		expect(wrapper.get('[data-cy="photo-viewer-details"]').text()).toContain('Summer album');
 		expect(wrapper.findAll('a[href*="folderId="]')).toHaveLength(1);
 		expect(wrapper.findComponent({ name: 'QPagination' }).exists()).toBe(false);
@@ -316,6 +419,111 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 		expect(wrapper.get('[data-cy="photo-viewer-zoom"]').attributes('aria-label')).toBe('Fit image to window');
 		expect(wrapper.get('[data-cy="photo-viewer-zoom"]').attributes('aria-pressed')).toBe('true');
 	});
+
+	async function loadSizedImage(wrapper: VueWrapper) {
+		const image = wrapper.get('[data-cy="photo-viewer-image"]');
+		Object.defineProperties(image.element, {
+			naturalWidth: { configurable: true, value: 1920 },
+			naturalHeight: { configurable: true, value: 1080 },
+		});
+		const frame = image.element.closest<HTMLElement>('.photo-asset-dialog__image-frame')!;
+		Object.assign(frame.style, {
+			paddingTop: '0px', paddingRight: '0px', paddingBottom: '0px', paddingLeft: '0px',
+		});
+		vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
+			x: 0, y: 0, top: 0, left: 0, right: 960, bottom: 540, width: 960, height: 540, toJSON: () => ({}),
+		});
+		// Happy DOM leaves computed padding empty; model the browser's zero-padding box.
+		const getStyle = window.getComputedStyle.bind(window);
+		vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) =>
+			element === frame ? frame.style : getStyle(element, pseudoElement));
+		await image.trigger('load');
+		return image;
+	}
+
+	async function scrollImage(image: Pick<DOMWrapper<Element>, 'element'>, deltaY: number) {
+		const event = new WheelEvent('wheel', { deltaY, bubbles: true, cancelable: true });
+		image.element.dispatchEvent(event);
+		await nextTick();
+		return event;
+	}
+
+	test('Should zoom progressively with the wheel and return to fit without zooming below it', async () => {
+		// Arrange
+		const wrapper = await render();
+		const image = await loadSizedImage(wrapper);
+
+		// Act
+		const event = await scrollImage(image, -100);
+
+		// Assert
+		expect(event.defaultPrevented).toBe(true);
+		expect(image.attributes('style')).toContain('width: 1152px');
+		expect(store.zoomed).toBe(true);
+		await scrollImage(image, -100);
+		expect(parseFloat((image.element as HTMLImageElement).style.width)).toBeCloseTo(1382.4);
+		await scrollImage(image, 100);
+		expect(image.attributes('style')).toContain('width: 1152px');
+		await scrollImage(image, 100);
+		await scrollImage(image, 100);
+		expect(store.zoomed).toBe(false);
+		expect(image.classes()).not.toContain('photo-asset-dialog__image--zoomed');
+		expect(image.attributes('style') ?? '').not.toContain('width:');
+	});
+
+	test('Should bound wheel magnification and preserve the native-size toggle', async () => {
+		// Arrange
+		const wrapper = await render();
+		const image = await loadSizedImage(wrapper);
+
+		// Act
+		for (let index = 0; index < 20; index++) await scrollImage(image, -100);
+
+		// Assert
+		expect(image.attributes('style')).toContain('width: 7680px');
+		await wrapper.get('[data-cy="photo-viewer-zoom"]').trigger('click');
+		expect(store.zoomed).toBe(false);
+		await wrapper.get('[data-cy="photo-viewer-zoom"]').trigger('click');
+		expect(image.attributes('style')).toContain('width: 1920px');
+	});
+
+	test('Should leave wheel scrolling alone for clip previews and while details are open', async () => {
+		// Arrange
+		const wrapper = await render();
+		const image = await loadSizedImage(wrapper);
+		store.detailsOpen = true;
+
+		// Act
+		const detailsScroll = await scrollImage(image, -100);
+		store.detailsOpen = false;
+		store.slides[0]!.asset.assetKind = PhotoAssetKind.VideoClip;
+		const clipScroll = await scrollImage(image, -100);
+
+		// Assert
+		expect(detailsScroll.defaultPrevented).toBe(false);
+		expect(clipScroll.defaultPrevented).toBe(false);
+		expect(store.setZoomed).not.toHaveBeenCalled();
+		expect(image.classes()).not.toContain('photo-asset-dialog__image--zoomed');
+	});
+
+	test('Should download the currently viewed image after navigating rather than the initial image', async () => {
+		// Arrange
+		const wrapper = await render();
+		store.index = 1;
+		store.current = store.slides[1]!.asset;
+		await nextTick();
+
+		// Act
+		await wrapper.get('[data-cy="photo-viewer-download"]').trigger('click');
+
+		// Assert
+		expect(wrapper.emitted('download')).toEqual([[{
+			kind: PhotoItemKind.Asset,
+			asset: store.slides[1]!.asset,
+			index: 1,
+		}]]);
+	});
+
 	test('Should pan a native-size image with a desktop pointer drag while zoomed', async () => {
 		// Arrange
 		const wrapper = await render();

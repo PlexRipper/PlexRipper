@@ -103,10 +103,10 @@ function setupPage(libraryCount = 1) {
 		override: {
 			plexServer: (items) => items.map((item) => ({ ...item, id: serverId, name: 'Photo server' })),
 			plexServerConnections: (items) => items,
-			plexLibraries: (items) => items.map((item, index) => ({ ...item, id: libraryId + index, type: PlexMediaType.PhotoAlbum, plexServerId: serverId, title: index === 0 ? 'Photo library' : 'Other photos', isEnabled: true, syncedAt: '2026-01-01T00:00:00Z' })),
+			plexLibraries: (items) => items.map((item, index) => ({ ...item, id: libraryId + index, type: PlexMediaType.PhotoAlbum, plexServerId: serverId, title: index === 0 ? 'Photo library' : 'Other photos', photoAlbumCount: 1, isEnabled: true, syncedAt: '2026-01-01T00:00:00Z' })),
 			plexAccounts: (items) => items.map((item) => ({ ...item, plexServerAccess: [serverId], plexLibraryAccess: Array.from({ length: libraryCount }, (_, index) => libraryId + index) })),
 			downloadTasks: (items) => items,
-			settings: (settings) => settings,
+			settings: (settings) => ({ ...settings, confirmationSettings: { ...settings.confirmationSettings, askDownloadPhotoImageConfirmation: true } }),
 		},
 	});
 }
@@ -348,6 +348,9 @@ describe('Photos browsing', () => {
 		setupPage();
 		const assets = Array.from({ length: 101 }, (_, index) => ({ ...asset, id: assetId + index, title: `Photo ${index + 1}` }));
 		setupPhotoApi(assets);
+		cy.intercept('POST', '**/api/Download/preview', {
+			statusCode: 200, body: generateResultDTO({ previews: [], totalSize: 0, expanded: {} }), ...headers,
+		}).as('viewerDownloadPreview');
 		cy.visit(route(`/photos/${libraryId}?view=assets`));
 		cy.wait('@photoAssets');
 		cy.getCy('photo-asset-41-501').focus().type('{enter}');
@@ -355,13 +358,34 @@ describe('Photos browsing', () => {
 		cy.getCy('photo-viewer-image').should('have.attr', 'alt', 'Photo 1').and('have.prop', 'naturalWidth', 6000);
 		cy.getCy('photo-asset-dialog').should('not.contain.text', 'A summer photo');
 		cy.get<Interception[]>('@photoInspection.all').should('have.length', 0);
+		cy.getCy('photo-viewer-image').then(($image) => {
+			const fittedWidth = $image[0]!.getBoundingClientRect().width;
+			cy.wrap($image).trigger('wheel', { deltaY: -100, eventConstructor: 'WheelEvent' });
+			cy.getCy('photo-viewer-image').should(($zoomed) => {
+				expect($zoomed[0]!.getBoundingClientRect().width).to.be.greaterThan(fittedWidth);
+			});
+			cy.getCy('photo-viewer-image').trigger('wheel', { deltaY: 100, eventConstructor: 'WheelEvent' });
+			cy.getCy('photo-viewer-image').should(($fitted) => {
+				expect($fitted[0]!.getBoundingClientRect().width).to.be.closeTo(fittedWidth, 1);
+			});
+		});
 		cy.getCy('photo-viewer-previous').click();
 		cy.getCy('photo-viewer-image').should('have.attr', 'alt', 'Photo 101');
-		cy.getCy('photo-viewer-menu').click();
 		cy.getCy('photo-viewer-details-action').click();
 		cy.wait('@photoInspection').its('request.url').should('contain', '/assets/601');
 		cy.getCy('photo-viewer-details').should('contain.text', 'A summer photo');
 		cy.getCy('photo-viewer-details-close').click();
+		cy.getCy('photo-viewer-download').click();
+		cy.wait('@viewerDownloadPreview').its('request.body.downloadMedias').should('have.length', 1).its('0').should('deep.include', {
+			plexServerId: serverId,
+			plexLibraryId: libraryId,
+			mediaIds: [601],
+			type: PlexMediaType.PhotoImage,
+			selectionKind: PhotoItemKind.Asset,
+			qualities: [],
+		});
+		cy.getCy('download-confirmation-dialog').should('be.visible');
+		cy.getCy('download-confirmation-cancel').click();
 		cy.getCy('photo-viewer-zoom').click().should('have.attr', 'aria-pressed', 'true');
 		cy.getCy('photo-asset-dialog-close').click();
 		cy.getCy('photo-asset-dialog').should('not.exist');
@@ -452,8 +476,10 @@ describe('Photos browsing', () => {
 			cy.hubPublishJobStatusUpdate(JobTypes.LibrarySyncJob, JobStatus.Started, queues[0]);
 		});
 		cy.wait('@syncSnapshot');
-		cy.getCy('media-overview-library-sync-processing-banner').should('be.visible');
-		cy.getCy('photo-asset-41-501').should('be.visible');
+		cy.getCy('refresh-library-container').should('be.visible');
+		cy.getCy('media-overview-library-sync-processing-banner').should('not.exist');
+		cy.getCy('photo-overview-list').should('not.exist');
+		cy.getCy('media-overview-refresh-library-btn').should('not.exist');
 		cy.then(() => {
 			queues = queues.map((queue) => ({ ...queue, status: LibrarySyncJobStatus.Failed, completedAt: '2026-01-02T00:00:00Z', errorMessage: 'Plex is offline' }));
 			cy.hubPublishJobStatusUpdate(JobTypes.LibrarySyncJob, JobStatus.Completed, queues[0]);
@@ -468,7 +494,6 @@ describe('Photos browsing', () => {
 		cy.getCy('media-overview-library-sync-queued-banner').should('be.visible');
 		cy.getCy('photo-asset-41-501').click();
 		cy.wait('@photoImage');
-		cy.getCy('photo-viewer-menu').click();
 		cy.getCy('photo-viewer-details-action').click();
 		cy.wait('@photoInspection');
 		cy.getCy('photo-viewer-details').should('contain.text', 'A summer photo').and('contain.text', 'Summer trip');

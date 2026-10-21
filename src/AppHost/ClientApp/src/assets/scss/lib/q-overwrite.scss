@@ -6,6 +6,23 @@
   background-color: transparent;
 }
 
+.q-breadcrumbs a.q-breadcrumbs__el[href] {
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-left: 2px solid transparent;
+  border-radius: 4px;
+  transition: color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    color: #ef9a9a;
+    background: linear-gradient(90deg, rgba(211, 47, 47, 0.15), rgba(229, 115, 115, 0.15));
+    border-left-color: #d32f2f;
+    box-shadow: inset 4px 0 20px rgba(211, 47, 47, 0.4), 0 0 15px rgba(211, 47, 47, 0.2);
+    text-shadow: 0 0 8px rgba(239, 154, 154, 0.6);
+  }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * QCard

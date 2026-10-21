@@ -1,0 +1,113 @@
+namespace Reaparr.Application.UnitTests;
+
+public class SearchPhotoAssetsQueryUnitTests : BaseCommandUnitTest<SearchPhotoAssetsQuery>
+{
+    [Test]
+    public async Task ShouldSearchAcrossAllEligibleLibrariesWithoutDuplicateRows()
+    {
+        // Arrange
+        await SetupDatabase(71007, config =>
+        {
+            config.PlexPhotoLibraryCount = 2;
+            config.PhotoAlbumCount = 1;
+            config.PhotoCount = 1;
+            config.PhotoClipCount = 1;
+        });
+        var dbContext = IDbContext;
+        var assets = await dbContext.PlexPhotoMediaData.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        assets.Count.ShouldBeGreaterThan(1);
+        var selectedIds = assets
+            .GroupBy(x => x.PlexLibraryId)
+            .Select(group => group.First().Id)
+            .Take(2)
+            .ToArray();
+        var searchTitle = "cross-library-search".ToSearchTitle();
+        await dbContext.PlexPhotoMediaData
+            .Where(x => selectedIds.Contains(x.Id))
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SearchTitle, searchTitle), CancellationToken);
+        var inactiveAsset = assets.Single(x => x.Id == selectedIds[0]);
+        var inactiveRoot = new PlexPhotoFolder
+        {
+            PlexServerId = inactiveAsset.PlexServerId,
+            PlexLibraryId = inactiveAsset.PlexLibraryId,
+            RelativePath = string.Empty,
+            Title = "Search inactive",
+            RootIdentityKey = "path:search-inactive",
+            SourceRootPath = "/search-inactive",
+            PlexApiLocationId = 9101,
+            IsActive = false,
+        };
+        dbContext.PlexPhotoFolders.Add(inactiveRoot);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var inactiveChild = new PlexPhotoFolder
+        {
+            PlexServerId = inactiveAsset.PlexServerId,
+            PlexLibraryId = inactiveAsset.PlexLibraryId,
+            ParentId = inactiveRoot.Id,
+            RelativePath = "search-inactive/child",
+            Title = "Search inactive child",
+        };
+        dbContext.PlexPhotoFolders.Add(inactiveChild);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.PlexPhotoMediaData
+            .Where(x => x.Id == inactiveAsset.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.PlexPhotoFolderId, inactiveChild.Id), CancellationToken);
+
+        // Act
+        var result = await TestHandlerExecuteAsync<PhotoAssetPageDTO>(
+            new SearchPhotoAssetsQuery("cross-library-search", 1, 100, "title:asc")
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.TotalCount.ShouldBe(2);
+        result.Value.Items.Select(x => x.Id).Distinct().Count().ShouldBe(2);
+        result.Value.Items.Select(x => x.Id).OrderBy(x => x).ShouldBe(selectedIds.OrderBy(x => x));
+        result.Value.Items.Select(x => x.PlexLibraryId).Distinct().Count().ShouldBeGreaterThan(1);
+        result.Value.Items.Single(x => x.Id == inactiveAsset.Id).SourceRootTitle.ShouldBe(inactiveRoot.Title);
+    }
+ 
+    [Test]
+    public async Task ShouldNormalizeUnicodePunctuationAndRejectQueriesWithOnlyShortTerms()
+    {
+        // Arrange
+        await SetupDatabase(71015, config =>
+        {
+            config.PlexPhotoLibraryCount = 1;
+            config.PhotoAlbumCount = 1;
+            config.PhotoCount = 3;
+        });
+        var dbContext = IDbContext;
+        var assets = await dbContext.PlexPhotoMediaData.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var matchingIds = assets.Take(2).Select(x => x.Id).ToArray();
+        await dbContext.PlexPhotoMediaData
+            .Where(x => x.Id == matchingIds[0])
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SearchTitle, "cafe resume"), CancellationToken);
+        await dbContext.PlexPhotoMediaData
+            .Where(x => x.Id == matchingIds[1])
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SearchTitle, "cafe resume extra"), CancellationToken);
+        await dbContext.PlexPhotoMediaData
+            .Where(x => x.Id == assets[2].Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SearchTitle, "unrelated"), CancellationToken);
+
+        // Act
+        var normalized = await TestHandlerExecuteAsync<PhotoAssetPageDTO>(
+            new SearchPhotoAssetsQuery("Café, résumé!", 1, 100)
+        );
+        var accentTerm = await TestHandlerExecuteAsync<PhotoAssetPageDTO>(
+            new SearchPhotoAssetsQuery("résumé", 1, 100)
+        );
+        var shortTerm = await TestHandlerExecuteAsync<PhotoAssetPageDTO>(
+            new SearchPhotoAssetsQuery("a", 1, 100)
+        );
+
+        // Assert
+        normalized.IsSuccess.ShouldBeTrue();
+        normalized.Value.TotalCount.ShouldBe(2);
+        normalized.Value.Items.Select(x => x.Id).ShouldBe(matchingIds.OrderBy(x => x));
+        accentTerm.IsSuccess.ShouldBeTrue();
+        accentTerm.Value.TotalCount.ShouldBe(2);
+        shortTerm.Has400BadRequestError().ShouldBeTrue();
+    }
+}

@@ -36,9 +36,9 @@ describe('OtherVideoMediaList - individual video selection', () => {
 				id: 20, type: PlexMediaType.OtherVideos, plexServerId: 3, plexLibraryId: 5,
 				title: 'Individual video', hasThumb: false, children: [],
 				mediaData: [
-					{ id: 10, plexApiMediaId: 100, plexApiPartId: 101, fileName: 'part-1.mp4', duration: 6000, size: 1024, videoResolution: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
-					{ id: 11, plexApiMediaId: 100, plexApiPartId: 102, fileName: 'part-2.mp4', duration: 6000, size: 1024, videoResolution: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
-					{ id: 30, plexApiMediaId: 200, plexApiPartId: 201, fileName: 'alternative.mkv', duration: 12000, size: 4096, videoResolution: VideoQuality.UHD_4K, videoCodec: 'hevc', audioCodec: 'flac', audioQuality: AudioQuality.None },
+					{ id: 10, plexApiMediaId: 100, plexApiPartId: 101, fileName: 'part-1.mp4', duration: 6000, size: 1024, videoQuality: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
+					{ id: 11, plexApiMediaId: 100, plexApiPartId: 102, fileName: 'part-2.mp4', duration: 6000, size: 1024, videoQuality: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
+					{ id: 30, plexApiMediaId: 200, plexApiPartId: 201, fileName: 'alternative.mkv', duration: 12000, size: 4096, videoQuality: VideoQuality.UHD_4K, videoCodec: 'hevc', audioCodec: 'flac', audioQuality: AudioQuality.None },
 				],
 				qualities: [
 					{ mediaId: 20, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, videoQuality: VideoQuality.FullHD, audioQuality: AudioQuality.None },

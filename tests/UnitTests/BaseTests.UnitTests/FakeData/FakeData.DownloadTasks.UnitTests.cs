@@ -255,75 +255,82 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
     }
 
     [Test]
-    public void PhotoAlbumDownloadTask_ShouldGenerateConfiguredHierarchyAndPhotoFiles()
+    public void PhotoFolderDownloadTask_ShouldGenerateConfiguredFoldersAndDirectPhotoFiles()
     {
         // Arrange
         var seed = new Seed(24682);
-        var config = new FakeDataConfig { PhotoImageDownloadTasksCount = 2, PhotoImageFileDownloadTasksCount = 3 };
+        var config = new FakeDataConfig
+        {
+            PhotoFolderDownloadTasksCount = 2,
+            PhotoImageDownloadTasksCount = 3,
+        };
 
         // Act
-        var album = FakeData
-            .GetDownloadTaskPhotoAlbum(
+        var folders = FakeData
+            .GetDownloadTaskPhotoFolder(
                 seed,
-                options =>
-                {
-                    options.PhotoImageDownloadTasksCount = config.PhotoImageDownloadTasksCount;
-                    options.PhotoImageFileDownloadTasksCount = config.PhotoImageFileDownloadTasksCount;
-                }
+                options => options.PhotoImageDownloadTasksCount = config.PhotoImageDownloadTasksCount
             )
-            .Generate();
-        var files = album.Children.SelectMany(image => image.Children).ToList();
+            .RuleFor(x => x.Id, faker => faker.Random.Guid())
+            .Generate(config.PhotoFolderDownloadTasksCount);
+        var files = folders.SelectMany(folder => folder.Files).ToList();
 
         // Assert
-        album.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoAlbum);
-        album.MediaType.ShouldBe(PlexMediaType.PhotoAlbum);
-        album.Children.Count.ShouldBe(config.PhotoImageDownloadTasksCount);
-        album.Children.ShouldAllBe(image =>
-            image.DownloadTaskType == DownloadTaskType.PhotoImage
-            && image.FullTitle.StartsWith(album.FullTitle, StringComparison.Ordinal)
-            && image.Children.Count == config.PhotoImageFileDownloadTasksCount
+        folders.Count.ShouldBe(config.PhotoFolderDownloadTasksCount);
+        folders.ShouldAllBe(folder =>
+            folder.DownloadTaskType == DownloadTaskType.PhotoFolder
+            && folder.MediaType == PlexMediaType.PhotoAlbum
+            && folder.Children.Count == 0
+            && folder.Files.Count == config.PhotoImageDownloadTasksCount
+            && folder.Count == folder.Files.Count + 1
+            && folder.DataTotal == folder.Files.Sum(file => file.DataTotal)
         );
-        files.Count.ShouldBe(config.PhotoImageDownloadTasksCount * config.PhotoImageFileDownloadTasksCount);
-        album.DataTotal.ShouldBe(files.Sum(file => file.DataTotal));
+        files.Count.ShouldBe(config.PhotoFolderDownloadTasksCount * config.PhotoImageDownloadTasksCount);
         files.ShouldAllBe(file =>
-            file.DownloadTaskType == DownloadTaskType.PhotoData
+            file.DownloadTaskType == DownloadTaskType.PhotoImage
+            && file.MediaType == PlexMediaType.PhotoImage
+            && file.ParentId != Guid.Empty
+            && file.Parent != null
+            && file.Parent!.Files.Contains(file)
             && file.VideoQuality == VideoQuality.None
             && file.FileName.EndsWith(".jpg", StringComparison.Ordinal)
-            && file.FullTitle.StartsWith(album.FullTitle, StringComparison.Ordinal)
-            && file.DirectoryMeta.PhotoAlbumFolder == album.Title.SanitizeFolderName()
+            && file.FullTitle.StartsWith(file.Parent!.FullTitle, StringComparison.Ordinal)
+            && file.DirectoryMeta.PhotoFolder == file.Parent!.Title.SanitizeFolderName()
+        );
+        folders.ShouldAllBe(folder =>
+            folder.Files.All(file => file.ParentId == folder.Id && file.Parent == folder)
         );
     }
 
     [Test]
-    public void PhotoAlbumDownloadTask_ShouldUseParityFallbacks_WhenChildCountsAreNotConfigured()
+    public void PhotoFolderDownloadTask_ShouldUseParityFallbacks_WhenFileCountIsNotConfigured()
     {
         // Arrange
         var seed = new Seed(24683);
 
         // Act
-        var album = FakeData.GetDownloadTaskPhotoAlbum(seed).Generate();
-        var files = album.Children.SelectMany(image => image.Children).ToList();
+        var folder = FakeData.GetDownloadTaskPhotoFolder(seed).Generate();
 
         // Assert
-        album.Children.Count.ShouldBeInRange(1, 5);
-        album.Children.ShouldAllBe(image => image.Children.Count == 1);
-        files.Count.ShouldBe(album.Children.Count);
-        album.DataTotal.ShouldBe(files.Sum(file => file.DataTotal));
+        folder.Children.ShouldBeEmpty();
+        folder.Files.Count.ShouldBe(1);
+        folder.Files.ShouldAllBe(file => file.ParentId == folder.Id && file.Parent == folder);
+        folder.Count.ShouldBe(2);
+        folder.DataTotal.ShouldBe(folder.Files.Sum(file => file.DataTotal));
     }
 
     [Test]
-    public async Task MockDatabase_ShouldPersistConfiguredPhotoDownloadTaskHierarchy()
+    public async Task MockDatabase_ShouldPersistConfiguredPhotoFolderDownloadTaskHierarchy()
     {
         // Arrange
+        const int photoFolderCount = 1;
         const int photoImageCount = 2;
-        const int photoImageFileCount = 2;
         await SetupDatabase(
             24684,
             config =>
             {
-                config.PhotoAlbumDownloadTasksCount = 1;
+                config.PhotoFolderDownloadTasksCount = photoFolderCount;
                 config.PhotoImageDownloadTasksCount = photoImageCount;
-                config.PhotoImageFileDownloadTasksCount = photoImageFileCount;
             }
         );
         var dbContext = IDbContext;
@@ -333,27 +340,20 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         );
 
         // Act
-        var album = await dbContext
-            .DownloadTaskPhotoAlbums.Include(x => x.Children)
-                .ThenInclude(x => x.Children)
+        var folder = await dbContext
+            .DownloadTaskPhotoFolders.Include(x => x.Files)
             .SingleAsync(CancellationToken);
-        var images = album.Children.OrderBy(x => x.Id).ToList();
-        var files = images.SelectMany(image => image.Children).OrderBy(x => x.Id).ToList();
 
         // Assert
-        images.Count.ShouldBe(photoImageCount);
-        images.ShouldAllBe(image =>
-            image.ParentId == album.Id
-            && image.PlexServerId == library.PlexServerId
-            && image.PlexLibraryId == library.Id
-            && image.Children.Count == photoImageFileCount
-        );
-        files.Count.ShouldBe(photoImageCount * photoImageFileCount);
-        files.ShouldAllBe(file =>
-            images.Any(image => image.Id == file.ParentId)
+        folder.Children.ShouldBeEmpty();
+        folder.Files.Count.ShouldBe(photoImageCount);
+        folder.Count.ShouldBe(photoImageCount + 1);
+        folder.Files.ShouldAllBe(file =>
+            file.ParentId == folder.Id
+            && file.Parent == folder
             && file.PlexServerId == library.PlexServerId
             && file.PlexLibraryId == library.Id
-            && file.DirectoryMeta.PhotoAlbumFolder == album.Title.SanitizeFolderName()
+            && file.DirectoryMeta.PhotoFolder == folder.Title.SanitizeFolderName()
         );
     }
 

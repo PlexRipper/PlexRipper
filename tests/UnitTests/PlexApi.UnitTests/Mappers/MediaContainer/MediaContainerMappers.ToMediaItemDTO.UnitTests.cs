@@ -1,5 +1,4 @@
 using LukeHagar.PlexAPI.SDK.Models.Components;
-using NodaTime;
 using Guids = LukeHagar.PlexAPI.SDK.Models.Components.Guids;
 using Media = LukeHagar.PlexAPI.SDK.Models.Components.Media;
 using Metadata = LukeHagar.PlexAPI.SDK.Models.Components.Metadata;
@@ -15,7 +14,7 @@ namespace Reaparr.PlexApi.UnitTests
         public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasMovieValues()
         {
             // Arrange
-            var now = DateTimeOffset.UtcNow;
+            var now = new DateTimeOffset(2023, 1, 1, 0, 0, 0, TimeSpan.Zero);
             var addedAtUnixTime = now.ToUnixTimeSeconds();
             var updatedAtUnixTime = now.AddDays(1).ToUnixTimeSeconds();
 
@@ -38,7 +37,7 @@ namespace Reaparr.PlexApi.UnitTests
                 Guid = "plex://movie/guid",
                 AddedAt = addedAtUnixTime,
                 UpdatedAt = updatedAtUnixTime,
-                OriginallyAvailableAt = LocalDate.FromDateOnly(new DateOnly(2023, 01, 01)),
+                OriginallyAvailableAt = "2023-01-01",
                 AudienceRating = 8.5f,
                 Rating = 9.0f,
                 GrandparentTitle = "Series Title",
@@ -130,10 +129,7 @@ namespace Reaparr.PlexApi.UnitTests
             result.Guid.ShouldBe(sourceData.Guid);
 
             // DateTime conversions
-            result.AddedAt.ShouldBe(
-                DateTimeExtensions.FromUnixTime(sourceData.AddedAt),
-                tolerance: TimeSpan.FromSeconds(1)
-            );
+            result.AddedAt.ShouldBe(now.UtcDateTime);
             result.UpdatedAt.ShouldBe(DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt ?? 0));
 
             result.OriginallyAvailableAt.ShouldNotBeNull();
@@ -191,7 +187,7 @@ namespace Reaparr.PlexApi.UnitTests
         }
 
         [Test]
-        public void ShouldMapMissingIndexesToMinusOne_WhenApiResponseOmitsIndexes()
+        public void ShouldMapMissingMetadataDefaults_WhenApiResponseOmitsOptionalFields()
         {
             // Arrange
             var sourceData = new Metadata
@@ -208,6 +204,8 @@ namespace Reaparr.PlexApi.UnitTests
             // Assert
             result.Index.ShouldBe(-1);
             result.ParentIndex.ShouldBe(-1);
+            result.AddedAt.ShouldBe(DateTime.UnixEpoch);
+            result.OriginallyAvailableAt.ShouldBe(string.Empty);
         }
 
         [Test]
@@ -236,7 +234,7 @@ namespace Reaparr.PlexApi.UnitTests
         public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasTvShowValues()
         {
             // Arrange
-            var now = DateTimeOffset.UtcNow;
+            var now = new DateTimeOffset(2020, 5, 15, 0, 0, 0, TimeSpan.Zero);
             var addedAtUnixTime = now.ToUnixTimeSeconds();
             var updatedAtUnixTime = now.AddDays(1).ToUnixTimeSeconds();
 
@@ -258,7 +256,7 @@ namespace Reaparr.PlexApi.UnitTests
                 Guid = "plex://show/guid",
                 AddedAt = addedAtUnixTime,
                 UpdatedAt = updatedAtUnixTime,
-                OriginallyAvailableAt = LocalDate.FromDateOnly(new DateOnly(2020, 05, 15)),
+                OriginallyAvailableAt = "2020-05-15",
                 AudienceRating = 9.1f,
                 Rating = 9.3f,
                 LeafCount = 42, // Episode count
@@ -296,13 +294,9 @@ namespace Reaparr.PlexApi.UnitTests
             result.Guid.ShouldBe(sourceData.Guid);
 
             // DateTime conversions
-            result.AddedAt.ShouldBe(
-                DateTimeExtensions.FromUnixTime(sourceData.AddedAt),
-                tolerance: TimeSpan.FromSeconds(1)
-            );
+            result.AddedAt.ShouldBe(now.UtcDateTime);
             result.UpdatedAt.ShouldBe(DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt ?? 0));
 
-            // Parse the string date to NodaTime.LocalDate if not null
             result.OriginallyAvailableAt.ShouldNotBeNull();
             result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
 

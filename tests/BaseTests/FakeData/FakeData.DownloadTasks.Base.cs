@@ -75,7 +75,7 @@ public static partial class FakeData
                         SeasonFolder = string.Empty,
                         MusicArtistFolder = string.Empty,
                         MusicAlbumFolder = string.Empty,
-                        PhotoAlbumFolder = string.Empty,
+                        PhotoFolder = string.Empty,
                         OtherVideoFolder = string.Empty,
                         KeepCompletedInDownloadFolder = false,
                     }

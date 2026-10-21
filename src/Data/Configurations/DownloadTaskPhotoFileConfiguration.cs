@@ -1,10 +1,11 @@
 namespace Reaparr.Data;
 
-public class DownloadTaskPhotoFileConfiguration : IEntityTypeConfiguration<DownloadTaskPhotoImageFile>
+public sealed class DownloadTaskPhotoFileConfiguration : IEntityTypeConfiguration<DownloadTaskPhotoImageFile>
 {
     public void Configure(EntityTypeBuilder<DownloadTaskPhotoImageFile> builder)
     {
         builder.HasIndex(x => x.DownloadStatus);
+        builder.HasIndex(x => x.ParentId);
         builder.HasIndex(x => new
         {
             x.PlexLibraryId,

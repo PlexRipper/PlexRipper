@@ -17,7 +17,7 @@ public record DownloadTaskDirectory
 
     public required string MusicAlbumFolder { get; set; }
 
-    public required string PhotoAlbumFolder { get; set; }
+    public required string PhotoFolder { get; set; }
 
     public required string OtherVideoFolder { get; set; }
 

@@ -60,7 +60,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
                 })
                 .SingleAsync(CancellationToken),
             PlexMediaType.PhotoImage => await dbContext
-                .PlexPhotoImages.Select(x => new
+                .PlexPhotoMediaData.Select(x => new
                 {
                     x.Id,
                     x.PlexApiRatingKey,

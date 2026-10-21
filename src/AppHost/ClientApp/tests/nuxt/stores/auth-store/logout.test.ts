@@ -1,4 +1,4 @@
-import { describe, beforeAll, beforeEach, test, expect, vi } from 'vitest';
+import { describe, afterEach, beforeAll, beforeEach, test, expect, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import { AuthenticationPaths } from '@api-urls';
@@ -15,6 +15,10 @@ describe('AuthenticationStore.logout()', () => {
 	beforeEach(() => {
 		mock = getAxiosMock();
 		setActivePinia(createPinia());
+		vi.spyOn(useRouter(), 'push').mockResolvedValue(undefined);
+	});
+	afterEach(() => {
+		vi.restoreAllMocks();
 	});
 
 	test('Should clear auth state and reset global store when logout succeeds', async () => {
@@ -66,8 +70,7 @@ describe('AuthenticationStore.logout()', () => {
 		accountStore.accounts = [{ id: 1 } as (typeof accountStore.accounts)[number]];
 		const signalrStore = useSignalrStore();
 		vi.spyOn(signalrStore, 'resetSession').mockRejectedValue(new Error('Hub stop failed'));
-		const router = useRouter();
-		const pushSpy = vi.spyOn(router, 'push').mockImplementation(() => Promise.resolve(undefined));
+		const pushSpy = vi.mocked(useRouter().push);
 		mock.onPost(AuthenticationPaths.appUserLogOutEndpoint()).reply(200, generateResultDTO('ok'));
 
 		// Act

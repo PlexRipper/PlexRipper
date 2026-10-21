@@ -10,7 +10,7 @@ const mediaTypes = [
 	[PlexMediaType.MusicArtist, DownloadTaskType.MusicArtist, FolderType.MusicFolder],
 	[PlexMediaType.MusicAlbum, DownloadTaskType.MusicAlbum, FolderType.MusicFolder],
 	[PlexMediaType.MusicTrack, DownloadTaskType.MusicTrack, FolderType.MusicFolder],
-	[PlexMediaType.PhotoAlbum, DownloadTaskType.PhotoAlbum, FolderType.PhotosFolder],
+	[PlexMediaType.PhotoAlbum, DownloadTaskType.PhotoFolder, FolderType.PhotosFolder],
 	[PlexMediaType.PhotoImage, DownloadTaskType.PhotoImage, FolderType.PhotosFolder],
 	[PlexMediaType.OtherVideos, DownloadTaskType.OtherVideo, FolderType.OtherVideosFolder],
 ] as const;
@@ -30,7 +30,6 @@ describe('Convert media identities', () => {
 
 	test.each([
 		[DownloadTaskType.MusicTrackData, PlexMediaType.MusicTrack],
-		[DownloadTaskType.PhotoData, PlexMediaType.PhotoImage],
 		[DownloadTaskType.OtherVideoData, PlexMediaType.OtherVideos],
 	])('Should retain the source media family for %s file tasks', (taskType, mediaType) => {
 		// Act

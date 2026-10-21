@@ -9,8 +9,8 @@ public class DeleteDownloadTasksByKeyCommandMediaTypesUnitTests : BaseCommandUni
     [Arguments(DownloadTaskType.TvShow, true)]
     [Arguments(DownloadTaskType.MusicArtist, false)]
     [Arguments(DownloadTaskType.MusicArtist, true)]
-    [Arguments(DownloadTaskType.PhotoAlbum, false)]
-    [Arguments(DownloadTaskType.PhotoAlbum, true)]
+    [Arguments(DownloadTaskType.PhotoFolder, false)]
+    [Arguments(DownloadTaskType.PhotoFolder, true)]
     [Arguments(DownloadTaskType.OtherVideo, false)]
     [Arguments(DownloadTaskType.OtherVideo, true)]
     public async Task ShouldDeleteOnlySelectedHierarchyAndNotifyExactKeys_WhenDeletingRootOrLastFile(
@@ -33,9 +33,8 @@ public class DeleteDownloadTasksByKeyCommandMediaTypesUnitTests : BaseCommandUni
             config.MusicTrackDownloadTasksCount = 1;
             config.MusicTrackFileDownloadTasksCount = 1;
             config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumDownloadTasksCount = 2;
+            config.PhotoFolderDownloadTasksCount = 2;
             config.PhotoImageDownloadTasksCount = 1;
-            config.PhotoImageFileDownloadTasksCount = 1;
             config.PlexOtherVideoLibraryCount = 1;
             config.OtherVideoDownloadTasksCount = 2;
             config.OtherVideoFileDownloadTasksCount = 1;
@@ -77,5 +76,35 @@ public class DeleteDownloadTasksByKeyCommandMediaTypesUnitTests : BaseCommandUni
                 It.IsAny<DownloadStatus>(),
                 It.IsAny<CancellationToken>()),
             Times.Never());
+    }
+    [Test]
+    public async Task ShouldDeletePhotoFolderRootAndNotifyItsKey()
+    {
+        await SetupDatabase(
+            88401,
+            config =>
+            {
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoFolderDownloadTasksCount = 1;
+                config.PhotoImageDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var root = (await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).Single();
+        root.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoFolder);
+        var key = root.ToKey();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x => x.OnStatusChangedAsync(key, DownloadStatus.Deleted, CancellationToken))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        var result = await TestHandlerExecuteAsync(new DeleteDownloadTasksByKeyCommand([key]));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+        (await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).ShouldBeEmpty();
+        (await dbContext.DownloadTaskPhotoFolders.CountAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.DownloadTaskPhotoImageFiles.CountAsync(CancellationToken)).ShouldBe(0);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
     }
 }

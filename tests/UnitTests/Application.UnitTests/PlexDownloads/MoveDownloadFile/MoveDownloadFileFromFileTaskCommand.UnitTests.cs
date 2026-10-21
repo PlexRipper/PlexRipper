@@ -114,17 +114,16 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
                 break;
             case PlexMediaType.PhotoImage:
                 var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-                var album = FakeData.GetDownloadTaskPhotoAlbum(new Seed(52223))
-                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52224)).Generate(2)).Generate();
-                foreach (var node in new DownloadTaskBase[] { album }
-                    .Concat(album.Children).Concat(album.Children.SelectMany(x => x.Children)))
+                var album = FakeData.GetDownloadTaskPhotoFolder(new Seed(52223))
+                    .RuleFor(x => x.Files, _ => FakeData.GetDownloadTaskPhotoImageFile(new Seed(52224)).Generate(2)).Generate();
+                foreach (var node in new DownloadTaskBase[] { album }.Concat(album.Files))
                 {
                     node.PlexServerId = library.PlexServerId;
                     node.PlexLibraryId = library.Id;
                 }
-                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                dbContext.DownloadTaskPhotoFolders.Add(album);
                 await dbContext.SaveChangesAsync(CancellationToken);
-                var photos = album.Children.SelectMany(x => x.Children).ToArray();
+                var photos = album.Files.ToArray();
                 target = photos[0];
                 control = photos[1];
                 break;
@@ -149,7 +148,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
                 target.DirectoryMeta.MusicArtistFolder,
                 target.DirectoryMeta.MusicAlbumFolder
             ),
-            PlexMediaType.PhotoImage => target.DirectoryMeta.PhotoAlbumFolder,
+            PlexMediaType.PhotoImage => target.DirectoryMeta.PhotoFolder,
             PlexMediaType.OtherVideos => target.DirectoryMeta.OtherVideoFolder,
             _ => target.DirectoryMeta.MovieFolder,
         };
@@ -299,17 +298,16 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
                 break;
             case PlexMediaType.PhotoImage:
                 var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-                var album = FakeData.GetDownloadTaskPhotoAlbum(new Seed(52224))
-                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52225)).Generate(2)).Generate();
-                foreach (var node in new DownloadTaskBase[] { album }
-                    .Concat(album.Children).Concat(album.Children.SelectMany(x => x.Children)))
+                var album = FakeData.GetDownloadTaskPhotoFolder(new Seed(52224))
+                    .RuleFor(x => x.Files, _ => FakeData.GetDownloadTaskPhotoImageFile(new Seed(52225)).Generate(2)).Generate();
+                foreach (var node in new DownloadTaskBase[] { album }.Concat(album.Files))
                 {
                     node.PlexServerId = library.PlexServerId;
                     node.PlexLibraryId = library.Id;
                 }
-                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                dbContext.DownloadTaskPhotoFolders.Add(album);
                 await dbContext.SaveChangesAsync(CancellationToken);
-                var photos = album.Children.SelectMany(x => x.Children).ToArray();
+                var photos = album.Files.ToArray();
                 target = photos[0];
                 control = photos[1];
                 break;
@@ -451,17 +449,16 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
                 break;
             case PlexMediaType.PhotoImage:
                 var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-                var album = FakeData.GetDownloadTaskPhotoAlbum(new Seed(52225))
-                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52226)).Generate(2)).Generate();
-                foreach (var node in new DownloadTaskBase[] { album }
-                    .Concat(album.Children).Concat(album.Children.SelectMany(x => x.Children)))
+                var album = FakeData.GetDownloadTaskPhotoFolder(new Seed(52225))
+                    .RuleFor(x => x.Files, _ => FakeData.GetDownloadTaskPhotoImageFile(new Seed(52226)).Generate(2)).Generate();
+                foreach (var node in new DownloadTaskBase[] { album }.Concat(album.Files))
                 {
                     node.PlexServerId = library.PlexServerId;
                     node.PlexLibraryId = library.Id;
                 }
-                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                dbContext.DownloadTaskPhotoFolders.Add(album);
                 await dbContext.SaveChangesAsync(CancellationToken);
-                var photos = album.Children.SelectMany(x => x.Children).ToArray();
+                var photos = album.Files.ToArray();
                 target = photos[0];
                 control = photos[1];
                 break;
@@ -550,7 +547,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
     [Arguments(DownloadTaskType.MovieData)]
     [Arguments(DownloadTaskType.EpisodeData)]
     [Arguments(DownloadTaskType.MusicTrackData)]
-    [Arguments(DownloadTaskType.PhotoData)]
+    [Arguments(DownloadTaskType.PhotoImage)]
     [Arguments(DownloadTaskType.OtherVideoData)]
     public async Task ShouldReturnNotFoundWithoutSideEffects_WhenFileKeyDoesNotExist(DownloadTaskType type)
     {
@@ -848,22 +845,18 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
                 break;
             case PlexMediaType.PhotoImage:
                 var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-                var album = FakeData
-                    .GetDownloadTaskPhotoAlbum(new Seed(52229))
-                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52230)).Generate(1))
+                var folder = FakeData
+                    .GetDownloadTaskPhotoFolder(new Seed(52229))
+                    .RuleFor(x => x.Files, _ => FakeData.GetDownloadTaskPhotoImageFile(new Seed(52230)).Generate(1))
                     .Generate();
-                foreach (
-                    var node in new DownloadTaskBase[] { album }
-                        .Concat(album.Children)
-                        .Concat(album.Children.SelectMany(x => x.Children))
-                )
+                foreach (var node in new DownloadTaskBase[] { folder }.Concat(folder.Files))
                 {
                     node.PlexServerId = library.PlexServerId;
                     node.PlexLibraryId = library.Id;
                 }
-                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                dbContext.DownloadTaskPhotoFolders.Add(folder);
                 await dbContext.SaveChangesAsync(CancellationToken);
-                target = album.Children.SelectMany(x => x.Children).Single();
+                target = folder.Files.Single();
                 break;
             default:
                 target = family == PlexMediaType.Movie
@@ -888,7 +881,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
                 target.DirectoryMeta.MusicArtistFolder,
                 target.DirectoryMeta.MusicAlbumFolder
             ),
-            PlexMediaType.PhotoImage => target.DirectoryMeta.PhotoAlbumFolder,
+            PlexMediaType.PhotoImage => target.DirectoryMeta.PhotoFolder,
             PlexMediaType.OtherVideos => target.DirectoryMeta.OtherVideoFolder,
             _ => target.DirectoryMeta.MovieFolder,
         };
@@ -1016,22 +1009,18 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
                 break;
             case PlexMediaType.PhotoImage:
                 var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-                var album = FakeData
-                    .GetDownloadTaskPhotoAlbum(new Seed(52230))
-                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52231)).Generate(1))
+                var folder = FakeData
+                    .GetDownloadTaskPhotoFolder(new Seed(52230))
+                    .RuleFor(x => x.Files, _ => FakeData.GetDownloadTaskPhotoImageFile(new Seed(52231)).Generate(1))
                     .Generate();
-                foreach (
-                    var node in new DownloadTaskBase[] { album }
-                        .Concat(album.Children)
-                        .Concat(album.Children.SelectMany(x => x.Children))
-                )
+                foreach (var node in new DownloadTaskBase[] { folder }.Concat(folder.Files))
                 {
                     node.PlexServerId = library.PlexServerId;
                     node.PlexLibraryId = library.Id;
                 }
-                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                dbContext.DownloadTaskPhotoFolders.Add(folder);
                 await dbContext.SaveChangesAsync(CancellationToken);
-                target = album.Children.SelectMany(x => x.Children).Single();
+                target = folder.Files.Single();
                 break;
             default:
                 target = family == PlexMediaType.Movie
@@ -1153,22 +1142,18 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseCommandUnitTest<
                 break;
             case PlexMediaType.PhotoImage:
                 var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-                var album = FakeData
-                    .GetDownloadTaskPhotoAlbum(new Seed(52231))
-                    .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(52232)).Generate(1))
+                var folder = FakeData
+                    .GetDownloadTaskPhotoFolder(new Seed(52231))
+                    .RuleFor(x => x.Files, _ => FakeData.GetDownloadTaskPhotoImageFile(new Seed(52232)).Generate(1))
                     .Generate();
-                foreach (
-                    var node in new DownloadTaskBase[] { album }
-                        .Concat(album.Children)
-                        .Concat(album.Children.SelectMany(x => x.Children))
-                )
+                foreach (var node in new DownloadTaskBase[] { folder }.Concat(folder.Files))
                 {
                     node.PlexServerId = library.PlexServerId;
                     node.PlexLibraryId = library.Id;
                 }
-                dbContext.DownloadTaskPhotoAlbums.Add(album);
+                dbContext.DownloadTaskPhotoFolders.Add(folder);
                 await dbContext.SaveChangesAsync(CancellationToken);
-                target = album.Children.SelectMany(x => x.Children).Single();
+                target = folder.Files.Single();
                 break;
             default:
                 target = family == PlexMediaType.Movie

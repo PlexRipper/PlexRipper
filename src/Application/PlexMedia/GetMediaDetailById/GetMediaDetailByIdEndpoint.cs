@@ -15,7 +15,7 @@ public class GetMediaDetailByIdEndpointRequest
         Type = type;
     }
 
-    /// <summary>The id of the <see cref="BasePlexMedia"/>.</summary>
+    /// <summary>The persisted media identifier within the requested media family.</summary>
     public required int PlexMediaId { get; init; }
 
     /// <summary> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</summary>
@@ -188,18 +188,13 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
 
     private async Task<Result<PlexPhotoAlbum>> GetPlexPhotoAlbum(int plexPhotoAlbumId, CancellationToken ct)
     {
-        var plexPhotoAlbum = _dbContext.PlexPhotoAlbums.FirstOrDefault(x => x.Id == plexPhotoAlbumId);
+        var plexPhotoAlbum = await _dbContext.PlexPhotoAlbums
+            .Include(x => x.Memberships)
+            .ThenInclude(x => x.PlexPhotoMediaData)
+            .FirstOrDefaultAsync(x => x.Id == plexPhotoAlbumId, ct);
 
         if (plexPhotoAlbum is null)
             return ResultExtensions.EntityNotFound(nameof(PlexPhotoAlbum), plexPhotoAlbumId).LogError();
-
-        plexPhotoAlbum.Photos = _dbContext
-            .PlexPhotoImages.Include(x => x.MediaDataList)
-            .Where(x => x.PlexPhotoAlbumId == plexPhotoAlbumId)
-            .Take(plexPhotoAlbum.ChildCount)
-            .ToList();
-
-        plexPhotoAlbum.Photos = plexPhotoAlbum.Photos.OrderBy(x => x.SortIndex).ToList();
 
         await SetNestedPhotoAlbumProperties(plexPhotoAlbum, ct);
 

@@ -11,6 +11,8 @@ export function setupMockPlexMediaEndpoints(
 ): BasePageSetupResult {
 	// Generate library media page data
 	for (const library of this.plexLibraries) {
+		// Photo journeys mock the bounded PlexPhoto endpoints, not generic media expansion.
+		if (library.type === PlexMediaType.PhotoAlbum) continue;
 		const mediaList = generatePlexMediaSlims({
 			config,
 			partialData: {

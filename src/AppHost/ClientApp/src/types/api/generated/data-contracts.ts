@@ -309,6 +309,7 @@ export interface DownloadMediaDTO {
   /** @format int32 */
   plexServerId: number;
   qualities: PlexMediaQualityDTO[];
+  selectionKind?: PhotoItemKind | null;
   type: PlexMediaType;
 }
 
@@ -372,6 +373,14 @@ export interface DownloadPreviewDTO {
   size: number;
   title: string;
   type: PlexMediaType;
+}
+
+export interface DownloadPreviewRequest {
+  customDestinationFolderPath: string;
+  /** @format int32 */
+  destinationFolderPathId?: number | null;
+  /** @minLength 1 */
+  downloadMedias: DownloadMediaDTO[];
 }
 
 export interface DownloadProgressDTO {
@@ -456,7 +465,7 @@ export interface DownloadTaskCreationReportDTO {
   /** @format int32 */
   otherVideos: number;
   /** @format int32 */
-  photoAlbums: number;
+  photoFolders: number;
   /** @format int32 */
   photoImages: number;
   /** @format int32 */
@@ -539,9 +548,8 @@ export enum DownloadTaskType {
   MusicAlbum = "MusicAlbum",
   MusicTrack = "MusicTrack",
   MusicTrackData = "MusicTrackData",
-  PhotoAlbum = "PhotoAlbum",
+  PhotoFolder = "PhotoFolder",
   PhotoImage = "PhotoImage",
-  PhotoData = "PhotoData",
   OtherVideo = "OtherVideo",
   OtherVideoData = "OtherVideoData",
 }
@@ -907,6 +915,208 @@ export enum NotificationLevel {
   Fatal = "Fatal",
 }
 
+export interface PhotoAlbumBrowseDTO {
+  /** @format int64 */
+  assetBytes: number;
+  /** @format int32 */
+  assetCount: number;
+  hasThumbnail: boolean;
+  /** @format int32 */
+  id: number;
+  /** @format int32 */
+  plexApiMetaDataKey: number;
+  /** @format int32 */
+  plexApiRatingKey: number;
+  /** @format int32 */
+  plexLibraryId: number;
+  plexLibraryTitle: string;
+  /** @format int32 */
+  plexServerId: number;
+  plexServerName: string;
+  title: string;
+}
+
+export interface PhotoAlbumPageDTO {
+  items: PhotoAlbumBrowseDTO[];
+  /** @format int32 */
+  page: number;
+  /** @format int32 */
+  pageSize: number;
+  /** @format int64 */
+  totalAssetBytes: number;
+  /** @format int32 */
+  totalCount: number;
+}
+
+export interface PhotoAlbumSummaryDTO {
+  hasThumbnail: boolean;
+  /** @format int32 */
+  id: number;
+  /** @format int32 */
+  plexApiMetaDataKey: number;
+  /** @format int32 */
+  plexApiRatingKey: number;
+  /** @format int32 */
+  plexLibraryId: number;
+  plexLibraryTitle: string;
+  /** @format int32 */
+  plexServerId: number;
+  plexServerName: string;
+  title: string;
+}
+
+export interface PhotoAlbumSummaryPageDTO {
+  items: PhotoAlbumSummaryDTO[];
+  /** @format int32 */
+  page: number;
+  /** @format int32 */
+  pageSize: number;
+  /** @format int32 */
+  totalCount: number;
+}
+
+export interface PhotoAssetBrowseDTO {
+  assetKind: PhotoAssetKind;
+  container: string;
+  /** @format int32 */
+  duration?: number | null;
+  hasThumbnail: boolean;
+  /** @format int32 */
+  height?: number | null;
+  /** @format int32 */
+  id: number;
+  originalFilename: string;
+  /** @format int32 */
+  plexApiMetaDataKey: number;
+  /** @format int32 */
+  plexApiRatingKey: number;
+  /** @format int32 */
+  plexLibraryId: number;
+  plexLibraryTitle: string;
+  /** @format int32 */
+  plexServerId: number;
+  plexServerName: string;
+  relativeFolderPath?: string | null;
+  /** @format int64 */
+  size: number;
+  sourceRootTitle?: string | null;
+  title: string;
+  /** @format int32 */
+  width?: number | null;
+}
+
+export interface PhotoAssetInspectionDTO {
+  /** @format date-time */
+  addedAt: string;
+  albums: PhotoAlbumSummaryPageDTO;
+  assetKind: PhotoAssetKind;
+  audioCodec?: string | null;
+  breadcrumbs: PhotoFolderBreadcrumbDTO[];
+  container: string;
+  /** @format int32 */
+  duration?: number | null;
+  hasThumbnail: boolean;
+  /** @format int32 */
+  height?: number | null;
+  /** @format int32 */
+  id: number;
+  originalFilename: string;
+  /** @format date-time */
+  originallyAvailableAt?: string | null;
+  /** @format int32 */
+  plexApiMetaDataKey: number;
+  /** @format int32 */
+  plexApiRatingKey: number;
+  /** @format int32 */
+  plexLibraryId: number;
+  plexLibraryTitle: string;
+  /** @format int32 */
+  plexServerId: number;
+  plexServerName: string;
+  relativeFolderPath?: string | null;
+  /** @format int64 */
+  size: number;
+  sourceRootTitle?: string | null;
+  summary?: string | null;
+  title: string;
+  /** @format date-time */
+  updatedAt?: string | null;
+  videoCodec?: string | null;
+  /** @format int32 */
+  width?: number | null;
+}
+
+export enum PhotoAssetKind {
+  Image = "Image",
+  VideoClip = "VideoClip",
+}
+
+export interface PhotoAssetPageDTO {
+  items: PhotoAssetBrowseDTO[];
+  /** @format int32 */
+  page: number;
+  /** @format int32 */
+  pageSize: number;
+  /** @format int64 */
+  totalBytes: number;
+  /** @format int32 */
+  totalCount: number;
+}
+
+export interface PhotoFolderBreadcrumbDTO {
+  /** @format int32 */
+  id: number;
+  relativePath: string;
+  title: string;
+}
+
+export interface PhotoFolderBrowseDTO {
+  /** @format int32 */
+  id: number;
+  isActive?: boolean | null;
+  isRoot: boolean;
+  /** @format int32 */
+  parentId?: number | null;
+  /** @format int32 */
+  plexLibraryId: number;
+  /** @format int32 */
+  plexServerId: number;
+  /** @format int64 */
+  recursiveAssetBytes: number;
+  /** @format int32 */
+  recursiveAssetCount: number;
+  relativePath: string;
+  title: string;
+}
+
+export interface PhotoFolderChildrenDTO {
+  assets: PhotoAssetPageDTO;
+  breadcrumbs: PhotoFolderBreadcrumbDTO[];
+  folder: PhotoFolderBrowseDTO;
+  folders: PhotoFolderPageDTO;
+}
+
+export interface PhotoFolderPageDTO {
+  items: PhotoFolderBrowseDTO[];
+  /** @format int32 */
+  page: number;
+  /** @format int32 */
+  pageSize: number;
+  /** @format int32 */
+  totalCount: number;
+}
+
+export enum PhotoImageRepresentation {
+  Original = "Original",
+  Converted = "Converted",
+}
+
+export enum PhotoItemKind {
+  Folder = "Folder",
+  Album = "Album",
+  Asset = "Asset",
+}
+
 export enum PlexAccessState {
   Unknown = "Unknown",
   Revoked = "Revoked",
@@ -1177,7 +1387,7 @@ export interface PlexMediaDataDTO {
   /** @format int64 */
   size: number;
   videoCodec: string;
-  videoResolution: VideoQuality;
+  videoQuality: VideoQuality;
 }
 
 export interface PlexMediaFilterMetadataDTO {
@@ -1697,6 +1907,51 @@ export interface ResultDTOOfListOfString {
   statusCode: number;
   successes: SuccessDTO[];
   value?: string[] | null;
+}
+
+export interface ResultDTOOfPhotoAlbumPageDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PhotoAlbumPageDTO | null;
+}
+
+export interface ResultDTOOfPhotoAssetInspectionDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PhotoAssetInspectionDTO | null;
+}
+
+export interface ResultDTOOfPhotoAssetPageDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PhotoAssetPageDTO | null;
+}
+
+export interface ResultDTOOfPhotoFolderChildrenDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PhotoFolderChildrenDTO | null;
+}
+
+export interface ResultDTOOfPhotoFolderPageDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PhotoFolderPageDTO | null;
 }
 
 export interface ResultDTOOfPlexAccountDTO {

@@ -18,25 +18,24 @@ public class ClearCompletedDownloadTasksByServerIdCommandUnitTests
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.PlexServerId).ToListAsync(CancellationToken);
         var albums = FakeData
-            .GetDownloadTaskPhotoAlbum(new Seed(88100))
-            .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(88101)).Generate(1))
+            .GetDownloadTaskPhotoFolder(new Seed(88100))
+            .RuleFor(x => x.Files, _ => FakeData.GetDownloadTaskPhotoImageFile(new Seed(88101)).Generate(1))
             .Generate(3);
         for (var i = 0; i < albums.Count; i++)
         {
             var album = albums[i];
             var library = libraries[i == 2 ? 1 : 0];
-            foreach (
-                var node in new DownloadTaskBase[] { album }
-                    .Concat(album.Children)
-                    .Concat(album.Children.SelectMany(x => x.Children))
-            )
+            album.DestinationRootPath = $"/Photos/context-{i}";
+            foreach (var file in album.Files)
+                file.DirectoryMeta.DestinationRootPath = album.DestinationRootPath;
+            foreach (var node in new DownloadTaskBase[] { album }.Concat(album.Files))
             {
                 node.PlexServerId = library.PlexServerId;
                 node.PlexLibraryId = library.Id;
                 node.DownloadStatus = i == 1 ? DownloadStatus.Queued : DownloadStatus.Completed;
             }
         }
-        dbContext.DownloadTaskPhotoAlbums.AddRange(albums);
+        dbContext.DownloadTaskPhotoFolders.AddRange(albums);
         await dbContext.SaveChangesAsync(CancellationToken);
         (await dbContext.DownloadTaskPhotoImageFiles.CountAsync(CancellationToken)).ShouldBe(3);
 
@@ -49,15 +48,12 @@ public class ClearCompletedDownloadTasksByServerIdCommandUnitTests
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         result.Value.ShouldBe(1);
-        (await dbContext.DownloadTaskPhotoAlbums.Select(x => x.Id).ToListAsync(CancellationToken))
+        (await dbContext.DownloadTaskPhotoFolders.Select(x => x.Id).ToListAsync(CancellationToken))
             .Order()
             .ShouldBe(albums.Skip(1).Select(x => x.Id).Order());
-        (await dbContext.DownloadTaskPhotoImages.Select(x => x.Id).ToListAsync(CancellationToken))
-            .Order()
-            .ShouldBe(albums.Skip(1).SelectMany(x => x.Children).Select(x => x.Id).Order());
         (await dbContext.DownloadTaskPhotoImageFiles.Select(x => x.Id).ToListAsync(CancellationToken))
             .Order()
-            .ShouldBe(albums.Skip(1).SelectMany(x => x.Children).SelectMany(x => x.Children).Select(x => x.Id).Order());
+            .ShouldBe(albums.Skip(1).SelectMany(x => x.Files).Select(x => x.Id).Order());
     }
 
     [Test]
@@ -215,5 +211,51 @@ public class ClearCompletedDownloadTasksByServerIdCommandUnitTests
         (await dbContext.GetDownloadTaskFileAsync(otherServer.ToKey(), CancellationToken))!.DownloadStatus.ShouldBe(
             DownloadStatus.Completed
         );
+    }
+    [Test]
+    public async Task ShouldClearCompletedStandalonePhotoRootWithoutTouchingActiveOrOtherServer()
+    {
+        await SetupDatabase(
+            88116,
+            c =>
+            {
+                c.PlexServerCount = 2;
+                c.PlexPhotoLibraryCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.PlexServerId).ToListAsync(CancellationToken);
+        var roots = FakeData.GetDownloadTaskPhotoFolder(new Seed(88116)).Generate(3);
+        for (var i = 0; i < roots.Count; i++)
+        {
+            var library = libraries[i == 2 ? 1 : 0];
+            roots[i].DestinationRootPath = $"/Photos/context-{i}";
+            foreach (var file in roots[i].Files)
+                file.DirectoryMeta.DestinationRootPath = roots[i].DestinationRootPath;
+            foreach (var node in new DownloadTaskBase[] { roots[i] }.Concat(roots[i].Files))
+            {
+                node.PlexServerId = library.PlexServerId;
+                node.PlexLibraryId = library.Id;
+                node.DownloadStatus = i == 1 ? DownloadStatus.Queued : DownloadStatus.Completed;
+            }
+        }
+        dbContext.DownloadTaskPhotoFolders.AddRange(roots);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var result = await TestHandlerExecuteAsync<int>(
+            new ClearCompletedDownloadTasksByServerIdCommand(libraries[0].PlexServerId)
+        );
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(1);
+        (await dbContext.DownloadTaskPhotoFolders.Select(x => x.Id).ToListAsync(CancellationToken))
+            .Order()
+            .ShouldBe(new[] { roots[1].Id, roots[2].Id }.Order());
+        (await dbContext.DownloadTaskPhotoImageFiles.Select(x => x.Id).ToListAsync(CancellationToken))
+            .Order()
+            .ShouldBe(new[] { roots[1].Files.Single().Id, roots[2].Files.Single().Id }.Order());
+        (await dbContext.GetAllDownloadTasksByServerAsync(libraries[0].PlexServerId, cancellationToken: CancellationToken))
+            .Select(x => x.Id)
+            .ShouldBe([roots[1].Id]);
     }
 }

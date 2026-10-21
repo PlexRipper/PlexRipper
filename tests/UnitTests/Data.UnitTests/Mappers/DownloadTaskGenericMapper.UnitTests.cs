@@ -13,9 +13,8 @@ public class DownloadTaskGenericMapperUnitTests : BaseUnitTest
     [Arguments(DownloadTaskType.MusicAlbum, "Music", "Artist", "Album")]
     [Arguments(DownloadTaskType.MusicTrack, "Music", "Artist", "Album")]
     [Arguments(DownloadTaskType.MusicTrackData, "Music", "Artist", "Album")]
-    [Arguments(DownloadTaskType.PhotoAlbum, "Photos", "Photos", "")]
+    [Arguments(DownloadTaskType.PhotoFolder, "Photos", "Photos", "")]
     [Arguments(DownloadTaskType.PhotoImage, "Photos", "Photos", "")]
-    [Arguments(DownloadTaskType.PhotoData, "Photos", "Photos", "")]
     [Arguments(DownloadTaskType.OtherVideo, "OtherVideos", "Video", "")]
     [Arguments(DownloadTaskType.OtherVideoData, "OtherVideos", "Video", "")]
     public void ShouldMapOwnHierarchyDirectory_WhenFileMetadataIsLoaded(
@@ -34,7 +33,7 @@ public class DownloadTaskGenericMapperUnitTests : BaseUnitTest
         file.DirectoryMeta.SeasonFolder = "Season 01";
         file.DirectoryMeta.MusicArtistFolder = "Artist";
         file.DirectoryMeta.MusicAlbumFolder = "Album";
-        file.DirectoryMeta.PhotoAlbumFolder = "Photos";
+        file.DirectoryMeta.PhotoFolder = type is DownloadTaskType.PhotoFolder or DownloadTaskType.PhotoImage ? "Photos" : string.Empty;
         file.DirectoryMeta.OtherVideoFolder = "Video";
 
         // Act
@@ -74,6 +73,64 @@ public class DownloadTaskGenericMapperUnitTests : BaseUnitTest
         mappedFile.FileTransferSpeed.ShouldBe(file.FileTransferSpeed);
         mappedFile.FileDataTransferred.ShouldBe(file.FileDataTransferred);
         mappedFile.CurrentFileTransferBytesOffset.ShouldBe(file.CurrentFileTransferBytesOffset);
+    }
+
+    [Test]
+    public void ShouldMapNestedPhotoFolderAndFileWithDirectParentKeys_WhenFolderContainsSubtree()
+    {
+        // Arrange
+        var root = FakeData
+            .GetDownloadTaskPhotoFolder(new Seed(74003), config => config.PhotoImageDownloadTasksCount = 1)
+            .RuleFor(x => x.Id, _ => Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))
+            .Generate();
+        root.DownloadRootPath = "/downloads";
+        root.DestinationRootPath = "/destination";
+        root.RelativePath = string.Empty;
+        var rootFile = root.Files.Single();
+        rootFile.UpdateInitProperty(nameof(rootFile.Id), Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"));
+        rootFile.DirectoryMeta.DownloadRootPath = root.DownloadRootPath;
+        rootFile.DirectoryMeta.DestinationRootPath = root.DestinationRootPath;
+        rootFile.DirectoryMeta.PhotoFolder = "root";
+        var child = FakeData
+            .GetDownloadTaskPhotoFolder(new Seed(74004), config => config.PhotoImageDownloadTasksCount = 1)
+            .RuleFor(x => x.Id, _ => Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"))
+            .Generate();
+        child.Parent = root;
+        child.ParentId = root.Id;
+        child.RelativePath = "nested";
+        child.DownloadRootPath = root.DownloadRootPath;
+        child.DestinationRootPath = root.DestinationRootPath;
+        child.Files.Clear();
+        var childFile = FakeData.GetDownloadTaskPhotoImageFile(new Seed(74005))
+            .RuleFor(x => x.Id, _ => Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"))
+            .Generate();
+        childFile.UpdateInitProperty(nameof(childFile.ParentId), child.Id);
+        childFile.UpdateInitProperty(nameof(childFile.Parent), child);
+        child.Files.Add(childFile);
+        childFile.DirectoryMeta.DownloadRootPath = child.DownloadRootPath;
+        childFile.DirectoryMeta.DestinationRootPath = child.DestinationRootPath;
+        childFile.DirectoryMeta.PhotoFolder = "root/nested";
+        root.Children.Add(child);
+
+        // Act
+        var result = root.ToGeneric();
+
+        // Assert
+        result.ParentId.ShouldBe(Guid.Empty);
+        result.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoFolder);
+        result.Children.Select(x => (x.Id, x.ParentId, x.DownloadTaskType, x.IsDownloadable)).OrderBy(x => x.Id).ShouldBe(
+            new (Guid Id, Guid ParentId, DownloadTaskType DownloadTaskType, bool IsDownloadable)[]
+            {
+                (child.Id, root.Id, DownloadTaskType.PhotoFolder, false),
+                (rootFile.Id, root.Id, DownloadTaskType.PhotoImage, true),
+            }.OrderBy(x => x.Id)
+        );
+        var mappedChild = result.Children.Single(x => x.Id == child.Id);
+        mappedChild.DownloadDirectory.ShouldBe(Path.Combine("/downloads", "Photos", "root/nested"));
+        mappedChild.DestinationDirectory.ShouldBe(Path.Combine("/destination", "root/nested"));
+        mappedChild.Children.Select(x => (x.Id, x.ParentId, x.DownloadTaskType, x.IsDownloadable)).ShouldBe([
+            (childFile.Id, child.Id, DownloadTaskType.PhotoImage, true),
+        ]);
     }
 
     [Test]
@@ -230,22 +287,13 @@ public class DownloadTaskGenericMapperUnitTests : BaseUnitTest
                     DownloadTaskType.MusicTrack => track,
                     _ => trackFile,
                 }, trackFile);
-            case DownloadTaskType.PhotoAlbum:
+            case DownloadTaskType.PhotoFolder:
             case DownloadTaskType.PhotoImage:
-            case DownloadTaskType.PhotoData:
-                var photoAlbum = FakeData.GetDownloadTaskPhotoAlbum(seed, config =>
-                {
-                    config.PhotoImageDownloadTasksCount = 1;
-                    config.PhotoImageFileDownloadTasksCount = 1;
-                }).Generate();
-                var image = photoAlbum.Children.Single();
-                var imageFile = image.Children.Single();
-                return (type switch
-                {
-                    DownloadTaskType.PhotoAlbum => photoAlbum,
-                    DownloadTaskType.PhotoImage => image,
-                    _ => imageFile,
-                }, imageFile);
+                var photoFolder = FakeData
+                    .GetDownloadTaskPhotoFolder(seed, config => config.PhotoImageDownloadTasksCount = 1)
+                    .Generate();
+                var imageFile = photoFolder.Files.Single();
+                return (type == DownloadTaskType.PhotoFolder ? photoFolder : imageFile, imageFile);
             case DownloadTaskType.OtherVideo:
             case DownloadTaskType.OtherVideoData:
                 var video = FakeData.GetDownloadTaskOtherVideo(seed).Generate();

@@ -6,6 +6,7 @@ import { Notification } from '@api/generated/Notification';
 import { PlexAccount } from '@api/generated/PlexAccount';
 import { PlexLibrary } from '@api/generated/PlexLibrary';
 import { PlexMedia } from '@api/generated/PlexMedia';
+import { PlexPhoto } from '@api/generated/PlexPhoto';
 import { PlexServer } from '@api/generated/PlexServer';
 import { PlexServerConnection } from '@api/generated/PlexServerConnection';
 import { Settings } from '@api/generated/Settings';
@@ -24,6 +25,7 @@ const folderPathApi = new FolderPath();
 const notificationApi = new Notification();
 const plexAccountApi = new PlexAccount();
 const plexLibraryApi = new PlexLibrary();
+const plexPhotoApi = new PlexPhoto();
 const plexMediaApi = new PlexMedia();
 const plexServerApi = new PlexServer();
 const plexServerConnectionApi = new PlexServerConnection();
@@ -41,6 +43,7 @@ export {
 	plexAccountApi,
 	plexLibraryApi,
 	plexMediaApi,
+	plexPhotoApi,
 	plexServerApi,
 	plexServerConnectionApi,
 	settingsApi,

@@ -67,18 +67,17 @@ public class UpdateScheduledDownloadLimitsCommandHandler : ICommandHandler<Updat
         if (!DownloadSchedule.IsValidDays(schedule.Days))
             return Result.Fail("The saved download schedule contains invalid change points or limits.").LogError();
 
-        var localTime = command.LocalTime ?? TimeZoneInfo.ConvertTime(
-            _timeProvider.GetUtcNow(),
-            TimeZoneInfo.FindSystemTimeZoneById(_userSettings.DateTimeSettings.TimeZone)
-        );
+        var localTime =
+            command.LocalTime
+            ?? TimeZoneInfo.ConvertTime(
+                _timeProvider.GetUtcNow(),
+                TimeZoneInfo.FindSystemTimeZoneById(_userSettings.DateTimeSettings.TimeZone)
+            );
         _log.Here().Debug("Applying download schedule for local time {LocalTime}", localTime);
         var result = await Result.Try(async Task () =>
         {
             int? limitKb = null;
-            if (
-                schedule.Enabled
-                && schedule.Days.TryGetValue(Enum.GetName(localTime.DayOfWeek)!, out var points)
-            )
+            if (schedule.Enabled && schedule.Days.TryGetValue(Enum.GetName(localTime.DayOfWeek)!, out var points))
             {
                 var localMinute = localTime.Hour * 60 + localTime.Minute;
                 var latestMinute = -1;

@@ -2,115 +2,45 @@ namespace Reaparr.Application.Contracts;
 
 public static partial class PlexMediaExtensions
 {
-    public static DownloadTaskPhotoAlbum MapToDownloadTask(
-        this PlexPhotoAlbum photoAlbum,
-        IntegrationIdentity? integrationIdentity
-    ) =>
-        new()
-        {
-            Id = default,
-            PlexApiRatingKey = photoAlbum.PlexApiRatingKey,
-            DataTotal = 0,
-            DownloadStatus = DownloadStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
-            PlexServer = null,
-            PlexServerId = photoAlbum.PlexServerId,
-            PlexLibrary = null,
-            PlexLibraryId = photoAlbum.PlexLibraryId,
-            Title = photoAlbum.Title,
-            Year = photoAlbum.Year,
-            FullTitle = photoAlbum.FullTitle,
-            DataReceived = 0,
-            DownloadSpeed = 0,
-            FileDataTransferred = 0,
-            FileTransferSpeed = 0,
-            Children = [],
-            SonarrIntegrationId = integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
-            RadarrIntegrationId = integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
-        };
-
-    public static DownloadTaskPhotoImage MapToDownloadTask(
-        this PlexPhotoImage photoImage,
-        DownloadTaskPhotoAlbum parent,
-        IntegrationIdentity? integrationIdentity
-    ) =>
-        new()
-        {
-            Id = default,
-            PlexApiRatingKey = photoImage.PlexApiRatingKey,
-            DataTotal = 0,
-            DownloadStatus = DownloadStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
-            PlexServer = null,
-            PlexServerId = photoImage.PlexServerId,
-            PlexLibrary = null,
-            PlexLibraryId = photoImage.PlexLibraryId,
-            Title = photoImage.Title,
-            Year = photoImage.Year,
-            FullTitle = photoImage.FullTitle,
-            DataReceived = 0,
-            DownloadSpeed = 0,
-            FileDataTransferred = 0,
-            FileTransferSpeed = 0,
-            Children = [],
-            Parent = parent,
-            ParentId = parent.Id,
-            SonarrIntegrationId = integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
-            RadarrIntegrationId = integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
-        };
-
     public static DownloadTaskPhotoImageFile MapToDownloadTask(
         this PlexPhotoMediaData mediaData,
-        DownloadTaskPhotoImage parent,
-        PlexPhotoImage photoImage,
-        PlexPhotoAlbum photoAlbum,
+        DownloadTaskPhotoFolder parent,
         CreateDownloadTasksRequest request,
-        string downloadRootPath,
-        bool keepCompletedInDownloadFolder
+        DownloadTaskDirectory directoryMeta
     ) =>
         new()
         {
-            Id = default,
+            Id = Guid.NewGuid(),
             PlexApiRatingKey = mediaData.PlexApiRatingKey,
             PlexApiMediaId = mediaData.PlexApiMediaId,
             PlexApiPartId = mediaData.PlexApiPartId,
             HashId = null,
+            AssetKind = mediaData.AssetKind,
             DataTotal = mediaData.Size,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
             PlexServer = null,
-            PlexServerId = photoImage.PlexServerId,
+            PlexServerId = mediaData.PlexServerId,
             PlexLibrary = null,
-            PlexLibraryId = photoImage.PlexLibraryId,
+            PlexLibraryId = mediaData.PlexLibraryId,
             DataReceived = 0,
             DownloadSpeed = 0,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
             TimeRemaining = 0,
-            FileName = mediaData.OriginalFilename.GetFileName(),
+            FileName = mediaData.OriginalFilename,
             FileLocationUrl = mediaData.Key,
-            VideoQuality = mediaData.VideoQuality,
-            DirectoryMeta = new DownloadTaskDirectory
-            {
-                DownloadRootPath = downloadRootPath,
-                DestinationRootPath = request.CustomDestinationFolderPath,
-                MovieFolder = string.Empty,
-                TvShowFolder = string.Empty,
-                SeasonFolder = string.Empty,
-                MusicArtistFolder = string.Empty,
-                MusicAlbumFolder = string.Empty,
-                PhotoAlbumFolder = photoAlbum.Title.SanitizeFolderName(),
-                OtherVideoFolder = string.Empty,
-                KeepCompletedInDownloadFolder = keepCompletedInDownloadFolder,
-            },
+            VideoQuality = VideoQuality.Unknown,
+            DirectoryMeta = directoryMeta,
             Parent = parent,
             ParentId = parent.Id,
             DestinationFolderPathId = request.DestinationFolderPathId,
-            FullTitle = $"{photoImage.FullTitle}/{mediaData.OriginalFilename.GetFileName()}",
-            Title = mediaData.OriginalFilename.GetFileName(),
+            FullTitle = $"{parent.FullTitle}/{mediaData.OriginalFilename}",
+            Title = mediaData.OriginalFilename,
             DirectDownloadSnapshot = null,
             DownloadClientType = PlexDownloadClientType.Direct,
             SonarrIntegrationId = request.Integration?.Type == IntegrationType.Sonarr ? request.Integration.Id : null,
             RadarrIntegrationId = request.Integration?.Type == IntegrationType.Radarr ? request.Integration.Id : null,
         };
+
 }

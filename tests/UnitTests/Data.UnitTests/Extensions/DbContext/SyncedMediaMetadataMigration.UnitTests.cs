@@ -88,7 +88,7 @@ public class SyncedMediaMetadataMigrationUnitTests : BaseUnitTest
             SELECT COUNT(*) FROM (
                 SELECT name FROM pragma_table_info('PlexMovieData') WHERE name = 'VideoResolution'
                 UNION ALL SELECT name FROM pragma_table_info('PlexTvShowEpisodeData') WHERE name = 'VideoResolution'
-                UNION ALL SELECT name FROM pragma_table_info('PlexPhotoData') WHERE name = 'VideoResolution'
+                UNION ALL SELECT name FROM pragma_table_info('PlexPhotoMediaData') WHERE name = 'VideoResolution'
                 UNION ALL SELECT name FROM pragma_table_info('PlexOtherVideoData')
                     WHERE name IN ('VideoResolution', 'OriginalFilePath', 'SourceRelativePath')
                 UNION ALL SELECT name FROM pragma_table_info('PlexMusicTrackData')
@@ -108,6 +108,67 @@ public class SyncedMediaMetadataMigrationUnitTests : BaseUnitTest
         // Assert
         Convert.ToInt64(obsoleteSchemaObjects).ShouldBe(0);
         (await database.GetAppliedMigrationsAsync(CancellationToken)).Last()
-            .ShouldBe("20261017225840_TEMP4");
+            .ShouldBe("20261020003652_TEMP5");
+    }
+
+    [Test]
+    public async Task ShouldCreateSingleFilePhotoSchema_WhenMigratingFreshDatabase()
+    {
+        // Arrange
+        await SetupDatabase(59323);
+        using var dbContext = IDbContext;
+        var database = ((DbContext)dbContext).Database;
+        await database.OpenConnectionAsync(CancellationToken);
+        await using var command = database.GetDbConnection().CreateCommand();
+        command.CommandText = """
+            SELECT name FROM sqlite_schema
+            WHERE type = 'table' AND (name LIKE 'PlexPhoto%' OR name LIKE 'DownloadTaskPhoto%')
+            ORDER BY name;
+            """;
+
+        // Act
+        var tables = new List<string>();
+        await using (var reader = await command.ExecuteReaderAsync(CancellationToken))
+        {
+            while (await reader.ReadAsync(CancellationToken))
+                tables.Add(reader.GetString(0));
+        }
+        command.CommandText = """
+            SELECT 'catalog-folder:' || on_delete
+                FROM pragma_foreign_key_list('PlexPhotoMediaData') WHERE "from" = 'PlexPhotoFolderId'
+            UNION ALL SELECT 'membership-album:' || on_delete
+                FROM pragma_foreign_key_list('PlexPhotoAlbumMemberships') WHERE "from" = 'PlexPhotoAlbumId'
+            UNION ALL SELECT 'membership-file:' || on_delete
+                FROM pragma_foreign_key_list('PlexPhotoAlbumMemberships') WHERE "from" = 'PlexPhotoMediaDataId'
+            UNION ALL SELECT 'queue-folder:' || on_delete
+                FROM pragma_foreign_key_list('DownloadTaskPhotoImageFiles') WHERE "from" = 'ParentId'
+            UNION ALL SELECT 'queue-log:' || on_delete
+                FROM pragma_foreign_key_list('DownloadTaskPhotoImageFileLogs') WHERE "from" = 'DownloadTaskFileId'
+            ORDER BY 1;
+            """;
+        var deletionRules = new List<string>();
+        await using (var reader = await command.ExecuteReaderAsync(CancellationToken))
+        {
+            while (await reader.ReadAsync(CancellationToken))
+                deletionRules.Add(reader.GetString(0));
+        }
+
+        // Assert
+        tables.ShouldBe([
+            "DownloadTaskPhotoFolders",
+            "DownloadTaskPhotoImageFileLogs",
+            "DownloadTaskPhotoImageFiles",
+            "PlexPhotoAlbumMemberships",
+            "PlexPhotoAlbums",
+            "PlexPhotoFolders",
+            "PlexPhotoMediaData",
+        ]);
+        deletionRules.ShouldBe([
+            "catalog-folder:SET NULL",
+            "membership-album:CASCADE",
+            "membership-file:CASCADE",
+            "queue-folder:CASCADE",
+            "queue-log:CASCADE",
+        ]);
     }
 }

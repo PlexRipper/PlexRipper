@@ -89,7 +89,7 @@ public sealed class GetMediaOverviewPhotoCommandHandler
         LogPhase(filter, "SnapshotExists", stopwatch.Elapsed, 1);
         stopwatch.Restart();
 
-        var candidates = context.PlexPhotoAlbums.ApplyFilter(options);
+        var candidates = context.PlexPhotoAlbums.ProjectToMediaSlimDTO().ApplyFilter(options);
         var snapshots = context.MediaOverviewPhotoAlbumSnapshots.Where(snapshot =>
             allowedLibraryIds.Contains(snapshot.PlexLibraryId)
             && candidates.Any(photoAlbum => photoAlbum.Id == snapshot.PlexPhotoAlbumId)
@@ -102,43 +102,16 @@ public sealed class GetMediaOverviewPhotoCommandHandler
             .ToListAsync(cancellationToken);
         LogPhase(filter, "PageIds", stopwatch.Elapsed, ids.Count);
         stopwatch.Restart();
-        var aggregate = await snapshots
-            .Join(
-                context.PlexPhotoAlbums,
-                snapshot => snapshot.PlexPhotoAlbumId,
-                photoAlbum => photoAlbum.Id,
-                (_, photoAlbum) => photoAlbum.MediaSize
-            )
-            .GroupBy(_ => 1)
-            .Select(group => new { Count = group.Count(), MediaSize = group.Sum() })
-            .FirstOrDefaultAsync(cancellationToken);
-        var totalCount = aggregate?.Count ?? 0;
-        var mediaSize = aggregate?.MediaSize ?? 0;
+        var totalCount = await snapshots.CountAsync(cancellationToken);
+        var mediaSize = await context.PlexPhotoMediaData
+            .Where(file => file.AlbumMemberships.Any(edge =>
+                snapshots.Any(snapshot => snapshot.PlexPhotoAlbumId == edge.PlexPhotoAlbumId)))
+            .SumAsync(file => file.Size, cancellationToken);
         LogPhase(filter, "Aggregate", stopwatch.Elapsed, totalCount);
         stopwatch.Restart();
         var items = await context
             .PlexPhotoAlbums.Where(x => ids.Contains(x.Id))
-            .Select(x => new PlexMediaSlimDTO
-            {
-                Id = x.Id,
-                Title = x.Title,
-                SearchTitle = x.SearchTitle,
-                SortIndex = x.SortIndex,
-                Year = x.Year,
-                Duration = x.Duration,
-                MediaSize = x.MediaSize,
-                ChildCount = x.Photos.Count,
-                GrandChildCount = 0,
-                AddedAt = x.AddedAt,
-                UpdatedAt = x.UpdatedAt,
-                PlexLibraryId = x.PlexLibraryId,
-                PlexServerId = x.PlexServerId,
-                Type = PlexMediaType.PhotoAlbum,
-                HasThumb = x.HasThumb,
-                PlexApiRatingKey = x.PlexApiRatingKey,
-                PlexApiMetaDataKey = x.PlexApiMetaDataKey,
-                Qualities = new List<PlexMediaQualityDTO>(),
-            })
+            .ProjectToMediaSlimDTO()
             .ToListAsync(cancellationToken);
         items = items.RestorePageOrder(ids);
         LogPhase(filter, "Items", stopwatch.Elapsed, items.Count);
@@ -155,7 +128,7 @@ public sealed class GetMediaOverviewPhotoCommandHandler
         );
         var navigationRows = await orderedSnapshots
             .Join(
-                context.PlexPhotoAlbums,
+                context.PlexPhotoAlbums.ProjectToMediaSlimDTO(),
                 snapshot => snapshot.PlexPhotoAlbumId,
                 photoAlbum => photoAlbum.Id,
                 (_, photoAlbum) =>

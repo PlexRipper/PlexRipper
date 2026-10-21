@@ -109,7 +109,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                         continue;
                     }
                     break;
-                case DownloadTaskType.PhotoData:
+                case DownloadTaskType.PhotoImage:
                     var refreshPhotoResult = await RefreshPhotoDownloadTask(childKey, cancellationToken);
                     if (refreshPhotoResult.IsCancelled)
                         return refreshPhotoResult.LogWarning();
@@ -215,7 +215,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     SeasonFolder = string.Empty,
                     MusicArtistFolder = string.Empty,
                     MusicAlbumFolder = string.Empty,
-                    PhotoAlbumFolder = string.Empty,
+                    PhotoFolder = string.Empty,
                     OtherVideoFolder = string.Empty,
                     KeepCompletedInDownloadFolder = downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder,
                 },
@@ -311,7 +311,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     SeasonFolder = episode.TvShowSeason!.Title.SanitizeFolderName(),
                     MusicArtistFolder = string.Empty,
                     MusicAlbumFolder = string.Empty,
-                    PhotoAlbumFolder = string.Empty,
+                    PhotoFolder = string.Empty,
                     OtherVideoFolder = string.Empty,
                     KeepCompletedInDownloadFolder = downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder,
                 },
@@ -369,20 +369,19 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskPhotoImageFile), downloadTaskKey.Id).LogError();
 
         var source = await _dbContext
-            .PlexPhotoData.Where(x =>
+            .PlexPhotoMediaData.Where(x =>
                 x.PlexApiMediaId == downloadTask.PlexApiMediaId
                 && x.PlexApiPartId == downloadTask.PlexApiPartId
-                && x.PlexPhoto!.PlexServerId == downloadTask.PlexServerId
-                && x.PlexPhoto.PlexLibraryId == downloadTask.PlexLibraryId
-                && x.PlexPhoto.PlexApiRatingKey == downloadTask.PlexApiRatingKey
+                && x.PlexServerId == downloadTask.PlexServerId
+                && x.PlexLibraryId == downloadTask.PlexLibraryId
+                && x.PlexApiRatingKey == downloadTask.PlexApiRatingKey
             )
             .Select(x => new
             {
                 FileName = x.OriginalFilename.GetFileName(),
-                FullTitle = x.PlexPhoto!.FullTitle,
+                FullTitle = x.Title,
                 x.Key,
                 x.Size,
-                PhotoAlbumFolder = x.PlexPhoto.PlexPhotoAlbum!.Title.SanitizeFolderName(),
             })
             .FirstOrDefaultAsync(cancellationToken);
         if (source is null)
@@ -426,13 +425,6 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 }
             );
             downloadTask.DirectDownloadSnapshot = null;
-            downloadTask.DirectoryMeta.PhotoAlbumFolder = source.PhotoAlbumFolder;
-            downloadTask.DirectoryMeta.MovieFolder = string.Empty;
-            downloadTask.DirectoryMeta.TvShowFolder = string.Empty;
-            downloadTask.DirectoryMeta.SeasonFolder = string.Empty;
-            downloadTask.DirectoryMeta.MusicArtistFolder = string.Empty;
-            downloadTask.DirectoryMeta.MusicAlbumFolder = string.Empty;
-            downloadTask.DirectoryMeta.OtherVideoFolder = string.Empty;
             await _dbContext.SaveChangesAsync(cancellationToken);
         });
         if (result.IsFailed)
@@ -521,7 +513,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 }
             );
             downloadTask.DirectDownloadSnapshot = null;
-            downloadTask.DirectoryMeta.PhotoAlbumFolder = string.Empty;
+            downloadTask.DirectoryMeta.PhotoFolder = string.Empty;
             downloadTask.DirectoryMeta.MovieFolder = string.Empty;
             downloadTask.DirectoryMeta.TvShowFolder = string.Empty;
             downloadTask.DirectoryMeta.SeasonFolder = string.Empty;
@@ -611,7 +603,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 }
             );
             downloadTask.DirectDownloadSnapshot = null;
-            downloadTask.DirectoryMeta.PhotoAlbumFolder = string.Empty;
+            downloadTask.DirectoryMeta.PhotoFolder = string.Empty;
             downloadTask.DirectoryMeta.MovieFolder = string.Empty;
             downloadTask.DirectoryMeta.TvShowFolder = string.Empty;
             downloadTask.DirectoryMeta.SeasonFolder = string.Empty;

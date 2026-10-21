@@ -71,20 +71,22 @@ describe('MediaOverviewRefresh queued presentation', () => {
 		vi.spyOn(libraryStore, 'getLibrarySyncWaitingReason').mockReturnValue(LibrarySyncWaitingReason.Busy);
 		vi.spyOn(libraryStore, 'getProcessingLibrarySyncQueue').mockReturnValue(processingQueue);
 		vi.spyOn(serverStore, 'getServerName').mockReturnValue('My Plex Server');
-		return { libraryStore, queuedLibrary };
+		return { libraryStore, queuedLibrary, processingLibrary };
 	}
 
-	async function render(libraryId: number, variant: 'panel' | 'banner') {
+	async function render(libraryId: number, variant: 'panel' | 'banner', mode: 'processing' | 'queued' = 'queued') {
 		return mountSuspended(MediaOverviewRefresh, {
-			props: { libraryId, mode: 'queued', variant },
+			props: { libraryId, mode, variant },
 			global: {
 				plugins: [pinia, createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': messages } })],
 				stubs: {
 					QAlert: passthrough,
 					QCol: passthrough,
 					QIcon: passthrough,
+					QProgressBar: passthrough,
 					QRow: passthrough,
 					BaseButton: buttonStub,
+					CancelButton: buttonStub,
 				},
 			},
 		});
@@ -116,5 +118,14 @@ describe('MediaOverviewRefresh queued presentation', () => {
 
 		await wrapper.get('[data-cy="view-library-sync-activity-button"]').trigger('click');
 		expect(openActivity).toHaveBeenCalledWith(7);
+	});
+	test('renders a processing banner with progress and cancellation action', async () => {
+		const { processingLibrary } = setupQueuedLibrary(new Date().toISOString());
+		const wrapper = await render(processingLibrary.id, 'banner', 'processing');
+
+		expect(wrapper.find('[data-cy="media-overview-library-sync-processing-banner"]').exists()).toBe(true);
+		expect(wrapper.find('[data-cy="media-overview-library-sync-processing-progress"]').exists()).toBe(true);
+		expect(wrapper.find('[data-cy="cancel-library-sync-button"]').exists()).toBe(true);
+		expect(wrapper.find('[data-cy="media-overview-library-sync-processing-banner"]').attributes('aria-live')).toBe('polite');
 	});
 });

@@ -9,15 +9,16 @@ public class RefreshPlexPhotoLibraryCommandValidator : AbstractValidator<Refresh
 {
     public RefreshPlexPhotoLibraryCommandValidator()
     {
+        RuleFor(x => x).NotNull();
         RuleFor(x => x.LibraryMetadata).NotNull();
         RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
-        RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.Id).GreaterThan(0);
         RuleFor(x => x.LibraryMetadata.PlexLibrary.Type).Equal(PlexMediaType.PhotoAlbum);
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.PlexServerId).GreaterThan(0);
     }
 }
 
-public class RefreshPlexPhotoLibraryCommandHandler
-    : ICommandHandler<RefreshPlexPhotoLibraryCommand, Result<PlexLibrary>>
+public class RefreshPlexPhotoLibraryCommandHandler : ICommandHandler<RefreshPlexPhotoLibraryCommand, Result<PlexLibrary>>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -37,131 +38,74 @@ public class RefreshPlexPhotoLibraryCommandHandler
         _librarySyncProgressStore = librarySyncProgressStore;
     }
 
-    public async Task<Result<PlexLibrary>> ExecuteAsync(
-        RefreshPlexPhotoLibraryCommand command,
-        CancellationToken cancellationToken
-    )
+    public async Task<Result<PlexLibrary>> ExecuteAsync(RefreshPlexPhotoLibraryCommand command, CancellationToken ct)
     {
-        var plexLibrary = command.LibraryMetadata.PlexLibrary;
-        var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
-        var retrievalResult = await Result.Try(() =>
-            _commandExecutor.Send(
-                new GetLibraryMediaFromPlexApiCommand(plexLibrary, PlexMediaType.PhotoImage),
-                cancellationToken
-            )
-        );
-        if (retrievalResult.IsCancelled)
-            return retrievalResult.ToResult().LogWarning();
-        if (retrievalResult.IsFailed)
-        {
-            await _librarySyncProgressStore.UpdateErrorAsync(
-                plexLibraryId,
-                retrievalResult.ToResult(),
-                cancellationToken
-            );
-            return retrievalResult.ToResult().LogError();
-        }
-
-        var photos = retrievalResult.Value.Library.PhotoImages;
-        var treeResult = BuildPhotoTree(plexLibrary, photos);
-        if (treeResult.IsFailed)
-        {
-            await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, treeResult, cancellationToken);
-            return treeResult.LogError();
-        }
-        command.LibraryMetadata.PhotoClipCount = retrievalResult.Value.PhotoClipCount;
+        var library = command.LibraryMetadata.PlexLibrary;
+        await _librarySyncProgressStore.StartAsync(library.Id, PlexMediaType.PhotoAlbum);
 
         var syncResult = await Result.Try(() =>
-            _commandExecutor.Send(
-                new SyncPlexPhotosCommand(command.LibraryMetadata, command.ForceMediaRefresh),
-                cancellationToken
-            )
+            _commandExecutor.Send(new SyncPlexPhotosCommand(command.LibraryMetadata, command.ForceMediaRefresh), ct)
         );
-
         if (syncResult.IsCancelled)
             return syncResult.ToResult().LogWarning();
-
         if (syncResult.IsFailed)
         {
-            await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, syncResult.ToResult(), cancellationToken);
+            await _librarySyncProgressStore.UpdateErrorAsync(library.Id, syncResult.ToResult(), ct);
             return syncResult.ToResult().LogError();
         }
 
-        var optimizationResult = await _commandExecutor.Send(
-            new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },
-            cancellationToken
+        // The catalog transaction has committed; postcommit progress and maintenance are best effort.
+        var optimizationResult = await Result.Try(() =>
+            _commandExecutor.Send(
+                new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },
+                ct
+            )
         );
         optimizationResult.LogIfFailed();
 
-        await _librarySyncProgressStore.UpdateItemAsync(
-            plexLibraryId,
-            new LibraryProgressItem
-            {
-                MediaType = PlexMediaType.PhotoAlbum,
-                Received = plexLibrary.PhotoAlbums.Count,
-                Total = plexLibrary.PhotoAlbums.Count,
-                TimeRemaining = TimeSpan.Zero,
-            },
-            cancellationToken
+        var albumProgressResult = await Result.Try(async Task () =>
+            await _librarySyncProgressStore.UpdateItemAsync(
+                library.Id,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.PhotoAlbum,
+                    Received = library.PhotoAlbums.Count,
+                    Total = library.PhotoAlbums.Count,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                ct
+            )
         );
-        await _librarySyncProgressStore.UpdateItemAsync(
-            plexLibraryId,
-            new LibraryProgressItem
-            {
-                MediaType = PlexMediaType.PhotoImage,
-                Received = plexLibrary.PhotoImages.Count,
-                Total = plexLibrary.PhotoImages.Count,
-                TimeRemaining = TimeSpan.Zero,
-            },
-            cancellationToken
+        albumProgressResult.LogIfFailed();
+
+        var imageProgressResult = await Result.Try(async Task () =>
+            await _librarySyncProgressStore.UpdateItemAsync(
+                library.Id,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.PhotoImage,
+                    Received = library.PhotoMediaData.Count,
+                    Total = library.PhotoMediaData.Count,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                ct
+            )
         );
-        var rebuildResult = await _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), cancellationToken);
+        imageProgressResult.LogIfFailed();
+
+        var rebuildResult = await Result.Try(() =>
+            _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), ct)
+        );
         rebuildResult.LogIfFailed();
 
-        _log.Here()
-            .Information(
-                "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
-                plexLibrary.Title,
-                plexLibraryId
-            );
+        _log.Here().Information("Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}", library.Title, library.Id);
 
-        var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(plexLibraryId, cancellationToken);
+        var plexLibraryDb = await _dbContext.PlexLibraries.FirstOrDefaultAsync(
+            x => x.Id == library.Id,
+            CancellationToken.None
+        );
         return plexLibraryDb is null
-            ? ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibraryId)
+            ? ResultExtensions.EntityNotFound(nameof(PlexLibrary), library.Id)
             : Result.Ok(plexLibraryDb);
-    }
-
-    private static Result BuildPhotoTree(PlexLibrary library, ICollection<PlexPhotoImage> photos)
-    {
-        var albums = library.PhotoAlbums.ToDictionary(x => x.PlexApiRatingKey);
-        var missingPhoto = photos.FirstOrDefault(x => !albums.ContainsKey(x.ParentKey));
-        if (missingPhoto is not null)
-            return Result.Fail($"Photo {missingPhoto.PlexApiRatingKey} has an unknown album {missingPhoto.ParentKey}");
-
-        foreach (var album in library.PhotoAlbums)
-        {
-            album.Photos.Clear();
-            album.ChildCount = 0;
-            album.Duration = 0;
-            album.MediaSize = 0;
-            album.VideoQuality = VideoQuality.Unknown;
-        }
-
-        foreach (var photo in photos)
-        {
-            var album = albums[photo.ParentKey];
-            photo.PlexPhotoAlbum = album;
-            album.Photos.Add(photo);
-        }
-
-        foreach (var album in library.PhotoAlbums)
-        {
-            album.ChildCount = album.Photos.Count;
-            album.Duration = album.Photos.Sum(x => x.Duration);
-            album.MediaSize = album.Photos.Sum(x => x.MediaSize);
-            album.VideoQuality = album.Photos.Count == 0 ? VideoQuality.Unknown : album.Photos.Max(x => x.VideoQuality);
-        }
-
-        return Result.Ok();
     }
 }

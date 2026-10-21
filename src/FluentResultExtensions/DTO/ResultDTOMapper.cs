@@ -71,6 +71,10 @@ public static class ResultDTOMapper
         if (result.Has401UnauthorizedError())
             return StatusCodes.Status401Unauthorized;
 
+        // Keep Plex authentication failures distinct from application-session authentication.
+        if (result.HasPlex401UnauthorizedError())
+            return HttpCodes.Status601PlexAuthenticationFailed;
+
         // Status Code 403 Forbidden
         if (result.Has403ForbiddenError())
             return StatusCodes.Status403Forbidden;

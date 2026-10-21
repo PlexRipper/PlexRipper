@@ -40,9 +40,8 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         await DeleteAsync(_dbContext.DownloadTaskTvShowSeason, DownloadTaskType.Season);
         await DeleteAsync(_dbContext.DownloadTaskTvShowEpisode, DownloadTaskType.Episode);
         await DeleteAsync(_dbContext.DownloadTaskTvShowEpisodeFile, DownloadTaskType.EpisodeData);
-        await DeleteAsync(_dbContext.DownloadTaskPhotoAlbums, DownloadTaskType.PhotoAlbum);
-        await DeleteAsync(_dbContext.DownloadTaskPhotoImages, DownloadTaskType.PhotoImage);
-        await DeleteAsync(_dbContext.DownloadTaskPhotoImageFiles, DownloadTaskType.PhotoData);
+        await DeleteAsync(_dbContext.DownloadTaskPhotoFolders, DownloadTaskType.PhotoFolder);
+        await DeleteAsync(_dbContext.DownloadTaskPhotoImageFiles, DownloadTaskType.PhotoImage);
         await DeleteAsync(_dbContext.DownloadTaskMusicArtists, DownloadTaskType.MusicArtist);
         await DeleteAsync(_dbContext.DownloadTaskMusicAlbums, DownloadTaskType.MusicAlbum);
         await DeleteAsync(_dbContext.DownloadTaskMusicTracks, DownloadTaskType.MusicTrack);
@@ -56,7 +55,7 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
             byType[DownloadTaskType.Movie]
                 .Concat(byType[DownloadTaskType.TvShow])
                 .Concat(byType[DownloadTaskType.MusicArtist])
-                .Concat(byType[DownloadTaskType.PhotoAlbum])
+                .Concat(byType[DownloadTaskType.PhotoFolder])
                 .Concat(byType[DownloadTaskType.OtherVideo])
         );
         var orphanRootIds = affectedRootIds.Where(id => !directlyDeletedRootIds.Contains(id)).ToList();
@@ -109,9 +108,21 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         await AddCandidatesAsync(
             _dbContext.DownloadTaskTvShowEpisode.Where(x => rootIds.Contains(x.Parent!.ParentId)).ProjectToKey()
         );
-        await AddCandidatesAsync(_dbContext.DownloadTaskPhotoAlbums.Where(x => rootIds.Contains(x.Id)).ProjectToKey());
+        var photoFolders = await _dbContext
+            .DownloadTaskPhotoFolders.Select(x => new { x.Id, x.ParentId })
+            .ToListAsync(ct);
+        var photoFolderIds = rootIds.ToHashSet();
+        var pendingPhotoFolders = new Stack<Guid>(rootIds);
+        while (pendingPhotoFolders.TryPop(out var parentId))
+        {
+            foreach (var childId in photoFolders.Where(x => x.ParentId == parentId).Select(x => x.Id))
+            {
+                if (photoFolderIds.Add(childId))
+                    pendingPhotoFolders.Push(childId);
+            }
+        }
         await AddCandidatesAsync(
-            _dbContext.DownloadTaskPhotoImages.Where(x => rootIds.Contains(x.ParentId)).ProjectToKey()
+            _dbContext.DownloadTaskPhotoFolders.Where(x => photoFolderIds.Contains(x.Id)).ProjectToKey()
         );
         await AddCandidatesAsync(_dbContext.DownloadTaskMusicArtists.Where(x => rootIds.Contains(x.Id)).ProjectToKey());
         await AddCandidatesAsync(
@@ -144,8 +155,7 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         await AddExistingAsync(_dbContext.DownloadTaskTvShow, DownloadTaskType.TvShow);
         await AddExistingAsync(_dbContext.DownloadTaskTvShowSeason, DownloadTaskType.Season);
         await AddExistingAsync(_dbContext.DownloadTaskTvShowEpisode, DownloadTaskType.Episode);
-        await AddExistingAsync(_dbContext.DownloadTaskPhotoAlbums, DownloadTaskType.PhotoAlbum);
-        await AddExistingAsync(_dbContext.DownloadTaskPhotoImages, DownloadTaskType.PhotoImage);
+        await AddExistingAsync(_dbContext.DownloadTaskPhotoFolders, DownloadTaskType.PhotoFolder);
         await AddExistingAsync(_dbContext.DownloadTaskMusicArtists, DownloadTaskType.MusicArtist);
         await AddExistingAsync(_dbContext.DownloadTaskMusicAlbums, DownloadTaskType.MusicAlbum);
         await AddExistingAsync(_dbContext.DownloadTaskMusicTracks, DownloadTaskType.MusicTrack);

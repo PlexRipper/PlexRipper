@@ -101,7 +101,7 @@ describe('Other Videos root detail - request lifetime', () => {
 			plexApiPartId: 301,
 			size: 1024,
 			videoCodec: 'h264',
-			videoResolution: VideoQuality.HD,
+			videoQuality: VideoQuality.HD,
 		}];
 		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValue(of(item));
 

@@ -11,8 +11,10 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
     private static Type ResolveRelatedType(string replacement)
     {
         var commandType = typeof(TCommand);
-        var fullName = commandType.FullName!.Replace("Command", replacement);
-        var shortName = commandType.Name.Replace("Command", replacement);
+        var suffix = commandType.Name.EndsWith("Query", StringComparison.Ordinal) ? "Query" : "Command";
+        var relatedSuffix = replacement.Replace("Command", suffix, StringComparison.Ordinal);
+        var shortName = commandType.Name[..^suffix.Length] + relatedSuffix;
+        var fullName = commandType.FullName![..^suffix.Length] + relatedSuffix;
         return commandType.Assembly.GetType(fullName)
             ?? AppDomain
                 .CurrentDomain.GetAssemblies()

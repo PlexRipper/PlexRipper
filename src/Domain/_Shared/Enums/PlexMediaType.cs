@@ -28,7 +28,7 @@ public enum PlexMediaType
     [JsonStringEnumMemberName(nameof(MusicTrack))]
     MusicTrack = 8,
 
-    [JsonStringEnumMemberName(nameof(PhotoAlbum))]
+    [JsonStringEnumMemberName(nameof(PhotoAlbum))] // TODO missing Photos meant for Library type
     PhotoAlbum = 9,
 
     [JsonStringEnumMemberName(nameof(PhotoImage))]

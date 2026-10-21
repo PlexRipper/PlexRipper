@@ -119,18 +119,33 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         if (refreshLibraryResult.IsFailed)
             return refreshLibraryResult.LogIfFailed();
 
-        var syncedAt = DateTime.UtcNow;
-        await _dbContext
-            .PlexLibraries.Where(x => x.Id == command.PlexLibraryId)
-            .ExecuteUpdateAsync(
-                s =>
-                    s.SetProperty(x => x.SyncedAt, syncedAt)
-                        .SetProperty(x => x.SyncedContentChangedAt, newPlexLibrary.ContentChangedAt)
-                        .SetProperty(x => x.Outdated, false),
-                ct
-            );
+        // Photo reconciliation owns completion stamps so they commit with its catalog transaction.
+        if (newPlexLibrary.Type != PlexMediaType.PhotoAlbum)
+        {
+            var syncedAt = DateTime.UtcNow;
+            await _dbContext
+                .PlexLibraries.Where(x => x.Id == command.PlexLibraryId)
+                .ExecuteUpdateAsync(
+                    s =>
+                        s.SetProperty(x => x.SyncedAt, syncedAt)
+                            .SetProperty(x => x.SyncedContentChangedAt, newPlexLibrary.ContentChangedAt)
+                            .SetProperty(x => x.Outdated, false),
+                    ct
+                );
+        }
 
-        var syncedLibrary = await _dbContext.PlexLibraries.GetAsync(command.PlexLibraryId, ct);
+        PlexLibrary? syncedLibrary;
+        if (newPlexLibrary.Type == PlexMediaType.PhotoAlbum)
+        {
+            syncedLibrary = await _dbContext.PlexLibraries.FirstOrDefaultAsync(
+                x => x.Id == command.PlexLibraryId,
+                CancellationToken.None
+            );
+        }
+        else
+        {
+            syncedLibrary = await _dbContext.PlexLibraries.GetAsync(command.PlexLibraryId, ct);
+        }
         if (syncedLibrary is null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), command.PlexLibraryId);
 

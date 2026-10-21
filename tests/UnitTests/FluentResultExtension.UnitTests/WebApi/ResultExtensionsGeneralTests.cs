@@ -194,4 +194,66 @@ public class ResultExtensionsGeneralTests
         // Assert
         isServerUnreachable.ShouldBeFalse();
     }
+
+    [Test]
+    [Arguments(HttpCodes.Status401Unauthorized)]
+    [Arguments(HttpCodes.Status601PlexAuthenticationFailed)]
+    public void ShouldPreserveAuthenticationStatus_WhenConvertingNonGenericFailureToDto(int statusCode)
+    {
+        // Arrange
+        var result = Result.Fail("Access denied").AddStatusCode((HttpStatusCode)statusCode, "Access denied");
+
+        // Act
+        var dto = result.ToResultDTO();
+
+        // Assert
+        dto.IsSuccess.ShouldBeFalse();
+        dto.StatusCode.ShouldBe(statusCode);
+        dto.Errors.Count.ShouldBe(1);
+        dto.Errors[0].Message.ShouldBe("Access denied");
+        dto.Errors[0].Metadata[ResultExtensions.StatusCodeName].ShouldBe(statusCode);
+        dto.Successes.ShouldBeEmpty();
+    }
+
+    [Test]
+    [Arguments(HttpCodes.Status401Unauthorized)]
+    [Arguments(HttpCodes.Status601PlexAuthenticationFailed)]
+    public void ShouldPreserveAuthenticationStatus_WhenConvertingGenericFailureToDto(int statusCode)
+    {
+        // Arrange
+        var result = new Result<string>().AddStatusCode((HttpStatusCode)statusCode, "Access denied");
+
+        // Act
+        var dto = result.ToResultDTO();
+
+        // Assert
+        dto.IsSuccess.ShouldBeFalse();
+        dto.StatusCode.ShouldBe(statusCode);
+        dto.Value.ShouldBeNull();
+        dto.Errors.Count.ShouldBe(1);
+        dto.Errors[0].Message.ShouldBe("Access denied");
+        dto.Errors[0].Metadata[ResultExtensions.StatusCodeName].ShouldBe(statusCode);
+        dto.Successes.ShouldBeEmpty();
+    }
+
+    [Test]
+    [Arguments(HttpCodes.Status401Unauthorized)]
+    [Arguments(HttpCodes.Status601PlexAuthenticationFailed)]
+    public void ShouldPreserveAuthenticationStatus_WhenConvertingMappedFailureToDto(int statusCode)
+    {
+        // Arrange
+        var result = new Result<string>().AddStatusCode((HttpStatusCode)statusCode, "Access denied");
+
+        // Act
+        var dto = result.ToResultDTO(value => value.ToUpperInvariant());
+
+        // Assert
+        dto.IsSuccess.ShouldBeFalse();
+        dto.StatusCode.ShouldBe(statusCode);
+        dto.Value.ShouldBeNull();
+        dto.Errors.Count.ShouldBe(1);
+        dto.Errors[0].Message.ShouldBe("Access denied");
+        dto.Errors[0].Metadata[ResultExtensions.StatusCodeName].ShouldBe(statusCode);
+        dto.Successes.ShouldBeEmpty();
+    }
 }

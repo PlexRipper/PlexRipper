@@ -1,20 +1,24 @@
 namespace Reaparr.Data;
 
-public class PlexPhotoMediaDataConfiguration : IEntityTypeConfiguration<PlexPhotoMediaData>
+public sealed class PlexPhotoMediaDataConfiguration : IEntityTypeConfiguration<PlexPhotoMediaData>
 {
     public void Configure(EntityTypeBuilder<PlexPhotoMediaData> builder)
     {
+        builder.Property(x => x.SearchTitle).UseCollation("NOCASE");
+        builder.Property(x => x.Title).UseCollation(OrderByNaturalExtensions.CollationName);
+        builder.HasIndex(x => new { x.PlexLibraryId, x.PlexApiRatingKey }).IsUnique();
         builder.HasIndex(x => new { x.PlexLibraryId, x.PlexApiPartId }).IsUnique();
-
-        builder.HasIndex(x => x.PlexApiRatingKey);
+        builder.HasIndex(x => new { x.PlexLibraryId, x.PlexPhotoFolderId, x.Title, x.Id });
+        builder.HasIndex(x => new { x.PlexLibraryId, x.Title, x.Id });
+        builder.HasIndex(x => new { x.PlexLibraryId, x.SearchTitle });
         builder
-            .HasOne(x => x.PlexPhoto)
-            .WithMany(x => x.MediaDataList)
-            .HasForeignKey(x => x.PlexPhotoId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasOne(x => x.PlexPhotoFolder)
+            .WithMany(x => x.Files)
+            .HasForeignKey(x => x.PlexPhotoFolderId)
+            .OnDelete(DeleteBehavior.SetNull);
         builder
             .HasOne(x => x.PlexLibrary)
-            .WithMany()
+            .WithMany(x => x.PhotoMediaData)
             .HasForeignKey(x => x.PlexLibraryId)
             .OnDelete(DeleteBehavior.Cascade);
         builder

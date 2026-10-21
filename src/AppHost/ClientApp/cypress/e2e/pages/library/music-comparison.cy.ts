@@ -113,7 +113,7 @@ function setupMusic(owned = false) {
 			request.reply(response);
 		}).as('musicComparison');
 		cy.intercept('POST', '**/api/Download/preview', (request) => {
-			const commands = request.body as DownloadMediaDTO[];
+			const commands = request.body.downloadMedias as DownloadMediaDTO[];
 			const previews = commands.flatMap((command) => command.mediaIds.map((id) => ({ key: `music-${id}`, title: id === 112 ? 'Missing track' : 'Missing album track', type: command.type, children: [], size: 2048, qualities: [] })));
 			request.reply({ statusCode: 200, body: generateResultDTO({ previews, totalSize: previews.length * 2048, expanded: {} }), ...headers });
 		}).as('musicPreview');
@@ -132,7 +132,7 @@ function expandAlbum(title: string) {
 }
 
 function assertMissingPreview(libraryId: number, serverId: number, ids: number[]) {
-	cy.wait('@musicPreview').its('request.body').should((commands: DownloadMediaDTO[]) => {
+	cy.wait('@musicPreview').its('request.body.downloadMedias').should((commands: DownloadMediaDTO[]) => {
 		expect(commands.flatMap((command) => command.mediaIds).sort()).to.deep.equal([...ids].sort());
 		for (const command of commands) expect(command).to.deep.equal({ mediaIds: command.mediaIds, type: PlexMediaType.MusicTrack, plexLibraryId: libraryId, plexServerId: serverId, qualities: [], keepCompletedInDownloadFolder: false });
 	});

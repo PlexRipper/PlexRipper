@@ -7,7 +7,7 @@ namespace Reaparr.Application.Contracts;
 /// not actively downloading/moving. Those non-active tasks are deleted without stop semantics,
 /// so this command explicitly removes files that may still be present in the download directory.
 /// Only file-type keys (<see cref="DownloadTaskType.MovieData"/>, <see cref="DownloadTaskType.EpisodeData"/>,
-/// <see cref="DownloadTaskType.MusicTrackData"/>, <see cref="DownloadTaskType.PhotoData"/>, and
+/// <see cref="DownloadTaskType.MusicTrackData"/>, <see cref="DownloadTaskType.PhotoImage"/>, and
 /// <see cref="DownloadTaskType.OtherVideoData"/> are supported.
 /// </summary>
 public record DeleteDownloadTaskFilesCommand(List<DownloadTaskKey> Keys) : ICommand<Result>;

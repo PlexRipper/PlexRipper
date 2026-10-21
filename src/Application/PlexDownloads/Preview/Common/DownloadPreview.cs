@@ -20,7 +20,6 @@ public record DownloadPreview
 
     public required int AlbumId { get; init; }
 
-    public required int PhotoAlbumId { get; init; }
 
     public required List<PlexMediaQuality> Qualities { get; init; }
 

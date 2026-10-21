@@ -83,6 +83,26 @@ public partial class FakePlexApiData
                     x.Type = type.ToPlexApiString();
                     x.Media = [GetMediaMetaDataMedia(seed, options).Generate()];
                     x.Guid = f.PlexMedia().Guid(type);
+                    if (type == PlexMediaType.PhotoAlbum)
+                    {
+                        x.Type = "photo";
+                        x.Key = $"/library/metadata/{x.RatingKey}/children";
+                        x.Media = [];
+                    }
+                    else if (type == PlexMediaType.PhotoImage)
+                    {
+                        foreach (var media in x.Media)
+                        {
+                            media.Container = "jpg";
+                            media.VideoCodec = "";
+                            media.AudioCodec = "";
+                            foreach (var part in media.Part!)
+                            {
+                                part.File = $"/fixture/photos/photo-{part.Id}.jpg";
+                                part.Stream = [];
+                            }
+                        }
+                    }
                 }
             );
     }

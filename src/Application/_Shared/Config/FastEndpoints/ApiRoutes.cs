@@ -18,6 +18,8 @@ public static class ApiRoutes
 
     public static string PlexLibraryController => Base + "/" + "PlexLibrary";
 
+    public static string PlexPhotoController => Base + "/" + "PlexPhoto";
+
     public static string PlexServerConnectionController => Base + "/" + "PlexServerConnection";
 
     public static string FolderPathController => Base + "/" + "FolderPath";

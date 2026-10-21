@@ -43,26 +43,21 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var dbContext = IDbContext;
         var photoLibrary = await dbContext.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.PhotoAlbum);
         var album = FakeData
-            .GetDownloadTaskPhotoAlbum(
+            .GetDownloadTaskPhotoFolder(
                 new Seed(88301),
                 config =>
                 {
                     config.PhotoImageDownloadTasksCount = 1;
-                    config.PhotoImageFileDownloadTasksCount = 1;
                 }
             )
             .Generate();
-        var photoFile = album.Children.Single().Children.Single();
-        foreach (
-            var node in new DownloadTaskBase[] { album }
-                .Concat(album.Children)
-                .Append(photoFile)
-        )
+        var photoFile = album.Files.Single();
+        foreach (var node in new DownloadTaskBase[] { album, photoFile })
         {
             node.PlexServerId = photoLibrary.PlexServerId;
             node.PlexLibraryId = photoLibrary.Id;
         }
-        dbContext.DownloadTaskPhotoAlbums.Add(album);
+        dbContext.DownloadTaskPhotoFolders.Add(album);
         var files = new DownloadTaskFileBase[]
         {
             await dbContext.DownloadTaskMovieFile.AsTracking().SingleAsync(CancellationToken),

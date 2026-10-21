@@ -32,6 +32,7 @@ public partial class GenerateDownloadTaskMusicAlbumsCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicAlbum,
+            SelectionKind = null,
             PlexServerId = album.PlexServerId,
             PlexLibraryId = album.PlexLibraryId,
             MediaIds = [album.Id],
@@ -90,6 +91,7 @@ public partial class GenerateDownloadTaskMusicAlbumsCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicAlbum,
+            SelectionKind = null,
             PlexServerId = album.PlexServerId,
             PlexLibraryId = album.PlexLibraryId,
             MediaIds = [album.Id],
@@ -147,6 +149,7 @@ public partial class GenerateDownloadTaskMusicAlbumsCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicAlbum,
+            SelectionKind = null,
             PlexServerId = albums[0].PlexServerId,
             PlexLibraryId = albums[1].PlexLibraryId,
             MediaIds = [albums[0].Id],

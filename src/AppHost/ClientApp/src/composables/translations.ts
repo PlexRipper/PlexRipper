@@ -41,7 +41,7 @@ export function translateDownloadNotification(
 
 	const { $i18n } = useNuxtApp();
 	const { t } = $i18n;
-	const { movies, tvShows, seasons, episodes, musicArtists, musicAlbums, musicTracks, photoAlbums, photoImages, otherVideos } = result.value;
+	const { movies, tvShows, seasons, episodes, musicArtists, musicAlbums, musicTracks, photoImages, otherVideos } = result.value;
 	const singleMediaType = request.downloadMedias.length === 1 && request.downloadMedias[0]?.mediaIds.length === 1
 		? request.downloadMedias[0].type
 		: null;
@@ -151,8 +151,6 @@ export function translateDownloadNotification(
 		message = translateDownloadMediaCount(PlexMediaType.MusicAlbum, musicAlbums);
 	} else if (musicTracks > 0) {
 		message = translateDownloadMediaCount(PlexMediaType.MusicTrack, musicTracks);
-	} else if (photoAlbums > 0) {
-		message = translateDownloadMediaCount(PlexMediaType.PhotoAlbum, photoAlbums);
 	} else if (photoImages > 0) {
 		message = translateDownloadMediaCount(PlexMediaType.PhotoImage, photoImages);
 	} else if (otherVideos > 0) {

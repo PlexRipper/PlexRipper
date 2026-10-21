@@ -8,5 +8,5 @@ public static class DownloadTaskTypeExtensions
                 or DownloadTaskType.Season
                 or DownloadTaskType.MusicArtist
                 or DownloadTaskType.MusicAlbum
-                or DownloadTaskType.PhotoAlbum;
+                or DownloadTaskType.PhotoFolder;
 }

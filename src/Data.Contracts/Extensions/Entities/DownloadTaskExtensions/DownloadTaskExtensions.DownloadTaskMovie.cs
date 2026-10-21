@@ -36,11 +36,9 @@ public static partial class DownloadTaskExtensions
                 case DownloadTaskMusicTrack track:
                     track.Children.SetRelationshipIds(plexServerId, plexLibraryId);
                     break;
-                case DownloadTaskPhotoAlbum photoAlbum:
-                    photoAlbum.Children.SetRelationshipIds(plexServerId, plexLibraryId);
-                    break;
-                case DownloadTaskPhotoImage image:
-                    image.Children.SetRelationshipIds(plexServerId, plexLibraryId);
+                case DownloadTaskPhotoFolder photoFolder:
+                    photoFolder.Children.SetRelationshipIds(plexServerId, plexLibraryId);
+                    photoFolder.Files.SetRelationshipIds(plexServerId, plexLibraryId);
                     break;
                 case DownloadTaskOtherVideo video:
                     video.Children.SetRelationshipIds(plexServerId, plexLibraryId);

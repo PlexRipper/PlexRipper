@@ -4,11 +4,12 @@ namespace Reaparr.PlexApi;
 
 public static class MediaContainerMappers
 {
-    public static LibraryMediaItemDTO ToMediaItemDTO(this Metadata data)
+    public static LibraryMediaItemDTO ToMediaItemDTO(this Metadata data, PlexMediaType? typeOverride = null)
     {
-        var mediaType = data.Type.ToPlexMediaType();
+        var mediaType = typeOverride ?? data.Type.ToPlexMediaType();
         var inferVideoQuality =
-            (mediaType is PlexMediaType.Movie or PlexMediaType.Episode or PlexMediaType.OtherVideos)
+            typeOverride is null
+            && (mediaType is PlexMediaType.Movie or PlexMediaType.Episode or PlexMediaType.OtherVideos)
             && data.Subtype != PlexMediaType.PhotoImage.ToPlexApiString();
 
         return new LibraryMediaItemDTO
@@ -38,9 +39,9 @@ public static class MediaContainerMappers
             Art = data.Art!,
             Theme = data.Theme!,
             Guid = data.Guid ?? string.Empty,
-            AddedAt = DateTimeExtensions.FromUnixTime(data.AddedAt),
+            AddedAt = DateTimeExtensions.FromUnixTime(data.AddedAt ?? 0),
             UpdatedAt = data.UpdatedAt is { } updatedAt ? DateTimeExtensions.FromUnixTime(updatedAt) : null,
-            OriginallyAvailableAt = data.OriginallyAvailableAt?.ToString() ?? string.Empty,
+            OriginallyAvailableAt = data.OriginallyAvailableAt ?? string.Empty,
             Ratings = [],
             Guids = data.Guids?.Select(x => new MetaDataGuidsDTO(x.Id)).ToList() ?? [],
             GrandparentTitle = data.GrandparentTitle ?? string.Empty,

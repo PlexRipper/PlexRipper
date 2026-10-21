@@ -3,9 +3,14 @@ namespace Reaparr.Data.UnitTests;
 public class ReaparrDbContextExtensionsGetDownloadProgressTasksByServerAsyncUnitTests : BaseUnitTest
 {
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task ShouldPreserveEveryTypedHierarchyAndProgress_WhenRetrievingAllOrOneServer(bool filterServer)
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    [Arguments(false, true)]
+    [Arguments(true, true)]
+    public async Task ShouldPreserveEveryTypedHierarchyAndProgress_WhenRetrievingAllOrOneServer(
+        bool filterServer,
+        bool includeAdditionalPhotoRoot
+    )
     {
         // Arrange
         await SetupDatabase(
@@ -25,15 +30,52 @@ public class ReaparrDbContextExtensionsGetDownloadProgressTasksByServerAsyncUnit
                 config.MusicTrackDownloadTasksCount = 1;
                 config.MusicTrackFileDownloadTasksCount = 1;
                 config.PlexPhotoLibraryCount = 1;
-                config.PhotoAlbumDownloadTasksCount = 1;
+                config.PhotoFolderDownloadTasksCount = 1;
                 config.PhotoImageDownloadTasksCount = 1;
-                config.PhotoImageFileDownloadTasksCount = 1;
                 config.PlexOtherVideoLibraryCount = 1;
                 config.OtherVideoDownloadTasksCount = 1;
                 config.OtherVideoFileDownloadTasksCount = 1;
             }
         );
         var dbContext = IDbContext;
+        Guid? additionalPhotoRootId = null;
+        if (includeAdditionalPhotoRoot)
+        {
+            var library = await dbContext
+                .PlexLibraries.Where(x => x.Type == PlexMediaType.PhotoAlbum)
+                .OrderByDescending(x => x.PlexServerId)
+                .FirstAsync(CancellationToken);
+            var additionalRoot = FakeData
+                .GetDownloadTaskPhotoFolder(
+                    new Seed(129888),
+                    config => config.PhotoImageDownloadTasksCount = 2
+                )
+                .Generate();
+            additionalRoot.DownloadRootPath = $"/downloads/{additionalRoot.Id:N}";
+            additionalRoot.DestinationRootPath = $"/destination/{additionalRoot.Id:N}";
+            foreach (var file in additionalRoot.Files)
+            {
+                file.DirectoryMeta.DownloadRootPath = additionalRoot.DownloadRootPath;
+                file.DirectoryMeta.DestinationRootPath = additionalRoot.DestinationRootPath;
+            }
+            new List<DownloadTaskPhotoFolder> { additionalRoot }.SetRelationshipIds(
+                library.PlexServerId,
+                library.Id
+            );
+            var files = additionalRoot.Files.OrderBy(x => x.Id).ToList();
+            files[0].DataTotal = 100;
+            files[0].DataReceived = 25;
+            files[0].Percentage = 25;
+            files[0].DownloadStatus = DownloadStatus.Downloading;
+            files[1].DataTotal = 200;
+            files[1].DataReceived = 200;
+            files[1].Percentage = 100;
+            files[1].DownloadStatus = DownloadStatus.Completed;
+            additionalRoot.DownloadStatus = DownloadStatus.Downloading;
+            dbContext.DownloadTaskPhotoFolders.Add(additionalRoot);
+            await dbContext.SaveChangesAsync(CancellationToken);
+            additionalPhotoRootId = additionalRoot.Id;
+        }
         var allTasks = await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
         var serverIds = await dbContext.PlexServers.OrderBy(x => x.Id).Select(x => x.Id).ToArrayAsync(CancellationToken);
         serverIds.Length.ShouldBe(2);
@@ -42,24 +84,39 @@ public class ReaparrDbContextExtensionsGetDownloadProgressTasksByServerAsyncUnit
             DownloadTaskType.Movie,
             DownloadTaskType.TvShow,
             DownloadTaskType.MusicArtist,
-            DownloadTaskType.PhotoAlbum,
+            DownloadTaskType.PhotoFolder,
             DownloadTaskType.OtherVideo,
         ];
-        allTasks.Select(x => x.DownloadTaskType).Order().ShouldBe(rootTypes.Order());
+        var expectedRootTypes = includeAdditionalPhotoRoot
+            ? rootTypes.Append(DownloadTaskType.PhotoFolder)
+            : rootTypes;
+        allTasks.Select(x => x.DownloadTaskType).Order().ShouldBe(expectedRootTypes.Order());
+        if (additionalPhotoRootId is Guid rootId)
+        {
+            var additionalRoot = allTasks.Single(x => x.Id == rootId);
+            additionalRoot.ParentId.ShouldBe(Guid.Empty);
+            (additionalRoot.DataTotal, additionalRoot.DataReceived, additionalRoot.Percentage).ShouldBe((300L, 225L, 62.5m));
+            additionalRoot.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoFolder);
+            additionalRoot.Children.Select(x => x.ParentId).ShouldBe([rootId, rootId]);
+            additionalRoot.Children.ShouldAllBe(x => x.DownloadTaskType == DownloadTaskType.PhotoImage && x.IsDownloadable);
+        }
         allTasks.ShouldAllBe(x => serverIds.Contains(x.PlexServerId));
         var requestedServerId = filterServer ? allTasks[0].PlexServerId : 0;
-        var expected = allTasks.Where(x => !filterServer || x.PlexServerId == requestedServerId)
-            .Flatten(x => x.Children).OrderBy(x => x.Id).ToArray();
+        var expected = allTasks
+            .Where(x => !filterServer || x.PlexServerId == requestedServerId)
+            .Flatten(x => x.Children)
+            .OrderBy(x => x.Id)
+            .ToArray();
         if (!filterServer)
-            expected.Select(x => x.DownloadTaskType).Distinct().Count().ShouldBe(15);
+            expected.Select(x => x.DownloadTaskType).Distinct().Count().ShouldBe(14);
         expected.ShouldAllBe(x => !string.IsNullOrWhiteSpace(x.FullTitle));
         var expectedKeys = expected.Select(x => x.ToKey()).ToArray();
         (await dbContext.GetDownloadTaskKeysByStatusAsync(expectedKeys, [DownloadStatus.Queued], CancellationToken))
-            .OrderBy(x => x.Id).ShouldBe(
-                expected.Where(x => x.DownloadStatus == DownloadStatus.Queued).Select(x => x.ToKey()).OrderBy(x => x.Id)
-            );
+            .OrderBy(x => x.Id)
+            .ShouldBe(expected.Where(x => x.DownloadStatus == DownloadStatus.Queued).Select(x => x.ToKey()).OrderBy(x => x.Id));
         (await dbContext.GetDownloadTaskKeysByStatusAsync(expectedKeys, [DownloadStatus.Completed], CancellationToken))
-            .ShouldBeEmpty();
+            .OrderBy(x => x.Id)
+            .ShouldBe(expected.Where(x => x.DownloadStatus == DownloadStatus.Completed).Select(x => x.ToKey()).OrderBy(x => x.Id));
 
         // Act
         var progressTasks = await dbContext.GetDownloadProgressTasksByServerAsync(requestedServerId, CancellationToken);
@@ -71,17 +128,47 @@ public class ReaparrDbContextExtensionsGetDownloadProgressTasksByServerAsyncUnit
         var actual = progressTasks.Flatten(x => x.Children).OrderBy(x => x.Id).ToArray();
         actual.Select(x => new
         {
-            x.Id, x.ParentId, x.RatingKey, x.Title, x.FullTitle, x.MediaType, x.DownloadTaskType,
-            x.PlexServerId, x.PlexLibraryId, x.IsDownloadable, x.DownloadStatus,
-            x.DataTotal, x.DataReceived, x.Percentage, x.DownloadSpeed, x.TimeRemaining,
-            x.FileTransferSpeed, x.FileDataTransferred,
-        }).ShouldBe(expected.Select(x => new
-        {
-            x.Id, x.ParentId, x.RatingKey, x.Title, x.FullTitle, x.MediaType, x.DownloadTaskType,
-            x.PlexServerId, x.PlexLibraryId, x.IsDownloadable, x.DownloadStatus,
-            x.DataTotal, x.DataReceived, x.Percentage, x.DownloadSpeed, x.TimeRemaining,
-            x.FileTransferSpeed, x.FileDataTransferred,
-        }));
+            x.Id,
+            x.ParentId,
+            x.RatingKey,
+            x.Title,
+            x.FullTitle,
+            x.MediaType,
+            x.DownloadTaskType,
+            x.PlexServerId,
+            x.PlexLibraryId,
+            x.IsDownloadable,
+            x.DownloadStatus,
+            x.DataTotal,
+            x.DataReceived,
+            x.Percentage,
+            x.DownloadSpeed,
+            x.TimeRemaining,
+            x.FileTransferSpeed,
+            x.FileDataTransferred,
+        }).ShouldBe(
+            expected.Select(x => new
+            {
+                x.Id,
+                x.ParentId,
+                x.RatingKey,
+                x.Title,
+                x.FullTitle,
+                x.MediaType,
+                x.DownloadTaskType,
+                x.PlexServerId,
+                x.PlexLibraryId,
+                x.IsDownloadable,
+                x.DownloadStatus,
+                x.DataTotal,
+                x.DataReceived,
+                x.Percentage,
+                x.DownloadSpeed,
+                x.TimeRemaining,
+                x.FileTransferSpeed,
+                x.FileDataTransferred,
+            })
+        );
         if (filterServer)
         {
             var otherServerId = serverIds.Single(x => x != requestedServerId);

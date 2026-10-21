@@ -23,10 +23,10 @@ public interface IReaparrDbContext : IDisposable
     DbSet<StreamLanguage> StreamLanguages { get; }
 
     DbSet<PlexPhotoAlbum> PlexPhotoAlbums { get; }
-    DbSet<PlexPhotoImage> PlexPhotoImages { get; }
-    DbSet<PlexPhotoMediaData> PlexPhotoData { get; }
+    DbSet<PlexPhotoMediaData> PlexPhotoMediaData { get; }
+    DbSet<PlexPhotoFolder> PlexPhotoFolders { get; }
+    DbSet<PlexPhotoAlbumMembership> PlexPhotoAlbumMemberships { get; }
     DbSet<MediaOverviewPhotoAlbumSnapshot> MediaOverviewPhotoAlbumSnapshots { get; }
-
     DbSet<PlexOtherVideo> PlexOtherVideos { get; }
     DbSet<PlexOtherVideoMediaData> PlexOtherVideoData { get; }
     DbSet<PlexOtherVideoDataStream> PlexOtherVideoDataStreams { get; }
@@ -37,8 +37,7 @@ public interface IReaparrDbContext : IDisposable
     DbSet<DownloadTaskMusicTrack> DownloadTaskMusicTracks { get; }
     DbSet<DownloadTaskMusicTrackFile> DownloadTaskMusicTrackFiles { get; }
     DbSet<DownloadTaskTrackFileLog> DownloadTaskTrackFileLogs { get; }
-    DbSet<DownloadTaskPhotoAlbum> DownloadTaskPhotoAlbums { get; }
-    DbSet<DownloadTaskPhotoImage> DownloadTaskPhotoImages { get; }
+    DbSet<DownloadTaskPhotoFolder> DownloadTaskPhotoFolders { get; }
     DbSet<DownloadTaskPhotoImageFile> DownloadTaskPhotoImageFiles { get; }
     DbSet<DownloadTaskPhotoImageFileLog> DownloadTaskPhotoImageFileLogs { get; }
     DbSet<DownloadTaskOtherVideo> DownloadTaskOtherVideos { get; }
@@ -291,4 +290,12 @@ public interface IReaparrDbContext : IDisposable
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The number of rows affected.</returns>
     Task<int> ExecuteSqlInterpolatedAsync(FormattableString sql, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a query for unmapped result types using parameterized interpolated SQL.
+    /// </summary>
+    /// <typeparam name="T">The result type returned by the query.</typeparam>
+    /// <param name="sql">The interpolated SQL query with parameters.</param>
+    /// <returns>The queryable results.</returns>
+    IQueryable<T> SqlQuery<T>(FormattableString sql);
 }

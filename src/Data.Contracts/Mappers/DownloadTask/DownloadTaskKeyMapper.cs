@@ -155,22 +155,13 @@ public static class DownloadTaskKeyMapper
             Type = DownloadTaskType.OtherVideo,
         });
 
-    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskPhotoAlbum> tasks) =>
+    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskPhotoFolder> tasks) =>
         tasks.Select(x => new DownloadTaskKey
         {
             Id = x.Id,
             PlexServerId = x.PlexServerId,
             PlexLibraryId = x.PlexLibraryId,
-            Type = DownloadTaskType.PhotoAlbum,
-        });
-
-    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskPhotoImage> tasks) =>
-        tasks.Select(x => new DownloadTaskKey
-        {
-            Id = x.Id,
-            PlexServerId = x.PlexServerId,
-            PlexLibraryId = x.PlexLibraryId,
-            Type = DownloadTaskType.PhotoImage,
+            Type = DownloadTaskType.PhotoFolder,
         });
 
     public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskPhotoImageFile> tasks) =>
@@ -179,16 +170,16 @@ public static class DownloadTaskKeyMapper
             Id = x.Id,
             PlexServerId = x.PlexServerId,
             PlexLibraryId = x.PlexLibraryId,
-            Type = DownloadTaskType.PhotoData,
+            Type = DownloadTaskType.PhotoImage,
         });
 
-    public static IQueryable<DownloadTaskKey> ProjectToParentKey(this IQueryable<DownloadTaskPhotoImage> tasks) =>
-        tasks.Select(x => new DownloadTaskKey
+    public static IQueryable<DownloadTaskKey> ProjectToParentKey(this IQueryable<DownloadTaskPhotoFolder> tasks) =>
+        tasks.Where(x => x.ParentId.HasValue).Select(x => new DownloadTaskKey
         {
-            Id = x.ParentId,
+            Id = x.ParentId!.Value,
             PlexServerId = x.PlexServerId,
             PlexLibraryId = x.PlexLibraryId,
-            Type = DownloadTaskType.PhotoAlbum,
+            Type = DownloadTaskType.PhotoFolder,
         });
 
     public static IQueryable<DownloadTaskKey> ProjectToParentKey(this IQueryable<DownloadTaskPhotoImageFile> tasks) =>
@@ -197,6 +188,6 @@ public static class DownloadTaskKeyMapper
             Id = x.ParentId,
             PlexServerId = x.PlexServerId,
             PlexLibraryId = x.PlexLibraryId,
-            Type = DownloadTaskType.PhotoImage,
+            Type = DownloadTaskType.PhotoFolder,
         });
 }

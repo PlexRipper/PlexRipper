@@ -46,6 +46,7 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicTrack,
+            SelectionKind = null,
             PlexServerId = track.PlexServerId,
             PlexLibraryId = track.PlexLibraryId,
             MediaIds = [track.Id],
@@ -134,6 +135,7 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicTrack,
+            SelectionKind = null,
             PlexServerId = track.PlexServerId,
             PlexLibraryId = track.PlexLibraryId,
             MediaIds = [track.Id],
@@ -225,6 +227,7 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicTrack,
+            SelectionKind = null,
             PlexServerId = target.PlexServerId,
             PlexLibraryId = target.PlexLibraryId,
             MediaIds = [target.Id],
@@ -321,6 +324,7 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicTrack,
+            SelectionKind = null,
             PlexServerId = track.PlexServerId,
             PlexLibraryId = track.PlexLibraryId,
             MediaIds = [track.Id],
@@ -368,6 +372,7 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicTrack,
+            SelectionKind = null,
             PlexServerId = tracks[0].PlexServerId,
             PlexLibraryId = tracks[1].PlexLibraryId,
             MediaIds = [tracks[0].Id],

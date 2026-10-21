@@ -126,7 +126,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         var hasUserFilters = options.HasFiltersApplied() || filter.ComparisonState.HasValue;
         options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
 
-        if (filter.MediaType.IsMusicType())
+        if (filter.MediaType.IsMusicType() || filter.MediaType.IsPhotoType())
         {
             options.Sort.RemoveAll(static sort =>
                 string.Equals(sort.Field, "quality", StringComparison.OrdinalIgnoreCase)
@@ -478,9 +478,24 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             }
             case PlexMediaType.PhotoAlbum:
             {
-                var albumQuery = _dbContext.PlexPhotoAlbums.ApplyFilter(options).ApplySort(options);
+                foreach (var sort in options.Sort)
+                {
+                    if (sort.Field is nameof(BasePlexMedia.SortIndex) or "sortIndex")
+                        sort.Field = nameof(PlexMediaSlimDTO.Title);
+                }
+                if (options.Sort.Count == 0)
+                    options.Sort.Add(new SortNode { Field = nameof(PlexMediaSlimDTO.Title), Descending = false });
+                options.Sort.Add(new SortNode { Field = nameof(PlexMediaSlimDTO.Id), Descending = false });
+                var albumQuery = _dbContext
+                    .PlexPhotoAlbums.ProjectToMediaSlimDTO()
+                    .ApplyFilter(options)
+                    .ApplySort(options);
                 response.TotalCount = await albumQuery.CountAsync(ct);
-                response.MediaSize = await albumQuery.SumAsync(x => x.MediaSize, ct);
+                response.MediaSize = await _dbContext
+                    .PlexPhotoMediaData.Where(file =>
+                        file.AlbumMemberships.Any(edge => albumQuery.Any(album => album.Id == edge.PlexPhotoAlbumId))
+                    )
+                    .SumAsync(file => file.Size, ct);
                 response.TotalMediaSize = response.MediaSize;
                 await SetNavigationIndexes(
                     response,
@@ -496,8 +511,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     options,
                     ct
                 );
-                var albums = await albumQuery.ApplyPaging(options).ToListAsync(ct);
-                response.Items = albums.Select(x => x.ToSlimDTOMapper()).ToList();
+                response.Items = await albumQuery.ApplyPaging(options).ToListAsync(ct);
                 break;
             }
             case PlexMediaType.OtherVideos:

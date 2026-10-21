@@ -17,8 +17,8 @@ import type {
   BaseResultDTO,
   CountResponseDTO,
   CreateDownloadTasksRequest,
-  DownloadMediaDTO,
   DownloadPreviewContainerDTO,
+  DownloadPreviewRequest,
   DownloadTaskCreationReportDTO,
   DownloadTaskDTO,
   DownloadTaskLogDTO,
@@ -234,7 +234,7 @@ export class Download {
    * @secure
    */
   getDownloadPreviewEndpoint = (
-    data: DownloadMediaDTO[],
+    data: DownloadPreviewRequest,
     params: RequestParams = {},
   ) =>
     axiosObservable<DownloadPreviewContainerDTO>({

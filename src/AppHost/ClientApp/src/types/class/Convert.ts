@@ -164,10 +164,9 @@ export const Convert = {
 			case DownloadTaskType.MusicTrack:
 			case DownloadTaskType.MusicTrackData:
 				return PlexMediaType.MusicTrack;
-			case DownloadTaskType.PhotoAlbum:
+			case DownloadTaskType.PhotoFolder:
 				return PlexMediaType.PhotoAlbum;
 			case DownloadTaskType.PhotoImage:
-			case DownloadTaskType.PhotoData:
 				return PlexMediaType.PhotoImage;
 			case DownloadTaskType.OtherVideo:
 			case DownloadTaskType.OtherVideoData:
@@ -193,7 +192,7 @@ export const Convert = {
 			case PlexMediaType.MusicTrack:
 				return DownloadTaskType.MusicTrack;
 			case PlexMediaType.PhotoAlbum:
-				return DownloadTaskType.PhotoAlbum;
+				return DownloadTaskType.PhotoFolder;
 			case PlexMediaType.PhotoImage:
 				return DownloadTaskType.PhotoImage;
 			case PlexMediaType.OtherVideos:

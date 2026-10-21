@@ -74,7 +74,7 @@ export function setupAxios(appConfig: IAppConfig, router: Router, t: (key: strin
 				router.push('/login');
 			}
 
-			if (Axios.isAxiosError(error) && error.config && !Axios.isCancel(error)) {
+			if (Axios.isAxiosError(error) && error.config && !Axios.isCancel(error) && !error.config.handleErrorsLocally) {
 				const isHttpError = status >= 400 && status <= 599 && status !== 401;
 				const isConnectivityError = !error.response && (
 					error.request || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED'

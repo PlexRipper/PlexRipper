@@ -17,9 +17,8 @@ public static partial class EnumMapperExtensions
         ["Album"] = DownloadTaskType.MusicAlbum,
         ["Track"] = DownloadTaskType.MusicTrack,
         ["TrackData"] = DownloadTaskType.MusicTrackData,
-        ["PhotoAlbum"] = DownloadTaskType.PhotoAlbum,
+        ["PhotoFolder"] = DownloadTaskType.PhotoFolder,
         ["PhotoImage"] = DownloadTaskType.PhotoImage,
-        ["PhotoData"] = DownloadTaskType.PhotoData,
         ["OtherVideo"] = DownloadTaskType.OtherVideo,
         ["OtherVideoData"] = DownloadTaskType.OtherVideoData,
     };
@@ -65,9 +64,8 @@ public static partial class EnumMapperExtensions
             DownloadTaskType.MusicAlbum => "Album",
             DownloadTaskType.MusicTrack => "Track",
             DownloadTaskType.MusicTrackData => "TrackData",
-            DownloadTaskType.PhotoAlbum => "PhotoAlbum",
+            DownloadTaskType.PhotoFolder => "PhotoFolder",
             DownloadTaskType.PhotoImage => "PhotoImage",
-            DownloadTaskType.PhotoData => "PhotoData",
             DownloadTaskType.OtherVideo => "OtherVideo",
             DownloadTaskType.OtherVideoData => "OtherVideoData",
             _ => DefaultException(),
@@ -95,15 +93,14 @@ public static partial class EnumMapperExtensions
             or DownloadTaskType.MusicArtist
             or DownloadTaskType.MusicAlbum
             or DownloadTaskType.MusicTrack
-            or DownloadTaskType.PhotoAlbum
-            or DownloadTaskType.PhotoImage
+            or DownloadTaskType.PhotoFolder
             or DownloadTaskType.OtherVideo
             or DownloadTaskType.None => false,
 
             DownloadTaskType.MovieData
             or DownloadTaskType.EpisodeData
             or DownloadTaskType.MusicTrackData
-            or DownloadTaskType.PhotoData
+            or DownloadTaskType.PhotoImage
             or DownloadTaskType.OtherVideoData => true,
             var _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
@@ -119,8 +116,8 @@ public static partial class EnumMapperExtensions
             DownloadTaskType.MusicArtist => PlexMediaType.MusicArtist,
             DownloadTaskType.MusicAlbum => PlexMediaType.MusicAlbum,
             DownloadTaskType.MusicTrack or DownloadTaskType.MusicTrackData => PlexMediaType.MusicTrack,
-            DownloadTaskType.PhotoAlbum => PlexMediaType.PhotoAlbum,
-            DownloadTaskType.PhotoImage or DownloadTaskType.PhotoData => PlexMediaType.PhotoImage,
+            DownloadTaskType.PhotoFolder => PlexMediaType.PhotoAlbum,
+            DownloadTaskType.PhotoImage => PlexMediaType.PhotoImage,
             DownloadTaskType.OtherVideo or DownloadTaskType.OtherVideoData => PlexMediaType.OtherVideos,
             DownloadTaskType.None => PlexMediaType.None,
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),

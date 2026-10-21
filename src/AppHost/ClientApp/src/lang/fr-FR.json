@@ -56,23 +56,63 @@
             "load-error": "Impossible de charger cet artiste",
             "invalid-route": "Bibliothèque musicale ou artiste invalide."
         },
-        "photo-media-list": {
-            "select-album": "Sélectionner l’album {title}",
-            "select-asset": "Sélectionner l’élément {title}",
-            "selected-count": "{count} sélectionnés",
-            "reset-selection": "Réinitialiser la sélection",
-            "empty": "Aucune image ni aucun clip trouvé dans cet album."
-        },
         "photo-details": {
             "asset-count": "Éléments",
-            "size": "Taille totale",
             "originally-available": "Première disponibilité",
             "added-at": "Ajout",
             "updated-at": "Mise à jour",
-            "loading": "Chargement de l’album photo…",
-            "load-error": "Impossible de charger cet album photo.",
-            "invalid-route": "Bibliothèque photo ou album invalide.",
-            "retry": "Réessayer"
+            "invalid-route": "Bibliothèque photo ou album invalide."
+        },
+        "photo-browser": {
+            "search-label": "Rechercher des photos",
+            "ownership-label": "Serveur : {server} · Bibliothèque : {library}",
+            "clear-selection": "Effacer la sélection",
+            "stale-selection": "Certains éléments sélectionnés ne figurent plus dans le catalogue. Votre sélection est conservée ; l’aperçu indiquera les éléments qui ne peuvent pas être téléchargés.",
+            "views": { "albums": "Albums", "folders": "Dossiers", "assets": "Tous les éléments" },
+            "empty-albums": "Aucun album photo disponible.",
+            "empty-assets": "Aucun élément photo disponible.",
+            "empty-folders": "Aucun dossier photo actif disponible.",
+            "load-error": "Le catalogue photo n’a pas pu être chargé.",
+            "reload-error": "Le catalogue a changé, mais les dernières données n’ont pas pu être chargées. Vos résultats précédents restent disponibles.",
+            "disabled-library": "Cette bibliothèque Photos est désactivée et ne peut pas être parcourue.",
+            "retry": "Réessayer",
+            "folder-roots": "Racines photo",
+            "thumbnail-unavailable": "Miniature indisponible",
+            "kind-image": "Image",
+            "kind-clip": "Clip",
+            "details": "Détails",
+            "details-load-error": "Impossible de charger les détails de l’élément.",
+            "details-reload-error": "Impossible de recharger les derniers détails de l’élément. Les informations précédentes sont affichées.",
+            "details-loading": "Chargement des détails de l’élément",
+            "memberships-loading": "Chargement des appartenances aux albums",
+            "asset-viewer": "Visionneuse photo",
+            "close-asset-viewer": "Fermer la visionneuse photo",
+            "close-details": "Fermer les détails de l’élément",
+            "previous-asset": "Élément précédent",
+            "next-asset": "Élément suivant",
+            "zoom-fit": "Ajuster l’image à la fenêtre",
+            "zoom-native": "Afficher à la taille native",
+            "image-loading": "Chargement de l’image",
+            "image-load-error": "Cette image n’a pas pu être affichée.",
+            "image-retry": "Réessayer l’image",
+            "image-preview": "Aperçu — original indisponible",
+            "filename": "Nom de fichier",
+            "format": "Format",
+            "size": "Taille",
+            "dimensions": "Dimensions",
+            "dimensions-value": "{width} × {height}",
+            "duration": "Durée",
+            "video-codec": "Codec vidéo",
+            "audio-codec": "Codec audio",
+            "location": "Emplacement",
+            "breadcrumbs": "Chemin du dossier",
+            "album-memberships": "Albums",
+            "no-album-memberships": "Cet élément n’est affecté à aucun album.",
+            "server": "Serveur",
+            "library": "Bibliothèque",
+            "source-root": "Racine source",
+            "asset-kind": "Type d’élément",
+            "never-synced": "Cette bibliothèque Photos n’a pas encore été synchronisée. Actualisez-la pour publier son catalogue."
         },
         "other-video-media-list": {
             "empty": "Aucun fichier original disponible."
@@ -228,6 +268,7 @@
             "view-sync-activity": "Voir l'activité de synchronisation",
             "cancel-queued-refresh": "Annuler l'actualisation en attente",
             "requesting-refresh": "Demande d'actualisation…",
+            "sync-processing-title": "Actualisation en cours",
             "comparison": {
                 "details-column-title": "Title",
                 "details-column-location": "Location",
@@ -649,11 +690,6 @@
         }
     },
     "general": {
-        "labels": {
-            "original": "Original",
-            "automatic-original": "Automatique (par défaut)",
-            "select-original": "Sélectionner un original pour {title}"
-        },
         "comparison": {
             "comparison-missing": "Manquant",
             "comparison-higher-quality": "Qualité supérieure disponible",
@@ -1257,8 +1293,7 @@
         },
         "photos": {
             "index": {
-                "header": "Photos",
-                "sub-header": "Sélectionnez une bibliothèque photo pour parcourir les albums, les images et les clips."
+                "header": "Photos"
             }
         },
         "other-videos": {

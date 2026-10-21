@@ -7,7 +7,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandMediaTypesUnitTe
     [Arguments(DownloadTaskType.Movie)]
     [Arguments(DownloadTaskType.TvShow)]
     [Arguments(DownloadTaskType.MusicArtist)]
-    [Arguments(DownloadTaskType.PhotoAlbum)]
+    [Arguments(DownloadTaskType.PhotoFolder)]
     [Arguments(DownloadTaskType.OtherVideo)]
     public async Task ShouldDispatchOnlyCompletedTypedRootAndReturnExactCount_WhenClearingMixedStates(DownloadTaskType type)
     {
@@ -26,9 +26,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandMediaTypesUnitTe
             config.MusicTrackDownloadTasksCount = 1;
             config.MusicTrackFileDownloadTasksCount = 1;
             config.PlexPhotoLibraryCount = 1;
-            config.PhotoAlbumDownloadTasksCount = 2;
+            config.PhotoFolderDownloadTasksCount = 2;
             config.PhotoImageDownloadTasksCount = 1;
-            config.PhotoImageFileDownloadTasksCount = 1;
             config.PlexOtherVideoLibraryCount = 1;
             config.OtherVideoDownloadTasksCount = 2;
             config.OtherVideoFileDownloadTasksCount = 1;
@@ -70,5 +69,42 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandMediaTypesUnitTe
                 It.Is<DeleteDownloadTasksByKeyCommand>(c => !c.Keys.SequenceEqual(new[] { completedKey })),
                 It.IsAny<CancellationToken>()),
             Times.Never());
+    }
+    [Test]
+    public async Task ShouldClearCompletedPhotoFolderRoot()
+    {
+        await SetupDatabase(
+            88411,
+            config =>
+            {
+                config.PlexPhotoLibraryCount = 1;
+                config.PhotoFolderDownloadTasksCount = 1;
+                config.PhotoImageDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var roots = await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
+        var root = roots.Single();
+        root.DownloadTaskType.ShouldBe(DownloadTaskType.PhotoFolder);
+        var key = root.ToKey();
+        foreach (var node in new[] { root }.Flatten(x => x.Children))
+            await dbContext.SetDownloadStatus(node.ToKey(), DownloadStatus.Completed);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(
+                    It.Is<DeleteDownloadTasksByKeyCommand>(c => c.Keys.SequenceEqual(new[] { key })),
+                    CancellationToken
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        var result = await TestHandlerExecuteAsync<int>(
+            new ClearCompletedDownloadTasksByDownloadTaskKeyCommand([key])
+        );
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(1);
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 }

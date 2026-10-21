@@ -131,6 +131,7 @@ public class GenerateDownloadTaskMusicAlbumsCommandHandler
                         new DownloadMediaDTO
                         {
                             Type = PlexMediaType.MusicTrack,
+                            SelectionKind = null,
                             PlexServerId = track.PlexServerId,
                             PlexLibraryId = track.PlexLibraryId,
                             MediaIds = [track.Id],

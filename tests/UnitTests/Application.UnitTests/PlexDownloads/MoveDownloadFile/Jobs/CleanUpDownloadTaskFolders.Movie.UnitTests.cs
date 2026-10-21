@@ -164,16 +164,16 @@ public class CleanUpDownloadTaskFoldersMovieUnitTests : BaseCommandUnitTest<Clea
         var control = movieFiles[2];
         var library = await dbContext.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.PhotoAlbum);
         var album = FakeData
-            .GetDownloadTaskPhotoAlbum(new Seed(63004))
-            .RuleFor(x => x.Children, _ => FakeData.GetDownloadTaskPhotoImage(new Seed(63005)).Generate(1))
+            .GetDownloadTaskPhotoFolder(new Seed(63004))
+            .RuleFor(x => x.Files, _ => FakeData.GetDownloadTaskPhotoImageFile(new Seed(63005)).Generate(1))
             .Generate();
-        var photoFiles = album.Children.SelectMany(x => x.Children).Cast<DownloadTaskFileBase>().ToList();
-        foreach (var node in new DownloadTaskBase[] { album }.Concat(album.Children).Concat(photoFiles))
+        var photoFiles = album.Files.Cast<DownloadTaskFileBase>().ToList();
+        foreach (var node in new DownloadTaskBase[] { album }.Concat(photoFiles))
         {
             node.PlexServerId = library.PlexServerId;
             node.PlexLibraryId = library.Id;
         }
-        dbContext.DownloadTaskPhotoAlbums.Add(album);
+        dbContext.DownloadTaskPhotoFolders.Add(album);
         var sibling = photoFiles.Single();
         var paths = Mock.Container.Resolve<IPathProvider>();
         var root = paths.DefaultDownloadsDestinationFolder;
@@ -184,7 +184,7 @@ public class CleanUpDownloadTaskFoldersMovieUnitTests : BaseCommandUnitTest<Clea
         control.DirectoryMeta.MovieFolder = "Movies/control";
         control.DownloadStatus = DownloadStatus.Downloading;
         sibling.DirectoryMeta.DownloadRootPath = Path.Combine(root, "Movies");
-        sibling.DirectoryMeta.PhotoAlbumFolder = "shared/file";
+        sibling.DirectoryMeta.PhotoFolder = "shared/file";
         sibling.DownloadStatus = siblingStatus;
         foreach (var file in new DownloadTaskFileBase[] { target, control })
             dbContext.Entry(file).State = EntityState.Modified;

@@ -97,7 +97,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.PhotoImage:
             {
                 var id = await dbContext
-                    .PlexPhotoImages.Where(x =>
+                    .PlexPhotoMediaData.Where(x =>
                         x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId
                     )
                     .Select(x => x.Id)
@@ -168,5 +168,56 @@ public static partial class DbContextExtensions
             },
             ct
         );
+    }
+
+    /// <summary>
+    /// Deletes a photo library's albums, image and clip assets, album memberships, and descendant folders.
+    /// Source-root folders are retained and marked inactive.
+    /// </summary>
+    /// <param name="dbContext">The database context used to purge the library's media.</param>
+    /// <param name="plexLibraryId">The ID of the photo library to purge.</param>
+    /// <param name="cancellationToken">The cancellation token for the database operations.</param>
+    /// <returns>The number of deleted albums and assets, excluding memberships and folders.</returns>
+    /// <remarks>The caller must provide the transaction when atomic deletion is required.</remarks>
+    public static async Task<int> DeletePlexPhotoLibraryMediaAsync(
+        this IReaparrDbContext dbContext,
+        int plexLibraryId,
+        CancellationToken cancellationToken
+    )
+    {
+        var albumCount = await dbContext.PlexPhotoAlbums.CountAsync(
+            x => x.PlexLibraryId == plexLibraryId,
+            cancellationToken
+        );
+        var fileCount = await dbContext.PlexPhotoMediaData.CountAsync(
+            x => x.PlexLibraryId == plexLibraryId,
+            cancellationToken
+        );
+        var descendantFolderIds = await dbContext
+            .PlexPhotoFolders.Where(x => x.PlexLibraryId == plexLibraryId && x.ParentId != null)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        await dbContext
+            .PlexPhotoAlbumMemberships.Where(x => x.PlexPhotoAlbum!.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
+        await dbContext
+            .PlexPhotoMediaData.Where(x => x.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
+        await dbContext
+            .PlexPhotoAlbums.Where(x => x.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
+        if (descendantFolderIds.Count > 0)
+        {
+            await dbContext
+                .PlexPhotoFolders.Where(x => descendantFolderIds.Contains(x.Id))
+                .ExecuteDeleteAsync(cancellationToken);
+        }
+
+        await dbContext
+            .PlexPhotoFolders.Where(x => x.PlexLibraryId == plexLibraryId && x.ParentId == null)
+            .ExecuteUpdateAsync(x => x.SetProperty(root => root.IsActive, false), cancellationToken);
+
+        return albumCount + fileCount;
     }
 }

@@ -519,7 +519,7 @@ public static partial class MockDatabase
         if (config.MusicArtistCount > 0)
             reaparrContext = await reaparrContext.AddPlexMusic(seed, options);
 
-        if (config.PhotoAlbumCount > 0)
+        if (config.PhotoAlbumCount > 0 || config.PhotoCount > 0 || config.PhotoClipCount > 0)
             reaparrContext = await reaparrContext.AddPlexPhotos(seed, options);
 
         if (config.OtherVideoCount > 0)
@@ -539,8 +539,8 @@ public static partial class MockDatabase
                 options
             );
 
-        if (config.PhotoAlbumDownloadTasksCount > 0)
-            reaparrContext = await reaparrContext.AddDownloadTaskPhotoAlbums(
+        if (config.PhotoFolderDownloadTasksCount > 0)
+            reaparrContext = await reaparrContext.AddDownloadTaskPhotoFolders(
                 seed,
                 pathProvider,
                 appRuntimeInfo,
@@ -718,33 +718,83 @@ public static partial class MockDatabase
         var libraries = await context.PlexLibraries.Where(x => x.Type == PlexMediaType.PhotoAlbum).ToListAsync();
         foreach (var library in libraries)
         {
+            var rootFolder = new PlexPhotoFolder
+            {
+                PlexLibraryId = library.Id,
+                PlexServerId = library.PlexServerId,
+                ParentId = null,
+                RelativePath = string.Empty,
+                Title = "photos",
+                RootIdentityKey = "id:1",
+                SourceRootPath = "/fixture/photos",
+                PlexApiLocationId = 1,
+                IsActive = true,
+            };
+            context.PlexPhotoFolders.Add(rootFolder);
+            await context.SaveChangesAsync();
+
             var albums = FakeData.GetPlexPhotoAlbums(seed, options).Generate(config.PhotoAlbumCount);
-            var photoCount = 0;
-            long mediaSize = 0;
+            List<PlexPhotoMediaData> files = [];
+            Dictionary<PlexPhotoAlbum, List<PlexPhotoMediaData>> albumFiles = [];
             foreach (var album in albums)
             {
                 album.PlexServerId = library.PlexServerId;
                 album.PlexLibraryId = library.Id;
-                foreach (var photo in album.Photos)
+                var albumImages = config.PhotoCount > 0
+                    ? FakeData.GetPlexPhotoMediaData(seed, options).Generate(config.PhotoCount)
+                    : [];
+                var albumClips = config.PhotoClipCount > 0
+                    ? FakeData.GetPlexPhotoMediaData(seed, options, isClip: true).Generate(config.PhotoClipCount)
+                    : [];
+                var albumAssets = albumImages.Concat(albumClips).ToList();
+                foreach (var file in albumAssets)
                 {
-                    photo.PlexServerId = library.PlexServerId;
-                    photo.PlexLibraryId = library.Id;
-                    photoCount++;
-                    foreach (var original in photo.MediaDataList)
-                    {
-                        original.PlexServerId = library.PlexServerId;
-                        original.PlexLibraryId = library.Id;
-                        mediaSize += original.Size;
-                    }
+                    file.PlexServerId = library.PlexServerId;
+                    file.PlexLibraryId = library.Id;
+                    file.PlexPhotoFolderId = rootFolder.Id;
+                }
+
+                albumFiles[album] = albumAssets;
+                files.AddRange(albumAssets);
+            }
+
+            if (albums.Count == 0)
+            {
+                var images = config.PhotoCount > 0
+                    ? FakeData.GetPlexPhotoMediaData(seed, options).Generate(config.PhotoCount)
+                    : [];
+                var clips = config.PhotoClipCount > 0
+                    ? FakeData.GetPlexPhotoMediaData(seed, options, isClip: true).Generate(config.PhotoClipCount)
+                    : [];
+                foreach (var file in images.Concat(clips))
+                {
+                    file.PlexServerId = library.PlexServerId;
+                    file.PlexLibraryId = library.Id;
+                    file.PlexPhotoFolderId = rootFolder.Id;
+                    files.Add(file);
                 }
             }
 
             context.PlexPhotoAlbums.AddRange(albums);
+            context.PlexPhotoMediaData.AddRange(files);
             await context.SaveChangesAsync();
 
-            // Photo clips share PlexPhoto storage; their separate count comes from the fixture configuration.
-            var clipCount = albums.Count * config.PhotoClipCount;
-            await context.SetPhotoMediaMetrics(library.Id, albums.Count, photoCount - clipCount, clipCount, mediaSize);
+            context.PlexPhotoAlbumMemberships.AddRange(
+                albumFiles.SelectMany(
+                    pair => pair.Value.Select(
+                        file => new PlexPhotoAlbumMembership
+                        {
+                            PlexPhotoAlbumId = pair.Key.Id,
+                            PlexPhotoMediaDataId = file.Id,
+                        }
+                    )
+                )
+            );
+            await context.SaveChangesAsync();
+
+            var imageCount = files.Count(x => x.AssetKind == PhotoAssetKind.Image);
+            var clipCount = files.Count(x => x.AssetKind == PhotoAssetKind.VideoClip);
+            await context.SetPhotoMediaMetrics(library.Id, albums.Count, imageCount, clipCount, files.Sum(x => x.Size));
         }
 
         return context;

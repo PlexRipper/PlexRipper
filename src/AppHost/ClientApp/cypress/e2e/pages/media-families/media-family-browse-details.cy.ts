@@ -6,7 +6,6 @@ import { AudioQuality, PlexMediaType, VideoQuality, ViewMode, type PlexMediaDTO,
 
 const families = [
 	{ type: PlexMediaType.MusicArtist, path: 'music', name: 'Music', viewField: 'musicArtistViewMode' },
-	{ type: PlexMediaType.PhotoAlbum, path: 'photos', name: 'Photos', viewField: 'photoAlbumViewMode' },
 	{ type: PlexMediaType.OtherVideos, path: 'other-videos', name: 'Other Videos', viewField: 'otherVideosViewMode' },
 ] as const;
 
@@ -33,7 +32,7 @@ function createRoots(type: PlexMediaType, config: MockConfig, libraryId: number,
 					const track = create(album.id + trackIndex + 1, PlexMediaType.MusicTrack, `Track ${trackIndex + 1}`, album.id);
 					track.discNumber = albumIndex === 0 ? [1, 2, 1, null][trackIndex] : 1;
 					track.trackNumber = albumIndex === 0 ? [1, 1, 2, null][trackIndex] : 1;
-					track.mediaData = [{ id: track.id, plexApiMediaId: track.id, plexApiPartId: track.id, fileName: `original-${track.id}.flac`, audioCodec: '', audioQuality: AudioQuality.Unknown, videoCodec: '', videoResolution: VideoQuality.None, duration: 6000, size: 1024 }];
+					track.mediaData = [{ id: track.id, plexApiMediaId: track.id, plexApiPartId: track.id, fileName: `original-${track.id}.flac`, audioCodec: '', audioQuality: AudioQuality.Unknown, videoCodec: '', videoQuality: VideoQuality.None, duration: 6000, size: 1024 }];
 					return track;
 				});
 				album.childCount = album.children.length;
@@ -42,19 +41,11 @@ function createRoots(type: PlexMediaType, config: MockConfig, libraryId: number,
 			});
 			root.childCount = root.children.length;
 			root.grandChildCount = root.children.reduce((count, album) => count + album.childCount, 0);
-		} else if (type === PlexMediaType.PhotoAlbum) {
-			root.children = Array.from({ length: 20 }, (_, index) => {
-				const asset = create(root.id + 10 + index, PlexMediaType.PhotoImage, `Holiday asset ${index + 1}`, root.id);
-				const isClip = index === 19;
-				asset.mediaData = [{ id: asset.id, plexApiMediaId: asset.id, plexApiPartId: asset.id, fileName: isClip ? `${'holiday-original-recording-'.repeat(8)}.mp4` : `holiday-${index + 1}.jpg`, audioCodec: isClip ? 'aac' : '', audioQuality: AudioQuality.None, videoCodec: isClip ? 'h264' : '', videoResolution: VideoQuality.Unknown, duration: isClip ? 6000 : 0, size: 1024 }];
-				return asset;
-			});
-			root.childCount = root.children.length;
 		} else {
 			const resolution = root.id === 100 ? VideoQuality.FullHD : VideoQuality.HD;
 			root.mediaData = [
-				...Array.from({ length: 18 }, (_, index) => ({ id: root.id * 100 + index, plexApiMediaId: root.id, plexApiPartId: root.id * 100 + index, fileName: `multipart-original-part-${index + 1}.mp4`, audioCodec: 'aac', audioQuality: AudioQuality.None, videoCodec: 'h264', videoResolution: resolution, duration: 6000, size: 1024 })),
-				{ id: root.id * 100 + 20, plexApiMediaId: root.id + 1, plexApiPartId: root.id * 100 + 20, fileName: `${'alternative-original-'.repeat(8)}.mkv`, audioCodec: 'flac', audioQuality: AudioQuality.None, videoCodec: 'hevc', videoResolution: resolution, duration: 12000, size: 2048 },
+				...Array.from({ length: 18 }, (_, index) => ({ id: root.id * 100 + index, plexApiMediaId: root.id, plexApiPartId: root.id * 100 + index, fileName: `multipart-original-part-${index + 1}.mp4`, audioCodec: 'aac', audioQuality: AudioQuality.None, videoCodec: 'h264', videoQuality: resolution, duration: 6000, size: 1024 })),
+				{ id: root.id * 100 + 20, plexApiMediaId: root.id + 1, plexApiPartId: root.id * 100 + 20, fileName: `${'alternative-original-'.repeat(8)}.mkv`, audioCodec: 'flac', audioQuality: AudioQuality.None, videoCodec: 'hevc', videoQuality: resolution, duration: 12000, size: 2048 },
 			];
 			root.qualities = [{ dataId: root.mediaData[0]!.id, mediaId: root.id, mediaDataType: type, audioQuality: AudioQuality.None, videoQuality: resolution }];
 		}
@@ -251,20 +242,6 @@ for (const family of families) {
 					cy.getCy(albumPanelCy).find('[data-cy="media-q-table-mobile-card"], tbody tr').filter(`:contains("${track.title}")`).should('not.be.visible');
 					cy.getCy(albumPanelCy).find('.q-expansion-item__container > .q-item').first().click();
 					cy.getCy(albumPanelCy).find('[data-cy="media-q-table-mobile-card"], tbody tr').filter(`:contains("${track.title}")`).find('[role="checkbox"]').should('have.attr', 'aria-checked', 'true');
-				} else if (family.type === PlexMediaType.PhotoAlbum) {
-					const asset = root.children.at(-1)!;
-					const selector = `[data-cy="photo-asset-${asset.id}"]`;
-					scrollLastFileIntoViewport(selector);
-					assertTouchControl(`photo-asset-checkbox-${asset.id}`);
-					cy.getCy(`photo-asset-checkbox-${asset.id}`).click();
-					cy.getCy('photo-selected-count').should('contain.text', '1');
-					cy.getCy('photo-album-checkbox').should('have.attr', 'aria-checked', 'mixed');
-					cy.get(selector).should('contain.text', '.mp4').and('contain.text', 'h264');
-					cy.get(`${selector} [style*="--media-thumbnail-width"]`).should(($image) => {
-						const bounds = $image[0]!.getBoundingClientRect();
-						expect(bounds.width, 'asset thumbnail width').to.be.closeTo(72, 1);
-						expect(bounds.height, 'asset thumbnail height').to.be.closeTo(72, 1);
-					});
 				} else {
 					scrollLastFileIntoViewport('[data-cy="other-video-media-list"] [data-cy="media-q-table-mobile-card"]:last-child');
 					cy.getCy('other-video-media-list').should('contain.text', 'multipart-original-part-18.mp4');

@@ -38,9 +38,9 @@ it('keeps multipart Other Video root downloads automatic instead of forcing the 
 				children: [],
 				mediaSize: 3072,
 				mediaData: [
-					{ id: 10, plexApiMediaId: 1000, plexApiPartId: 1010, fileName: 'recording-part-1.mp4', duration: 6000, size: 1024, videoResolution: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
-					{ id: 11, plexApiMediaId: 1000, plexApiPartId: 1011, fileName: 'recording-part-2.mp4', duration: 6000, size: 1024, videoResolution: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
-					{ id: 30, plexApiMediaId: 2000, plexApiPartId: 2030, fileName: 'recording-alternative.mkv', duration: 12000, size: 1024, videoResolution: VideoQuality.UHD_4K, videoCodec: 'hevc', audioCodec: 'aac', audioQuality: AudioQuality.None },
+					{ id: 10, plexApiMediaId: 1000, plexApiPartId: 1010, fileName: 'recording-part-1.mp4', duration: 6000, size: 1024, videoQuality: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
+					{ id: 11, plexApiMediaId: 1000, plexApiPartId: 1011, fileName: 'recording-part-2.mp4', duration: 6000, size: 1024, videoQuality: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
+					{ id: 30, plexApiMediaId: 2000, plexApiPartId: 2030, fileName: 'recording-alternative.mkv', duration: 12000, size: 1024, videoQuality: VideoQuality.UHD_4K, videoCodec: 'hevc', audioCodec: 'aac', audioQuality: AudioQuality.None },
 				],
 				qualities: [
 					{ mediaId: 100, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, videoQuality: VideoQuality.FullHD, audioQuality: AudioQuality.None },
@@ -53,7 +53,7 @@ it('keeps multipart Other Video root downloads automatic instead of forcing the 
 			type: PlexMediaType.OtherVideos,
 			plexLibraryId: library.id,
 			plexServerId: library.plexServerId,
-			qualities: [{ mediaId: media.id, dataId: part.id, mediaDataType: PlexMediaType.OtherVideos, videoQuality: part.videoResolution, audioQuality: AudioQuality.None }],
+			qualities: [{ mediaId: media.id, dataId: part.id, mediaDataType: PlexMediaType.OtherVideos, videoQuality: part.videoQuality, audioQuality: AudioQuality.None }],
 			keepCompletedInDownloadFolder: false,
 		}));
 		const metadata = { countries: [], countryCount: 0, genres: [], genreCount: 0, roles: [], roleCount: 0, qualities: [], qualityCount: 0, mediaCount: 1 };
@@ -89,7 +89,7 @@ it('keeps multipart Other Video root downloads automatic instead of forcing the 
 		cy.getCy('media-overview-bar-download-button').filter(':visible').click();
 
 		// Assert
-		cy.wait('@automaticPreview').its('request.body').should('deep.equal', expectedCommands);
+		cy.wait('@automaticPreview').its('request.body.downloadMedias').should('deep.equal', expectedCommands);
 		cy.getCy('download-confirmation-dialog').should('be.visible').and('contain.text', media.title);
 	});
 });

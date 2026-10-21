@@ -94,6 +94,27 @@ describe('PhotoOverviewList', () => {
 		expect(wrapper.find('[role="checkbox"]').exists()).toBe(false);
 	});
 
+	test.each(['folders', 'albums'] as const)('Should retain loading state without a folder-navigation progress bar in %s', async (context) => {
+		// Arrange
+		const wrapper = await mountSuspended(PhotoOverviewList, {
+			props: { context, itemCount: 0, itemAt: () => null, loading: true },
+			global: { plugins: [pinia, i18n()] },
+		});
+
+		// Assert
+		expect(wrapper.attributes('aria-busy')).toBe('true');
+		expect(wrapper.find('.q-linear-progress').exists()).toBe(context !== 'folders');
+		expect(wrapper.find('[data-cy="photo-overview-empty"]').exists()).toBe(false);
+
+		// Act
+		await wrapper.setProps({ loading: false });
+
+		// Assert
+		expect(wrapper.attributes('aria-busy')).toBe('false');
+		expect(wrapper.find('.q-linear-progress').exists()).toBe(false);
+		expect(wrapper.find('[data-cy="photo-overview-empty"]').exists()).toBe(true);
+	});
+
 	test('Should keep the photo title in the hover overlay without rendering a duplicate footer title', async () => {
 		// Arrange
 		const photo = asset(10);

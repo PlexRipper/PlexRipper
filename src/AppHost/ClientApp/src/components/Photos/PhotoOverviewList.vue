@@ -6,7 +6,7 @@
 		tabindex="-1"
 		:aria-busy="props.loading || props.selectionLoading">
 		<QLinearProgress
-			v-if="props.loading"
+			v-if="props.loading && props.context !== 'folders'"
 			indeterminate
 			class="q-mb-sm" />
 		<QBanner

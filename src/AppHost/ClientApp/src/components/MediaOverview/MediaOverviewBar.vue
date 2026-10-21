@@ -356,7 +356,7 @@ import { PlexMediaType, ViewMode } from '@dto';
 import { MediaSortField, SortDirection } from '@enums';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import { useMediaOverviewBarDownloadCommandBus } from '@composables/event-bus';
-import { useMediaOverviewStore, usePhotoBrowsingStore, useSettingsStore } from '@store';
+import { useLibraryStore, useMediaOverviewStore, usePhotoBrowsingStore, useSettingsStore } from '@store';
 import type { PhotoBrowseSort, PhotoBrowseView } from '@/store/photoBrowsingStore';
 import { useSubscription } from '@vueuse/rxjs';
 import { get } from '@vueuse/core';
@@ -373,6 +373,7 @@ type SortOption = {
 };
 
 const mediaOverviewStore = useMediaOverviewStore();
+const libraryStore = useLibraryStore();
 const photoStore = usePhotoBrowsingStore();
 const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
 const settingsStore = useSettingsStore();
@@ -463,7 +464,9 @@ const viewOptions = computed((): ViewOption[] => {
 	];
 	if (props.photoMode) {
 		const contentOptions: ViewOption[] = [
-			{ label: t('components.photo-browser.views.albums'), viewMode: 'albums' },
+			...(libraryStore.getLibrary(props.libraryId)?.photoAlbumCount === 0
+				? []
+				: [{ label: t('components.photo-browser.views.albums'), viewMode: 'albums' as const }]),
 			...(props.libraryId > 0
 				? [{ label: t('components.photo-browser.views.folders'), viewMode: 'folders' as const }]
 				: []),

@@ -5,7 +5,8 @@ import { createI18n } from 'vue-i18n';
 import { DOMWrapper, flushPromises } from '@vue/test-utils';
 import { baseSetup } from '@services-test-base';
 import { PhotoItemKind, PlexMediaType, ViewMode } from '@dto';
-import { useMediaOverviewStore, usePhotoBrowsingStore, useSettingsStore } from '@store';
+import { useLibraryStore, useMediaOverviewStore, usePhotoBrowsingStore, useSettingsStore } from '@store';
+import { generatePlexLibrary, Seed } from '@mock';
 import messages from '@/lang/en-US.json';
 import MediaOverviewBar from '@/components/MediaOverview/MediaOverviewBar.vue';
 
@@ -129,6 +130,30 @@ describe('MediaOverviewBar - photo mode', () => {
 		expect(menu.find('[data-cy="view-mode-albums-btn"]').exists()).toBe(true);
 		expect(menu.find('[data-cy="view-mode-assets-btn"]').exists()).toBe(true);
 		expect(menu.find('[data-cy="view-mode-folders-btn"]').exists()).toBe(false);
+	});
+	test.each([0, 2])('Should offer Albums only when the library has albums count %s', async (photoAlbumCount) => {
+		// Arrange
+		const library = generatePlexLibrary({
+			seed: new Seed(1206),
+			plexServerId: 1,
+			type: PlexMediaType.PhotoAlbum,
+			partialData: { id: 4, photoAlbumCount },
+		});
+		useLibraryStore().updateLibrary(library);
+		const wrapper = await mountSuspended(MediaOverviewBar, {
+			props: { photoMode: true, libraryId: library.id },
+			global: { plugins: [pinia, i18n()], stubs: { teleport: true, QMediaTypeIcon: true } },
+		});
+		mounted.push(wrapper);
+
+		// Act
+		await wrapper.get('[data-cy="change-view-mode-btn"]').trigger('click');
+		await flushPromises();
+
+		// Assert
+		expect(wrapper.find('[data-cy="view-mode-albums-btn"]').exists()).toBe(photoAlbumCount > 0);
+		expect(wrapper.find('[data-cy="view-mode-folders-btn"]').exists()).toBe(true);
+		expect(wrapper.find('[data-cy="view-mode-assets-btn"]').exists()).toBe(true);
 	});
 
 	test('keeps ordinary family view changes on the generic settings path', async () => {

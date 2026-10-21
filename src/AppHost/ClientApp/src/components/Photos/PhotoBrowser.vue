@@ -1,5 +1,15 @@
 <template>
+	<MediaOverviewRefresh
+		v-if="isProcessing"
+		:library-id="props.libraryId"
+		mode="processing" />
+	<MediaOverviewRefresh
+		v-else-if="showQueuedPanel"
+		:library-id="props.libraryId"
+		mode="queued"
+		variant="panel" />
 	<MediaOverviewLayout
+		v-else
 		class="photo-browser"
 		data-cy="photo-browser"
 		:aria-busy="photoStore.isRefreshing">
@@ -17,6 +27,11 @@
 				@photo-download="downloadSelection"
 				@photo-clear-selection="photoStore.clearSelection"
 				@photo-family-change="changeFamily" />
+			<MediaOverviewRefresh
+				v-if="isQueued"
+				:library-id="props.libraryId"
+				mode="queued"
+				variant="banner" />
 		</template>
 		<QAlert
 			v-if="!validRoute"
@@ -33,16 +48,6 @@
 				data-cy="photo-stale-selection">
 				{{ t('components.photo-browser.stale-selection') }}
 			</QAlert>
-			<MediaOverviewRefresh
-				v-if="props.libraryId > 0 && isProcessing"
-				:library-id="props.libraryId"
-				mode="processing"
-				:variant="hasCatalog ? 'banner' : 'panel'" />
-			<MediaOverviewRefresh
-				v-else-if="props.libraryId > 0 && isQueued"
-				:library-id="props.libraryId"
-				mode="queued"
-				:variant="hasCatalog ? 'banner' : 'panel'" />
 			<QAlert
 				v-if="neverSynced && !isProcessing && !isQueued"
 				type="info"
@@ -83,6 +88,21 @@
 					@click="retry" />
 			</QAlert>
 			<nav
+				v-if="photoStore.view === 'albums' || photoStore.mode === 'album'"
+				aria-label="Photo album breadcrumbs"
+				class="photo-browser__breadcrumbs"
+				data-cy="photo-album-breadcrumbs">
+				<QBreadcrumbs>
+					<QBreadcrumbsEl
+						:label="t('pages.photos.index.header')"
+						:to="props.libraryId > 0 ? '/photos' : undefined" />
+					<QBreadcrumbsEl
+						v-if="props.libraryId > 0"
+						:label="libraryStore.getLibraryName(props.libraryId)"
+						:to="props.albumId ? `/photos/${props.libraryId}` : undefined" />
+				</QBreadcrumbs>
+			</nav>
+			<nav
 				v-if="showFolderBreadcrumbs"
 				aria-label="Photo folder breadcrumbs"
 				class="photo-browser__breadcrumbs"
@@ -90,13 +110,12 @@
 				<QBreadcrumbs>
 					<QBreadcrumbsEl
 						:label="t('components.photo-browser.folder-roots')"
-						@click="openRootFolders" />
+						:to="folderLocation(null)" />
 					<QBreadcrumbsEl
 						v-for="(breadcrumb, index) in photoStore.breadcrumbs"
 						:key="`${breadcrumb.id}-${index}`"
 						:label="breadcrumb.title"
-						:clickable="index < photoStore.breadcrumbs.length - 1"
-						@click="index < photoStore.breadcrumbs.length - 1 && openFolder(breadcrumb.id)" />
+						:to="index < photoStore.breadcrumbs.length - 1 ? folderLocation(breadcrumb.id) : undefined" />
 				</QBreadcrumbs>
 			</nav>
 			<PhotoOverviewList
@@ -121,7 +140,7 @@
 				@select-all="selectAll"
 				@retry="retry" />
 			<QLoadingOverlay :loading="photoStore.loading && !photoStore.hasAnyData" />
-			<PhotoAssetDialog />
+			<PhotoAssetDialog @download="downloadOverviewItem" />
 			<DownloadConfirmation @download="downloadStore.downloadMedia($event)" />
 			<RefreshModeDialog
 				v-if="props.libraryId > 0"
@@ -171,7 +190,11 @@ const isProcessing = computed(() => get(queue)?.status === LibrarySyncJobStatus.
 const isQueued = computed(() => get(queue)?.status === LibrarySyncJobStatus.Queued);
 const refreshDisabled = computed(() => get(isProcessing) || get(isQueued));
 const neverSynced = computed(() => props.libraryId > 0 && libraryStore.getLibrary(props.libraryId)?.syncedAt === null);
-const hasCatalog = computed(() => photoStore.hasAnyData || (props.libraryId > 0 && !!libraryStore.getLibrary(props.libraryId)?.syncedAt));
+const showQueuedPanel = computed(() => get(isQueued)
+	&& get(neverSynced)
+	&& libraryStore.getLibrary(props.libraryId)?.isEnabled === true
+	&& !photoStore.disabledLibrary);
+const hasNoAlbums = computed(() => libraryStore.getLibrary(props.libraryId)?.photoAlbumCount === 0);
 
 function scalarQuery(name: string): string | undefined {
 	const value = route.query[name];
@@ -210,6 +233,10 @@ const parsedRoute = computed<IPhotoBrowseActivation | null>(() => {
 	};
 });
 const validRoute = computed(() => get(parsedRoute) !== null);
+const shouldRedirectToFolders = computed(() => {
+	const context = get(parsedRoute);
+	return context?.mode === 'library' && context.view === 'albums' && get(hasNoAlbums);
+});
 const overviewContext = computed<'albums' | 'folders' | 'assets' | 'album' | 'search'>(() => {
 	if (photoStore.searchQuery) return 'search';
 	if (photoStore.mode === 'album') return 'album';
@@ -234,6 +261,10 @@ function syncRoute(): void {
 		void router.replace({ query: cleanQuery }).catch(() => undefined);
 	if (!get(ready) || !context) {
 		photoStore.deactivate(owner);
+		return;
+	}
+	if (get(shouldRedirectToFolders)) {
+		updateQuery({ view: 'folders', folderId: null }, true);
 		return;
 	}
 	const activation = photoStore.activate(context, owner);
@@ -274,11 +305,14 @@ function changeSort(sort: PhotoBrowseSort): void {
 }
 
 function openFolder(folderId: number): void {
-	updateQuery({ view: 'folders', folderId });
+	void router.push(folderLocation(folderId)).catch(() => undefined);
 }
 
-function openRootFolders(): void {
-	updateQuery({ view: 'folders', folderId: null });
+function folderLocation(folderId: number | null) {
+	return {
+		path: route.path,
+		query: { ...cleanPhotoQuery(), view: 'folders', folderId: folderId?.toString() },
+	};
 }
 
 function openAlbum(album: { plexLibraryId: number; id: number }): void {
@@ -388,7 +422,7 @@ function retry(): void {
 	useSubscription(photoStore.loadCurrent(true).subscribe());
 }
 
-watch(() => [get(ready), route.fullPath, props.libraryId, props.albumId], syncRoute, { immediate: true });
+watch(() => [get(ready), route.fullPath, props.libraryId, props.albumId, get(hasNoAlbums)], syncRoute, { immediate: true });
 watch(() => settingsStore.displaySettings.photoAlbumViewMode, () => {
 	set(restoreScrollIndex, photoStore.focusIndex ?? photoStore.scrollIndex);
 });

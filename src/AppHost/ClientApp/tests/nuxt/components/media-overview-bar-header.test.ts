@@ -6,7 +6,7 @@ import { flushPromises } from '@vue/test-utils';
 import { baseSetup } from '@services-test-base';
 import { generatePlexLibrary, generatePlexServer, Seed } from '@mock';
 import { PlexMediaType } from '@dto';
-import { useLibraryStore, useMediaOverviewStore, useServerStore, useSettingsStore } from '@store';
+import { useLibraryStore, useMediaOverviewStore, usePhotoBrowsingStore, useServerStore, useSettingsStore } from '@store';
 import messages from '@/lang/en-US.json';
 import MediaOverviewBarHeader from '@/components/MediaOverview/MediaOverviewBarHeader.vue';
 import MediaOverviewTypeSelector from '@/components/MediaOverview/MediaOverviewTypeSelector.vue';
@@ -151,6 +151,41 @@ describe('MediaOverviewBarHeader - library media counts', () => {
 		expect(wrapper.text()).toContain('1 Clips');
 		expect(wrapper.text()).not.toContain('99 Albums');
 		expect(wrapper.findComponent(MediaOverviewTypeSelector).exists()).toBe(false);
+		wrapper.unmount();
+	});
+
+	test.each(['albums', 'folders'] as const)('Should keep library counts visible in empty and refreshing %s views', async (view) => {
+		// Arrange
+		const library = generatePlexLibrary({
+			seed: new Seed(1207),
+			plexServerId: 9,
+			type: PlexMediaType.PhotoAlbum,
+			partialData: { id: 9, count: 0, photoAlbumCount: 0, photoImageCount: 17, photoClipCount: 1, mediaSize: 4096 },
+		});
+		useLibraryStore().updateLibrary(library);
+		const photoStore = usePhotoBrowsingStore();
+		photoStore.view = view;
+		const wrapper = await mountSuspended(MediaOverviewBarHeader, {
+			props: { libraryId: library.id, photoMode: true },
+			global: {
+				plugins: [pinia, createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': messages } })],
+				stubs: { QMediaTypeIcon: true },
+			},
+		});
+
+		// Act
+		expect(wrapper.text()).toContain('0 Albums - 17 Photos - 1 Clips - 4.1 kB');
+		photoStore.loading = true;
+		if (view === 'albums') photoStore.albums.loading = true;
+		else photoStore.folders.loading = true;
+		await flushPromises();
+
+		// Assert
+		expect(photoStore.isRefreshing).toBe(true);
+		expect(wrapper.text()).toContain('0 Albums - 17 Photos - 1 Clips - 4.1 kB');
+		useLibraryStore().updateLibrary({ ...library, photoImageCount: 18 });
+		await flushPromises();
+		expect(wrapper.text()).toContain('0 Albums - 18 Photos - 1 Clips - 4.1 kB');
 		wrapper.unmount();
 	});
 

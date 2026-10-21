@@ -46,7 +46,7 @@
 										</template>
 									</q-item-label>
 									<q-item-label
-										v-if="!isLoading && hasMedia"
+										v-if="showMetadata"
 										caption>
 										{{ formatted(mediaMetaData) }}
 									</q-item-label>
@@ -78,7 +78,7 @@
 					{{ mediaTypeToAllText(mediaType) }}
 				</q-item-label>
 				<q-item-label
-					v-if="!isLoading && hasMedia"
+					v-if="showMetadata"
 					caption>
 					{{ formatted(mediaMetaData) }}
 				</q-item-label>
@@ -227,6 +227,7 @@ const hasMedia = computed(() => {
 	}
 	return !!props.mediaDetailItem || mediaOverviewStore.totalCount > 0;
 });
+const showMetadata = computed(() => (props.photoMode && get(library) !== null) || (!get(isLoading) && get(hasMedia)));
 
 function formatPhotoMetadata(metadata: IMediaOverviewMetadata, currentLibrary: PlexLibraryDTO | null, aggregateAlbumCount = metadata.photoAlbumCount): string {
 	if (currentLibrary) {

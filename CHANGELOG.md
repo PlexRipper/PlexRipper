@@ -1,5 +1,34 @@
 Reaparr Changelog
 
+# [0.41.0-dev.8](https://github.com/Reaparr/Reaparr/compare/v0.41.0-dev.7...v0.41.0-dev.8) (2026-10-21)
+
+
+### Bug Fixes
+
+* **WebAPI:** Accept string photo selections in download previews ([bf47833](https://github.com/Reaparr/Reaparr/commit/bf478334b80d03bb3cb0e0f26743b43fa2c451aa))
+* **Web-UI:** Correct photo library navigation and refresh presentation ([8a2f663](https://github.com/Reaparr/Reaparr/commit/8a2f663a05ebc46e611843b976231391d99e14b4))
+* **Web-UI:** Hide the loading bar during photo folder navigation ([758e275](https://github.com/Reaparr/Reaparr/commit/758e27505a9ba96fb0123554251c8467f386d008))
+* **Web-UI:** Resolve photo layout lint failures ([b8be8d6](https://github.com/Reaparr/Reaparr/commit/b8be8d6754c74035c63f073eef17fd3c6830227c))
+* **WebAPI:** Serialize photo asset kinds as documented strings ([042d838](https://github.com/Reaparr/Reaparr/commit/042d838954f383c3b2886d51ce68d9cabe39c09d))
+* **Web-UI:** Simplify photo poster labels and folder controls ([511cecc](https://github.com/Reaparr/Reaparr/commit/511cecc25299e305a4841f26cc9c84c045acc296))
+* **Web-UI:** Update Cypress action for Node 24 readiness ([fa23cc3](https://github.com/Reaparr/Reaparr/commit/fa23cc329d0b0d1d8bf9834f0902f6c7e6a184ec))
+
+
+### Features
+
+* **Web-UI:** Add fullscreen photo Dock and wheel zoom controls ([c0167b9](https://github.com/Reaparr/Reaparr/commit/c0167b997950b786d8eb0f40918f23d8309b43bb))
+* **WebAPI:** Add unmapped-only filter for photo assets query ([7033d45](https://github.com/Reaparr/Reaparr/commit/7033d4552029a6d8cc4510bc4ca70f5ca480772e))
+* **WebAPI:** Implement end-to-end photo browsing ([c669379](https://github.com/Reaparr/Reaparr/commit/c669379a98651573314441967f75398113c4ba1f))
+* **WebAPI:** Implement GetPhotoAssetImage endpoint for streaming photo assets ([94858f7](https://github.com/Reaparr/Reaparr/commit/94858f709dbce805afe3359bf31521cea8b0fa04))
+* **WebAPI:** Implement recursive photo folder resolution and browsing logic ([e21ef6e](https://github.com/Reaparr/Reaparr/commit/e21ef6e17d02ceb41f9186c25852bf5d20a0b44a))
+* **Web-UI:** Integrate photo browsing functionality ([b2d2006](https://github.com/Reaparr/Reaparr/commit/b2d2006f1d058dbe06e7ed6a8acfcb06efd09276))
+
+
+### Performance Improvements
+
+* **Web-UI:** Cache photo folder and album navigation results ([7825ce4](https://github.com/Reaparr/Reaparr/commit/7825ce4a44d3c89071ea4af993f4587ee8328691))
+* **Web-UI:** Preload visible photos for fullscreen viewing ([a862057](https://github.com/Reaparr/Reaparr/commit/a8620578cf9d629fc46f9f5e155e356159681517))
+
 # [0.41.0-dev.7](https://github.com/Reaparr/Reaparr/compare/v0.41.0-dev.6...v0.41.0-dev.7) (2026-10-20)
 
 

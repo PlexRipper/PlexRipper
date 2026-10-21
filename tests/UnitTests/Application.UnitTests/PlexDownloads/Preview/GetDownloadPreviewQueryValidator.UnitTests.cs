@@ -137,7 +137,7 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
         result.Errors.Single().PropertyName.ShouldBe("Request.DownloadMedias[0].Type");
     }
     [Test]
-    public async Task ShouldAcceptFolderSelection_WhenSelectionKindIsNumericZero()
+    public async Task ShouldAcceptFolderSelection_WhenSelectionKindIsFolder()
     {
         // Arrange
         var query = CreateQuery([CreateSelectionWithKind(PlexMediaType.PhotoImage, PhotoItemKind.Folder)]);
@@ -162,6 +162,61 @@ public class GetDownloadPreviewQueryValidatorUnitTests : BaseUnitTest<GetDownloa
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(x => x.ErrorMessage.Contains("Photo album selections"));
+    }
+
+    [Test]
+    [Arguments(PlexMediaType.PhotoImage, "Asset", PhotoItemKind.Asset)]
+    [Arguments(PlexMediaType.PhotoImage, "Folder", PhotoItemKind.Folder)]
+    [Arguments(PlexMediaType.PhotoAlbum, "Album", PhotoItemKind.Album)]
+    public async Task ShouldDeserializePhotoSelectionKind_WhenApiUsesStringEnum(
+        PlexMediaType type,
+        string selectionKind,
+        PhotoItemKind expectedSelectionKind
+    )
+    {
+        // Arrange
+        var json = $$"""
+            {
+              "downloadMedias": [
+                {
+                  "plexServerId": 14,
+                  "plexLibraryId": 46,
+                  "mediaIds": [112],
+                  "type": "{{type}}",
+                  "selectionKind": "{{selectionKind}}",
+                  "qualities": [],
+                  "keepCompletedInDownloadFolder": false
+                }
+              ],
+              "destinationFolderPathId": 5,
+              "customDestinationFolderPath": ""
+            }
+            """;
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        // Act
+        var request = JsonSerializer.Deserialize<DownloadPreviewRequest>(json, options);
+
+        // Assert
+        request.ShouldNotBeNull();
+        request.DownloadMedias.Count.ShouldBe(1);
+        var selection = request.DownloadMedias.Single();
+        selection.Type.ShouldBe(type);
+        selection.SelectionKind.ShouldBe(expectedSelectionKind);
+        selection.PlexServerId.ShouldBe(14);
+        selection.PlexLibraryId.ShouldBe(46);
+        selection.MediaIds.ShouldBe([112]);
+        selection.Qualities.ShouldBeEmpty();
+        selection.KeepCompletedInDownloadFolder.ShouldBeFalse();
+        request.DestinationFolderPathId.ShouldBe(5);
+        request.CustomDestinationFolderPath.ShouldBeEmpty();
+
+        var validationResult = await Sut.ValidateAsync(
+            new GetDownloadPreviewQuery(request),
+            CancellationToken
+        );
+        validationResult.IsValid.ShouldBeTrue();
+        validationResult.Errors.Count.ShouldBe(0);
     }
 
     private static GetDownloadPreviewQuery CreateQuery(IEnumerable<DownloadMediaDTO> selections) =>

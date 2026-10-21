@@ -2,13 +2,15 @@ import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { generateLibrarySyncJobQueue } from '@mock';
-import { IntegrationProvisioningState, IntegrationType, TestConnectionStatus } from '@dto';
+import { IntegrationProvisioningState, IntegrationType, NotificationLevel, PlexMediaType, PhotoItemKind, TestConnectionStatus } from '@dto';
 import {
 	useAccountStore,
 	useAuthenticationStore,
 	useGlobalStore,
 	useIntegrationStore,
 	useLibraryStore,
+	usePhotoBrowsingStore,
+	useNotificationsStore,
 	useSignalrStore,
 } from '@store';
 
@@ -33,6 +35,21 @@ describe('GlobalStore.resetSession()', () => {
 		const authenticationStore = useAuthenticationStore();
 		const libraryStore = useLibraryStore();
 		const integrationStore = useIntegrationStore();
+		const photoStore = usePhotoBrowsingStore();
+		const notificationsStore = useNotificationsStore();
+		notificationsStore.notifications = [{
+			id: 17, message: 'Previous session notification', hidden: false,
+			level: NotificationLevel.Information, createdAt: '2026-10-20T00:00:00Z',
+		}];
+		photoStore.selectedSelectors = [{
+			id: 33,
+			plexServerId: 1,
+			plexLibraryId: 1,
+			kind: PhotoItemKind.Asset,
+			type: PlexMediaType.PhotoImage,
+			title: 'Selected photo',
+			stale: false,
+		}];
 		accountStore.accounts = [{ id: 1 } as (typeof accountStore.accounts)[number]];
 		authenticationStore.isLoggedIn = true;
 		libraryStore.syncQueues = [generateLibrarySyncJobQueue({ plexLibraryId: 1, plexServerId: 1 })];
@@ -62,5 +79,7 @@ describe('GlobalStore.resetSession()', () => {
 		expect(authenticationStore.isLoggedIn).toBe(false);
 		expect(libraryStore.syncQueues).toEqual([]);
 		expect(integrationStore.items).toEqual([]);
+		expect(photoStore.selectedSelectors).toEqual([]);
+		expect(notificationsStore.notifications).toEqual([]);
 	});
 });

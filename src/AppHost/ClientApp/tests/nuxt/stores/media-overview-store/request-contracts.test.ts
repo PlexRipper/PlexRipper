@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { get, set } from '@vueuse/core';
 import { useRouteQuery } from '@vueuse/router';
@@ -519,5 +519,21 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		expect(lastMediaRequest().params.genreId).toBe(31);
 		expect(lastMediaRequest().params.qualityId).toBe(41);
 		expect(lastMediaRequest().params.comparisonState).toBe(PlexMediaComparisonState.Missing);
+	});
+	test('switching to Photos cancels generic state without initializing a generic photo feed', () => {
+		const store = useMediaOverviewStore();
+		const settingsStore = useSettingsStore();
+		const initializeLibrary = vi.spyOn(store, 'initializeLibrary');
+		store.libraryId = 45;
+		store.filterQuery = 'stale query';
+		store.totalCount = 3;
+
+		store.changeAllMediaOverviewType(PlexMediaType.PhotoAlbum);
+
+		expect(initializeLibrary).not.toHaveBeenCalled();
+		expect(settingsStore.displaySettings.allOverviewViewMode).toBe(PlexMediaType.PhotoAlbum);
+		expect(store.libraryId).toBe(0);
+		expect(store.filterQuery).toBe('');
+		expect(store.totalCount).toBe(0);
 	});
 });

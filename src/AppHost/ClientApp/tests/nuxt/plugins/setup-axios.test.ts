@@ -112,6 +112,44 @@ describe('setupAxios()', () => {
 		expect(alertStore.alerts).toEqual([]);
 	});
 
+	test.each([
+		{ name: 'HTTP failure', arrange: () => mock.onGet('/api/Handled').reply(502), status: 502 },
+		{ name: 'network failure', arrange: () => mock.onGet('/api/Handled').networkError(), status: undefined },
+		{ name: 'timeout', arrange: () => mock.onGet('/api/Handled').timeout(), status: undefined },
+	])('Should leave a locally handled $name rejected without global feedback', async ({ arrange, status }) => {
+		// Arrange
+		arrange();
+		let observedError: unknown;
+		observerInterceptorId = Axios.interceptors.response.use(undefined, (error) => {
+			observedError = error;
+			return Promise.reject(error);
+		});
+
+		// Act
+		const caught = await Axios.get('/api/Handled', { handleErrorsLocally: true }).catch((error) => error);
+
+		// Assert
+		expect(Axios.isAxiosError(caught)).toBe(true);
+		expect(caught).toBe(observedError);
+		expect(caught.response?.status).toBe(status);
+		expect(useAlertStore().alerts).toEqual([]);
+		expect(notificationMocks.showErrorNotification).not.toHaveBeenCalled();
+	});
+
+	test('Should still redirect unauthorized locally handled requests', async () => {
+		// Arrange
+		mock.onGet('/api/Secure').reply(401);
+
+		// Act
+		const caught = await Axios.get('/api/Secure', { handleErrorsLocally: true }).catch((error) => error);
+
+		// Assert
+		expect(caught.response.status).toBe(401);
+		expect(router.push).toHaveBeenCalledWith('/login');
+		expect(useAlertStore().alerts).toEqual([]);
+		expect(notificationMocks.showErrorNotification).not.toHaveBeenCalled();
+	});
+
 	test('Should keep intentional cancellation silent', async () => {
 		// Arrange
 		const alertStore = useAlertStore();

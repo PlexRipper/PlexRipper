@@ -1,48 +1,77 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { reactive, nextTick } from 'vue';
-import { createPinia, setActivePinia, type Pinia } from 'pinia';
+import { createPinia, setActivePinia } from 'pinia';
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime';
-import { of, Subject } from 'rxjs';
-import { baseSetup, baseVars, getAxiosMock } from '@services-test-base';
-import { generatePlexMedia } from '@mock';
-import { PlexMediaType, type PlexMediaDTO } from '@dto';
-import { useDialogStore, useDownloadStore, useMediaStore, useSettingsStore } from '@store';
-import { resetMediaOverviewCommandsBus, sendMediaOverviewDownloadCommand } from '@/composables/event-bus';
-import ConfirmationSection from '@/components/Views/Settings/ConfirmationSection.vue';
-import PhotoDetails from '@/pages/photos/[id]/details/[albumId].vue';
+import { flushPromises } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
+import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
+import { generatePlexAccount, generatePlexLibrary, generatePlexServer, generateResultDTO, Seed } from '@mock';
+import { PhotoAssetKind, PlexMediaType, ViewMode, type PhotoAssetPageDTO } from '@dto';
+import { useAccountStore, useGlobalStore, useLibraryStore, usePhotoBrowsingStore, useServerStore, useSettingsStore } from '@store';
+import PhotoDetails from '@/pages/photos/[id]/details/[albumId].vue';
 import messages from '@/lang/en-US.json';
 
-const routeState = vi.hoisted(() => ({ params: { id: '4', albumId: '20' } }));
+const routeState = vi.hoisted(() => ({
+	params: { id: '4', albumId: '20' },
+	query: {} as Record<string, string>,
+	path: '/photos/4/details/20',
+	fullPath: '/photos/4/details/20',
+}));
 mockNuxtImport('useRoute', () => () => routeState);
 
-describe('Photos album detail - request lifetime', () => {
+describe('Photos album route - bounded member browsing', () => {
 	let { mock } = baseVars();
-	let pinia: Pinia;
+	let pinia = createPinia();
 	const mounted: Array<{ unmount: () => void }> = [];
 	beforeAll(() => baseSetup());
-	beforeEach(() => {
+	beforeEach(async () => {
 		mock = getAxiosMock();
 		pinia = createPinia();
 		setActivePinia(pinia);
+		useSettingsStore().displaySettings.photoAlbumViewMode = ViewMode.Table;
 		routeState.params = reactive({ id: '4', albumId: '20' });
+		routeState.query = {};
+		routeState.fullPath = '/photos/4/details/20';
+		vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(960);
+		vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(600);
+		const library = generatePlexLibrary({
+			seed: new Seed(625), plexServerId: 3, type: PlexMediaType.PhotoAlbum,
+			partialData: { id: 4, isEnabled: true, syncedAt: '2026-10-20T00:00:00Z' },
+		});
+		useLibraryStore().updateLibrary(library);
+		const server = generatePlexServer({ id: 3, config: { seed: 626 } });
+		server.name = 'Camera server';
+		useServerStore().servers = [server];
+		useAccountStore().accounts = [generatePlexAccount({
+			id: 1,
+			plexServers: [server],
+			plexLibraries: [library],
+			partialData: { isEnabled: false },
+			config: { seed: 627 },
+		})];
+		await subscribeSpyTo(usePhotoBrowsingStore().setup()).onComplete();
+		useGlobalStore().pageReadyObservable.next(true);
 	});
 	afterEach(() => {
 		mounted.forEach((wrapper) => wrapper.unmount());
 		mounted.length = 0;
+		usePhotoBrowsingStore().$reset();
+		mock.restore();
 		vi.restoreAllMocks();
-		resetMediaOverviewCommandsBus();
 	});
 
-	function album(id: number) {
-		return generatePlexMedia({
-			config: { seed: 625 },
-			partialData: {
-				id, type: PlexMediaType.PhotoAlbum, plexLibraryId: 4, plexServerId: 3,
-				title: `Photo album ${id}`, summary: 'A real album summary', children: [], childCount: 0,
-				addedAt: '2026-01-02T00:00:00Z', updatedAt: null, hasThumb: false,
-			},
-		});
+	function page(title: string): PhotoAssetPageDTO {
+		return {
+			items: [{
+				id: 31, plexServerId: 3, plexLibraryId: 4,
+				plexServerName: 'Camera server', plexLibraryTitle: 'Travel photos',
+				title, assetKind: PhotoAssetKind.Image, hasThumbnail: false,
+				plexApiRatingKey: 31, plexApiMetaDataKey: 31, originalFilename: 'original.jpg',
+				container: 'jpg', size: 2048, width: 1920, height: 1080, duration: null,
+				relativeFolderPath: 'Summer', sourceRootTitle: 'Camera',
+			}],
+			page: 1, pageSize: 100, totalCount: 1, totalBytes: 2048,
+		};
 	}
 
 	async function render() {
@@ -51,111 +80,69 @@ describe('Photos album detail - request lifetime', () => {
 				plugins: [pinia, createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': messages } })],
 				stubs: {
 					QPage: { template: '<main><slot /></main>' },
-					MediaOverviewBar: true, MediaPosterImage: true, DownloadConfirmation: true,
-					QFileSize: true, QDateTime: true,
+					DownloadConfirmation: true, PhotoAssetDialog: true, RefreshModeDialog: true,
+					MediaOverviewRefresh: true, PhotoThumbnail: true, QFileSize: true,
 				},
 			},
 		});
 		mounted.push(wrapper);
+		await flushPromises();
 		return wrapper;
 	}
 
-	test('Should discard an old response after direct navigation to another album', async () => {
+	test('Should browse explicit album members without requesting generic embedded album contents', async () => {
 		// Arrange
-		const first = new Subject<PlexMediaDTO>();
-		const second = new Subject<PlexMediaDTO>();
-		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValueOnce(first).mockReturnValueOnce(second);
+		mock.onGet(/\/api\/PlexPhoto\/libraries\/4\/albums\/20\/assets/).reply(200, generateResultDTO(page('Beach image')));
+		// Act
 		const wrapper = await render();
-		expect(wrapper.get('[data-cy="photo-details-loading"]').text()).toBe('Loading photo album…');
+		// Assert
+		expect(wrapper.text()).toContain('Beach image');
+		expect(wrapper.text()).toContain('Camera server');
+		expect(wrapper.get('[data-cy="photo-album-back"]').attributes('aria-label')).toBe('Back');
+		expect(mock.history.get.some((request) => request.url?.includes('/api/PlexMedia'))).toBe(false);
+	});
 
+	test('Should reject invalid route ids before fetching a catalog', async () => {
+		// Arrange
+		routeState.params.albumId = 'not-an-id';
+		// Act
+		const wrapper = await render();
+		// Assert
+		expect(wrapper.get('[data-cy="photo-album-invalid-route"]').text()).toContain('Invalid photo library or album');
+		expect(mock.history.get).toHaveLength(0);
+	});
+
+	test('Should show a scope rejection and recover through the visible member retry action', async () => {
+		// Arrange
+		mock.onGet(/\/api\/PlexPhoto\/libraries\/4\/albums\/20\/assets/).replyOnce(404, {
+			isSuccess: false, value: null, statusCode: 404, errors: [{ message: 'Album not found', metadata: {}, reasons: [] }], successes: [],
+		}).onGet(/\/api\/PlexPhoto\/libraries\/4\/albums\/20\/assets/).reply(200, generateResultDTO(page('Recovered image')));
+		const wrapper = await render();
+		expect(wrapper.text()).toContain('Photo catalog could not be loaded');
+		// Act
+		const retry = wrapper.findAll('button').find((button) => button.text().includes('Retry'));
+		expect(retry).toBeDefined();
+		await retry!.trigger('click');
+		await flushPromises();
+		// Assert
+		expect(wrapper.text()).toContain('Recovered image');
+		expect(wrapper.text()).not.toContain('Photo catalog could not be loaded');
+	});
+
+	test('Should discard an old album response after route navigation while retaining the new album members', async () => {
+		// Arrange
+		const oldResponse = Promise.withResolvers<[number, unknown]>();
+		mock.onGet(/\/api\/PlexPhoto\/libraries\/4\/albums\/20\/assets/).reply(() => oldResponse.promise);
+		mock.onGet(/\/api\/PlexPhoto\/libraries\/4\/albums\/30\/assets/).reply(200, generateResultDTO(page('Current album image')));
+		const wrapper = await render();
 		// Act
 		routeState.params.albumId = '30';
 		await nextTick();
-		first.next(album(20));
-		await nextTick();
-
+		await flushPromises();
+		oldResponse.resolve([200, generateResultDTO(page('Obsolete album image'))]);
+		await flushPromises();
 		// Assert
-		expect(wrapper.find('.media-title').exists()).toBe(false);
-		expect(wrapper.find('[data-cy="photo-details-loading"]').exists()).toBe(true);
-
-		// Act
-		second.next(album(30));
-		await nextTick();
-
-		expect(wrapper.get('.media-title').text()).toBe('Photo album 30');
-		expect(wrapper.find('.media-detail-header').exists()).toBe(true);
-		expect(wrapper.text()).toContain('A real album summary');
-		expect(wrapper.get('[data-cy="photo-assets-empty"]').text()).toBe('No images or clips found in this album.');
-		expect(wrapper.text()).not.toContain('Photo album 20');
-	});
-
-	test('Should stop loading on a failed request and recover through the visible retry control', async () => {
-		// Arrange
-		const first = new Subject<PlexMediaDTO>();
-		const retry = new Subject<PlexMediaDTO>();
-		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValueOnce(first).mockReturnValueOnce(retry);
-		const wrapper = await render();
-
-		// Act
-		first.error(new Error('Unavailable'));
-		await nextTick();
-
-		// Assert
-		expect(wrapper.find('[data-cy="photo-details-loading"]').exists()).toBe(false);
-		expect(wrapper.get('[data-cy="photo-details-error"]').text()).toBe('Unable to load this photo album.');
-
-		// Act
-		await wrapper.get('button').trigger('click');
-		retry.next(album(20));
-		await nextTick();
-
-		// Assert
-		expect(wrapper.find('[data-cy="photo-details-error"]').exists()).toBe(false);
-		expect(wrapper.get('.media-title').text()).toBe('Photo album 20');
-	});
-
-	test('Should reject invalid route ids before fetching and display an actionable error', async () => {
-		// Arrange
-		routeState.params.albumId = 'not-an-id';
-		const request = vi.spyOn(useMediaStore(), 'getMediaDataDetailById');
-
-		// Act
-		const wrapper = await render();
-
-		// Assert
-		expect(wrapper.get('[data-cy="photo-details-error"]').text()).toBe('Invalid photo library or album.');
-		expect(wrapper.find('[data-cy="photo-details-loading"]').exists()).toBe(false);
-		expect(request).not.toHaveBeenCalled();
-		expect(wrapper.get('button').text()).toContain('Back');
-		expect(mock.history.get).toHaveLength(0);
-	});
-	test.each([
-		[PlexMediaType.PhotoAlbum, 'ask-download-photo-album-confirmation'],
-		[PlexMediaType.PhotoImage, 'ask-download-photo-image-confirmation'],
-	] as const)('Should use the distinct %s confirmation control in the detail download consumer', async (type, control) => {
-		// Arrange
-		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValue(of(album(20)));
-		const open = vi.spyOn(useDialogStore(), 'openMediaConfirmationDownloadDialog');
-		const download = vi.spyOn(useDownloadStore(), 'downloadMedia').mockImplementation(() => undefined);
-		await render();
-		const settings = await mountSuspended(ConfirmationSection, { global: {
-			plugins: [pinia, createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': messages } })],
-			stubs: { QSection: { template: '<section><slot /></section>' }, HelpGroup: { template: '<div><slot /></div>' }, HelpRow: { template: '<div><slot /></div>' } },
-		} });
-		mounted.push(settings);
-		const command = [{ type, mediaIds: [20], plexServerId: 3, plexLibraryId: 4, qualities: [], keepCompletedInDownloadFolder: false }];
-		sendMediaOverviewDownloadCommand(command);
-		expect(open).toHaveBeenCalledExactlyOnceWith(command);
-		open.mockClear();
-
-		// Act
-		await settings.get(`[data-cy="${control}"]`).trigger('click');
-		sendMediaOverviewDownloadCommand(command);
-
-		// Assert
-		expect(open).not.toHaveBeenCalled();
-		expect(download).toHaveBeenCalledExactlyOnceWith({ downloadMedias: command, customDestinationFolderPath: '', destinationFolderPathId: null });
-		expect(useSettingsStore().confirmationSettings.askDownloadMusicArtistConfirmation).toBe(true);
-		expect(useSettingsStore().confirmationSettings.askDownloadMovieConfirmation).toBe(true);
+		expect(wrapper.text()).toContain('Current album image');
+		expect(wrapper.text()).not.toContain('Obsolete album image');
 	});
 });

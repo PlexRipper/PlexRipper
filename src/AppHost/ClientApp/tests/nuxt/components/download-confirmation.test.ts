@@ -3,12 +3,20 @@ import { createPinia, setActivePinia, type Pinia } from 'pinia';
 import { defineComponent, h } from 'vue';
 import { flushPromises } from '@vue/test-utils';
 import { mountSuspended } from '@nuxt/test-utils/runtime';
-import { Subject } from 'rxjs';
+import { EMPTY, Subject } from 'rxjs';
 import { createI18n } from 'vue-i18n';
 import { baseSetup } from '@services-test-base';
 import { useDialogStore, useDownloadStore, useFolderPathStore } from '@store';
 import { DialogType } from '@enums';
-import { FolderType, PlexMediaType, type DownloadMediaDTO, type DownloadPreviewContainerDTO, type FolderPathDTO } from '@dto';
+import {
+	FolderType,
+	PhotoItemKind,
+	PlexMediaType,
+	type DownloadMediaDTO,
+	type DownloadPreviewContainerDTO,
+	type DownloadPreviewRequest,
+	type FolderPathDTO,
+} from '@dto';
 import DownloadConfirmation from '@/components/Dialogs/DownloadConfirmation.vue';
 import messages from '@/lang/en-US.json';
 
@@ -29,7 +37,21 @@ const DirectoryBrowser = defineComponent({
 });
 
 function command(type: PlexMediaType): DownloadMediaDTO[] {
-	return [{ type, mediaIds: [101], plexServerId: 3, plexLibraryId: 4, qualities: [], keepCompletedInDownloadFolder: false }];
+	let selectionKind: PhotoItemKind | undefined;
+	if (type === PlexMediaType.PhotoAlbum) {
+		selectionKind = PhotoItemKind.Album;
+	} else if (type === PlexMediaType.PhotoImage) {
+		selectionKind = PhotoItemKind.Asset;
+	}
+	return [{
+		type,
+		mediaIds: [101],
+		plexServerId: 3,
+		plexLibraryId: 4,
+		qualities: [],
+		keepCompletedInDownloadFolder: false,
+		...(selectionKind === undefined ? {} : { selectionKind }),
+	}];
 }
 
 function preview(title: string, type: PlexMediaType): DownloadPreviewContainerDTO {
@@ -57,10 +79,12 @@ const families = [
 describe('DownloadConfirmation - family destinations and preview lifetime', () => {
 	let pinia: Pinia;
 	const mounted: Array<{ unmount: () => void }> = [];
+	let previewRequests: DownloadPreviewRequest[];
 
 	beforeAll(() => baseSetup());
 	beforeEach(() => {
 		pinia = createPinia();
+		previewRequests = [];
 		setActivePinia(pinia);
 	});
 	afterEach(() => {
@@ -72,7 +96,10 @@ describe('DownloadConfirmation - family destinations and preview lifetime', () =
 	async function render(paths: FolderPathDTO[], responses: Subject<DownloadPreviewContainerDTO | null>[]) {
 		const downloadStore = useDownloadStore();
 		let responseIndex = 0;
-		vi.spyOn(downloadStore, 'previewDownload').mockImplementation(() => responses[responseIndex++]!.asObservable());
+		vi.spyOn(downloadStore, 'previewDownload').mockImplementation((request) => {
+			previewRequests.push(request);
+			return responses[responseIndex++]?.asObservable() ?? EMPTY;
+		});
 		useFolderPathStore().$patch({ folderPaths: paths });
 		const wrapper = await mountSuspended(DownloadConfirmation, {
 			global: {
@@ -83,7 +110,6 @@ describe('DownloadConfirmation - family destinations and preview lifetime', () =
 		mounted.push(wrapper);
 		return wrapper;
 	}
-
 	test.each(families)('Should use the persisted %s family default instead of the first or foreign destination', async (type, rootType, folderType) => {
 		const response = new Subject<DownloadPreviewContainerDTO | null>();
 		const wrapper = await render([
@@ -115,7 +141,8 @@ describe('DownloadConfirmation - family destinations and preview lifetime', () =
 
 	test('Should keep Other Videos quality information and close the browser after a custom destination is selected', async () => {
 		const response = new Subject<DownloadPreviewContainerDTO | null>();
-		const wrapper = await render([folder(10, PlexMediaType.Movie, FolderType.MovieFolder, true)], [response]);
+		const customDestinationResponse = new Subject<DownloadPreviewContainerDTO | null>();
+		const wrapper = await render([folder(10, PlexMediaType.Movie, FolderType.MovieFolder, true)], [response, customDestinationResponse]);
 		const dialogStore = useDialogStore();
 		const closeDialog = vi.spyOn(dialogStore, 'closeDialog');
 		wrapper.getComponent(CardDialog).vm.$emit('opened', command(PlexMediaType.OtherVideos));
@@ -130,8 +157,26 @@ describe('DownloadConfirmation - family destinations and preview lifetime', () =
 		});
 		await flushPromises();
 		expect(closeDialog).toHaveBeenCalledWith(DialogType.DirectoryBrowserDialog);
+		customDestinationResponse.next(preview('Personal video', PlexMediaType.OtherVideos));
+		await flushPromises();
 		await wrapper.get('[data-cy="download-confirmation-submit"]').findAll('button')[0]!.trigger('click');
+		const latestPreviewRequest = previewRequests[previewRequests.length - 1];
+		expect(latestPreviewRequest).toMatchObject({
+			destinationFolderPathId: 0,
+			customDestinationFolderPath: '/custom/personal-videos',
+		});
 		expect(wrapper.emitted('download')?.[0]?.[0]).toMatchObject({ destinationFolderPathId: 0, customDestinationFolderPath: '/custom/personal-videos' });
+	});
+
+	test('Should treat a successful empty preview as an ineligible selection rather than a failed request', async () => {
+		const response = new Subject<DownloadPreviewContainerDTO | null>();
+		const wrapper = await render([], [response]);
+		wrapper.getComponent(CardDialog).vm.$emit('opened', command(PlexMediaType.PhotoImage));
+		response.next({ previews: [], expanded: {}, totalSize: 0 });
+		await flushPromises();
+
+		expect(wrapper.find('[data-cy="download-confirmation-error"]').exists()).toBe(false);
+		expect(wrapper.get('[data-cy="download-confirmation-submit"]').findAll('button')[0]!.attributes('disabled')).toBeDefined();
 	});
 
 	test('Should show a failed preview, reject submission and retry the current selection', async () => {

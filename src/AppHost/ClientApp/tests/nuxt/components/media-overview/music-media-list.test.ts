@@ -59,7 +59,7 @@ function original(overrides: Partial<PlexMediaDataDTO>): PlexMediaDataDTO {
 		plexApiPartId: 0,
 		size: 1000,
 		videoCodec: '',
-		videoResolution: VideoQuality.None,
+		videoQuality: VideoQuality.None,
 		...originalOverrides,
 	};
 }

@@ -1,5 +1,6 @@
 <template>
 	<MediaPosterCard
+		ref="visibilityTarget"
 		:data-cy="itemCy"
 		:data-photo-overview-index="item.index"
 		data-photo-overview-focus="card"
@@ -65,8 +66,10 @@
 </template>
 
 <script setup lang="ts">
+import { get } from '@vueuse/core';
 import { PhotoAssetKind, PhotoItemKind, PlexMediaType } from '@dto';
 import { useSettingsStore } from '@store';
+import { usePhotoImagePreloadCandidate } from '@composables/usePhotoImagePreloadCandidate';
 import type { PhotoOverviewItem } from '@/store/photoBrowsingStore';
 
 const props = defineProps<{ item: PhotoOverviewItem }>();
@@ -76,6 +79,9 @@ const emit = defineEmits<{
 }>();
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const visibilityTarget = useTemplateRef<{ $el: HTMLElement }>('visibilityTarget');
+const visibilityElement = computed(() => get(visibilityTarget)?.$el ?? null);
+usePhotoImagePreloadCandidate(visibilityElement, () => props.item);
 
 const title = computed(() => {
 	const item = props.item;

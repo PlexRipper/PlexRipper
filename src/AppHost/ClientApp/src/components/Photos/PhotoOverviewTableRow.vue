@@ -1,5 +1,7 @@
 <template>
-	<td :data-cy="itemCy">
+	<td
+		ref="visibilityTarget"
+		:data-cy="itemCy">
 		<q-btn
 			flat
 			dense
@@ -34,6 +36,7 @@
 
 <script setup lang="ts">
 import { PhotoAssetKind, PhotoItemKind } from '@dto';
+import { usePhotoImagePreloadCandidate } from '@composables/usePhotoImagePreloadCandidate';
 import type { PhotoOverviewItem } from '@/store/photoBrowsingStore';
 
 const props = defineProps<{
@@ -44,6 +47,8 @@ const emit = defineEmits<{
 	(e: 'download'): void;
 }>();
 const { t } = useI18n();
+const visibilityTarget = useTemplateRef<HTMLElement>('visibilityTarget');
+usePhotoImagePreloadCandidate(visibilityTarget, () => props.item);
 
 const title = computed(() => {
 	const item = props.item;

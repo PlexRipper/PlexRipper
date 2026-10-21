@@ -4,6 +4,10 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, reactive, shallowReactive, toRefs } from 'vue';
 import {
 	Subject,
+	EMPTY,
+	asapScheduler,
+	defer,
+	from,
 	forkJoin,
 	of,
 	range as rxRange,
@@ -17,6 +21,8 @@ import {
 	concatMap,
 	finalize,
 	map,
+	mergeMap,
+	startWith,
 	switchMap,
 	takeUntil,
 	tap,
@@ -175,9 +181,18 @@ interface CachedBrowseContext {
 	itemCount: number;
 }
 
+interface ImagePreloadCandidate {
+	asset: PhotoAssetBrowseDTO;
+	cancel$: Subject<void>;
+	queued: boolean;
+	owners: Set<object>;
+}
+
 const PAGE_SIZE = 100;
 const RANGE_CACHE_LIMIT = 600;
 const HISTORY_LIMIT = 20;
+const IMAGE_PRELOAD_CONCURRENCY = 2;
+const IMAGE_PRELOAD_SETTLE_MS = 75;
 
 // Photo browse failures belong to their inline states; 401 still uses the shared login redirect.
 const photoBrowseRequestParams: AxiosRequestConfig = {
@@ -279,6 +294,10 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 	const rangeCancellers = new Map<string, Subject<void>>();
 	const scrollHistory = new Map<string, number>();
 	const slideVersions = new Map<string, number>();
+	const imagePreloadCandidates = new Map<string, ImagePreloadCandidate>();
+	const imagePreloadChanges$ = new Subject<void>();
+	const imagePreloadSessions$ = new Subject<void>();
+	let viewerDirection = 1;
 
 	const feedMaps: Record<Surface, Map<number, PageItem>> = {
 		albums: shallowReactive(new Map<number, PhotoAlbumBrowseDTO>()),
@@ -307,6 +326,11 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 			setupComplete = true;
 			syncEligibility();
 			seedQueueObservations();
+			imagePreloadSessions$.pipe(
+				startWith(undefined),
+				switchMap(createImagePreloadWorker),
+				takeUntil(lifecycle$),
+			).subscribe();
 			setupSubscription = signalrStore
 				.getRefreshNotification(RefreshDataType.PlexLibrary)
 				.pipe(auditTime(250), takeUntil(lifecycle$))
@@ -320,7 +344,10 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		activate(route: IPhotoBrowseActivation, owner: object): Observable<void> {
 			const key = contextKey(route);
 			const contextChanged = activeContextKey !== key;
-			if (contextChanged || activeOwner !== owner) cancelBrowseRequests();
+			if (contextChanged || activeOwner !== owner) {
+				cancelBrowseRequests();
+				clearImagePreloadCandidates();
+			}
 			if (contextChanged) {
 				if (activeContextKey) rememberScrollPosition(activeContextKey);
 				rememberContextResults();
@@ -359,6 +386,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 			activeOwner = null;
 			state.active = false;
 			cancelBrowseRequests();
+			clearImagePreloadCandidates();
 			clearViewer();
 			state.dialog.open = false;
 			activeContextKey = '';
@@ -382,11 +410,12 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 					rangeRequest = forkJoin([initial, requestRangeInternal(currentIndex, currentIndex + 1, true)]).pipe(map(() => undefined));
 				}
 			}
-			return force && state.dialog.open ? rangeRequest.pipe(switchMap(() => reloadViewerImages())) : rangeRequest;
+			const viewerRequest = force && state.dialog.open ? rangeRequest.pipe(switchMap(() => reloadViewerImages())) : rangeRequest;
+			return viewerRequest.pipe(finalize(() => imagePreloadChanges$.next()));
 		},
 
 		requestRange(start: number, end: number): Observable<void> {
-			return requestRangeInternal(start, end, false);
+			return requestRangeInternal(start, end, false).pipe(finalize(() => imagePreloadChanges$.next()));
 		},
 
 		openAsset(asset: PhotoAssetBrowseDTO, overviewIndex?: number): Observable<void> {
@@ -424,6 +453,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 			state.inspectionAlbums = null;
 			state.inspectionIdentity = null;
 			state.detailsOpen = false;
+			imagePreloadChanges$.next();
 		},
 
 		openDetails(): Observable<void> {
@@ -603,12 +633,32 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 			state.focusIndex = null;
 		},
 
+		setImagePreloadCandidate(asset: PhotoAssetBrowseDTO, visible: boolean, owner: object): void {
+			const key = imagePreloadKey(asset);
+			const existing = imagePreloadCandidates.get(key);
+			if (!visible) {
+				releaseImagePreloadOwner(key, existing, owner);
+				return;
+			}
+			if (asset.assetKind !== PhotoAssetKind.Image) return;
+			if (!state.active || state.disabledLibrary) return;
+			if (!libraryIsBrowseable(asset.plexLibraryId)) return;
+			if (existing) {
+				existing.asset = asset;
+				existing.owners.add(owner);
+				return;
+			}
+			imagePreloadCandidates.set(key, { asset, cancel$: new Subject<void>(), queued: false, owners: new Set([owner]) });
+			imagePreloadChanges$.next();
+		},
+
 		$reset(): void {
 			sessionGeneration += 1;
 			activeOwner = null;
 			state.active = false;
 			pendingRefreshLibraries.clear();
 			cancelBrowseRequests();
+			clearImagePreloadCandidates();
 			clearViewer();
 			lifecycle$.next();
 			lifecycle$.complete();
@@ -643,6 +693,76 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 	};
 
 	// 5. Private helpers
+	function releaseImagePreloadOwner(key: string, candidate: ImagePreloadCandidate | undefined, owner: object): void {
+		if (!candidate) return;
+		candidate.owners.delete(owner);
+		if (candidate.owners.size === 0) removeImagePreloadCandidate(key);
+	}
+
+	function imagePreloadKey(asset: PhotoAssetBrowseDTO): string {
+		return `${asset.plexServerId}:${asset.plexLibraryId}:${asset.id}`;
+	}
+
+	function removeImagePreloadCandidate(key: string): void {
+		const candidate = imagePreloadCandidates.get(key);
+		imagePreloadCandidates.delete(key);
+		candidate?.cancel$.next();
+		candidate?.cancel$.complete();
+	}
+
+	function clearImagePreloadCandidates(): void {
+		for (const key of imagePreloadCandidates.keys()) removeImagePreloadCandidate(key);
+	}
+
+	function cancelImagePreloads(): void {
+		imagePreloadSessions$.next();
+		for (const candidate of imagePreloadCandidates.values()) candidate.queued = false;
+	}
+
+	function pauseImagePreloads(): void {
+		if (state.dialog.open) cancelImagePreloads();
+	}
+
+	function pendingImagePreloads(): ImagePreloadCandidate[] {
+		if (!state.active || state.disabledLibrary) return [];
+		if (state.dialog.open || state.loading) return [];
+		const candidates: ImagePreloadCandidate[] = [];
+		for (const candidate of imagePreloadCandidates.values()) {
+			if (candidate.queued) continue;
+			candidate.queued = true;
+			candidates.push(candidate);
+		}
+		return candidates;
+	}
+
+	function preloadCandidate(candidate: ImagePreloadCandidate): Observable<void> {
+		return defer(() => {
+			if (imagePreloadCandidates.get(imagePreloadKey(candidate.asset)) !== candidate) return EMPTY;
+			if (!state.active || state.dialog.open) return EMPTY;
+			if (!libraryIsBrowseable(candidate.asset.plexLibraryId)) return EMPTY;
+			return mediaStore.preloadPhotoImage(candidate.asset).pipe(
+				takeUntil(candidate.cancel$),
+				catchError(() => EMPTY),
+			);
+		});
+	}
+
+	function createImagePreloadWorker(): Observable<void> {
+		return imagePreloadChanges$.pipe(
+			auditTime(IMAGE_PRELOAD_SETTLE_MS),
+			mergeMap(() => from(pendingImagePreloads())),
+			mergeMap(preloadCandidate, IMAGE_PRELOAD_CONCURRENCY),
+		);
+	}
+
+	function invalidatePreloadedImages(libraryIds: ReadonlySet<number> | null): void {
+		const affectsVisible = libraryIds === null || Array.from(imagePreloadCandidates.values())
+			.some(({ asset }) => libraryIds.has(asset.plexLibraryId));
+		if (affectsVisible) cancelImagePreloads();
+		mediaStore.invalidatePhotoImages(libraryIds);
+		if (affectsVisible) imagePreloadChanges$.next();
+	}
+
 	function surfaces(): Surface[] {
 		return ['albums', 'assets', 'folders', 'folderAssets', 'albumMembers', 'search'];
 	}
@@ -758,6 +878,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 	function prepareForcedRead(force: boolean): void {
 		if (!force) return;
 		cancelBrowseRequests();
+		invalidatePreloadedImages(state.libraryId > 0 && !state.searchQuery ? new Set([state.libraryId]) : null);
 		contextGeneration += 1;
 		// Keep the last published rows visible, but only newly loaded pages may enter the cache.
 		for (const surface of surfaces()) loadedPages[surface].clear();
@@ -815,6 +936,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 	}
 
 	function invalidateCachedContexts(libraryIds: ReadonlySet<number> | null): void {
+		invalidatePreloadedImages(libraryIds);
 		for (const [key, cached] of contextCache) {
 			const globalContext = cached.context.libraryId === 0 || cached.context.searchQuery.length > 0;
 			const affectedLibrary = libraryIds === null || libraryIds.has(cached.context.libraryId);
@@ -975,6 +1097,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 	}
 
 	function cancelBrowseRequests(): void {
+		cancelImagePreloads();
 		browseCancel$.next();
 		browseCancel$.complete();
 		browseCancel$ = new Subject<void>();
@@ -1220,7 +1343,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 	function desiredAssetIndexes(index: number, count: number): number[] {
 		if (count <= 0) return [];
 		if (count === 1) return [0];
-		const candidates = [normalizeAssetIndex(index - 1, count), normalizeAssetIndex(index, count), normalizeAssetIndex(index + 1, count)];
+		const candidates = [normalizeAssetIndex(index, count), normalizeAssetIndex(index + viewerDirection, count), normalizeAssetIndex(index - viewerDirection, count)];
 		return [...new Set(candidates)];
 	}
 
@@ -1686,6 +1809,10 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		else if (start === 'converted') source = converted();
 		else source = original();
 		return source.pipe(
+			tap({ subscribe: () => {
+				// Let the foreground subscriber join its shared request before background subscribers detach.
+				if (index === state.index) asapScheduler.schedule(pauseImagePreloads);
+			} }),
 			takeUntil(viewerCancel$),
 			tap(({ url, representation }) => {
 				if (!valid()) return;
@@ -1744,6 +1871,11 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		state.detailsOpen = false;
 	}
 
+	function setViewerPosition(index: number, count: number): void {
+		viewerDirection = index === normalizeAssetIndex(state.index - 1, count) ? -1 : 1;
+		state.index = index;
+	}
+
 	function showAssetInternal(indexValue: number, fallbackAsset?: PhotoAssetBrowseDTO): Observable<void> {
 		if (!state.dialog.open) state.dialog.open = true;
 		const count = assetSequenceCount();
@@ -1780,7 +1912,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		}
 		state.zoomed = false;
 		state.detailsOpen = false;
-		state.index = targetIndex;
+		setViewerPosition(targetIndex, count);
 		state.count = count || 1;
 		const targetOverview = assetOverviewIndex(targetIndex);
 		const needed = new Set<number>([targetOverview]);

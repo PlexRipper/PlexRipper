@@ -1,6 +1,7 @@
 <template>
 	<q-card
 		class="media-poster-card"
+		:class="{ 'media-poster-card--without-overlay': !overlay }"
 		ref="card"
 		flat
 		@click="onClick"
@@ -59,9 +60,11 @@
 								</div>
 							</div>
 
-							<div class="media-poster--overlay white--text">
+							<div :class="overlay ? 'media-poster--overlay white--text' : 'media-poster--controls'">
 								<div class="media-poster--content">
-									<div class="media-poster--section">
+									<div
+										v-if="overlay"
+										class="media-poster--section">
 										<QText
 											:value="title"
 											bold="bold"
@@ -86,11 +89,11 @@
 
 						<slot name="badge" />
 						<div
-							v-if="$slots['image-actions'] || ($q.screen.lt.md && $slots.actions)"
+							v-if="$slots['image-actions'] || (overlay && $q.screen.lt.md && $slots.actions)"
 							class="media-poster-image-actions">
 							<slot name="image-actions">
 								<q-btn
-									v-if="$q.screen.lt.md && $slots.actions"
+									v-if="overlay && $q.screen.lt.md && $slots.actions"
 									class="media-poster-mobile-actions-trigger"
 									flat
 									round
@@ -115,7 +118,7 @@
 		</q-card-section>
 		<slot name="menu">
 			<q-menu
-				v-if="$q.screen.lt.md && $slots.actions"
+				v-if="overlay && $q.screen.lt.md && $slots.actions"
 				v-model="mobileMenuVisible"
 				no-parent-event
 				anchor="bottom middle"
@@ -140,8 +143,10 @@ const props = withDefaults(defineProps<{
 	imageUrl?: string;
 	loading?: boolean;
 	fallbackIcon?: string;
+	overlay?: boolean;
 }>(), {
 	loading: false,
+	overlay: true,
 });
 const titleSize = computed(() => {
 	const len = props.title?.length ?? 0;
@@ -348,7 +353,17 @@ function onKeydown(event: KeyboardEvent) {
   pointer-events: auto;
 }
 
-.media-poster-card:hover {
+.media-poster--controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  .media-poster--actions {
+    pointer-events: auto;
+  }
+}
+
+.media-poster-card:not(.media-poster-card--without-overlay):hover {
   .media-poster--fallback {
     opacity: 0;
   }

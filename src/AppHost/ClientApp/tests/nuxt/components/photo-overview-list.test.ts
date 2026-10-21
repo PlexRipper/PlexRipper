@@ -8,6 +8,7 @@ import { PhotoAssetKind, PhotoItemKind, ViewMode, type PhotoAssetBrowseDTO, type
 import { useSettingsStore } from '@store';
 import type { PhotoOverviewItem } from '@/store/photoBrowsingStore';
 import PhotoOverviewList from '@/components/Photos/PhotoOverviewList.vue';
+import PhotoOverviewPosterCard from '@/components/Photos/PhotoOverviewPosterCard.vue';
 import PhotoOverviewTableRow from '@/components/Photos/PhotoOverviewTableRow.vue';
 import messages from '@/lang/en-US.json';
 
@@ -91,6 +92,71 @@ describe('PhotoOverviewList', () => {
 		expect(wrapper.get('[data-cy="photo-overview-list"]')).toBeTruthy();
 		expect(wrapper.get('[data-cy="photo-folder-8"]')).toBeTruthy();
 		expect(wrapper.find('[role="checkbox"]').exists()).toBe(false);
+	});
+
+	test('Should keep the photo title in the hover overlay without rendering a duplicate footer title', async () => {
+		// Arrange
+		const photo = asset(10);
+		const item: PhotoOverviewItem = { kind: PhotoItemKind.Asset, asset: photo, index: 1 };
+		const wrapper = await mountSuspended(PhotoOverviewPosterCard, {
+			props: { item },
+			global: {
+				plugins: [pinia, i18n()],
+				stubs: {
+					QGlowContainer: { template: '<div><slot /></div>' },
+					QText: {
+						props: { value: { type: String, default: '' } },
+						template: '<span>{{ value }}</span>',
+					},
+					QMediaTypeIcon: true,
+					BaseButton: true,
+					PhotoThumbnail: true,
+				},
+			},
+		});
+
+		// Act
+		const card = wrapper.get('.media-poster-card');
+
+		// Assert
+		expect(card.attributes('aria-label')).toBe(photo.title);
+		expect(wrapper.get('.media-poster--overlay .media-poster--title').text()).toBe(photo.title);
+		expect(wrapper.find('.q-pt-sm').exists()).toBe(false);
+	});
+
+	test('Should keep folder names and direct download and magnify actions without an overlay', async () => {
+		// Arrange
+		const wrapper = await mountSuspended(PhotoOverviewPosterCard, {
+			props: { item: { kind: PhotoItemKind.Folder, folder, index: 0 } },
+			global: {
+				plugins: [pinia, i18n()],
+				stubs: {
+					QGlowContainer: { template: '<div><slot /></div>' },
+					QText: {
+						props: { value: { type: String, default: '' } },
+						template: '<span>{{ value }}</span>',
+					},
+					QMediaTypeIcon: true,
+				},
+			},
+		});
+
+		// Act
+		await wrapper.get('button[aria-label="Download"]').trigger('click');
+
+		// Assert
+		expect(wrapper.get('.media-poster--fallback .media-poster--title').text()).toBe('Summer');
+		expect(wrapper.find('.media-poster--overlay').exists()).toBe(false);
+		expect(wrapper.find('[data-cy="media-poster-menu-trigger"]').exists()).toBe(false);
+		expect(wrapper.emitted('download')).toHaveLength(1);
+		expect(wrapper.emitted('open')).toBeUndefined();
+
+		// Act
+		await wrapper.get('button[aria-label="View"]').trigger('click');
+
+		// Assert
+		expect(wrapper.emitted('open')).toHaveLength(1);
+		expect(wrapper.emitted('download')).toHaveLength(1);
 	});
 
 	test('Should render the table item identity and emit open/download actions for a direct asset', async () => {

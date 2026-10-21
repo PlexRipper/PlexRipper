@@ -5,6 +5,7 @@
 		data-photo-overview-focus="card"
 		:title="title"
 		:media-type="mediaType"
+		:overlay="item.kind !== PhotoItemKind.Folder"
 		tabindex="0"
 		role="group"
 		:aria-label="title"
@@ -58,11 +59,6 @@
 					:outline="false"
 					:aria-label="t('general.commands.view')"
 					@click.stop="activate" />
-			</div>
-		</template>
-		<template #footer>
-			<div class="q-pt-sm">
-				<div class="text-weight-medium ellipsis">{{ title }}</div>
 			</div>
 		</template>
 	</MediaPosterCard>

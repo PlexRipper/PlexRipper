@@ -22,7 +22,7 @@ import {
 	tap,
 	toArray,
 } from 'rxjs/operators';
-import { cloneDeep, uniqBy } from 'lodash-es';
+import { cloneDeep, pick, uniqBy } from 'lodash-es';
 import {
 	PlexMediaType,
 	LibrarySyncJobStatus,
@@ -162,6 +162,19 @@ type PageDTO = PhotoAlbumPageDTO | PhotoAssetPageDTO | PhotoFolderPageDTO;
 type SelectionPage = PageDTO | PhotoFolderChildrenDTO;
 type ApiResult<T> = ResultDTO<T>;
 
+interface CachedBrowseContext {
+	context: IPhotoBrowseRoute;
+	surfaces: Array<{
+		surface: Surface;
+		items: Map<number, PageItem>;
+		loadedPages: Set<number>;
+		page: Pick<IPhotoPageState<PageItem>, 'page' | 'pageSize' | 'totalCount' | 'totalBytes' | 'totalAssetBytes'>;
+	}>;
+	folder: PhotoFolderBrowseDTO | null;
+	breadcrumbs: IPhotoBrowsingState['breadcrumbs'];
+	itemCount: number;
+}
+
 const PAGE_SIZE = 100;
 const RANGE_CACHE_LIMIT = 600;
 const HISTORY_LIMIT = 20;
@@ -284,6 +297,8 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		search: new Set<number>(),
 	};
 	const cacheOrder: Array<{ surface: Surface; index: number }> = [];
+	const contextCache = new Map<string, CachedBrowseContext>();
+	let cachedItemCount = 0;
 
 	// 4. Actions
 	const actions = {
@@ -308,11 +323,13 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 			if (contextChanged || activeOwner !== owner) cancelBrowseRequests();
 			if (contextChanged) {
 				if (activeContextKey) rememberScrollPosition(activeContextKey);
+				rememberContextResults();
 				activeContextKey = key;
 				contextGeneration += 1;
 				clearViewer();
 				state.dialog.open = false;
 				clearContextResults();
+				restoreContextResults(key);
 				state.searchOrigin = null;
 				state.scrollIndex = scrollHistory.get(key) ?? 0;
 				state.focusIndex = null;
@@ -331,18 +348,21 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 			}
 			if (!state.searchQuery) state.searchOrigin = null;
 			state.disabledLibrary = !activeLibraryEnabled();
+			state.count = assetSequenceCount();
 			return actions.loadCurrent(false);
 		},
 
 		deactivate(owner: object): void {
 			if (activeOwner !== owner) return;
 			rememberScrollPosition(activeContextKey);
+			rememberContextResults();
 			activeOwner = null;
 			state.active = false;
 			cancelBrowseRequests();
 			clearViewer();
 			state.dialog.open = false;
 			activeContextKey = '';
+			clearContextResults();
 		},
 
 		leavePhotos(owner: object): void {
@@ -353,6 +373,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 
 		loadCurrent(force = false): Observable<void> {
 			if (!state.active || state.disabledLibrary) return of(undefined);
+			prepareForcedRead(force);
 			const initial = requestRangeInternal(0, PAGE_SIZE, force);
 			let rangeRequest = initial;
 			if (force && state.dialog.open && state.current) {
@@ -612,6 +633,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 			inspectionGeneration += 1;
 			for (const surface of surfaces()) clearSurface(surface);
 			cacheOrder.length = 0;
+			invalidateCachedContexts(null);
 			rangeCancellers.clear();
 			scrollHistory.clear();
 			slideVersions.clear();
@@ -733,6 +755,73 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		state.allVisibleSelected = false;
 	}
 
+	function prepareForcedRead(force: boolean): void {
+		if (!force) return;
+		cancelBrowseRequests();
+		contextGeneration += 1;
+		// Keep the last published rows visible, but only newly loaded pages may enter the cache.
+		for (const surface of surfaces()) loadedPages[surface].clear();
+	}
+
+	function takeCachedContext(key: string): CachedBrowseContext | undefined {
+		const cached = contextCache.get(key);
+		if (cached) {
+			contextCache.delete(key);
+			cachedItemCount -= cached.itemCount;
+		}
+		return cached;
+	}
+
+	function rememberContextResults(): void {
+		const context = currentContext(false);
+		if (!context) return;
+		if (state.disabledLibrary || state.contextMissing) return;
+		if (!surfaces().some((surface) => loadedPages[surface].size > 0)) return;
+		const cachedSurfaces: CachedBrowseContext['surfaces'] = surfaces().map((surface) => {
+			const items = new Map<number, PageItem>();
+			for (const [index, item] of feedMaps[surface]) {
+				if (loadedPages[surface].has(Math.floor(index / PAGE_SIZE) + 1)) items.set(index, item);
+			}
+			return {
+				surface,
+				items,
+				loadedPages: new Set(loadedPages[surface]),
+				page: pick(pageState(surface), ['page', 'pageSize', 'totalCount', 'totalBytes', 'totalAssetBytes']),
+			};
+		});
+		takeCachedContext(context.key);
+		const itemCount = cachedSurfaces.reduce((total, entry) => total + entry.items.size, 0);
+		contextCache.set(context.key, {
+			context, surfaces: cachedSurfaces, folder: state.folder, breadcrumbs: state.breadcrumbs, itemCount,
+		});
+		cachedItemCount += itemCount;
+		while (contextCache.size > HISTORY_LIMIT) takeCachedContext(contextCache.keys().next().value!);
+	}
+
+	function restoreContextResults(key: string): void {
+		const cached = takeCachedContext(key);
+		if (!cached) return;
+		for (const entry of cached.surfaces) {
+			for (const [index, item] of entry.items) {
+				feedMaps[entry.surface].set(index, item);
+				cacheOrder.push({ surface: entry.surface, index });
+			}
+			loadedPages[entry.surface] = entry.loadedPages;
+			Object.assign(pageState(entry.surface), entry.page);
+			syncPageState(entry.surface);
+		}
+		state.folder = cached.folder;
+		state.breadcrumbs = cached.breadcrumbs;
+	}
+
+	function invalidateCachedContexts(libraryIds: ReadonlySet<number> | null): void {
+		for (const [key, cached] of contextCache) {
+			const globalContext = cached.context.libraryId === 0 || cached.context.searchQuery.length > 0;
+			const affectedLibrary = libraryIds === null || libraryIds.has(cached.context.libraryId);
+			if (globalContext || affectedLibrary) takeCachedContext(key);
+		}
+	}
+
 	function compactCacheOrder(): void {
 		const live = new Set<string>();
 		for (const surface of surfaces()) {
@@ -745,12 +834,14 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 	function cacheSurfaceItem(surface: Surface, index: number, item: PageItem): void {
 		if (!feedMaps[surface].has(index)) cacheOrder.push({ surface, index });
 		feedMaps[surface].set(index, item);
-		trimCache();
 	}
 
 	function trimCache(): void {
 		const size = surfaces().reduce((total, surface) => total + feedMaps[surface].size, 0);
 		let remaining = size;
+		while (remaining + cachedItemCount > RANGE_CACHE_LIMIT && contextCache.size > 0) {
+			takeCachedContext(contextCache.keys().next().value!);
+		}
 		while (remaining > RANGE_CACHE_LIMIT && cacheOrder.length > 0) {
 			const oldest = cacheOrder.shift()!;
 			if (!feedMaps[oldest.surface].has(oldest.index)) continue;
@@ -815,7 +906,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		target.totalAssetBytes = totalAssetBytes;
 		target.error = false;
 		target.loaded = true;
-		syncPageState(surface);
+		trimCache();
 		state.error = false;
 		state.reloadError = false;
 		state.count = assetSequenceCount();
@@ -972,21 +1063,26 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		return `${libraries}#${accounts}#${servers}`;
 	}
 
+	function updateEligibilityMetadata(metadataKey: string): boolean {
+		const changed = eligibilityInitialized && eligibilityMetadataKey !== metadataKey;
+		if (!eligibilityInitialized || changed) invalidateCachedContexts(null);
+		eligibilityMetadataKey = metadataKey;
+		eligibilityInitialized = true;
+		return changed;
+	}
+
 	function syncEligibility(): void {
 		const nextEligible = getEligibleLibraryIds();
-		const metadataKey = getEligibilityMetadataKey();
-		const changed = eligibilityInitialized && eligibilityMetadataKey !== metadataKey;
+		const changed = updateEligibilityMetadata(getEligibilityMetadataKey());
 		const lost = Array.from(eligibleLibraryIds).filter((libraryId) => !nextEligible.has(libraryId));
-		eligibilityMetadataKey = metadataKey;
 		eligibleLibraryIds = nextEligible;
-		eligibilityInitialized = true;
 		for (const libraryId of lost) removeLibraryFromResults(libraryId);
 		const wasDisabled = state.disabledLibrary;
 		state.disabledLibrary = state.libraryId > 0 && !nextEligible.has(state.libraryId);
 		if (!state.active) return;
 		if (!changed && !wasDisabled) return;
-		cancelBrowseRequests();
-		if (!state.disabledLibrary) actions.loadCurrent(true).subscribe();
+		if (state.disabledLibrary) cancelBrowseRequests();
+		else actions.loadCurrent(true).subscribe();
 	}
 
 	function handleLibraryState(): void {
@@ -1003,6 +1099,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 	}
 
 	function refreshAffectedLibraries(libraryIds: number[]): void {
+		invalidateCachedContexts(new Set(libraryIds));
 		if (!state.active) return;
 		const eligible = libraryIds.filter((libraryId) => eligibleLibraryIds.has(libraryId));
 		refreshInspectionFor(eligible);

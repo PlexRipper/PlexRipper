@@ -353,7 +353,8 @@
 <script lang="ts" setup>
 import type { PlexMediaDTO } from '@dto';
 import { PlexMediaType, ViewMode } from '@dto';
-import { MediaSortField, SortDirection } from '@enums';
+import { SortDirection } from '@enums';
+import type { MediaSortField } from '@enums';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import { useMediaOverviewBarDownloadCommandBus } from '@composables/event-bus';
 import { useLibraryStore, useMediaOverviewStore, usePhotoBrowsingStore, useSettingsStore } from '@store';
@@ -397,8 +398,7 @@ const emit = defineEmits<{
 	(e: 'photo-view', value: PhotoBrowseView): void;
 	(e: 'photo-search', value: string): void;
 	(e: 'photo-sort', value: PhotoBrowseSort): void;
-	(e: 'photo-download'): void;
-	(e: 'photo-clear-selection'): void;
+	(e: 'photo-download' | 'photo-clear-selection'): void;
 	(e: 'photo-family-change', value: PlexMediaType): void;
 }>();
 

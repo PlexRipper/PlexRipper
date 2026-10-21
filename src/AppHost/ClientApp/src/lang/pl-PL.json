@@ -58,26 +58,17 @@
         },
         "photo-details": {
             "asset-count": "Elementy",
-            "size": "Łączny rozmiar",
             "originally-available": "Pierwsza dostępność",
             "added-at": "Dodano",
             "updated-at": "Zaktualizowano",
-            "loading": "Wczytywanie albumu zdjęć…",
-            "load-error": "Nie można wczytać tego albumu zdjęć.",
-            "invalid-route": "Nieprawidłowa biblioteka zdjęć lub album.",
-            "retry": "Spróbuj ponownie"
+            "invalid-route": "Nieprawidłowa biblioteka zdjęć lub album."
         },
         "photo-browser": {
             "search-label": "Wyszukaj zdjęcia",
-            "search-placeholder": "Wyszukaj tytuły elementów",
-            "sort-label": "Przełącz sortowanie według tytułu",
-            "change-family": "Zmień rodzinę multimediów",
-            "download-selected": "Pobierz wybrane: {count}",
+            "ownership-label": "Serwer: {server} · Biblioteka: {library}",
             "clear-selection": "Wyczyść wybór",
             "stale-selection": "Niektórych wybranych elementów nie ma już w katalogu. Wybór zostaje zachowany; podgląd wyjaśni, których elementów nie można pobrać.",
             "views": { "albums": "Albumy", "folders": "Foldery", "assets": "Wszystkie elementy" },
-            "album-members": "Elementy albumu",
-            "direct-folder-assets": "Elementy bezpośrednio w tym folderze",
             "empty-albums": "Brak dostępnych albumów zdjęć.",
             "empty-assets": "Brak dostępnych elementów zdjęć.",
             "empty-folders": "Brak aktywnych folderów zdjęć.",
@@ -85,9 +76,6 @@
             "reload-error": "Katalog zmienił się, ale nie udało się wczytać najnowszych danych. Ostatnie wyniki są nadal dostępne.",
             "disabled-library": "Ta biblioteka zdjęć jest wyłączona i nie można jej przeglądać.",
             "retry": "Spróbuj ponownie",
-            "select-album": "Wybierz album {title}",
-            "select-asset": "Wybierz element {title}",
-            "select-folder": "Wybierz folder {title} i wszystkie elementy potomne",
             "folder-roots": "Foldery główne zdjęć",
             "thumbnail-unavailable": "Miniatura niedostępna",
             "kind-image": "Obraz",
@@ -99,7 +87,6 @@
             "memberships-loading": "Wczytywanie przynależności do albumów",
             "asset-viewer": "Przeglądarka zdjęć",
             "close-asset-viewer": "Zamknij przeglądarkę zdjęć",
-            "open-details": "Otwórz menu szczegółów elementu",
             "close-details": "Zamknij szczegóły elementu",
             "previous-asset": "Poprzedni element",
             "next-asset": "Następny element",
@@ -703,11 +690,6 @@
         }
     },
     "general": {
-        "labels": {
-            "original": "Oryginał",
-            "automatic-original": "Automatycznie (domyślnie)",
-            "select-original": "Wybierz oryginał dla {title}"
-        },
         "comparison": {
             "comparison-missing": "Zaginiony",
             "comparison-higher-quality": "Dostępna wyższa jakość",
@@ -1311,8 +1293,7 @@
         },
         "photos": {
             "index": {
-                "header": "Zdjęcia",
-                "sub-header": "Wybierz bibliotekę zdjęć, aby przeglądać albumy, obrazy i klipy."
+                "header": "Zdjęcia"
             }
         },
         "other-videos": {

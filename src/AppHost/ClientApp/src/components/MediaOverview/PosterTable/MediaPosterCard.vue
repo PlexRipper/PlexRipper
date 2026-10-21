@@ -173,8 +173,7 @@ defineSlots<{
 	menu?: () => unknown;
 }>();
 const emit = defineEmits<{
-	(e: 'click', event: MouseEvent): void;
-	(e: 'contextmenu', event: MouseEvent): void;
+	(e: 'click' | 'contextmenu', event: MouseEvent): void;
 }>();
 function onClick(event: MouseEvent) {
 	emit('click', event);
@@ -472,5 +471,4 @@ function onKeydown(event: KeyboardEvent) {
   min-height: 44px;
   touch-action: manipulation;
 }
-
 </style>

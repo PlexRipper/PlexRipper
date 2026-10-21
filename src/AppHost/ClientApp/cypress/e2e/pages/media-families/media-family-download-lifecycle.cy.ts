@@ -245,7 +245,6 @@ function createAndOpenQueue(state: WorkflowState, command: DownloadMediaDTO | Do
 	queueCy(`column-status-${taskId(media.id)}`).should('have.text', 'Queued');
 }
 
-
 function publishStatus(state: WorkflowState, item: DownloadProgressDTO, status: DownloadStatus, percentage = 0) {
 	cy.then(() => {
 		Object.assign(item, { status, percentage, dataReceived: item.dataTotal * percentage / 100, downloadSpeed: status === DownloadStatus.Downloading ? 1024 : 0 });

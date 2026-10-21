@@ -128,7 +128,7 @@ function scrollPhotoOverview(position: 'top' | 'middle' | 'bottom') {
 
 		// Data can arrive before ResizeObserver settles the responsive column count.
 		const row = target.querySelector<HTMLElement>('.poster-table-item');
-		expect(row, 'rendered poster row').not.to.be.null;
+		expect(row, 'rendered poster row').not.to.equal(null);
 		const rowBounds = row!.getBoundingClientRect();
 		for (const card of row!.children) {
 			const bounds = card.getBoundingClientRect();
@@ -219,7 +219,6 @@ describe('Photos browsing', () => {
 		cy.location('search').should('contain', 'view=albums');
 		cy.getCy('photo-album-41-301').should('contain.text', 'Summer trip');
 	});
-
 
 	it('switches shared photo display modes while retaining multiple scoped assets and selection', () => {
 		setupPage();

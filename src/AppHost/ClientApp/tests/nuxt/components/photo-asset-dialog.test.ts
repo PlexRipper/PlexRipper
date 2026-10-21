@@ -128,7 +128,6 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 			loading: false,
 			error: false,
 		}));
-		let viewer!: ViewerStore;
 		const raw = {
 			dialog: reactive({
 				open: true,
@@ -159,7 +158,7 @@ describe('PhotoAssetDialog - image-first viewer', () => {
 			retryInspection: vi.fn(() => of(undefined)),
 			requestInspectionMembershipPage: vi.fn(() => of(undefined)),
 		};
-		viewer = reactive(raw) as unknown as ViewerStore;
+		const viewer = reactive(raw) as unknown as ViewerStore;
 		return viewer;
 	}
 	const DockStub = defineComponent({

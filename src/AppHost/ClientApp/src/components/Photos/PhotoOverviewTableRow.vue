@@ -17,13 +17,21 @@
 	<template v-if="item.kind === PhotoItemKind.Album">
 		<td>{{ item.album.plexServerName }}</td>
 		<td>{{ item.album.plexLibraryTitle }}</td>
-		<td class="text-center">{{ item.album.assetCount }}</td>
-		<td class="text-center"><QFileSize :size="item.album.assetBytes" /></td>
+		<td class="text-center">
+			{{ item.album.assetCount }}
+		</td>
+		<td class="text-center">
+			<QFileSize :size="item.album.assetBytes" />
+		</td>
 	</template>
 	<template v-else-if="metadata">
 		<td>{{ metadata.location }}</td>
-		<td class="text-center">{{ metadata.kindLabel }}</td>
-		<td class="text-center"><QFileSize :size="metadata.size" /></td>
+		<td class="text-center">
+			{{ metadata.kindLabel }}
+		</td>
+		<td class="text-center">
+			<QFileSize :size="metadata.size" />
+		</td>
 	</template>
 	<td class="text-center">
 		<q-btn
@@ -56,6 +64,7 @@ const title = computed(() => {
 		case PhotoItemKind.Album: return item.album.title;
 		case PhotoItemKind.Folder: return item.folder.title;
 		case PhotoItemKind.Asset: return item.asset.title;
+		default: return '';
 	}
 });
 const itemCy = computed(() => {

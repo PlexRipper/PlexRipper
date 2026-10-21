@@ -76,10 +76,10 @@ export interface IPhotoSelector {
 	stale: boolean;
 }
 
-export type PhotoOverviewItem =
-	| { kind: PhotoItemKind.Album; album: PhotoAlbumBrowseDTO; index: number }
-	| { kind: PhotoItemKind.Folder; folder: PhotoFolderBrowseDTO; index: number }
-	| { kind: PhotoItemKind.Asset; asset: PhotoAssetBrowseDTO; index: number };
+export type PhotoOverviewItem
+	= | { kind: PhotoItemKind.Album; album: PhotoAlbumBrowseDTO; index: number }
+		| { kind: PhotoItemKind.Folder; folder: PhotoFolderBrowseDTO; index: number }
+		| { kind: PhotoItemKind.Asset; asset: PhotoAssetBrowseDTO; index: number };
 
 export interface PhotoViewerSlide {
 	asset: PhotoAssetBrowseDTO;
@@ -491,12 +491,12 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		},
 
 		retryInspection(): Observable<PhotoAssetInspectionDTO | null> {
-		const identity = state.inspectionIdentity;
-		if (!identity) return of(null);
-		state.dialog.open = true;
-		state.detailsOpen = true;
-		state.dialog.error = false;
-		return requestInspectionPage(identity, 1);
+			const identity = state.inspectionIdentity;
+			if (!identity) return of(null);
+			state.dialog.open = true;
+			state.detailsOpen = true;
+			state.dialog.error = false;
+			return requestInspectionPage(identity, 1);
 		},
 
 		requestInspectionMembershipPage(page: number): Observable<PhotoAssetInspectionDTO | null> {
@@ -1492,9 +1492,9 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		const needInitial = force || !loadedPages.folders.has(1) || !loadedPages.folderAssets.has(1);
 		const initial = needInitial
 			? forkJoin([
-				requestRootsPage(context, 1, force, generation, rangeCanceller),
-				requestUnmappedAssetsPage(context, 1, force, generation, rangeCanceller),
-			]).pipe(map(() => undefined))
+					requestRootsPage(context, 1, force, generation, rangeCanceller),
+					requestUnmappedAssetsPage(context, 1, force, generation, rangeCanceller),
+				]).pipe(map(() => undefined))
 			: of(undefined);
 		return initial.pipe(
 			switchMap(() => {
@@ -1692,7 +1692,6 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 			}),
 		);
 	}
-
 
 	function requestInspectionPage(identity: IPhotoInspectionIdentity, page: number): Observable<PhotoAssetInspectionDTO | null> {
 		const generation = ++inspectionGeneration;

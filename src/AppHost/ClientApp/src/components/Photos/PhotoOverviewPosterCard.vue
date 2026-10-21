@@ -35,7 +35,9 @@
 				<div v-if="item.kind === PhotoItemKind.Asset">
 					{{ locationLabel }}
 				</div>
-				<div v-if="item.kind === PhotoItemKind.Asset">{{ kindLabel }}</div>
+				<div v-if="item.kind === PhotoItemKind.Asset">
+					{{ kindLabel }}
+				</div>
 			</div>
 		</template>
 		<template #actions="{ compact, activate }">
@@ -89,6 +91,7 @@ const title = computed(() => {
 		case PhotoItemKind.Album: return item.album.title;
 		case PhotoItemKind.Folder: return item.folder.title;
 		case PhotoItemKind.Asset: return item.asset.title;
+		default: return '';
 	}
 });
 const mediaType = computed(() => props.item.kind === PhotoItemKind.Asset ? PlexMediaType.PhotoImage : PlexMediaType.PhotoAlbum);

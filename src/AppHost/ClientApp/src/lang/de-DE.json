@@ -58,26 +58,17 @@
         },
         "photo-details": {
             "asset-count": "Elemente",
-            "size": "Gesamtgröße",
             "originally-available": "Ursprünglich verfügbar",
             "added-at": "Hinzugefügt",
             "updated-at": "Aktualisiert",
-            "loading": "Fotoalbum wird geladen…",
-            "load-error": "Dieses Fotoalbum konnte nicht geladen werden.",
-            "invalid-route": "Ungültige Fotobibliothek oder ungültiges Album.",
-            "retry": "Erneut versuchen"
+            "invalid-route": "Ungültige Fotobibliothek oder ungültiges Album."
         },
         "photo-browser": {
             "search-label": "Fotos durchsuchen",
-            "search-placeholder": "Elementtitel durchsuchen",
-            "sort-label": "Titelsortierung umschalten",
-            "change-family": "Medienfamilie ändern",
-            "download-selected": "{count} ausgewählte herunterladen",
+            "ownership-label": "Server: {server} · Mediathek: {library}",
             "clear-selection": "Auswahl löschen",
             "stale-selection": "Einige ausgewählte Elemente sind nicht mehr im Katalog. Die Auswahl bleibt erhalten; die Vorschau erklärt, welche Elemente nicht heruntergeladen werden können.",
             "views": { "albums": "Alben", "folders": "Ordner", "assets": "Alle Elemente" },
-            "album-members": "Albumelemente",
-            "direct-folder-assets": "Direkte Elemente in diesem Ordner",
             "empty-albums": "Keine Fotoalben verfügbar.",
             "empty-assets": "Keine Fotoelemente verfügbar.",
             "empty-folders": "Keine aktiven Fotordner verfügbar.",
@@ -85,9 +76,6 @@
             "reload-error": "Der Katalog hat sich geändert, aber die neuesten Daten konnten nicht geladen werden. Die letzten Ergebnisse sind weiterhin verfügbar.",
             "disabled-library": "Diese Fotomediathek ist deaktiviert und kann nicht durchsucht werden.",
             "retry": "Erneut versuchen",
-            "select-album": "Album {title} auswählen",
-            "select-asset": "Element {title} auswählen",
-            "select-folder": "Ordner {title} und alle Nachfolger auswählen",
             "folder-roots": "Fotowurzeln",
             "thumbnail-unavailable": "Miniatur nicht verfügbar",
             "kind-image": "Bild",
@@ -99,7 +87,6 @@
             "memberships-loading": "Albumzugehörigkeiten werden geladen",
             "asset-viewer": "Fotobetrachter",
             "close-asset-viewer": "Fotobetrachter schließen",
-            "open-details": "Menü für Elementdetails öffnen",
             "close-details": "Elementdetails schließen",
             "previous-asset": "Vorheriges Element",
             "next-asset": "Nächstes Element",
@@ -703,11 +690,6 @@
         }
     },
     "general": {
-        "labels": {
-            "original": "Original",
-            "automatic-original": "Automatisch (Standard)",
-            "select-original": "Original für {title} auswählen"
-        },
         "comparison": {
             "comparison-missing": "Fehlen",
             "comparison-higher-quality": "Höhere Qualität verfügbar",
@@ -1311,8 +1293,7 @@
         },
         "photos": {
             "index": {
-                "header": "Fotos",
-                "sub-header": "Wählen Sie eine Fotobibliothek aus, um Alben, Bilder und Clips zu durchsuchen."
+                "header": "Fotos"
             }
         },
         "other-videos": {

@@ -24,7 +24,6 @@ function blobWithSize(size: number): Blob {
 	return image;
 }
 
-
 describe('MediaStore photo image ownership', () => {
 	let { mock } = baseVars();
 
@@ -318,5 +317,4 @@ describe('MediaStore photo image ownership', () => {
 		expect(mock.history.get.filter((request) => request.url === imagePath)).toHaveLength(2);
 		store.releasePhotoImageUrl(retried.getLastValue()!);
 	});
-
 });

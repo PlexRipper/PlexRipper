@@ -235,4 +235,3 @@ function updateSelected(selected: readonly PlexMediaSlimDTO[]) {
 	});
 }
 </script>
-

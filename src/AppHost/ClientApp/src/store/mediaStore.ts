@@ -42,7 +42,6 @@ interface IPhotoImageRequest {
 	source$: Observable<string>;
 }
 
-
 export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 	const defaultState: IMediaUrlStoreState = {
 		mediaUrls: [],

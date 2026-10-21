@@ -321,7 +321,6 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss">
-
 .comparison-state-button {
   position: absolute;
   top: 8px;
@@ -330,5 +329,4 @@ onUnmounted(() => {
   pointer-events: auto;
   max-width: calc(100% - 16px);
 }
-
 </style>

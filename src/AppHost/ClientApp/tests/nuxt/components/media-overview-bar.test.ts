@@ -195,5 +195,4 @@ describe('MediaOverviewBar - photo mode', () => {
 		expect(wrapper.emitted('action')).toEqual([['back']]);
 		expect(wrapper.find('[data-cy="change-view-mode-btn"]').exists()).toBe(true);
 	});
-
 });

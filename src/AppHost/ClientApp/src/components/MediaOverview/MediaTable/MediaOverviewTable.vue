@@ -36,14 +36,14 @@
 						{{ column.label }}
 					</th>
 				</tr>
-				</thead>
-				<tbody>
-					<tr
-						class="media-overview-table__virtual-spacer"
-						aria-hidden="true"
-						:style="{ height: `${safeTotalSize}px` }">
-						<td :colspan="props.columns.length + 1" />
-					</tr>
+			</thead>
+			<tbody>
+				<tr
+					class="media-overview-table__virtual-spacer"
+					aria-hidden="true"
+					:style="{ height: `${safeTotalSize}px` }">
+					<td :colspan="props.columns.length + 1" />
+				</tr>
 				<tr
 					v-for="virtualRow in rowVirtualizer.getVirtualItems()"
 					:key="virtualRow.index"

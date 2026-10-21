@@ -370,7 +370,9 @@
 								clickable
 								:to="`/photos/${album.plexLibraryId}/details/${album.id}`">
 								<QItemSection>{{ album.title }}</QItemSection>
-								<QItemSection side>{{ album.plexLibraryTitle }}</QItemSection>
+								<QItemSection side>
+									{{ album.plexLibraryTitle }}
+								</QItemSection>
 							</QItem>
 						</template>
 					</QVirtualScroll>
@@ -994,4 +996,3 @@ watch(() => photoStore.zoomed, (zoomed) => {
 	}
 }
 </style>
-

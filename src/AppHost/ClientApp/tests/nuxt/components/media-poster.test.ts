@@ -11,6 +11,7 @@ import MediaPoster from '@/components/MediaOverview/PosterTable/MediaPoster.vue'
 import MediaPosterCard from '@/components/MediaOverview/PosterTable/MediaPosterCard.vue';
 import PosterTable from '@/components/MediaOverview/PosterTable/PosterTable.vue';
 import messages from '@/lang/en-US.json';
+
 const glowContainerStub = defineComponent({
 	name: 'QGlowContainer',
 	setup(_, { slots }) {
@@ -184,7 +185,6 @@ describe('Shared poster presentation', () => {
 		await action.trigger('keydown', { key: ' ' });
 		await action.trigger('click');
 		expect(wrapper.emitted('click')).toHaveLength(3);
-
 	});
 
 	test('controlled grids render through the item slot without generic media requests or scroll state writes', async () => {

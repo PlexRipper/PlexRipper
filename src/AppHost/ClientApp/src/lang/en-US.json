@@ -58,21 +58,14 @@
         },
         "photo-details": {
             "asset-count": "Assets",
-            "size": "Total size",
             "originally-available": "Originally available",
             "added-at": "Added",
             "updated-at": "Updated",
-            "loading": "Loading photo album…",
-            "load-error": "Unable to load this photo album.",
-            "invalid-route": "Invalid photo library or album.",
-            "retry": "Retry"
+            "invalid-route": "Invalid photo library or album."
         },
         "photo-browser": {
             "search-label": "Search photos",
-            "search-placeholder": "Search asset titles",
-            "sort-label": "Toggle title sort order",
-            "change-family": "Change media family",
-            "download-selected": "Download {count} selected",
+            "ownership-label": "Server: {server} · Library: {library}",
             "clear-selection": "Clear selection",
             "stale-selection": "Some selected items are no longer in the catalog. Your selection is retained; preview will explain which items cannot be downloaded.",
             "views": {
@@ -80,8 +73,6 @@
                 "folders": "Folders",
                 "assets": "All assets"
             },
-            "album-members": "Album assets",
-            "direct-folder-assets": "Assets directly in this folder",
             "empty-albums": "No photo albums are available.",
             "empty-assets": "No photo assets are available.",
             "empty-folders": "No active photo folders are available.",
@@ -89,9 +80,6 @@
             "reload-error": "The catalog changed, but the latest browse data could not be loaded. Your last results remain available.",
             "disabled-library": "This Photos library is disabled and cannot be browsed.",
             "retry": "Retry",
-            "select-album": "Select album {title}",
-            "select-asset": "Select asset {title}",
-            "select-folder": "Select folder {title} and all descendants",
             "folder-roots": "Photo roots",
             "thumbnail-unavailable": "Thumbnail unavailable",
             "kind-image": "Image",
@@ -103,7 +91,6 @@
             "memberships-loading": "Loading album memberships",
             "asset-viewer": "Photo viewer",
             "close-asset-viewer": "Close photo viewer",
-            "open-details": "Open asset details menu",
             "close-details": "Close asset details",
             "previous-asset": "Previous asset",
             "next-asset": "Next asset",
@@ -707,11 +694,6 @@
         }
     },
     "general": {
-        "labels": {
-            "original": "Original",
-            "automatic-original": "Automatic (default)",
-            "select-original": "Select an original for {title}"
-        },
         "comparison": {
             "comparison-missing": "Missing",
             "comparison-higher-quality": "Higher quality available",
@@ -1315,8 +1297,7 @@
         },
         "photos": {
             "index": {
-                "header": "Photos",
-                "sub-header": "Select a Photos library to browse albums, images and clips."
+                "header": "Photos"
             }
         },
         "other-videos": {

@@ -21,7 +21,9 @@ const asset = (id: number, libraryId = 7): PhotoAssetBrowseDTO => ({
 const activate = async (libraryId = 7) => {
 	await subscribeSpyTo(usePhotoBrowsingStore().activate(route(libraryId), owner)).onComplete();
 };
-const settle = async () => { await vi.advanceTimersByTimeAsync(75); };
+const settle = async () => {
+	await vi.advanceTimersByTimeAsync(75);
+};
 
 describe('PhotoBrowsingStore - background image preloading', () => {
 	let { mock } = baseVars();
@@ -114,7 +116,6 @@ describe('PhotoBrowsingStore - background image preloading', () => {
 		store.setImagePreloadCandidate(photo, false, nextOwner);
 		expect(pending.observed).toBe(false);
 	});
-
 
 	test('Should cancel old folder work and allow the new context to preload immediately', async () => {
 		// Arrange

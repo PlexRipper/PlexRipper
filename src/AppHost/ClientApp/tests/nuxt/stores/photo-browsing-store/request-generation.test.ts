@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { Subject, of } from 'rxjs';
+import { Subject } from 'rxjs';
 import { baseSetup, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import { generateResultDTO } from '@mock';
 import { plexPhotoApi } from '@api';

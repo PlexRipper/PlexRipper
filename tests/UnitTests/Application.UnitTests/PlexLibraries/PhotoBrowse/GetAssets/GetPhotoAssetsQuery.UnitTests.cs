@@ -1,3 +1,5 @@
+using NaturalSort.Extension;
+
 namespace Reaparr.Application.UnitTests;
 
 public class GetPhotoAssetsQueryUnitTests : BaseCommandUnitTest<GetPhotoAssetsQuery>
@@ -184,5 +186,66 @@ public class GetPhotoAssetsQueryUnitTests : BaseCommandUnitTest<GetPhotoAssetsQu
         aggregate.Value.TotalCount.ShouldBe(0);
         aggregate.Value.TotalBytes.ShouldBe(0);
         explicitRequest.Has400BadRequestError().ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyNullFolderAssets_WhenUnmappedOnlyIsScopedToLibrary()
+    {
+        // Arrange
+        await SetupDatabase(71011, config =>
+        {
+            config.PlexPhotoLibraryCount = 1;
+            config.PhotoAlbumCount = 1;
+            config.PhotoCount = 3;
+        });
+        var dbContext = IDbContext;
+        var library = await dbContext.PlexLibraries.SingleAsync(
+            x => x.Type == PlexMediaType.PhotoAlbum,
+            CancellationToken
+        );
+        var root = await dbContext.PlexPhotoFolders.SingleAsync(
+            x => x.PlexLibraryId == library.Id && x.ParentId == null,
+            CancellationToken
+        );
+        var assets = await dbContext.PlexPhotoMediaData
+            .Where(x => x.PlexLibraryId == library.Id)
+            .AsTracking()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        assets.Count.ShouldBe(3);
+        assets[0].PlexPhotoFolderId = root.Id;
+        assets[1].PlexPhotoFolderId = null;
+        assets[2].PlexPhotoFolderId = null;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var expectedUnmapped = assets
+            .Where(x => x.PlexPhotoFolderId is null)
+            .OrderBy(x => x.Title, StringComparison.OrdinalIgnoreCase.WithNaturalSort())
+            .ThenBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToList();
+
+        // Act
+        var scoped = await TestHandlerExecuteAsync<PhotoAssetPageDTO>(
+            new GetPhotoAssetsQuery(library.Id, 1, 100, "title:asc", true)
+        );
+        var aggregate = await TestHandlerExecuteAsync<PhotoAssetPageDTO>(
+            new GetPhotoAssetsQuery(null, 1, 100, "title:asc")
+        );
+        var invalidAggregate = await TestHandlerExecuteAsync<PhotoAssetPageDTO>(
+            new GetPhotoAssetsQuery(null, 1, 100, "title:asc", true)
+        );
+
+        // Assert
+        scoped.IsSuccess.ShouldBeTrue();
+        scoped.Errors.Count.ShouldBe(0);
+        scoped.Value.Items.Select(x => x.Id).ShouldBe(expectedUnmapped);
+        scoped.Value.TotalCount.ShouldBe(expectedUnmapped.Count);
+        scoped.Value.TotalBytes.ShouldBe(assets.Where(x => x.PlexPhotoFolderId is null).Sum(x => x.Size));
+        aggregate.IsSuccess.ShouldBeTrue();
+        aggregate.Value.TotalCount.ShouldBe(assets.Count);
+        aggregate.Value.Items.Select(x => x.Id).ShouldContain(assets[0].Id);
+        invalidAggregate.IsFailed.ShouldBeTrue();
+        invalidAggregate.Errors.Count.ShouldBe(2);
+        invalidAggregate.Has400BadRequestError().ShouldBeTrue();
     }
 }

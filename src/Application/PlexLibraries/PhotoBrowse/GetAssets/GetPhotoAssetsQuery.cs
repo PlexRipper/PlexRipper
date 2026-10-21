@@ -4,7 +4,8 @@ public sealed record GetPhotoAssetsQuery(
     int? PlexLibraryId,
     int Page = 1,
     int PageSize = MediaQueryFilter.MaximumPageSize,
-    string Sort = "title:asc"
+    string Sort = "title:asc",
+    bool UnmappedOnly = false
 ) : ICommand<Result<PhotoAssetPageDTO>>;
 
 public sealed class GetPhotoAssetsQueryValidator : AbstractValidator<GetPhotoAssetsQuery>
@@ -15,6 +16,9 @@ public sealed class GetPhotoAssetsQueryValidator : AbstractValidator<GetPhotoAss
         RuleFor(x => x.Page).GreaterThan(0);
         RuleFor(x => x.PageSize).InclusiveBetween(1, MediaQueryFilter.MaximumPageSize);
         RuleFor(x => x.Sort).Must(PhotoBrowseQuerySupport.IsSupportedSort);
+        RuleFor(x => x)
+            .Must(x => !x.UnmappedOnly || x.PlexLibraryId.HasValue)
+            .WithMessage("Unmapped-only assets require an explicit photo library.");
         RuleFor(x => x)
             .Must(x => (long)(x.Page - 1) * x.PageSize <= int.MaxValue)
             .WithMessage("The requested page offset is too large.");
@@ -73,6 +77,14 @@ public sealed class GetPhotoAssetsQueryHandler : ICommandHandler<GetPhotoAssetsQ
     )
     {
         var assets = context.PlexPhotoMediaData.Where(x => allowedLibraryIds.Contains(x.PlexLibraryId));
+        if (query.UnmappedOnly)
+        {
+            assets = assets.Where(x =>
+                x.PlexLibraryId == query.PlexLibraryId!.Value
+                && x.PlexPhotoFolderId == null
+            );
+        }
+
         var totalCount = await assets.CountAsync(cancellationToken);
         var totalBytes = await assets.Select(x => (long?)x.Size).SumAsync(cancellationToken) ?? 0L;
         var ordered = PhotoBrowseQuerySupport.IsDescending(query.Sort)
@@ -88,3 +100,4 @@ public sealed class GetPhotoAssetsQueryHandler : ICommandHandler<GetPhotoAssetsQ
     }
 
 }
+

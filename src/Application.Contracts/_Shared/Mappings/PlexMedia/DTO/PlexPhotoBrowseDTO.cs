@@ -1,5 +1,15 @@
 namespace Reaparr.Application.Contracts;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PhotoImageRepresentation
+{
+    [JsonStringEnumMemberName("original")]
+    Original = 0,
+
+    [JsonStringEnumMemberName("converted")]
+    Converted = 1,
+}
+
 /// <summary>A page of photo albums visible in the local catalog.</summary>
 public sealed record PhotoAlbumPageDTO
 {

@@ -103,6 +103,7 @@ public class GenerateDownloadTaskMoviesOwnershipUnitTests : BaseCommandUnitTest<
             [new DownloadMediaDTO
             {
                 Type = PlexMediaType.Movie,
+                SelectionKind = null,
                 PlexServerId = movies[0].PlexServerId,
                 PlexLibraryId = movies[0].PlexLibraryId,
                 MediaIds = movies.Select(x => x.Id).ToList(),
@@ -199,6 +200,7 @@ public class GenerateDownloadTaskMoviesOwnershipUnitTests : BaseCommandUnitTest<
                     new DownloadMediaDTO
                     {
                         Type = PlexMediaType.Movie,
+                        SelectionKind = null,
                         PlexServerId = scenario.SourceServerId,
                         PlexLibraryId = scenario.SourceLibraryId,
                         MediaIds = scenario.SelectedMovieIds.ToList(),

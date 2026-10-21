@@ -88,6 +88,7 @@ public class GenerateDownloadTaskMoviesBatchingUnitTests : BaseCommandUnitTest<G
             groups.Select(group => new DownloadMediaDTO
             {
                 Type = PlexMediaType.Movie,
+                SelectionKind = null,
                 PlexServerId = group.PlexServerId,
                 PlexLibraryId = group.LibraryId,
                 MediaIds = group.Movies.Select(x => x.Id).ToList(),

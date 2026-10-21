@@ -9,8 +9,8 @@ import {
 	type BaseResultDTO,
 	type CreateDownloadTasksRequest,
 	DownloadActions,
-	type DownloadMediaDTO,
 	type DownloadPreviewContainerDTO,
+	type DownloadPreviewRequest,
 	type DownloadPatchMessagePackDTO,
 	type DownloadProgressDTO,
 	DownloadStatus,
@@ -180,8 +180,8 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				existingNode.timeRemaining = upsert.timeRemaining;
 			}
 		},
-		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewContainerDTO | null> {
-			return downloadApi.getDownloadPreviewEndpoint(downloadMediaCommand).pipe(map((response) => {
+		previewDownload(request: DownloadPreviewRequest): Observable<DownloadPreviewContainerDTO | null> {
+			return downloadApi.getDownloadPreviewEndpoint(request).pipe(map((response) => {
 				if (response && response.isSuccess) {
 					return response.value ?? null;
 				}

@@ -2,14 +2,14 @@
 	<!-- Poster display -->
 	<QScroll
 		ref="scrollAreaRef"
-		scroll-id="poster-table"
-		data-cy="poster-table">
+		:scroll-id="scrollId"
+		:data-cy="controlled ? 'photo-overview-scroll' : 'poster-table'">
 		<div
 			class="poster-table-content"
 			:style="{ paddingLeft: `${gridPaddingLeft}px` }">
 			<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
 			<div
-				:data-pages-version="mediaOverviewStore.mediaPagesVersion"
+				:data-pages-version="controlled ? undefined : mediaOverviewStore.mediaPagesVersion"
 				:style="{ height: `${safeTotalSize}px`, position: 'relative' }">
 				<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
 				<div
@@ -26,23 +26,34 @@
 						transform: `translateY(${virtualRow.start}px)`,
 						display: 'flex',
 					}">
-					<template
-						v-for="rowItem in getRowItems(virtualRow.index)"
-						:key="rowItem.item?.id ?? `skeleton-${rowItem.index}`">
-						<MediaPoster
-							v-if="rowItem.item"
-							:media-item="rowItem.item"
-							:active="true"
-							:data-media-id="rowItem.item.id"
-							:data-scroll-index="rowItem.index"
-							@download="sendMediaOverviewDownloadCommand($event)"
-							@open-media-details="onOpenMediaDetails" />
-						<div
-							v-else
-							class="media-poster-placeholder">
-							<div class="media-poster-placeholder__image" />
-							<div class="media-poster-placeholder__quality" />
-						</div>
+					<template v-if="controlled">
+						<template
+							v-for="itemIndex in getControlledItemIndexes(virtualRow.index)"
+							:key="itemIndex">
+							<slot
+								name="item"
+								:index="itemIndex" />
+						</template>
+					</template>
+					<template v-else>
+						<template
+							v-for="rowItem in getRowItems(virtualRow.index)"
+							:key="rowItem.item?.id ?? `skeleton-${rowItem.index}`">
+							<MediaPoster
+								v-if="rowItem.item"
+								:media-item="rowItem.item"
+								:active="true"
+								:data-media-id="rowItem.item.id"
+								:data-scroll-index="rowItem.index"
+								@download="sendMediaOverviewDownloadCommand($event)"
+								@open-media-details="onOpenMediaDetails" />
+							<div
+								v-else
+								class="media-poster-placeholder">
+								<div class="media-poster-placeholder__image" />
+								<div class="media-poster-placeholder__quality" />
+							</div>
+						</template>
 					</template>
 				</div>
 			</div>
@@ -64,12 +75,32 @@ import { useRouter } from '#imports';
 import { useMediaOverviewStore } from '@store';
 import Convert from '@class/Convert';
 
-const mediaOverviewStore = useMediaOverviewStore();
-
 type QScrollInstance = {
 	getScrollTarget: () => HTMLElement | null;
 };
 
+const props = withDefaults(defineProps<{
+	mediaType?: PlexMediaType;
+	libraryId?: number;
+	itemCount?: number;
+	scrollId?: string;
+	requestRange?: (start: number, end: number) => import('rxjs').Observable<void>;
+	rangeContextKey?: string;
+	initialScrollIndex?: number;
+	onScrollIndex?: (index: number) => void;
+}>(), {
+	scrollId: 'poster-table',
+	requestRange: undefined,
+	rangeContextKey: '',
+	initialScrollIndex: 0,
+	onScrollIndex: undefined,
+});
+
+const slots = defineSlots<{
+	item?: (props: { index: number }) => unknown;
+}>();
+const controlled = computed(() => props.itemCount !== undefined || Boolean(slots.item));
+const mediaOverviewStore = useMediaOverviewStore();
 const scrollAreaRef = ref<QScrollInstance | null>(null);
 const scrollContainerRef = ref<HTMLElement | null>(null);
 const posterCardWidthCss = useCssVar('--poster-card-width', scrollContainerRef);
@@ -81,15 +112,12 @@ const gridItems = ref(10);
 const gridRowGap = ref(20);
 const gridPaddingLeft = ref(0);
 const hasRunInitialPageReady = ref(false);
+const requestedRange = ref('');
 const router = useRouter();
 
-defineProps<{
-	mediaType: PlexMediaType;
-	libraryId: number;
-}>();
-
-// Number of rows = ceil(total items / columns)
-const rowCount = computed(() => Math.ceil(mediaOverviewStore.totalCount / get(gridItems)));
+// Number of rows = ceil(total items / columns). Controlled photo grids own their item count.
+const totalItemCount = computed(() => controlled.value ? Math.max(0, props.itemCount ?? 0) : mediaOverviewStore.totalCount);
+const rowCount = computed(() => Math.ceil(totalItemCount.value / get(gridItems)));
 
 // Row virtualizer — re-configures reactively when rowCount or posterCardHeight changes
 const rowVirtualizer = useVirtualizer(
@@ -103,6 +131,10 @@ const rowVirtualizer = useVirtualizer(
 		// Stable row keys: use the first item id in each row
 		getItemKey: (rowIndex: number): number => rowIndex,
 		onChange: (_instance: unknown, sync: boolean) => {
+			if (get(controlled)) {
+				requestControlledRange(sync);
+				return;
+			}
 			if (sync)
 				return;
 
@@ -127,10 +159,19 @@ const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(
 
 function getScrollElement(): HTMLElement | null {
 	const target = get(scrollAreaRef)?.getScrollTarget() ?? null;
-	if (target !== get(scrollContainerRef)) {
+	if (target !== get(scrollContainerRef))
 		set(scrollContainerRef, target);
-	}
 	return target;
+}
+
+function getControlledItemIndexes(rowIndex: number): number[] {
+	const cols = get(gridItems);
+	const startIndex = rowIndex * cols;
+	const endIndex = Math.min(startIndex + cols, totalItemCount.value);
+	const indexes: number[] = [];
+	for (let index = startIndex; index < endIndex; index++)
+		indexes.push(index);
+	return indexes;
 }
 
 // Returns the loaded items belonging to a given row index, preserving each item's global index.
@@ -238,20 +279,22 @@ watch(containerWidth, (width) => {
 	rowVirtualizer.value.measure();
 	if (!get(hasRunInitialPageReady)) {
 		set(hasRunInitialPageReady, true);
-		nextTick(() => onPageReady());
+		if (!get(controlled))
+			nextTick(() => onPageReady());
 	}
 });
 
 function onPageReady() {
+	if (get(controlled))
+		return;
+
 	const requestedScrollIndex = get(mediaOverviewStore.currentScrollIndex);
-	if (requestedScrollIndex > 0) {
+	if (requestedScrollIndex > 0)
 		scrollToIndex(requestedScrollIndex - 1, get(mediaOverviewStore.pendingMediaHighlightId) === null);
-	}
 
 	highlightPendingMedia();
-	if (get(mediaOverviewStore.pendingMediaHighlightId) !== null) {
+	if (get(mediaOverviewStore.pendingMediaHighlightId) !== null)
 		return;
-	}
 
 	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
 	if (requestedScrollIndex <= 0 && lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0)
@@ -259,10 +302,12 @@ function onPageReady() {
 }
 
 async function highlightPendingMedia() {
-	const pendingMediaHighlightId = get(mediaOverviewStore.pendingMediaHighlightId);
-	if (pendingMediaHighlightId === null) {
+	if (get(controlled))
 		return;
-	}
+
+	const pendingMediaHighlightId = get(mediaOverviewStore.pendingMediaHighlightId);
+	if (pendingMediaHighlightId === null)
+		return;
 
 	const element = await waitForElement(getScrollElement(), `[data-media-id="${pendingMediaHighlightId}"]`);
 	if (!element) {
@@ -277,6 +322,9 @@ async function highlightPendingMedia() {
 }
 
 async function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
+	if (get(controlled))
+		return;
+
 	const path = Convert.mediaTypeToDetailsPath(mediaItem);
 	if (!path)
 		return;
@@ -295,11 +343,29 @@ async function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 	}
 }
 
+function requestControlledRange(sync: boolean): void {
+	const virtualRows = get(rowVirtualizer).getVirtualItems();
+	const firstRow = virtualRows.at(0)?.index ?? 0;
+	const lastRow = virtualRows.at(-1)?.index ?? Math.min(get(rowCount), 4) - 1;
+	if (lastRow < firstRow) return;
+
+	const columns = get(gridItems);
+	const start = firstRow * columns;
+	const end = Math.min(totalItemCount.value, (lastRow + 1) * columns);
+	props.onScrollIndex?.(start);
+	if (sync || !props.requestRange || end <= start) return;
+
+	const rangeKey = `${props.rangeContextKey}:${props.itemCount}:${start}:${end}`;
+	if (get(requestedRange) === rangeKey) return;
+	set(requestedRange, rangeKey);
+	useSubscription(props.requestRange(start, end).subscribe());
+}
+
 // Throttled page-prefetch during scrolling — avoids firing HTTP requests on every scroll tick.
 let prefetchTimer: ReturnType<typeof setTimeout> | null = null;
 
 function requestPagesAroundViewport() {
-	if (prefetchTimer)
+	if (get(controlled) || prefetchTimer)
 		return;
 
 	prefetchTimer = setTimeout(() => {
@@ -336,17 +402,47 @@ function scrollToIndex(index: number, highlight = true) {
 	const rowIndex = Math.floor(index / get(gridItems));
 	get(rowVirtualizer).scrollToIndex(rowIndex, { align: 'start' });
 
-	if (highlight) {
+	if (highlight && !get(controlled)) {
 		// Highlight after render
 		waitForElement(container, `[data-scroll-index="${index}"]`).then((element) => {
-			if (element) {
+			if (element)
 				triggerBoxHighlight(element);
-			}
 		});
 	}
 }
+async function focusItem(index: number): Promise<boolean> {
+	if (!get(controlled) || index < 0 || index >= totalItemCount.value)
+		return false;
+	scrollToIndex(index, false);
+	const target = await waitForElement(getScrollElement(), `[data-photo-overview-index="${index}"]`);
+	if (!target)
+		return false;
+	target.focus({ preventScroll: true });
+	return true;
+}
+
+watch(() => props.rangeContextKey, () => {
+	set(requestedRange, '');
+	if (get(controlled))
+		nextTick(() => requestControlledRange(false));
+});
+watch(() => props.itemCount, () => {
+	if (get(controlled))
+		nextTick(() => requestControlledRange(false));
+});
+watch(() => props.initialScrollIndex, (index) => {
+	if (get(controlled) && index > 0)
+		nextTick(() => scrollToIndex(index, false));
+});
 
 onMounted(() => {
+	if (get(controlled)) {
+		if (props.initialScrollIndex > 0)
+			nextTick(() => scrollToIndex(props.initialScrollIndex, false));
+		nextTick(() => requestControlledRange(false));
+		return;
+	}
+
 	// Listen for scroll to navigation index command
 	useSubscription(mediaOverviewStore.getScrollCommand().subscribe(({ index, highlight }) => {
 		if (!getScrollElement()) {
@@ -359,9 +455,13 @@ onMounted(() => {
 	}));
 });
 
+defineExpose({ scrollToIndex, focusItem });
+
 onBeforeUnmount(() => {
 	if (persistTimer)
 		clearTimeout(persistTimer);
+	if (prefetchTimer)
+		clearTimeout(prefetchTimer);
 });
 </script>
 

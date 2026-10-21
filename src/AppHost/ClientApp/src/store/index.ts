@@ -15,6 +15,7 @@ export * from './localizationStore';
 export * from './logsStore';
 export * from './mediaOverviewStore';
 export * from './mediaStore';
+export * from './photoBrowsingStore';
 export * from './notificationsStore';
 export * from './serverConnection';
 export * from './serverStore';

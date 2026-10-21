@@ -105,6 +105,35 @@
 			</QCol>
 		</QRow>
 	</template>
+	<template v-else-if="props.variant === 'banner'">
+		<QBanner
+			class="media-overview-library-sync-processing-banner"
+			role="status"
+			aria-live="polite"
+			data-cy="media-overview-library-sync-processing-banner">
+			<div class="row items-center q-col-gutter-md">
+				<div class="col">
+					<div class="text-weight-medium">
+						{{ t('components.media-overview.sync-processing-title') }}
+					</div>
+					<div class="text-caption">
+						{{ refreshingText }}
+					</div>
+					<QProgressBar
+						class="q-mt-xs"
+						:value="libraryProgress?.percentage ?? 0"
+						:indeterminate="progressIndeterminate"
+						cy="media-overview-library-sync-processing-progress" />
+				</div>
+				<div class="col-auto">
+					<CancelButton
+						cy="cancel-library-sync-button"
+						:loading="cancelling"
+						@click="cancelSync" />
+				</div>
+			</div>
+		</QBanner>
+	</template>
 	<QRow
 		v-else
 		align="start"

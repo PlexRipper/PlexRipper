@@ -3,12 +3,13 @@ import { reactive, toRefs } from 'vue';
 import { from, type Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { map, take, catchError } from 'rxjs/operators';
-import type { PlexMediaComparisonDetailsDTO, PlexMediaType, PlexMediaDTO, BaseResultDTO } from '@dto';
+import type { PlexMediaComparisonDetailsDTO, PlexMediaType, PlexMediaDTO, BaseResultDTO, PhotoAssetBrowseDTO } from '@dto';
+import { PhotoImageRepresentation } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
-import { plexMediaApi } from '@api';
+import { plexMediaApi, plexPhotoApi } from '@api';
 import { cloneDeep } from 'lodash-es';
 import Log from 'consola';
-import Axios from 'axios';
+import Axios, { type AxiosRequestConfig } from 'axios';
 
 interface IMediaUrlStoreState {
 	mediaUrls: IObjectUrl[];
@@ -27,6 +28,7 @@ export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 	};
 
 	const state = reactive<IMediaUrlStoreState>(cloneDeep(defaultState));
+	const photoObjectUrls = new Set<string>();
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -52,7 +54,7 @@ export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 			metaDataKey: number;
 			height: number;
 			width: number;
-		}): Observable<string> {
+		}, requestOptions?: Pick<AxiosRequestConfig, 'handleErrorsLocally'>): Observable<string> {
 			// Fast-path: return cached object URL if present
 			const existing = state.mediaUrls.find((x) => x.plexServerId === query.plexServerId && x.plexKey === query.plexKey && x.metaDataKey === query.metaDataKey);
 			if (existing)
@@ -64,6 +66,7 @@ export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 					method: 'GET',
 					params: query,
 					responseType: 'blob',
+					...requestOptions,
 				}),
 			)
 				.pipe(
@@ -86,6 +89,38 @@ export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 						return of('');
 					}),
 				);
+		},
+
+		getPhotoImageUrl(asset: PhotoAssetBrowseDTO, representation: 'original' | 'converted'): Observable<string> {
+			return plexPhotoApi.getPhotoAssetImageEndpoint(
+				asset.plexLibraryId,
+				asset.id,
+				{ representation: representation === 'original' ? PhotoImageRepresentation.Original : PhotoImageRepresentation.Converted },
+				{
+					handleErrorsLocally: true,
+					validateStatus: (status) => status !== 401,
+					// Expected image failures belong to the viewer; keep their status beside raw blob successes.
+					transformResponse: (data: Blob, _headers, status) => status === 200
+						? data
+						: { isSuccess: false, statusCode: status, value: null, errors: [], successes: [] },
+				},
+			).pipe(
+				map((response) => {
+					if (!(response instanceof Blob)) {
+						if (response.statusCode === 404) {
+							throw Object.assign(new Error('The photo asset is no longer available.'), { statusCode: 404 });
+						}
+						return '';
+					}
+					if (!response.type.startsWith('image/')) return '';
+					const url = URL.createObjectURL(response);
+					photoObjectUrls.add(url);
+					return url;
+				}),
+			);
+		},
+		releasePhotoImageUrl(url: string): void {
+			if (photoObjectUrls.delete(url)) URL.revokeObjectURL(url);
 		},
 
 		updateMediaUrl({
@@ -112,6 +147,8 @@ export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 			return mediaObject.url;
 		},
 		$reset() {
+			for (const url of photoObjectUrls) URL.revokeObjectURL(url);
+			photoObjectUrls.clear();
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};

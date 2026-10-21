@@ -9,53 +9,53 @@
 		:library-id="libraryId"
 		mode="queued"
 		variant="panel" />
-	<div
-		v-else
-		class="media-overview-layout">
-		<div class="media-overview-bar">
-			<!--	Overview bar	-->
-			<MediaOverviewBar
-				:detail-mode="false"
-				:library-id="libraryId"
-				:refresh-disabled="isRefreshDisabled"
-				@action="onAction" />
-			<!-- Library Inaccessible Alert -->
-			<q-banner
-				v-if="isLibraryInaccessible"
-				class="media-overview-inaccessible-banner bg-warning text-black"
+	<MediaOverviewLayout v-else>
+		<template #header>
+			<div class="media-overview-bar">
+				<!--	Overview bar	-->
+				<MediaOverviewBar
+					:detail-mode="false"
+					:library-id="libraryId"
+					:refresh-disabled="isRefreshDisabled"
+					@action="onAction" />
+				<!-- Library Inaccessible Alert -->
+				<q-banner
+					v-if="isLibraryInaccessible"
+					class="media-overview-inaccessible-banner bg-warning text-black"
+					dense
+					role="status"
+					aria-live="polite"
+					data-cy="media-overview-inaccessible-library-banner">
+					<template #avatar>
+						<q-icon
+							name="mdi-alert"
+							aria-hidden="true" />
+					</template>
+					<strong>{{ $t('components.media-overview.library-inaccessible-title') }}</strong>
+					{{ $t('components.media-overview.library-inaccessible') }}
+				</q-banner>
+			</div>
+			<QBanner
+				v-if="refreshSubmitting && !isQueued"
+				class="media-overview-refresh-requesting"
 				dense
 				role="status"
 				aria-live="polite"
-				data-cy="media-overview-inaccessible-library-banner">
+				data-cy="media-overview-refresh-requesting">
 				<template #avatar>
 					<q-icon
-						name="mdi-alert"
+						name="mdi-refresh"
 						aria-hidden="true" />
 				</template>
-				<strong>{{ $t('components.media-overview.library-inaccessible-title') }}</strong>
-				{{ $t('components.media-overview.library-inaccessible') }}
-			</q-banner>
-		</div>
-		<QBanner
-			v-if="refreshSubmitting && !isQueued"
-			class="media-overview-refresh-requesting"
-			dense
-			role="status"
-			aria-live="polite"
-			data-cy="media-overview-refresh-requesting">
-			<template #avatar>
-				<q-icon
-					name="mdi-refresh"
-					aria-hidden="true" />
-			</template>
-			{{ t('components.media-overview.requesting-refresh') }}
-		</QBanner>
-		<MediaOverviewRefresh
-			v-if="isQueued"
-			:library-id="libraryId"
-			mode="queued"
-			variant="banner" />
-		<div class="media-overview-content">
+				{{ t('components.media-overview.requesting-refresh') }}
+			</QBanner>
+			<MediaOverviewRefresh
+				v-if="isQueued"
+				:library-id="libraryId"
+				mode="queued"
+				variant="banner" />
+		</template>
+		<template #default>
 			<template v-if="!mediaOverviewStore.loading">
 				<QRow
 					v-if="library && !library.isEnabled"
@@ -167,8 +167,8 @@
 			<RefreshModeDialog
 				:library-name="libraryStore.getLibraryName(libraryId)"
 				@select="refreshLibrary" />
-		</div>
-	</div>
+		</template>
+	</MediaOverviewLayout>
 </template>
 
 <script setup lang="ts">
@@ -177,7 +177,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { filter, finalize, switchMap, take } from 'rxjs';
 import { DialogType } from '@enums';
-import { LibrarySyncJobStatus, type DownloadMediaDTO, PlexMediaType, ViewMode } from '@dto';
+import { LibrarySyncJobStatus, PhotoItemKind, type DownloadMediaDTO, PlexMediaType, ViewMode } from '@dto';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import { useGlobalStore } from '@store';
 import {
@@ -313,6 +313,11 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 		mediaIds: mediaOverviewStore.selection.keys,
 		type: mediaOverviewStore.getMediaType,
 		qualities: [],
+		...(mediaOverviewStore.getMediaType === PlexMediaType.PhotoAlbum
+			? { selectionKind: PhotoItemKind.Album }
+			: mediaOverviewStore.getMediaType === PlexMediaType.PhotoImage
+				? { selectionKind: PhotoItemKind.Asset }
+				: {}),
 		keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 	};
 	sendMediaOverviewDownloadCommand([downloadCommand]);
@@ -438,22 +443,6 @@ onMounted(() => {
 
 <style lang="scss">
 @use '@/assets/scss/variables.scss' as *;
-
-.media-overview-layout {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.media-overview-content {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-}
 
 .media-overview-results {
   height: 100%;

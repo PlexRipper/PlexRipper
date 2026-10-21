@@ -12,12 +12,13 @@
 							enter-active-class="animated fadeInLeft"
 							leave-active-class="animated fadeOutLeft">
 							<QCol
-								v-if="detailMode"
+								v-if="detailMode || (photoMode && photoStore.mode === 'album')"
 								cols="auto">
 								<q-btn
 									flat
 									icon="mdi-arrow-left"
 									:aria-label="$t('general.commands.back')"
+									:data-cy="photoMode ? 'photo-album-back' : undefined"
 									size="xl"
 									@click="$emit('action', 'back')" />
 							</QCol>
@@ -26,35 +27,53 @@
 							<MediaOverviewBarHeader
 								:library-id="libraryId"
 								:detail-mode="detailMode"
-								:media-detail-item="mediaDetailItem" />
+								:media-detail-item="mediaDetailItem"
+								:photo-mode="photoMode"
+								@family-change="emit('photo-family-change', $event)" />
 						</QCol>
 						<!-- Search Bar -->
 						<QCol
 							class="media-overview-bar__search"
 							align-self="center">
-							<MediaOverviewSearchBar :library-id="libraryId" />
+							<MediaOverviewSearchBar
+								:library-id="libraryId"
+								:photo-mode="photoMode"
+								@photo-search="emit('photo-search', $event)" />
 						</QCol>
 					</QRow>
 				</q-toolbar-title>
 				<div class="media-overview-bar__mobile-search">
-					<MediaOverviewSearchBar :library-id="libraryId" />
+					<MediaOverviewSearchBar
+						:library-id="libraryId"
+						:photo-mode="photoMode"
+						@photo-search="emit('photo-search', $event)" />
 				</div>
 			</div>
 
 			<div class="media-overview-bar__actions">
 				<!-- Download button -->
 				<VerticalButton
-					v-if="mediaOverviewStore.showDownloadButton"
+					v-if="showDownloadButton"
 					:height="barHeight"
 					:label="$t('general.commands.download')"
 					:width="verticalButtonWidth"
 					icon="mdi-download"
 					cy="media-overview-bar-download-button"
-					@click="downloadCommandBus.emit('download')" />
+					@click="download()" />
+
+				<!-- Photo selection clear button -->
+				<VerticalButton
+					v-if="showClearSelectionButton"
+					:height="barHeight"
+					:label="$t('components.photo-browser.clear-selection')"
+					:width="verticalButtonWidth"
+					icon="mdi-close-circle-outline"
+					cy="media-overview-bar-clear-selection-button"
+					@click="emit('photo-clear-selection')" />
 
 				<!--	Selection Dialog Button	-->
 				<VerticalButton
-					v-if="mediaOverviewStore.showSelectionButton"
+					v-if="showSelectionButton"
 					:height="barHeight"
 					:label="$t('general.commands.selection')"
 					:width="verticalButtonWidth"
@@ -68,7 +87,7 @@
 					:icon="activeSortIcon"
 					:label="$t('general.commands.sort')"
 					:width="verticalButtonWidth"
-					:color="mediaOverviewStore.getIsSorted ? 'positive' : undefined"
+					:color="isSorted ? 'positive' : undefined"
 					cy="media-overview-sort-btn">
 					<q-menu
 						anchor="bottom left"
@@ -77,24 +96,24 @@
 						<q-list>
 							<!--	Clear Sort	-->
 							<q-item
-								v-if="mediaOverviewStore.getIsSorted"
+								v-if="isSorted && !photoMode"
 								clickable
 								cy="sort-clear-btn"
-								@click="useSubscription(mediaOverviewStore.clearSort().subscribe())">
+								@click="clearSort()">
 								<q-item-section avatar>
 									<q-icon name="mdi-sort-variant-remove" />
 								</q-item-section>
 								<q-item-section>{{ $t('general.sort.clear') }}</q-item-section>
 							</q-item>
-							<q-separator v-if="mediaOverviewStore.getIsSorted" />
+							<q-separator v-if="isSorted && !photoMode" />
 							<!--	Sort options	-->
 							<q-item
-								v-for="option in mediaOverviewStore.getSortOptions()"
+								v-for="option in sortOptions"
 								:key="option.field"
 								:data-cy="`sort-option-${option.field}-btn`"
 								clickable
 								style="min-width: 200px"
-								@click="mediaOverviewStore.toggleSortMedia(option.field)">
+								@click="changeSort(option.field)">
 								<q-item-section avatar>
 									<q-icon
 										v-if="option.direction !== SortDirection.NoSort"
@@ -108,24 +127,25 @@
 
 				<!--	Refresh library button	-->
 				<VerticalButton
-					v-if="!mediaOverviewStore.allMediaMode && !detailMode"
+					v-if="showRefreshButton"
 					:height="barHeight"
 					:label="$t('general.commands.refresh')"
 					:width="verticalButtonWidth"
 					cy="media-overview-refresh-library-btn"
 					icon="mdi-refresh"
+					:loading="photoMode && photoStore.isRefreshing"
 					:disabled="refreshDisabled"
-					@click="$emit('action', 'refresh-library');" />
+					@click="$emit('action', 'refresh-library')" />
 
 				<!--	Media Options button	-->
 				<VerticalButton
-					v-if="mediaOverviewStore.allMediaMode && !detailMode"
+					v-if="showMediaOptionsButton"
 					:height="barHeight"
 					:label="$t('general.commands.media-options')"
 					:width="verticalButtonWidth"
 					cy="media-overview-options-btn"
 					icon="mdi-tune"
-					@click="$emit('action', 'media-options-dialog');" />
+					@click="$emit('action', 'media-options-dialog')" />
 
 				<!--	View mode	-->
 				<VerticalButton
@@ -140,26 +160,28 @@
 						auto-close
 						self="top left">
 						<q-list>
-							<q-item
-								v-for="(viewOption, i) in viewOptions"
-								:key="i"
-								:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
-								clickable
-								style="min-width: 200px"
-								@click="changeView(viewOption.viewMode)">
-								<!-- View mode options -->
-								<q-item-section avatar>
-									<q-icon
-										v-if="isSelected(viewOption.viewMode)"
-										name="mdi-check" />
-								</q-item-section>
-								<!--	Is selected icon	-->
-								<q-item-section> {{ viewOption.label }}</q-item-section>
-							</q-item>
+							<template
+								v-for="viewOption in viewOptions"
+								:key="viewOption.viewMode">
+								<q-separator v-if="photoMode && libraryId > 0 && viewOption.viewMode === ViewMode.Poster" />
+								<q-item
+									:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
+									clickable
+									style="min-width: 200px"
+									@click="changeView(viewOption.viewMode)">
+									<q-item-section avatar>
+										<q-icon
+											v-if="isSelected(viewOption.viewMode)"
+											name="mdi-check" />
+									</q-item-section>
+									<q-item-section>{{ viewOption.label }}</q-item-section>
+								</q-item>
+							</template>
 						</q-list>
 					</q-menu>
 				</VerticalButton>
 			</div>
+
 			<q-btn
 				class="media-overview-bar__mobile-menu-trigger"
 				flat
@@ -176,20 +198,32 @@
 					<q-list class="media-overview-bar__mobile-actions">
 						<!-- Download button -->
 						<q-item
-							v-if="mediaOverviewStore.showDownloadButton"
+							v-if="showDownloadButton"
 							v-close-popup
 							clickable
 							data-cy="media-overview-bar-mobile-download-button"
-							@click="downloadCommandBus.emit('download')">
+							@click="download()">
 							<q-item-section avatar>
 								<q-icon name="mdi-download" />
 							</q-item-section>
 							<q-item-section>{{ $t('general.commands.download') }}</q-item-section>
 						</q-item>
+						<!-- Photo selection clear button -->
+						<q-item
+							v-if="showClearSelectionButton"
+							v-close-popup
+							clickable
+							data-cy="media-overview-bar-mobile-clear-selection-button"
+							@click="emit('photo-clear-selection')">
+							<q-item-section avatar>
+								<q-icon name="mdi-close-circle-outline" />
+							</q-item-section>
+							<q-item-section>{{ $t('components.photo-browser.clear-selection') }}</q-item-section>
+						</q-item>
 
 						<!-- Selection Dialog Button -->
 						<q-item
-							v-if="mediaOverviewStore.showSelectionButton"
+							v-if="showSelectionButton"
 							v-close-popup
 							clickable
 							data-cy="media-overview-bar-mobile-selection-button"
@@ -217,24 +251,24 @@
 								self="top right">
 								<q-list style="min-width: 220px">
 									<q-item
-										v-if="mediaOverviewStore.getIsSorted"
+										v-if="isSorted && !photoMode"
 										v-close-popup
 										clickable
 										cy="sort-clear-btn"
-										@click="useSubscription(mediaOverviewStore.clearSort().subscribe())">
+										@click="clearSort()">
 										<q-item-section avatar>
 											<q-icon name="mdi-sort-variant-remove" />
 										</q-item-section>
 										<q-item-section>{{ $t('general.sort.clear') }}</q-item-section>
 									</q-item>
-									<q-separator v-if="mediaOverviewStore.getIsSorted" />
+									<q-separator v-if="isSorted && !photoMode" />
 									<q-item
-										v-for="option in mediaOverviewStore.getSortOptions()"
+										v-for="option in sortOptions"
 										:key="option.field"
 										v-close-popup
 										:data-cy="`sort-option-${option.field}-btn`"
 										clickable
-										@click="mediaOverviewStore.toggleSortMedia(option.field)">
+										@click="changeSort(option.field)">
 										<q-item-section avatar>
 											<q-icon
 												v-if="option.direction !== SortDirection.NoSort"
@@ -248,7 +282,7 @@
 
 						<!-- Refresh library button -->
 						<q-item
-							v-if="!mediaOverviewStore.allMediaMode && !detailMode"
+							v-if="showRefreshButton"
 							v-close-popup
 							:disable="refreshDisabled"
 							clickable
@@ -262,7 +296,7 @@
 
 						<!-- Media Options button -->
 						<q-item
-							v-if="mediaOverviewStore.allMediaMode && !detailMode"
+							v-if="showMediaOptionsButton"
 							v-close-popup
 							clickable
 							data-cy="media-overview-bar-mobile-options-button"
@@ -289,20 +323,23 @@
 								anchor="top right"
 								self="top right">
 								<q-list style="min-width: 220px">
-									<q-item
-										v-for="(viewOption, i) in viewOptions"
-										:key="i"
-										v-close-popup
-										:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
-										clickable
-										@click="changeView(viewOption.viewMode)">
-										<q-item-section avatar>
-											<q-icon
-												v-if="isSelected(viewOption.viewMode)"
-												name="mdi-check" />
-										</q-item-section>
-										<q-item-section>{{ viewOption.label }}</q-item-section>
-									</q-item>
+									<template
+										v-for="viewOption in viewOptions"
+										:key="viewOption.viewMode">
+										<q-separator v-if="photoMode && libraryId > 0 && viewOption.viewMode === ViewMode.Poster" />
+										<q-item
+											v-close-popup
+											:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
+											clickable
+											@click="changeView(viewOption.viewMode)">
+											<q-item-section avatar>
+												<q-icon
+													v-if="isSelected(viewOption.viewMode)"
+													name="mdi-check" />
+											</q-item-section>
+											<q-item-section>{{ viewOption.label }}</q-item-section>
+										</q-item>
+									</template>
 								</q-list>
 							</q-menu>
 						</q-item>
@@ -316,53 +353,105 @@
 <script lang="ts" setup>
 import type { PlexMediaDTO } from '@dto';
 import { PlexMediaType, ViewMode } from '@dto';
-import { SortDirection } from '@enums';
-import type { IMediaOverviewBarActions, IViewOptions } from '@interfaces';
+import { MediaSortField, SortDirection } from '@enums';
+import type { IMediaOverviewBarActions } from '@interfaces';
 import { useMediaOverviewBarDownloadCommandBus } from '@composables/event-bus';
-import { useMediaOverviewStore, useSettingsStore } from '@store';
+import { useMediaOverviewStore, usePhotoBrowsingStore, useSettingsStore } from '@store';
+import type { PhotoBrowseSort, PhotoBrowseView } from '@/store/photoBrowsingStore';
+import { useSubscription } from '@vueuse/rxjs';
+import { get } from '@vueuse/core';
+
+type ViewOption = {
+	label: string;
+	viewMode: ViewMode | PhotoBrowseView;
+};
+
+type SortOption = {
+	field: MediaSortField | 'title';
+	label: string;
+	direction: SortDirection;
+};
 
 const mediaOverviewStore = useMediaOverviewStore();
+const photoStore = usePhotoBrowsingStore();
 const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
-
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
-const supportsViewMode = computed(() => [
-	PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.MusicArtist, PlexMediaType.PhotoAlbum, PlexMediaType.OtherVideos,
-].includes(mediaOverviewStore.getMediaType));
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
 	libraryId?: number;
 	detailMode?: boolean;
 	mediaDetailItem?: PlexMediaDTO | null;
 	refreshDisabled?: boolean;
+	photoMode?: boolean;
 }>(), {
 	libraryId: 0,
 	detailMode: false,
 	refreshDisabled: false,
+	photoMode: false,
 });
 
-defineEmits<{
+const emit = defineEmits<{
 	(e: 'action', payload: IMediaOverviewBarActions): void;
+	(e: 'photo-view', value: PhotoBrowseView): void;
+	(e: 'photo-search', value: string): void;
+	(e: 'photo-sort', value: PhotoBrowseSort): void;
+	(e: 'photo-download'): void;
+	(e: 'photo-clear-selection'): void;
+	(e: 'photo-family-change', value: PlexMediaType): void;
 }>();
 
 const $q = useQuasar();
 const barHeight = computed(() => $q.screen.lt.md ? 72 : 85);
 const verticalButtonWidth = computed(() => $q.screen.lt.md ? 96 : 120);
 
-function isSelected(viewMode: ViewMode) {
-	return mediaOverviewStore.getMediaViewMode === viewMode;
+const supportsViewMode = computed(() => props.photoMode || [
+	PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.MusicArtist, PlexMediaType.PhotoAlbum, PlexMediaType.OtherVideos,
+].includes(mediaOverviewStore.getMediaType));
+const showDownloadButton = computed(() => props.photoMode
+	? photoStore.selectedCount > 0
+	: mediaOverviewStore.showDownloadButton);
+const showClearSelectionButton = computed(() => props.photoMode && photoStore.selectedCount > 0);
+const showSelectionButton = computed(() => !props.photoMode && mediaOverviewStore.showSelectionButton);
+const showRefreshButton = computed(() => !props.detailMode && (props.photoMode ? props.libraryId > 0 : !mediaOverviewStore.allMediaMode));
+const showMediaOptionsButton = computed(() => !props.photoMode && !props.detailMode && mediaOverviewStore.allMediaMode);
+const isSorted = computed(() => props.photoMode
+	? photoStore.sort === 'title:desc'
+	: mediaOverviewStore.getIsSorted);
+
+function isSelected(viewMode: ViewMode | PhotoBrowseView): boolean {
+	if (viewMode === ViewMode.Poster || viewMode === ViewMode.Table) {
+		return (props.photoMode
+			? settingsStore.displaySettings.photoAlbumViewMode
+			: mediaOverviewStore.getMediaViewMode) === viewMode;
+	}
+	return props.photoMode && photoStore.view === viewMode;
 }
 
 const activeSortIcon = computed((): string => {
-	if (!mediaOverviewStore.getIsSorted) {
+	if (!get(isSorted)) {
 		return 'mdi-sort';
+	}
+	if (props.photoMode) {
+		return 'mdi-sort-ascending';
 	}
 	const sort = mediaOverviewStore.getActiveSort.sort;
 	return sort === SortDirection.Asc ? 'mdi-sort-descending' : 'mdi-sort-ascending';
 });
 
-const viewOptions = computed((): IViewOptions[] => {
-	return [
+const sortOptions = computed((): SortOption[] => {
+	if (props.photoMode) {
+		return [{
+			field: 'title',
+			label: t('general.sort.title'),
+			direction: photoStore.sort === 'title:asc' ? SortDirection.Asc : SortDirection.Desc,
+		}];
+	}
+	return mediaOverviewStore.getSortOptions();
+});
+
+const viewOptions = computed((): ViewOption[] => {
+	const options: ViewOption[] = [
 		{
 			label: t('components.media-overview-bar.view-mode.poster'),
 			viewMode: ViewMode.Poster,
@@ -372,10 +461,49 @@ const viewOptions = computed((): IViewOptions[] => {
 			viewMode: ViewMode.Table,
 		},
 	];
+	if (props.photoMode) {
+		const contentOptions: ViewOption[] = [
+			{ label: t('components.photo-browser.views.albums'), viewMode: 'albums' },
+			...(props.libraryId > 0
+				? [{ label: t('components.photo-browser.views.folders'), viewMode: 'folders' as const }]
+				: []),
+			{ label: t('components.photo-browser.views.assets'), viewMode: 'assets' },
+		];
+		return [...contentOptions, ...options];
+	}
+	return options;
 });
 
-function changeView(viewMode: ViewMode) {
-	settingsStore.updateDisplayMode(mediaOverviewStore.getMediaType, viewMode);
+function download(): void {
+	if (props.photoMode) {
+		emit('photo-download');
+		return;
+	}
+	downloadCommandBus.emit('download');
+}
+
+function clearSort(): void {
+	if (!props.photoMode) {
+		useSubscription(mediaOverviewStore.clearSort().subscribe());
+	}
+}
+
+function changeSort(field: MediaSortField | 'title'): void {
+	if (props.photoMode) {
+		emit('photo-sort', photoStore.sort === 'title:asc' ? 'title:desc' : 'title:asc');
+		return;
+	}
+	mediaOverviewStore.toggleSortMedia(field as MediaSortField);
+}
+
+function changeView(viewMode: ViewMode | PhotoBrowseView): void {
+	if (viewMode === ViewMode.Poster || viewMode === ViewMode.Table) {
+		settingsStore.updateDisplayMode(props.photoMode ? PlexMediaType.PhotoAlbum : mediaOverviewStore.getMediaType, viewMode);
+		return;
+	}
+	if (props.photoMode) {
+		emit('photo-view', viewMode);
+	}
 }
 </script>
 

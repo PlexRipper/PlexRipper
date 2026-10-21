@@ -547,6 +547,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
+			if (mediaType === PlexMediaType.PhotoAlbum) {
+				actions.clearLibraryMediaData(0);
+				actions.clearMetaDataFilter();
+				state.filterQuery = '';
+				set(searchQuery, undefined);
+				set(scrollIndexQuery, undefined);
+				set(sortQuery, undefined);
+				return;
+			}
 			useSubscription(actions.initializeLibrary(0).subscribe());
 		},
 		setSelection(selection: ISelection) {

@@ -1,78 +1,55 @@
 <template>
-	<q-input
-		v-if="$q.screen.gt.sm"
-		:model-value="mediaOverviewStore.filterQuery"
-		:debounce="100"
-		outlined
-		:aria-label="$t('components.media-overview.search-label')"
-		input-style="font-size: 1.25rem"
-		rounded
-		@update:model-value="(value) => useSubscription(mediaOverviewStore.setFilterQuery(String(value ?? '')).subscribe())">
-		<template #prepend>
-			<IconButton
-				icon="mdi-magnify"
-				:aria-label="$t('components.media-overview.filter-label')"
-				cy="media-overview-filter-btn">
-				<MediaFilterMenu :library-id="libraryId" />
-			</IconButton>
-		</template>
-		<template #append>
-			<QGlowChip
-				v-for="chip in mediaOverviewStore.getFilterChips"
-				:key="chip.id"
-				:value="chip.text"
-				:color="chip.color"
-				removable
-				@remove="useSubscription(chip.unset.subscribe())" />
-			<q-btn
-				v-if="mediaOverviewStore.filterQuery !== ''"
-				flat
-				round
-				dense
-				icon="mdi-close"
-				:aria-label="$t('components.media-overview.clear-search-label')"
-				@click="useSubscription(mediaOverviewStore.clearFilter().subscribe())" />
-		</template>
-	</q-input>
-
-	<div
-		v-else
-		class="media-overview-search">
+	<div class="media-overview-search">
 		<q-input
 			class="media-overview-search__input"
-			:model-value="mediaOverviewStore.filterQuery"
+			:model-value="searchQuery"
 			:debounce="100"
 			outlined
-			:aria-label="$t('components.media-overview.search-label')"
-			input-style="font-size: 1.1rem"
+			:aria-label="searchLabel"
+			:data-cy="photoMode ? 'photo-search-input' : undefined"
+			:input-style="$q.screen.gt.sm ? 'font-size: 1.25rem' : 'font-size: 1.1rem'"
 			rounded
-			@update:model-value="(value) => useSubscription(mediaOverviewStore.setFilterQuery(String(value ?? '')).subscribe())">
+			@update:model-value="updateSearch">
 			<template #prepend>
+				<q-icon
+					v-if="photoMode"
+					name="mdi-magnify"
+					:aria-label="searchLabel" />
 				<IconButton
-					class="media-overview-search__filter"
+					v-else
+					:class="{ 'media-overview-search__filter': $q.screen.lt.md }"
 					icon="mdi-magnify"
 					:aria-label="$t('components.media-overview.filter-label')"
-					:tooltip-text="$t('components.media-overview.filter-label')"
+					:tooltip-text="$q.screen.lt.md ? $t('components.media-overview.filter-label') : undefined"
 					cy="media-overview-filter-btn">
 					<MediaFilterMenu :library-id="libraryId" />
 				</IconButton>
 			</template>
 			<template #append>
+				<template v-if="!photoMode && $q.screen.gt.sm">
+					<QGlowChip
+						v-for="chip in filterChips"
+						:key="chip.id"
+						:value="chip.text"
+						:color="chip.color"
+						removable
+						@remove="useSubscription(chip.unset.subscribe())" />
+				</template>
 				<q-btn
-					v-if="mediaOverviewStore.filterQuery !== ''"
+					v-if="searchQuery !== ''"
 					flat
 					round
 					dense
 					icon="mdi-close"
 					:aria-label="$t('components.media-overview.clear-search-label')"
-					@click="useSubscription(mediaOverviewStore.clearFilter().subscribe())" />
+					@click="clearSearch" />
 			</template>
 		</q-input>
 		<div
-			v-if="mediaOverviewStore.getFilterChips.length > 0"
+			v-if="!photoMode && $q.screen.lt.md && filterChips.length > 0"
 			class="media-overview-search__chips">
 			<QGlowChip
-				v-for="chip in mediaOverviewStore.getFilterChips"
+				v-for="chip in filterChips"
 				:key="chip.id"
 				:value="chip.text"
 				:color="chip.color"
@@ -83,17 +60,47 @@
 </template>
 
 <script setup lang="ts">
-import { useMediaOverviewStore } from '@store';
+import { useMediaOverviewStore, usePhotoBrowsingStore } from '@store';
+import { useSubscription } from '@vueuse/rxjs';
 
-const $q = useQuasar();
-
+const { t } = useI18n();
 const mediaOverviewStore = useMediaOverviewStore();
+const photoStore = usePhotoBrowsingStore();
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
 	libraryId?: number;
+	photoMode?: boolean;
 }>(), {
 	libraryId: 0,
+	photoMode: false,
 });
+
+const emit = defineEmits<{
+	(e: 'photo-search', value: string): void;
+}>();
+
+const searchQuery = computed(() => props.photoMode ? photoStore.searchQuery : mediaOverviewStore.filterQuery);
+const filterChips = computed(() => props.photoMode ? [] : mediaOverviewStore.getFilterChips);
+const searchLabel = computed(() => props.photoMode
+	? t('components.photo-browser.search-label')
+	: t('components.media-overview.search-label'));
+
+function updateSearch(value: unknown): void {
+	const query = String(value ?? '');
+	if (props.photoMode) {
+		emit('photo-search', query);
+		return;
+	}
+	useSubscription(mediaOverviewStore.setFilterQuery(query).subscribe());
+}
+
+function clearSearch(): void {
+	if (props.photoMode) {
+		emit('photo-search', '');
+		return;
+	}
+	useSubscription(mediaOverviewStore.clearFilter().subscribe());
+}
 </script>
 
 <style lang="scss">

@@ -8,6 +8,7 @@ import type IAppConfig from '@class/IAppConfig';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import {
 	useAccountStore,
+	useAccountDialogStore,
 	useAlertStore,
 	useBackgroundJobsStore,
 	useDialogStore,
@@ -16,10 +17,12 @@ import {
 	useHelpStore,
 	useIntegrationStore,
 	useLibraryStore,
-	useLogsStore,
 	useLocalizationStore,
+	useLogsStore,
+	useMediaOverviewStore,
 	useMediaStore,
 	useNotificationsStore,
+	usePhotoBrowsingStore,
 	useServerConnectionStore,
 	useServerStore,
 	useSettingsStore,
@@ -93,6 +96,7 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 				useLogsStore().setup(),
 				useMediaStore().setup(),
 				useNotificationsStore().setup(),
+				usePhotoBrowsingStore().setup(),
 				useServerConnectionStore().setup(),
 				useServerStore().setup(),
 				useSettingsStore().setup(),
@@ -140,6 +144,7 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			useLogsStore().$reset();
 			useMediaOverviewStore().$reset();
 			useMediaStore().$reset();
+			usePhotoBrowsingStore().$reset();
 			useNotificationsStore().$reset();
 			useServerConnectionStore().$reset();
 			useServerStore().$reset();

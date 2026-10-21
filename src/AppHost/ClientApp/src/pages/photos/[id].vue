@@ -1,14 +1,15 @@
 <template>
 	<NuxtPage v-if="route.params.albumId" />
 	<QPage v-else>
-		<MediaOverview
+		<PhotoBrowser
 			v-if="validLibraryId"
 			:key="libraryId"
 			:library-id="libraryId" />
 		<p
 			v-else
 			role="alert"
-			class="q-pa-md">
+			class="q-pa-md"
+			data-cy="photo-invalid-route">
 			{{ t('components.photo-details.invalid-route') }}
 		</p>
 	</QPage>
@@ -21,5 +22,7 @@ definePageMeta({ scrollToTop: false });
 const route = useRoute();
 const { t } = useI18n();
 const libraryId = computed(() => Number(route.params.id));
-const validLibraryId = computed(() => Number.isSafeInteger(get(libraryId)) && get(libraryId) > 0);
+const validLibraryId = computed(() => typeof route.params.id === 'string'
+	&& /^[1-9]\d*$/.test(route.params.id)
+	&& Number.isSafeInteger(get(libraryId)));
 </script>

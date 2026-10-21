@@ -1,8 +1,22 @@
-import { DownloadActions, type DownloadMediaDTO, DownloadStatus, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto';
+import {
+	DownloadActions,
+	PhotoItemKind,
+	PlexMediaType,
+	type DownloadMediaDTO,
+	DownloadStatus,
+	type PlexMediaDTO,
+	type PlexMediaSlimDTO,
+} from '@dto';
 import { useSettingsStore } from '@store';
 
 export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): DownloadMediaDTO[] {
 	const settingsStore = useSettingsStore();
+	let selectionKind: PhotoItemKind | undefined;
+	if (mediaItem.type === PlexMediaType.PhotoAlbum) {
+		selectionKind = PhotoItemKind.Album;
+	} else if (mediaItem.type === PlexMediaType.PhotoImage) {
+		selectionKind = PhotoItemKind.Asset;
+	}
 	return [
 		{
 			mediaIds: [mediaItem.id],
@@ -10,6 +24,7 @@ export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): Dow
 			plexServerId: mediaItem.plexServerId,
 			plexLibraryId: mediaItem.plexLibraryId,
 			qualities: mediaItem.qualities,
+			...(selectionKind === undefined ? {} : { selectionKind }),
 			keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 		},
 	];

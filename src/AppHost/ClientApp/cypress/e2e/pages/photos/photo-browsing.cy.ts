@@ -182,7 +182,9 @@ describe('Photos browsing', () => {
 		cy.location('pathname').should('eq', '/photos');
 		cy.location('search').should((search) => expect(new URLSearchParams(search).get('sort')).to.equal('title:desc'));
 		cy.getCy('photo-album-41-301').click();
-		cy.wait('@photoAlbumMembers');
+		cy.location('pathname').should('eq', `/photos/${libraryId}/details/${albumId}`);
+		cy.getCy('photo-overview-list').should('contain.text', 'Beach photo');
+		cy.get<Interception[]>('@photoAlbumMembers.all').should('have.length', 1);
 		cy.getCy('photo-search-input').filter(':visible').type('beach');
 		cy.get<Interception[]>('@photoSearch.all').should((requests) => {
 			expect(requests.at(-1)?.request.url).to.contain('q=beach');
@@ -385,7 +387,8 @@ describe('Photos browsing', () => {
 		});
 		cy.getCy('download-confirmation-dialog').should('be.visible');
 		cy.getCy('download-confirmation-cancel').click();
-		cy.getCy('photo-viewer-zoom').click().should('have.attr', 'aria-pressed', 'true');
+		cy.getCy('photo-viewer-zoom').click();
+		cy.getCy('photo-viewer-zoom').should('have.attr', 'aria-pressed', 'true');
 		cy.getCy('photo-asset-dialog-close').click();
 		cy.getCy('photo-asset-dialog').should('not.exist');
 		cy.getCy('photo-asset-41-601').should('be.visible');

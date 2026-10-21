@@ -13,6 +13,9 @@ public sealed record GetPhotoAssetsRequest
 
     [QueryParam, BindFrom("sort")]
     public string? Sort { get; init; }
+
+    [QueryParam, BindFrom("unmappedOnly")]
+    public bool? UnmappedOnly { get; init; }
 }
 
 public sealed class GetPhotoAssetsRequestValidator : Validator<GetPhotoAssetsRequest>
@@ -23,6 +26,9 @@ public sealed class GetPhotoAssetsRequestValidator : Validator<GetPhotoAssetsReq
         RuleFor(x => x.Page).GreaterThan(0).When(x => x.Page.HasValue);
         RuleFor(x => x.PageSize).InclusiveBetween(1, MediaQueryFilter.MaximumPageSize).When(x => x.PageSize.HasValue);
         RuleFor(x => x.Sort).Must(PhotoBrowseQuerySupport.IsSupportedSort).When(x => x.Sort is not null);
+        RuleFor(x => x)
+            .Must(x => x.UnmappedOnly != true || x.PlexLibraryId.HasValue)
+            .WithMessage("Unmapped-only assets require an explicit photo library.");
         RuleFor(x => x)
             .Must(x => (long)((x.Page ?? 1) - 1) * (x.PageSize ?? MediaQueryFilter.MaximumPageSize) <= int.MaxValue)
             .WithMessage("The requested page offset is too large.");
@@ -52,7 +58,13 @@ public sealed class GetPhotoAssetsEndpoint : Endpoint<GetPhotoAssetsRequest, Pho
     public override async Task HandleAsync(GetPhotoAssetsRequest req, CancellationToken ct)
     {
         var result = await _commandExecutor.Send(
-            new GetPhotoAssetsQuery(req.PlexLibraryId, req.Page ?? 1, req.PageSize ?? MediaQueryFilter.MaximumPageSize, req.Sort ?? "title:asc"),
+            new GetPhotoAssetsQuery(
+                req.PlexLibraryId,
+                req.Page ?? 1,
+                req.PageSize ?? MediaQueryFilter.MaximumPageSize,
+                req.Sort ?? "title:asc",
+                req.UnmappedOnly ?? false
+            ),
             ct
         );
         await Send.FluentResult(result, ct);

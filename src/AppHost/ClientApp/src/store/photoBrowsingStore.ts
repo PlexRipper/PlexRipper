@@ -552,6 +552,7 @@ export const usePhotoBrowsingStore = defineStore(StoreNames.PhotoBrowsingStore, 
 		},
 
 		clearSelection(): void {
+			cancelSelectionRequests();
 			state.selectedSelectors = [];
 			state.selectionStale = false;
 			state.allVisibleSelected = false;

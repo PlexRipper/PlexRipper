@@ -118,7 +118,7 @@ export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 			return requestPhotoImage(asset, representation, true);
 		},
 		preloadPhotoImage(asset: PhotoAssetBrowseDTO): Observable<void> {
-			if (asset.assetKind !== PhotoAssetKind.Image) return of(undefined);
+			if (asset.assetKind !== PhotoAssetKind.Image || asset.size > PHOTO_IMAGE_CACHE_MAX_BYTES) return of(undefined);
 			return requestPhotoImage(asset, 'original', false).pipe(map(() => undefined));
 		},
 		releasePhotoImageUrl(url: string): void {

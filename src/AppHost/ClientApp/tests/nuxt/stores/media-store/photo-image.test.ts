@@ -317,4 +317,50 @@ describe('MediaStore photo image ownership', () => {
 		expect(mock.history.get.filter((request) => request.url === imagePath)).toHaveLength(2);
 		store.releasePhotoImageUrl(retried.getLastValue()!);
 	});
+
+	test('Should skip a known oversized preload but retain a foreground image lease until release', async () => {
+		// Arrange
+		const largeAsset = photoAsset({ size: 64 * 1024 * 1024 + 1 });
+		const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:large-original');
+		const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+		mock.onGet(imagePath).reply(200, blobWithSize(largeAsset.size));
+		const store = useMediaStore();
+		await subscribeSpyTo(store.setup()).onComplete();
+
+		// Act
+		await subscribeSpyTo(store.preloadPhotoImage(largeAsset)).onComplete();
+
+		// Assert
+		expect(mock.history.get.filter((request) => request.url === imagePath)).toHaveLength(0);
+		expect(createUrl).not.toHaveBeenCalled();
+		const foreground = subscribeSpyTo(store.getPhotoImageUrl(largeAsset, 'original'));
+		await foreground.onComplete();
+		expect(foreground.getLastValue()).toBe('blob:large-original');
+		expect(mock.history.get.filter((request) => request.url === imagePath)).toHaveLength(1);
+		store.invalidatePhotoImages(new Set([largeAsset.plexLibraryId]));
+		expect(revoke).not.toHaveBeenCalled();
+		store.releasePhotoImageUrl(foreground.getLastValue()!);
+		expect(revoke.mock.calls).toEqual([['blob:large-original']]);
+		store.$reset();
+	});
+
+	test.each([0, 64 * 1024 * 1024])('Should reuse a preload when the catalog size is %s bytes', async (size) => {
+		// Arrange
+		const candidate = photoAsset({ size });
+		vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:retained-original');
+		mock.onGet(imagePath).reply(200, blobWithSize(size || 1));
+		const store = useMediaStore();
+		await subscribeSpyTo(store.setup()).onComplete();
+
+		// Act
+		await subscribeSpyTo(store.preloadPhotoImage(candidate)).onComplete();
+		const foreground = subscribeSpyTo(store.getPhotoImageUrl(candidate, 'original'));
+		await foreground.onComplete();
+
+		// Assert
+		expect(foreground.getLastValue()).toBe('blob:retained-original');
+		expect(mock.history.get.filter((request) => request.url === imagePath)).toHaveLength(1);
+		store.releasePhotoImageUrl(foreground.getLastValue()!);
+		store.$reset();
+	});
 });
